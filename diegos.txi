@@ -1,0 +1,326 @@
+\input texinfo  @c -*-texinfo-*-
+@c %**start of header
+@settitle DiegOS Design and Architecture Version 1.0
+@c %**end of header
+
+@copying
+This manual is for DiegOS, version 1.0.
+
+Copyright @copyright{} 2012-2015 Diego Gallizioli.
+
+@quotation
+Permission is granted to print or copy this manual, reporting Copyright
+and licencing informations.
+@end quotation
+@end copying
+
+@afourpaper
+@fonttextsize11
+
+@titlepage
+@title DiegOS Design and Architecture
+@subtitle Release 1.0
+@author Diego Gallizioli 
+
+@c  The following two commands
+@c  start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+Published by Diego Gallizioli
+@end titlepage
+
+@c So the toc is printed at the start.
+@contents
+
+@ifnottex
+@node Top
+@top title
+
+This manual is for program, version version.
+@end ifnottex
+
+@menu
+* First Chapter::    Getting started …
+* Second Chapter::          …
+ …
+* Copying::          Your rights and freedoms.
+@end menu
+
+@node First Chapter - Concepts
+@chapter Concepts
+@section Inheritance and other inspirations
+One of the many goals of an Operating System is to offer
+a friendly and comfortable environment to developers.
+@*This target is not easy to be met.
+
+Another goal of an Operating System is to be as efficient as possible
+not to compromise applications' performance.
+Since the very first Operating System inception, a massive amount of engineers 
+and scientists worked on the theory and the application of these goals, 
+and they all proved to be smarter than the Author of this book, serious!
+
+I have the opportunity and the privilege to work on a number of Operating Systems,
+some of them with peculiar features, some of them with legacy constraints, most of
+them with a clear design.
+DiegOS was born after years of careful and intensive meditation; it has no peculiarities,
+a @slanted{KISS} (Keep It Simple, Stupid) approach, no legacy constraints, and above all a humble
+target: do the right thing, the easy way, the fastest way, avoiding common errors and nuisances.
+
+Development of DiegOS took a lot of my spare time, still I cannot claim it to be a "professional" work; it is a hobbist toy for sure, probably a useful tool to play with, definitively not
+a general purpose Operating System, although it can perform nicely as an embedded Operating System.
+
+Just like anyone out there, I did not conceive all you can find in this book by myself;
+the most inspiring source of wisdom at the heart of DiegOS was Minix. 
+I think of Minix as a virtual fitness room, furnished with all the tools you could ever dream of to work out your ideas in the most convenient way.
+This @strong{does not imply} that Minix is the best OS out there, 
+it simply means I found it a delightful environment to work with.
+On the other side, the most inspiring source of reading at the heart of my programming skills was 
+Michael Abrash's @strong{GRAPHICS programming black book};
+all I have to say about it is, zenning is a very long journey, and you'd better take your time and read it.
+
+With all that said, I suggest you now to have a break and practice your zen ...
+@sp 3
+@cartouche
+@slanted {
+Form is empty, emptiness is form, Emptiness is not other than form, form is also not other than emptiness. Likewise, sensation, discrimination, conditioning, and awareness are empty. In this way, Sariputra, all things are emptiness; they are without defining characteristics; they are not born, they do not cease, they are not defiled, they are not undefiled. They have no increase, they have no decrease.
+@*Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness. There is no eye, no ear, no nose, no tongue, no body, no mind. There is no form, no sound, no smell, no taste, no texture, no phenomenon. There is no eye-element and so on up to no mind-element and also up to no element of mental awareness. There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death. Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.}
+@end cartouche
+@page
+@section Dedications
+To my wife Monica and my kids Davide and Matteo, for being proud of my work (and letting me work at night on my projects!).
+@page
+@node Second chapter - Architecture
+@chapter Architecture
+@section Code base structure
+Source code is a versioned tree of folders.
+@*Files organization follows a simple rule: platform dependent code must be separated
+from platform independent code and every platform must be isolated from each other.
+Common features or functionalities to be implemented in platform dependent code must export
+common interfaces or a Hardware Abstraction Layer.
+
+@section Portability
+The source code of DiegOS is written in plain C, with a little amount of
+assembler to perform hardware init.
+Some drivers and some libraries' API do have a double personality, one implementation
+in plain C and one implementation optimized in assembler; the former is totally portable,
+the latter is welcome when performance gets on stage.
+The system is not designed to run on 64-bit architectures, writing 32- and 64- compliant 
+code requires a considerable amount of time, and time is a scarce resource when working at night!
+
+@section Features
+DiegOS is a single image application, it offers concurrent software threads, 
+a cooperative scheduler, shared structures to synchronize threads, 
+a common interface to handle interrupts, a common driver infrastructure, 
+and a common networking infrastructure.
+DiegOS does not offer a native file system, and does not require one to boot.
+Still, any file system can be added to the code base as a user level application.
+@*DiegOS does not support multiple processors, multiple cores, or multiple hardware 
+threads of execution; it does not offer memory protection or virtual memory, it does not offer pre-emption.
+
+@node Third Chapter - Design
+@chapter Design
+@section System design
+@subsection Booting process
+The rationale behind the booting stage is to have the most straighforward
+solution, adaptable to any platform and any medium, with the least
+interactions with the hardware.
+
+To satisfy this requirement DiegOS has to be built as a binary image, statically linked and relocated to run at a specific address.
+@*There is no support for alternate file formats, so there are no COFF, ELF or PE
+loaders.
+The default target will emit an ELF file and a binary file, 
+to satisfy the needs of having a symbol reference for debugging, along with
+all binutils capabilities.
+
+From a high-level perspective, the booting stage consist in initializing the minimum required hardware, 
+finding the DiegOS binary, loading it into memory, and running it.
+Here follows a detailed setup procedure to have consistent booting steps across
+any kind of platform; all platforms should adhere to this procedure to avoid adding
+useless assembly code here and there, bloating the source code and making it less
+portable:
+@enumerate 1
+@item Setup the host processor in order to execute the boot code; since you
+are in charge of writing the boot code, it should be easy. Reserve a register
+or a memory location to store debugging data like return values or failures.
+Add comments to explain how this data can be used. Do not add debugging
+infrastructures, traces, endless strings for printouts.
+@item Access the medium where you stored the DiegOS binary, and read it into
+memory. Document where the binary is put in memory, why it is put there, and
+the memory layout during boot. The medium choice and the code required to
+drive it
+is up to you. The rationale here is, split your boot code if it grows beyond
+logic; chain booting is not an option in this case.
+@item Keep your code simple and stupid, do not try to optimize the load time
+or the medium access time: access the hardware in a safe manner, load the OS
+into memory, and run it.
+@item Before jumping to the OS entry point verify this checklist:
+@sp 1
+@cartouche
+@itemize
+@item All registers are setup to start DiegOS: scratch registers should be
+set to null, memory registers should be set to access the whole addressing
+space; you could also restrict the range of available addresses, but you 
+must ensure the OS is still able to access all the memory and all the hardware.
+@item A small stack will be used by the system init stage, be sure to set
+it up before jumping or you'll crash the machine.
+@item All interrupts @b{must be disabled} prior to jumping to the
+DiegOS entry point. 
+@item Reserve some memory for booting variables.
+@end itemize
+@end cartouche
+@sp 1
+@item Jump to the system entry point, which is labelled as @t{DiegOS}.
+Be careful not to perform a function call, but simply jump to the label;
+calling implies using the stack, and setting a return address somewhere, which
+is not expected to happen.
+@footnote {No Operating System returns to the boot code after a shutdown.}
+@end enumerate
+
+@subsection System initialization
+Initialization is split into a set of function calls, acting on both hardware and
+software. 
+@enumerate
+@item Initialize the processor, including power save features, interrupts,
+cache memory.
+@item Initialize the platform hardware and software; usually you would init
+heap and SoC devices here, as well as platform-dependent libraries (i.e.
+malloc).
+@b{Do not initialize} any kind of driver at this stage.
+@item Force interrupts to be disabled.
+@item Initialize the TTY; depending on your platform, this can be a frame buffer,
+a video card, a serial line; keep in mind that this is the system's TTY, and will be used
+for debugging purposes only.
+@item Initialize the kernel system libraries.
+@item Initialize the drivers; details about the drivers infrastructure are
+explained in section
+@item Initialize the kernel.
+@item Initialize the users' additions, threads added to perform specific tasks
+at user's will.
+@item Enable all interrupts.
+@item Run the kernel, this actually roll the ball and kicks the scheduler.
+@end enumerate
+
+@subsection The kernel
+The core functionalities of DiegOS are enclosed in the kernel.
+@*The kernel is a single instance, single processor component; it does not
+support any kind of memory protection, and it is expecting to be able to access the
+whole address space with no restrictions. As mentioned before, there could be restrictions
+on the address space, but the OS must still be able to drive all the hardware and must
+be able to access all the available memory (both CPU and I/O memory).
+
+The kernel does not support threads contention or access privilege, so any portion of
+the code (and consequently any thread) is able to taint memory or access any
+hardware device.
+This is a questionable choice, prone to errors and security flaws.
+A general purpose OS would not even mention memory protection or privileges as an option,
+but an embedded OS must bear with limited resources and specific operations.
+DiegOS is not a general purpose OS and relies on its developers skills for security and stability.
+
+@subsection Kernel services
+The kernel is designed to offer the following services: 
+a thread scheduler, a thread management API, an alarm API, events queueing and dispatching, 
+mutexes, barriers, I/O waits and spinlocks.
+@*Alarms, Events and Mutexes are all managed services, meaning that an owning thread
+can create, destroy, or reconfigure them at any time.
+@*We will now go through each item in greater details.
+@sp 2
+@table @dfn
+@item Scheduler 
+The DiegOS scheduler is as simple as possible; pre-emption is
+not supported, and threads must co-operate in order to give up CPU time when
+idling or waiting for peripherals.
+Threads can be suspended, halted, delayed, and removed@footnote{Removal means the
+thread will be killed.} but at least one thread must be ready to run at any time
+@footnote{This is the Idle thread, which cannot be killed.}.
+@*Ready threads are linked in lists.
+The scheduler is designed to manage the threads' finite state machine and select 
+the running thread by using a priority queue schema. There are four
+priorities in DiegOS, namely @t{Idle Priority}, @t{Normal Priority}, 
+@t{High Priority} and @t{Realtime Priority}.
+When a thread is put in the ready queue, it will not substitute the running
+one, not even if its priority is higher; pre-emption is @strong{not
+supported} at all.
+
+The running thread can either suspend its execution yielding to ready threads, or
+it can suspend not yielding to lower priority ready threads; in the former case the running
+thread will suspend unconditionally, in the latter case the running thread will suspend if and only if 
+there is a ready thread with a priority greater than or equal to.
+In order to avoid CPU hogging you must be sure that all threads will either sleep or 
+wait, and they should perform their processing as fast as possible;
+if you cannot complete the required actions in a decent amount of time, you must split
+operations in tokens and suspend execution at the end of each token.
+Failing to do so will lock your processing into one thread only for an extended time frame.
+
+@item Threads 
+A new, independent code path starting from a
+function (used as entry point) that can be alternated with other code paths.
+Whenever a thread hands over to another thread, the kernel has to store the
+CPU's context into the running thread, and restore the context loading it from
+the handed over thread.
+Context is defined as the set of registers and flags that differ from path to
+path in the code.
+
+@item Alarms
+A fundamental feature to let threads sleep and wake up at a
+defined time. 
+Alarms queue events to a thread with a specific class ID; handling alarms is just
+like handling events. Alarms can be one-shot or recursive, and can be started or
+halted anytime.
+
+@item Events
+Extensible system messages, used to signal something to a thread. 
+Events are organized as queues (FIFO), and processed one by one in
+chronological order.
+@*There is no memory management for events, so the producer must take care of 
+allocating memory when creating a message, while the consumer must
+take care of releasing memory after processing the message.
+Memory chunk managers, arrays, or static memory is strongly recommended to allocate
+messages, as dynamic memory (heap memory) requires additional synchronization
+between threads.
+
+@item Mutexes
+The simplest form of semaphore. A mutex is initially
+unlocked; the first thread locking the mutex will proceed with execution,
+entering a critical code section and running as long as it needs to.
+Unless the mutex is unlocked, no other thread is allowed to enter the same
+critical code section; other threads trying to lock the same mutex will sit in a
+waiting queue. 
+Once the first thread has released (unlocked) the mutex, the threads waiting for 
+a lock will be run one at a time, until no waiting threads are left.
+@*Once no thread is waiting for a lock on the mutex, the mutex is unlocked.
+Remeber that a mutex is not a counting semaphore, threads sitting in the wait queue
+will repeatedly lock and unlock the mutex.
+
+@item Spinlocks
+A running, atomic wait to gain a lock on a integer used as a
+barrier or mutex. Spinlocks can be locked or unlocked.
+@*A thread trying to acquire a spinlock will enter an infinite loop until the lock is 
+gained, so if the spinlock is originally locked, the thread will suspend and enter
+the ready queue continuosly.
+@*Good use of spinlocks is to protect very short critical sections or hardware accesses,
+where the longer code path required to manage mutexes might be an issue.
+
+@end table
+
+@subsection Recommendations and other suggestions
+The core functionalities are very simple: spawn a number of execution threads, run all
+of them one by one, interrupts @emph{cannot and must not} invoke a context switch,
+synchronize the execution by suspension, share resources with mutexes or spinlocks.
+
+A few words about mutexes and spinlocks and their pros and cons: mutexes have a more complex
+code path and disable or enable interrupts to avoid contention within the scheduler, while
+spinlocks are very light and simple.
+On reverse, a thread waiting to acquire a lock on a mutex will enter a wait queue, thus it will
+sit and wait (and shut up!) until its time has come to run and gain a lock; a thread waiting to
+acquire a lock on a spinlock will continuosly suspend and thus will be rescheduled until its
+time has come to gain a lock.
+
+The balance is, more complexity but lesser CPU usage, opposed to extreme simplicity but a busy CPU.
+My suggestion is to use spinlocks for very fast and short critical sections, whereas managing mutexes
+would be worser and slower; make use of mutexes if you need heavy computations inside the critical 
+section, as all other contending thread will be waiting and won't be scheduled at all, freeing up the 
+CPU and letting the locking thread complete its tasks as fast as possible.
+ 
+@bye
