@@ -1,0 +1,28 @@
+export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
+export AS = $(CC) -xassembler
+export LN = ld --oformat binary -eDiegOS
+export AR = ar cruT
+
+export OBJPREFIX = $(CPU)_$(PLATFORM)
+
+export CDEFS = -DDIEGOS_CPU=$(CPU) -DDIEGOS_PLAT=$(PLATFORM) -DDBG_MODULE
+
+default: all
+
+objdirs:
+	mkdir -p $(OBJPREFIX)
+
+objclean:
+	rm -rf $(OBJSO) *.a
+
+$(OBJPREFIX)/%.o: %.c
+	$(CC) $(CFLAGS) $(CDEFS) -c -o $@ $<
+
+$(OBJPREFIX)/%.o: %.s
+	$(AS) $(ASFLAGS) -c -o $@ $<
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.s
+	$(AS) $(ASFLAGS) -c -o $@ $<

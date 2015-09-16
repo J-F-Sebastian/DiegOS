@@ -1,0 +1,5 @@
+export CWARN = -Wall -Wextra -Winline -Wcast-align -Wno-unused-parameter -Werror -Wframe-larger-than=1023
+export COPT = -O2
+export CARCH = -m32 -march=pentium2 -fomit-frame-pointer -fcall-used-ebx
+export CFLAGS = $(CWARN) $(COPT) $(CARCH)
+export ASFLAGS = $(CARCH)
