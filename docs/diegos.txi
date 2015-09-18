@@ -330,7 +330,9 @@ wait, and they should perform their processing as fast as possible;
 if you cannot complete the required actions in a decent amount of time, you must split
 operations in tokens and suspend execution at the end of each token.
 Failing to do so will lock your processing into one thread only for an extended time frame.
-
+@page
+You can refer to the following figure for a visual description of the Scheduler State Machine.
+@center @image{DiegOS_Scheduler_sm,,8cm,Scheduler State Machine,.jpg}
 @item Threads 
 A new, independent code path that can be alternated with several other code paths is
 called a thread.
