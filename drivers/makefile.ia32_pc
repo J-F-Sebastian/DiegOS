@@ -1,0 +1,31 @@
+include ../build/makefiles/makefile.master
+
+all:
+	cd i8253 && make all
+	cd ti16550d && make all
+	cd tty && make all
+	cd rtl8139 && make all
+	cd lance && make all
+	cd VGA && make all
+	cd i82371SB && make all
+	cd lo && make all
+	$(AR) $(OBJPREFIX)_drivers.a i8253/$(OBJPREFIX)/i8253.o
+	$(AR) $(OBJPREFIX)_drivers.a ti16550d/$(OBJPREFIX)/16550d.o
+	$(AR) $(OBJPREFIX)_drivers.a tty/$(OBJPREFIX)/*.o
+	$(AR) $(OBJPREFIX)_drivers.a rtl8139/$(OBJPREFIX)/rtl8139.o
+	$(AR) $(OBJPREFIX)_drivers.a lance/$(OBJPREFIX)/lance.o
+	$(AR) $(OBJPREFIX)_drivers.a VGA/$(OBJPREFIX)/vga.o \
+				     VGA/$(OBJPREFIX)/vga_txt.o
+	$(AR) $(OBJPREFIX)_drivers.a i82371SB/$(OBJPREFIX)/82371SB.o
+	$(AR) $(OBJPREFIX)_drivers.a lo/$(OBJPREFIX)/local_loop.o
+
+clean:
+	cd i8253 && make clean
+	cd ti16550d && make clean
+	cd tty && make clean
+	cd rtl8139 && make clean    
+	cd lance && make clean    
+	cd VGA && make clean    
+	cd i82371SB && make clean
+	cd lo && make clean
+	rm -rf *.a
