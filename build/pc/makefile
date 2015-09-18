@@ -16,9 +16,7 @@ ARLIST=-l:../../applications/console/$(OBJPREFIX)_app.a \
 	-l:../../platforms/$(CPU)/$(CPU).a \
 	-l:../../drivers/$(OBJPREFIX)_drivers.a \
 	-l:../../libs/$(OBJPREFIX)_diegos_lib.a \
-	-l:../../libs/libc/$(OBJPREFIX)_libc.a \
-	-l:../../networking/netw/$(OBJPREFIX)_diegos_netw.a \
-	-l:../../networking/ip/$(OBJPREFIX)_ip.a
+	-l:../../libs/libc/$(OBJPREFIX)_libc.a
    
 all: bootsect.bin 
 	cd ../../platforms/$(CPU) && make all
@@ -26,7 +24,6 @@ all: bootsect.bin
 	cd ../../kernel && make all
 	cd ../../libs && make all
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) all
-	cd ../../networking && make all
 	cd ../../applications/console && make all
 	cd ../../applications/demo && make all
 	ld -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
@@ -40,7 +37,6 @@ clean:
 	cd ../../platforms/$(CPU) && make clean
 	cd ../../platforms/$(PLATFORM) && make clean
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) clean
-	cd ../../networking && make clean
 	cd ../../applications/console && make clean
 	cd ../../applications/demo && make clean
 	rm -f *.o *.bin *.img *.elf

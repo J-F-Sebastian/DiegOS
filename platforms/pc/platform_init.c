@@ -34,8 +34,6 @@
 #include "../../drivers/ti16550d/16550d.h"
 #include "../../drivers/i8253/i8253.h"
 #include "../../include/diegos/devices.h"
-#include "../../drivers/rtl8139/rtl8139.h"
-#include "../../drivers/lance/lance.h"
 #include "../../drivers/i82371SB/82371SB.h"
 #include "../../drivers/lo/local_loop.h"
 #include "../../include/diegos/drivers.h"
@@ -58,9 +56,7 @@ static char_driver_t *drvlist[] = { &uart16550d_drv,
                                     &i82371sb_drv
                                   };
 
-static net_driver_t *netlist[] = { &rtl8139_drv,
-                                   &lance_drv,
-                                   &lo_drv
+static net_driver_t *netlist[] = { &lo_drv
                                  };
 
 static volatile unsigned long ticks = 0;

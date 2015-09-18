@@ -20,7 +20,7 @@
 .file "ints_equ.s"
 
 /* 8259A interrupt controller ports. */
-.equ	INT_CTL         0x20
+.equ	INT_CTL,        0x20
 .equ	INT_CTLMASK,	0x21
 .equ	INT2_CTL,	0xA0
 .equ	INT2_CTLMASK,	0xA1
