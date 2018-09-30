@@ -32,17 +32,17 @@ STATUS queue_roll(queue_inst *queue);
 
 STATUS queue_insert(queue_inst *queue, queue_node *data, queue_node *after);
 
-extern inline void *queue_head(queue_inst *queue)
+inline void *queue_head(queue_inst *queue)
 {
     return ((queue) ? (queue->head) : (NULL));
 }
 
-extern inline void *queue_tail(queue_inst *queue)
+inline void *queue_tail(queue_inst *queue)
 {
     return ((queue) ? (queue->tail) : (NULL));
 }
 
-extern inline unsigned queue_count(queue_inst *queue)
+inline unsigned queue_count(queue_inst *queue)
 {
     return ((queue) ? (queue->counter) : (0));
 }

@@ -28,7 +28,7 @@ STATUS stack_push(queue_inst *queue, queue_node *data);
 
 STATUS stack_pop(queue_inst *queue, queue_node **data);
 
-extern inline uint32_t stack_count(queue_inst *queue)
+inline uint32_t stack_count(queue_inst *queue)
 {
     return ((queue) ? (queue->counter) : (0));
 }

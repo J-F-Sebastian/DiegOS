@@ -59,7 +59,7 @@ extern fd_data_t fdarray[FD_MAX];
  * Extern inline function to check boundaries before accessing fdarray.
  * DO NOT access fdarray directly, cal fdget instead.
  */
-extern inline fd_data_t *fdget (int fd)
+inline fd_data_t *fdget (int fd)
 {
     return (((fd >=0) && (fd < (int)NELEMENTS(fdarray))) ? (fdarray+fd) : (NULL));
 }

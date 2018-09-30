@@ -56,14 +56,14 @@ typedef struct ieee_802_3q_hdr {
     uint16_t    type;
 } ieee_802_3q_hdr_t;
 
-extern inline void copy_ieee_addr (const ieee_addr_t *src, ieee_addr_t *dst)
+inline void copy_ieee_addr (const ieee_addr_t *src, ieee_addr_t *dst)
 {
     dst->macw[0] = src->macw[0];
     dst->macw[1] = src->macw[1];
     dst->macw[2] = src->macw[2];
 }
 
-extern inline BOOL cmp_ieee_addr (const ieee_addr_t *src, const ieee_addr_t *dst)
+inline BOOL cmp_ieee_addr (const ieee_addr_t *src, const ieee_addr_t *dst)
 {
     return (((dst->macw[0] == src->macw[0]) &&
             (dst->macw[1] == src->macw[1]) &&

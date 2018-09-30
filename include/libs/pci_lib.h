@@ -51,21 +51,21 @@ typedef struct pci_bus_device {
     /* 48 bytes */
 } pci_bus_device_t;
 
-extern inline void pci_device_read (volatile uint32_t *bar,
-                                    unsigned offset,
-                                    uint32_t *value)
+inline void pci_device_read (volatile uint32_t *bar,
+                             unsigned offset,
+                             uint32_t *value)
 {
     *value = *(bar + offset/4);
 }
 
-extern inline void pci_device_write (volatile uint32_t *bar,
-                                     unsigned offset,
-                                     const uint32_t value)
+inline void pci_device_write (volatile uint32_t *bar,
+                              unsigned offset,
+                              const uint32_t value)
 {
     *(bar + offset/4) = value;
 }
 
-extern inline void
+inline void
 pci_device_read_multi (volatile uint32_t *bar,
                        unsigned offset,
                        uint32_t *values,
@@ -77,7 +77,7 @@ pci_device_read_multi (volatile uint32_t *bar,
     }
 }
 
-extern inline void
+inline void
 pci_device_write_multi (volatile uint32_t *bar,
                         unsigned offset,
                         const uint32_t *values,
@@ -89,21 +89,21 @@ pci_device_write_multi (volatile uint32_t *bar,
     }
 }
 
-extern inline void pci_device_readb (volatile uint8_t *bar,
-                                     unsigned offset,
-                                     uint8_t *value)
+inline void pci_device_readb (volatile uint8_t *bar,
+                              unsigned offset,
+                              uint8_t *value)
 {
     *value = *(bar + offset);
 }
 
-extern inline void pci_device_writeb (volatile uint8_t *bar,
-                                      unsigned offset,
-                                      const uint8_t value)
+inline void pci_device_writeb (volatile uint8_t *bar,
+                               unsigned offset,
+                               const uint8_t value)
 {
     *(bar + offset) = value;
 }
 
-extern inline void
+inline void
 pci_device_read_multib (volatile uint8_t *bar,
                         unsigned offset,
                         uint8_t *values,
@@ -115,7 +115,7 @@ pci_device_read_multib (volatile uint8_t *bar,
     }
 }
 
-extern inline void
+inline void
 pci_device_write_multib (volatile uint8_t *bar,
                          unsigned offset,
                          const uint8_t *values,

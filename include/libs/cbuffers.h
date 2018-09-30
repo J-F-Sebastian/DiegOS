@@ -88,7 +88,7 @@ struct cbuffer listname = {     \
     .bufstep = step             \
 }
 
-extern inline void cbuffer_init (struct cbuffer *cbuf,
+inline void cbuffer_init (struct cbuffer *cbuf,
                                  unsigned buffersize,
                                  unsigned bufferstep)
 {
@@ -100,31 +100,31 @@ extern inline void cbuffer_init (struct cbuffer *cbuf,
     }
 }
 
-extern inline void cbuffer_add (struct cbuffer *cbuf)
+inline void cbuffer_add (struct cbuffer *cbuf)
 {
     cbuf->tail += cbuf->bufstep;
     cbuf->tail %= cbuf->bufsize;
 }
 
-extern inline void cbuffer_remove (struct cbuffer *cbuf)
+inline void cbuffer_remove (struct cbuffer *cbuf)
 {
     cbuf->head += cbuf->bufstep;
     cbuf->head %= cbuf->bufsize;
 }
 
-extern inline void cbuffer_add_n (struct cbuffer *cbuf, unsigned n)
+inline void cbuffer_add_n (struct cbuffer *cbuf, unsigned n)
 {
     cbuf->tail += cbuf->bufstep*n;
     cbuf->tail %= cbuf->bufsize;
 }
 
-extern inline void cbuffer_remove_n (struct cbuffer *cbuf, unsigned n)
+inline void cbuffer_remove_n (struct cbuffer *cbuf, unsigned n)
 {
     cbuf->head += cbuf->bufstep*n;
     cbuf->head %= cbuf->bufsize;
 }
 
-extern inline unsigned cbuffer_free_space (struct cbuffer *cbuf)
+inline unsigned cbuffer_free_space (struct cbuffer *cbuf)
 {
     if (cbuf->head == cbuf->tail) return (cbuf->bufsize - cbuf->bufstep);
     if (cbuf->head < cbuf->tail) {
@@ -134,7 +134,7 @@ extern inline unsigned cbuffer_free_space (struct cbuffer *cbuf)
     }
 }
 
-extern inline unsigned cbuffer_in_use (struct cbuffer *cbuf)
+inline unsigned cbuffer_in_use (struct cbuffer *cbuf)
 {
     if (cbuf->head == cbuf->tail) return (0);
     if (cbuf->head < cbuf->tail) {
@@ -144,7 +144,7 @@ extern inline unsigned cbuffer_in_use (struct cbuffer *cbuf)
     }
 }
 
-extern inline BOOL cbuffer_is_empty (struct cbuffer *cbuf)
+inline BOOL cbuffer_is_empty (struct cbuffer *cbuf)
 {
     return (cbuf->head == cbuf->tail) ? TRUE : FALSE;
 }

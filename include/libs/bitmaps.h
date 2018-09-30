@@ -46,17 +46,17 @@ typedef void (*bitmapcb)(long *bitmap, unsigned bitpos, void *);
 /*
  * For any function, bitpos is 0 BASED
  */
-extern inline void bitmap_set(long *bitmap, unsigned bitpos)
+inline void bitmap_set(long *bitmap, unsigned bitpos)
 {
     bitmap[bitpos/BINL] |= (long)1 << (bitpos%BINL);
 }
 
-extern inline void bitmap_clear(long *bitmap, unsigned bitpos)
+inline void bitmap_clear(long *bitmap, unsigned bitpos)
 {
     bitmap[bitpos/BINL] &= ~((long)1 << (bitpos%BINL));
 }
 
-extern inline BOOL bitmap_is_set(long *bitmap, unsigned bitpos)
+inline BOOL bitmap_is_set(long *bitmap, unsigned bitpos)
 {
     if (bitmap[bitpos/BINL] & ((long)1 << (bitpos%BINL))) {
         return (TRUE);
@@ -65,7 +65,7 @@ extern inline BOOL bitmap_is_set(long *bitmap, unsigned bitpos)
     return (FALSE);
 }
 
-extern inline unsigned bitmap_first_is_set(long *bitmap, unsigned leninlongs)
+inline unsigned bitmap_first_is_set(long *bitmap, unsigned leninlongs)
 {
     unsigned i = 0,j,k;
 
@@ -83,7 +83,7 @@ extern inline unsigned bitmap_first_is_set(long *bitmap, unsigned leninlongs)
     return (leninlongs*sizeof(long)*8);
 }
 
-extern inline unsigned bitmap_first_is_clear(long *bitmap, unsigned leninlongs)
+inline unsigned bitmap_first_is_clear(long *bitmap, unsigned leninlongs)
 {
     unsigned i = 0,j,k;
 
@@ -102,7 +102,7 @@ extern inline unsigned bitmap_first_is_clear(long *bitmap, unsigned leninlongs)
     return (leninlongs*BINL);
 }
 
-extern inline void bitmap_for_each_set(long *bitmap,
+inline void bitmap_for_each_set(long *bitmap,
                                        unsigned leninlongs,
                                        bitmapcb cbfn,
                                        void *param)
@@ -121,7 +121,7 @@ extern inline void bitmap_for_each_set(long *bitmap,
     }
 }
 
-extern inline void bitmap_for_each_clear(long *bitmap,
+inline void bitmap_for_each_clear(long *bitmap,
                                          unsigned leninlongs,
                                          bitmapcb cbfn,
                                          void *param)

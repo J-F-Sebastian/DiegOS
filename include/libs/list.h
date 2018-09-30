@@ -37,17 +37,17 @@ int list_remove(list_inst *list, list_node *data);
 
 list_node *list_search(list_inst *list, void *param, BOOL (*fn)(list_node *, void *));
 
-extern inline void *list_head(list_inst *list)
+inline void *list_head(list_inst *list)
 {
     return ((list) ? (list->head) : (NULL));
 }
 
-extern inline void *list_tail(list_inst *list)
+inline void *list_tail(list_inst *list)
 {
     return ((list) ? (list->tail) : (NULL));
 }
 
-extern inline uint32_t list_count(list_inst *list)
+inline uint32_t list_count(list_inst *list)
 {
     return ((list) ? (list->counter) : (0));
 }
