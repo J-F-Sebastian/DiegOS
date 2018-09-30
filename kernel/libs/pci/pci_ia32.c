@@ -47,13 +47,15 @@ BOOL pci_bus_check()
 {
     unsigned tmp;
     BOOL retcode = FALSE;
+    unsigned retries = 10;
 
-    out_byte(PCI_CONFIG_ADDRESS + 3, 1);
-    tmp = in_dword(PCI_CONFIG_ADDRESS);
     out_dword(PCI_CONFIG_ADDRESS, (unsigned)(1<<31));
-    if (in_dword(PCI_CONFIG_ADDRESS) == (unsigned)(1<<31)) {
-        retcode = TRUE;
+    tmp = in_dword(PCI_CONFIG_ADDRESS);
+    while ((tmp != (unsigned)(1<<31)) && retries--) {
+        tmp = in_dword(PCI_CONFIG_ADDRESS);
     }
+
+    if (tmp == (unsigned)(1 << 31)) retcode = TRUE;
 
     out_dword(PCI_CONFIG_ADDRESS, tmp);
 
