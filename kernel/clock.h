@@ -58,21 +58,5 @@ BOOL clock_add_cb (kernel_clock_cb cb);
  */
 BOOL clock_del_cb (kernel_clock_cb cb);
 
-/*
- * Get system ticks.
- *
- * RETURN VALUES
- * 64 bit counter of ticks elapsed since boot time.
- */
-uint64_t clock_get_ticks (void);
-
-/*
- * Convert milliseconds into system ticks.
- *
- * RETURN VALUES
- * 64 bit counter of the ticks elapsed in msecs.
- */
-uint64_t clock_convert_msecs_to_ticks (unsigned msecs);
-
 #endif
 

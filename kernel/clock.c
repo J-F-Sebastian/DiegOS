@@ -19,6 +19,7 @@
 
 #include <diegos/devices.h>
 #include <diegos/interrupts.h>
+#include <diegos/kernel_ticks.h>
 #include <errno.h>
 
 #include "clock.h"
@@ -26,6 +27,8 @@
 
 static uint64_t ticks = 0;
 static uint64_t ticks_msecs = 0;
+/* boot ticks can be set to configure the current time and date */
+static uint64_t boot_ticks = 0;
 
 struct ticks_incr {
     uint32_t    increment_msecs_per_tick;
@@ -120,6 +123,21 @@ BOOL clock_del_cb (kernel_clock_cb cb)
 uint64_t clock_get_ticks (void)
 {
     return (ticks);
+}
+
+uint64_t clock_get_seconds (void)
+{
+    return (ticks_msecs/1000);
+}
+
+void clock_set_boot_seconds (unsigned seconds)
+{
+    boot_ticks = (uint64_t)seconds*DEFAULT_CLOCK_RES;
+}
+
+unsigned clock_get_boot_seconds (void)
+{
+    return (unsigned)(boot_ticks/DEFAULT_CLOCK_RES);
 }
 
 uint64_t clock_convert_msecs_to_ticks (unsigned msecs)

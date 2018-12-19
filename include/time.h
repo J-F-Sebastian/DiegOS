@@ -19,23 +19,17 @@
 
 #ifndef _TIME_H_
 #define _TIME_H_
-#if 0
-#define NULL    ((void *)0)
 
-#ifndef _SIZE_T
-#define _SIZE_T
-typedef unsigned int size_t;
-#endif
-#endif
-#ifndef _TIME_T
-#define _TIME_T
-typedef long time_t;		/* time in sec since 1 Jan 1970 0000 GMT */
-#endif
+#include <platform_config.h>
+#include <stddef.h>
 
-#ifndef _CLOCK_T
-#define _CLOCK_T
-typedef long clock_t;		/* time in ticks since process started */
-#endif
+#define CLOCKS_PER_SEC (DEFAULT_CLOCK_RES)
+
+/* time in sec since 1 Jan 2015 0000 GMT */
+typedef long int time_t;
+
+/* time in ticks since process started */
+typedef unsigned long long int clock_t;
 
 struct tm {
   int tm_sec;			/* seconds after the minute [0, 59] */
@@ -43,27 +37,24 @@ struct tm {
   int tm_hour;			/* hours since midnight [0, 23] */
   int tm_mday;			/* day of the month [1, 31] */
   int tm_mon;			/* months since January [0, 11] */
-  int tm_year;			/* years since 1900 */
+  int tm_year;			/* years since 2015 */
   int tm_wday;			/* days since Sunday [0, 6] */
   int tm_yday;			/* days since January 1 [0, 365] */
   int tm_isdst;			/* Daylight Saving Time flag */
 };
 
-extern char *tzname[];
+clock_t clock (void);
+double difftime (time_t end, time_t beginning);
+time_t mktime (struct tm *timeptr);
+time_t time (time_t *timeptr);
+char *asctime (const struct tm *timeptr);
+char *ctime (const time_t *timer);
+struct tm *gmtime (const time_t *timer);
+struct tm *localtime (const time_t *timer);
+size_t strftime (char *s,
+                 size_t max,
+                 const char *fmt,
+                 const struct tm *timep);
+void tzset (void);
 
-_PROTOTYPE( clock_t clock, (void)					);
-_PROTOTYPE( double difftime, (time_t _time1, time_t _time0)		);
-_PROTOTYPE( time_t mktime, (struct tm *_timeptr)			);
-_PROTOTYPE( time_t time, (time_t *_timeptr)				);
-_PROTOTYPE( char *asctime, (const struct tm *_timeptr)			);
-_PROTOTYPE( char *ctime, (const time_t *_timer)			);
-_PROTOTYPE( struct tm *gmtime, (const time_t *_timer)			);
-_PROTOTYPE( struct tm *localtime, (const time_t *_timer)		);
-_PROTOTYPE( size_t strftime, (char *_s, size_t _max, const char *_fmt,
-				const struct tm *_timep)		);
-
-#ifdef _POSIX_SOURCE
-_PROTOTYPE( void tzset, (void)						);
 #endif
-
-#endif /* _TIME_H */

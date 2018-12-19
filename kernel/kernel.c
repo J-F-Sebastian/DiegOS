@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <diegos/kernel.h>
+#include <diegos/kernel_ticks.h>
 #include <diegos/mutexes.h>
 #include <diegos/devices.h>
 

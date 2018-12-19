@@ -25,16 +25,6 @@
 typedef int ssize_t;
 #endif
 
-#ifndef _TIME_T
-#define _TIME_T
-typedef long time_t;		   /* time in sec since 1 Jan 1970 0000 GMT */
-#endif
-
-#ifndef _CLOCK_T
-#define _CLOCK_T
-typedef long clock_t;		   /* unit for system accounting */
-#endif
-
 /* Types used in disk, inode, etc. data structures. */
 typedef short          dev_t;	   /* holds (major|minor) device pair */
 typedef char           gid_t;	   /* group id */

@@ -24,6 +24,7 @@
 #include <diegos/alarms.h>
 #include <diegos/events.h>
 #include <diegos/kernel_events.h>
+#include <diegos/kernel_ticks.h>
 #include <diegos/interrupts.h>
 #include <list.h>
 
