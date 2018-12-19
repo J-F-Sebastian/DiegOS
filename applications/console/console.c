@@ -31,6 +31,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "system_parser.h"
 #include "system_parser_api.h"
@@ -70,6 +71,12 @@ static void print_banner (void)
     puts("\n");
 }
 
+static void print_login_time (void)
+{
+    time_t tmp = time(NULL);
+    printf("Login time: %s\n", ctime(&tmp));
+}
+
 static void console_main_entry (void)
 {
     char buffer[128] = {0};
@@ -79,6 +86,7 @@ static void console_main_entry (void)
     struct pollfd waitinp = {.fd = 0, .events = 0, .revents = POLLIN};
 
     print_banner();
+    print_login_time();
 
     while (TRUE) {
         printf("# ");
