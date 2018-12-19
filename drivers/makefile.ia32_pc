@@ -2,12 +2,14 @@ include ../build/makefiles/makefile.master
 
 all:
 	cd i8253 && make all
+	cd i8042 && make all
 	cd ti16550d && make all
 	cd tty && make all
 	cd VGA && make all
 	cd i82371SB && make all
 	cd lo && make all
 	$(AR) $(OBJPREFIX)_drivers.a i8253/$(OBJPREFIX)/i8253.o
+	$(AR) $(OBJPREFIX)_drivers.a i8042/$(OBJPREFIX)/i8042.o
 	$(AR) $(OBJPREFIX)_drivers.a ti16550d/$(OBJPREFIX)/16550d.o
 	$(AR) $(OBJPREFIX)_drivers.a tty/$(OBJPREFIX)/*.o
 	$(AR) $(OBJPREFIX)_drivers.a VGA/$(OBJPREFIX)/vga.o \
@@ -17,6 +19,7 @@ all:
 
 clean:
 	cd i8253 && make clean
+	cd i8042 && make clean
 	cd ti16550d && make clean
 	cd tty && make clean
 	cd VGA && make clean    
