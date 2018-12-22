@@ -23,17 +23,14 @@
 /*
  * The following externs *must* be defined for
  * every processor in use. the platform makefile
- * *must* link these symbols.
- * lock, unlock, enable_int and disable_int *must* support
- * nested calls, so that only the first call to lock will disable interrupts,
- * only the last call to unlock will enable interrupts, only the first call to
- * enable_int() will enable a specific interrupt and only the last call to
- * disable_int() will disable a specific interrupt(). *
+ * *must* link these symbols. 
  */
 
 #include <types_common.h>
 
 typedef BOOL (*int_handler_t)(void);
+typedef void (*exc_handler_t)(void);
+
 /*
  * disable all interrupts
  */
@@ -63,5 +60,15 @@ extern int add_int_cb(int_handler_t cb, unsigned intno);
  * remove an interrupt callback
  */
 extern int del_int_cb(unsigned intno);
+
+/*
+ * add an exception callback
+ */
+extern int add_exc_cb(exc_handler_t cb, unsigned exc);
+
+/*
+ * remove an exception callback
+ */
+extern int del_exc_cb(unsigned exc);
 
 #endif

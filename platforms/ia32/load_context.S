@@ -17,8 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.file	"load_context.s"
-.include "context_equ.s"
+.file	"load_context.S"
 
 .text
 .globl  load_context
@@ -37,10 +36,17 @@ cli
 movl    P1(%esp), %eax          # move context pointer into eax
 movl    %eax, %esp              # we know the context is the stack pointer
 
+#If support for FP/MMX/SSE is desired, set the Task Switched bit to trap
+# FP and SIMD instructions
+#if defined(ENABLE_FP) || defined(ENABLE_SIMD)
+call    set_ts
+#endif          
+
 #recover all registers, ESP will be skipped but this is exactly what we want
-popal
+popal    
 #recover EFLAGS
 popfl
 sti
+
 #returning will load the thread entry point from stack and jump into it
 ret

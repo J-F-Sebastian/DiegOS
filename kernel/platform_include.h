@@ -62,6 +62,13 @@ extern void switch_context(void **from, const void *to);
 extern void load_context(const void *to);
 
 /*
+ * Context cleaning: release or re-init context memory.
+ * Interrupts MUST BE DISABLED entering the function, and REENABLED
+ * exiting the function.
+ */
+extern void cleanup_context(void *ctx, unsigned tid);
+
+/*
  * Init the processor, setup all required data to run
  * DiegOS.
  * Returns a pointer to a null-terminated string describing

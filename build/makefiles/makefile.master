@@ -1,5 +1,6 @@
 export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
 export AS = $(CC) -xassembler
+export ASCC = $(CC) -xassembler-with-cpp
 export LN = ld --oformat binary -eDiegOS
 export AR = ar cruT
 
@@ -26,3 +27,7 @@ $(OBJPREFIX)/%.o: %.s
 
 %.o: %.s
 	$(AS) $(ASFLAGS) -c -o $@ $<
+
+%.o: %.S
+	$(ASCC) $(ASFLAGS) -c -o $@ $<
+

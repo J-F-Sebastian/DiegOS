@@ -78,17 +78,16 @@ int_handler_t int_table[MAX_INT];
  * Exceptions callbacks, these are used by assembler file
  * exceptions.s
  */
-int_handler_t exc_table[MAX_EXC];
+exc_handler_t exc_table[MAX_EXC];
 
-static BOOL default_exception_handler (void)
+static void default_exception_handler (void)
 {
-    //fprintf(stderr,"Default exception handler\n");
-    return (TRUE);
+    fprintf(stderr,"Default exception handler\n");    
 }
 
 static BOOL default_int_cb (void)
 {
-    //fprintf(stderr,"Default interrupt handler\n");
+    fprintf(stderr,"Default interrupt handler\n");
     return (TRUE);
 }
 
@@ -418,6 +417,30 @@ int del_int_cb(unsigned intno)
 
     if (int_table[intno]) {
         int_table[intno] = default_int_cb;
+    }
+
+    return (EOK);
+}
+
+int add_exc_cb(exc_handler_t cb, unsigned exc)
+{
+    if (exc >= MAX_EXC) return (EINVAL);
+
+    if (exc_table[exc] &&
+            (exc_table[exc] != default_exception_handler)) {
+        return EINVAL;
+    }
+    exc_table[exc] = cb;
+
+    return (EOK);
+}
+
+int del_exc_cb(unsigned exc)
+{
+    if (exc >= MAX_INT) return EINVAL;
+
+    if (exc_table[exc]) {
+        exc_table[exc] = default_exception_handler;
     }
 
     return (EOK);

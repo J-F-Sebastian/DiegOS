@@ -102,6 +102,12 @@ void DiegOS (void)
     if (proctype) {
         kmsgprintf("processor is a %s\n",proctype);
     }
+#if defined(ENABLE_SIMD)
+    kmsgprintf("SIMD instructions are supported.\n");  
+#endif    
+#if defined(ENABLE_FP)
+    kmsgprintf("Floating Point instructions are supported.\n");
+#endif        
 
     /*
      * Init the kernel system libraries.

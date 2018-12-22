@@ -18,9 +18,23 @@
  */
 
 #include <string.h>
-
+#include <platform_config.h>
+#include <diegos/interrupts.h>
 #include "../../kernel/platform_include.h"
 #include "ia32_private.h"
+
+#define FPU     (1 << 0)
+#define MMX     (1 << 23)
+#define FXSR    (1 << 24)
+#define SSE     (1 << 25)
+#define SSE2    (1 << 26)
+#define MASK1   (FPU | MMX | FXSR | SSE | SSE2)
+
+#define SSE3    (1 << 0)
+#define SSSE3   (1 << 9)
+#define SSE4_1  (1 << 19)
+#define SSE4_2  (1 << 20)
+#define MASK2   (SSE3 | SSSE3 | SSE4_1 | SSE4_2)
 
 static const char *families[] = {
     "80486 or AMD/Cyrix 5x86",
@@ -29,7 +43,7 @@ static const char *families[] = {
     "Itanium"
 };
 
-static char cpu_signature[80];
+static char cpu_signature[160];
 
 struct cpuid_data {
     unsigned word[4];
@@ -64,10 +78,50 @@ const char *processor_init()
                     families[info.word[0] - 4],
                     sizeof(cpu_signature) - 13);
         }
+
+        if (info.word[3] & MASK1) {
+            strcat(cpu_signature, "\n( ");
+            if (info.word[3] & FPU) {
+                strcat(cpu_signature, "FPU ");      
+            }
+            if (info.word[3] & MMX) {
+                strcat(cpu_signature, "MMX ");
+            }
+            if (info.word[3] & SSE) {
+                strcat(cpu_signature, "SSE ");
+            }
+            if (info.word[3] & SSE2) {
+                strcat(cpu_signature, "SSE2 ");
+            }
+        }
+        if (info.word[2]& MASK2) {
+            if (info.word[2] & SSE3) {
+                strcat(cpu_signature, "SSE3 ");      
+            }
+            if (info.word[2] & SSSE3) {
+                strcat(cpu_signature, "SSSE3 ");
+            }
+            if (info.word[2] & SSE4_1) {
+                strcat(cpu_signature, "SSE4.1 ");
+            }
+            if (info.word[2] & SSE4_2) {
+                strcat(cpu_signature, "SSE4.2 ");
+            }
+        }
+        strcat(cpu_signature, ")");
     }
 
-    idt_init();
-    check_fp(&info);
+    idt_init();    
+
+#if defined(ENABLE_SIMD) || defined(ENABLE_FP)
+    if ((info.word[3] & (SSE | SSE2)) ||
+        (info.word[2] & (SSE3 | SSSE3 | SSE4_1 | SSE4_2))) {        
+        init_simd();        
+    } else if (info.word[3] & (FPU | MMX)) {        
+        init_fp();        
+    } 
+    add_exc_cb(exc_handler_fp, 7);
+#endif    
 
     return (cpu_signature);
 }

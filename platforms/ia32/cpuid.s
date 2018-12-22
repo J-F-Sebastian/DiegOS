@@ -20,9 +20,12 @@
 .text
 .globl execute_cpuid
 .type  execute_cpuid, @function
-.globl check_fp 
-.type  check_fp, @function
-
+.globl set_ts
+.type  set_ts, @function
+.globl init_fp
+.type  init_fp, @function
+.globl init_simd
+.type  init_simd, @function
 
 /*
  * void execute_cpuid(void *data, unsigned infotype);
@@ -40,14 +43,29 @@ popl    %edi
 ret
 
 /*
- * void check_fp (void *data);
+ * void set_ts ();
  */
-check_fp:
-movl	4(%esp), %ebx
+set_ts:
 movl	%cr0, %eax
-movl    %eax, (%ebx)
-movl	%cr3, %eax
-movl    %eax, 4(%ebx)
-movl	%cr4, %eax
-movl    %eax, 8(%ebx)
+/* Bit 3 TS - Task Switched enables exceptions on executing FP/MMX/SSE instructions */
+orl     $0x8, %eax
+movl    %eax, %cr0
+ret
+
+/*
+ * void init_fp ();
+ */
+init_fp:
+fninit
+ret
+
+/*
+ * void init_simd ();
+ */
+init_simd:
+fninit
+#set the OSFXR bit 9 in CR4
+movl    %cr4, %eax
+orl     $0x200, %eax
+movl    %eax, %cr4
 ret

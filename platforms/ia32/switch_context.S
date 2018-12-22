@@ -39,7 +39,7 @@ switch_context:
 cli
 movl    P1(%esp), %eax
 movl    P2(%esp), %ebx
-cmpl    %ebx, (%eax)
+cmpl    (%eax), %ebx
 je      switch_exit
     
 # Store context to the stack
@@ -51,7 +51,10 @@ pushal
 movl    %esp, (%eax)
 #CONTEXT SWITCH !!!!   
 movl    %ebx, %esp
-
+#If support for FP/MMX/SSE is desired, enable Task Switched bit
+#if defined(ENABLE_FP) || defined(ENABLE_SIMD)
+call    set_ts
+#endif
 #Recover context
 popal
 popfl

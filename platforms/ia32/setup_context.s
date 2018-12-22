@@ -63,9 +63,8 @@ movl    %eax, ESP(%eax)
 movl	%ebx, EBP(%eax)
 movl	%ebx, ESI(%eax)
 movl	%ebx, EDI(%eax)
-pushfl
-popl    %ecx
-movl    %ecx, EFLAGS(%eax)
+#Reset default value of EFLAGS
+movl    $0x2, EFLAGS(%eax)
 
 #Step 4 update the context by storing the stack pointer, that's all we need
 movl    %eax, (%edx)

@@ -23,8 +23,18 @@
 #define CACHE_ALN 64
 #define STACK_ALN 4
 
-/* These are required by libraries */
 #define _BYTE_ORDER _LITTLE_ENDIAN
+
+/* The following defines can be explicitely uncommented or declared
+ * on the compiler's command line.
+ * Processors with no support for a specific feature will still run as
+ * expected, the defines enable software support.
+ * Defines are NOT platform dependent - they are used in the kernel and in 
+ * other platform independent code.
+ */
+
+#define ENABLE_FP
+//#define ENABLE_SIMD
 
 #endif
 

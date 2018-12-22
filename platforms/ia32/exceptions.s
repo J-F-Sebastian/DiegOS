@@ -60,10 +60,9 @@
 .type	exc19, @function
 
 .macro exc_master vect
+pusha
 call	*exc_table+4*\vect(,1)	/* eax = (*exc_table[vect])()  */
-0:
-jmp 0b
-sti
+popa
 iret				        /* reenable interrupts */
 .endm
 

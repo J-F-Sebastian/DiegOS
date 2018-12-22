@@ -145,6 +145,7 @@ BOOL done_thread(uint8_t tid)
         if (th->flags & THREAD_FLAG_REL_STACK) {
             free(th->stack);
         }
+        cleanup_context(th->context, tid);
         memset(th,0,sizeof(*th));
         th->tid = THREAD_TID_INVALID;
         --thread_num;

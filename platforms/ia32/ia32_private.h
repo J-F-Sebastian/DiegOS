@@ -22,9 +22,13 @@
 
 void execute_cpuid(void *data, unsigned infotype);
 
-void check_fp(void *data);
+extern void set_ts(void);
+extern void init_fp(void);
+extern void init_simd(void);
 
 void idt_init(void);
+
+void exc_handler_fp (void);
 
 /*
  * externs for hw_interrupts.s and

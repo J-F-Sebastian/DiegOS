@@ -67,7 +67,6 @@
  * Note this is a macro, it looks like a subroutine.
  */
 .macro hwint_master irq
-/* save interrupted process state */
 cld
 pusha				            /* stack pointer is not changed */
 inb     $INT_CTLMASK
@@ -83,7 +82,6 @@ inb     $INT_CTLMASK
 andb    $(~1<<\irq), %al         /* Mask this interrupt */
 outb    $INT_CTLMASK
 popa
-sti
 iretl
 .endm
 
@@ -126,17 +124,16 @@ hwint_master 7
  *Note this is a macro, it looks like a subroutine.
  */
 .macro hwint_slave irq
-/* save interrupted process state */
 cld
 pusha
 inb     $INT2_CTLMASK
 orb     $(1<<(\irq-8)), %al         /* Mask this interrupt */
 outb    $INT2_CTLMASK
 movb	$(SPEC_EOI|(\irq-8)), %al
-outb	$INT2_CTL		    /* reenable slave 8259		  */
+outb	$INT2_CTL		            /* reenable slave 8259		  */
 movb	$(SPEC_EOI|CASCADE_IRQ), %al
-outb	$INT_CTL		    /* reenable master 8259		  */
-sti                             /* reenable interrupts */
+outb	$INT_CTL		            /* reenable master 8259		  */
+sti                                 /* reenable interrupts */
 /*  Service the interrupt now */
 call	*int_table+4*\irq(,1)	/* eax = (*int_table[irq])()  */
 cli
@@ -144,8 +141,7 @@ inb     $INT2_CTLMASK
 andb    $(~1<<(\irq-8)), %al         /* Mask this interrupt */
 outb    $INT2_CTLMASK
 popa
-sti
-iretl				        /* restart (another) process      */
+iretl
 .endm
 
 /* Each of these entry points is an expansion of the hwint_slave macro */
