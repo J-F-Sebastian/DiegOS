@@ -70,17 +70,28 @@ int i82371sb_done (unsigned unitno)
     return EOK;
 }
 
+static unsigned i82371sb_status (unsigned unitno)
+{
+    if (unitno) {
+        return 0;
+    }
+    return (DRV_STATUS_RUN | DRV_IS_CHAR);
+}
+
 char_driver_t i82371sb_drv = {
-    .name = "PIIX3",
-    .init_fn = i82371sb_init,
-    .start_fn = i82371sb_start,
-    .stop_fn = i82371sb_stop,
-    .done_fn = i82371sb_done,
+    .cmn = {
+        .name = "PIIX3",
+        .init_fn = i82371sb_init,
+        .start_fn = i82371sb_start,
+        .stop_fn = i82371sb_stop,
+        .done_fn = i82371sb_done,
+        .ioctrl_fn = NULL,
+        .status_fn = i82371sb_status,
+        .poll_fn = NULL
+    },
     .write_fn = NULL,
     .read_fn = NULL,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL,
-    .ioctrl_fn = NULL,
-    .status_fn = NULL
+    .read_multi_fn = NULL    
 };
 

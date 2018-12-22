@@ -63,7 +63,7 @@ static int lo_done (unsigned unitno)
 
 static unsigned lo_status (unsigned unitno)
 {
-    return (0);
+    return (DRV_STATUS_RUN | DRV_IS_NET);
 }
 
 static int lo_tx (const struct packet *buf, unsigned unitno)
@@ -150,22 +150,24 @@ static short lo_poll (poll_table_t *table)
 }
 
 net_driver_t lo_drv = {
-    .name = "lo",
+    .cmn = {
+        .name = "lo",
+        .init_fn = lo_init,
+        .start_fn = lo_start,
+        .stop_fn = lo_stop,
+        .done_fn = lo_done,
+        .status_fn = lo_status,
+        .poll_fn = lo_poll
+    },
     .ifname = "lo",
     .mtu = SHRT_MAX,
     .iftype = 0,
     .addr = {0x7F, 0x0, 0x0, 0x1},
-    .ifflags = (IFF_UP | IFF_LOOPBACK),
-    .init_fn = lo_init,
-    .start_fn = lo_start,
-    .stop_fn = lo_stop,
-    .done_fn = lo_done,
+    .ifflags = (IFF_UP | IFF_LOOPBACK),    
     .tx_fn = lo_tx,
     .rx_fn = lo_rx,
     .tx_multi_fn = NULL,
     .rx_multi_fn = NULL,
-    .rx_peak_fn = lo_peak,
-    .status_fn = lo_status,
-    .poll_fn = lo_poll
+    .rx_peak_fn = lo_peak    
 };
 

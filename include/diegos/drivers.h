@@ -29,32 +29,10 @@
 #define DRV_UNIT_MAX        (4)
 #define DRV_MAX_ADDR_LEN    (16)
 
+#include "drivers_common.h"
 #include "char_drivers.h"
 #include "net_drivers.h"
 #include "ui_drivers.h"
-
-/*
- * The following enum values are returned by
- * the status_fn function call to assert the driver
- * overall status, not the status of a single op.
- * Blocking flags mark those drivers that will suspend
- * and resume the calling thread on reading or writing or both.
- */
-enum {
-    DRV_STATUS_DONE = (1 << 0),
-    DRV_STATUS_FAIL = (1 << 1),
-    DRV_STATUS_RUN  = (1 << 2),
-    DRV_STATUS_STOP = (1 << 3),
-    DRV_READING     = (1 << 4),
-    DRV_WRITING     = (1 << 5),
-    DRV_STATUS_BUSY = (DRV_READING | DRV_WRITING),
-    DRV_CTRL        = (1 << 6),
-    DRV_READ_BLOCK  = (1 << 8),
-    DRV_WRITE_BLOCK = (1 << 9),
-    DRV_IS_CHAR     = (1 << 16),
-    DRV_IS_BLOCK    = (1 << 17),
-    DRV_IS_NET      = (1 << 18)
-};
 
 /*
  * Predefined, system-wide ioctrl values.
@@ -87,7 +65,7 @@ enum uart_ioctrl {
  * Init driver list and init data structures. To be called BEFORE
  * driver_lib_init()
  */
-int char_drivers_list_init(char_driver_t *drvlist[], unsigned drvlistsize);
+int drivers_list_init(const void *drvlist[], unsigned drvlistsize);
 
 int driver_def_ok(unsigned unitno);
 

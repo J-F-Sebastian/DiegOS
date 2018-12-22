@@ -20,81 +20,98 @@
 #ifndef UI_DRIVERS_H_INCLUDED
 #define UI_DRIVERS_H_INCLUDED
 
+/*
+ * Do not include this file directly - include drivers.h
+ */
+
 #include <stdint.h>
 
 typedef struct point {
-    unsigned x;
-    unsigned y;
+    int x;
+    int y;
 } point_t;
 
+typedef struct palette {
+    uint8_t red, green, blue;
+} palette_t;
+
 typedef struct text_ui_driver {
+	/*
+	 * Common functionalities
+	 */
+	driver_header_t cmn;    
     /*
-     * Name of the UI driver
-     */
-    char name[DRV_NAME_LEN + 1];
-    /*
-     * Init function, it is to be invoked at startup to discover the supported devices,
-     * assign resources for all units, and init the device.
-     * Note: init does not mean start, run, enable interrupts, enable DMA.
-     *       The kernel will not be able to handle events to or from devices until
-     *       the start_fn function is invoked.
-     *       The device should be configured to be ready to start working but kept
-     *       reset or idle.
-     * Return values:
-     * EOK in case of success (device unit inited)
-     * ENXIO in case the unitno is not supported or inited
-     * other errnos for failures
-     */
-    int (*init_fn)(unsigned unitno);
-    /*
-     * Start the device's operations. This include interrupt handlers, DMA, I/O activities.
-     */
-    int (*start_fn)(unsigned unitno);
-    /*
-     * This function should shut down the device. It will be invoked on shutdown/reboot
-     * of the kernel.
-     */
-    int (*done_fn)(unsigned unitno);
-    /*
-     *
-     */
+     *  Set a single character on screen
+     */	
     void (*put_char_fn)(point_t pos, char ch, uint8_t color);
+	/*
+     *  Write characters on screen
+     */	
+    void (*write_char_fn)(point_t a, point_t b, const char *ch, uint8_t color);
+	/*
+     * Draws a line from a to b.
+	 * Width grows simmetrically.
+     */
     void (*line_fn)(point_t a, point_t b, unsigned width, char ch, uint8_t color);
+	/*
+	 * Draws a rectangle from a to b.
+	 * Width grows inward.
+	 */
     void (*rectangle_fn)(point_t a, point_t b, unsigned width, char ch, uint8_t color);
+	/*
+	 * Draws a solid (filled) rectangle.
+     */
     void (*filled_rectangle_fn)(point_t a, point_t b, char ch, uint8_t color);
-    void (*write_text_bg_fn)(point_t a, uint8_t bgcolor, uint8_t color, const char *text);
+	/*
+	 * Blitters from the video buffer (not visible, readable, writable)
+	 * to dbuffer. The copied area has a topmost left limit a and a bottom right
+	 * limit b.
+	 * To dump the whole buffer use a(0,0) and b(79,24).
+	 */
+    void (*bitblt_fn)(point_t a, point_t b, void *dbuffer);
+	/*
+	 * Blitters from sbuffer to the video buffer (not visible, readable, writable).
+	 * The copied area has a topmost left limit a and a bottom right
+	 * limit b.
+	 * To dump the whole buffer use a(0,0) and b(79,24).
+	 */
+    void (*bitblt2_fn)(point_t a, point_t b, const void *sbuffer);
+	/*
+	 * Set the cursor position on screen
+	 */
+    void (*cursor_fn)(point_t pos);
+	/*
+	 * Set the cursor on (on != 0) or off (on == 0).
+	 */
+	void (*cursor_on_fn)(int on);
+	/*
+	 * Set the cursor size
+	 */
+	void (*cursor_size_fn)(unsigned startline, unsigned endline);
+	/*
+	 * Use a different font 
+	 */
+    void (*set_fonts_fn)(const unsigned char *fonts);
+	/*
+	 * Set 1 out of 16 palette color
+	 */
+    void (*set_palette_fn)(unsigned index, palette_t pal);
+	/*
+	 * Set all palette colors
+	 */
+    void (*set_palette_fn2)(const palette_t *pal);
+	/*
+	 * Make the video buffer visible, select a new video buffer
+	 */
     void (*show_fn)(void);
+    
 } text_driver_t;
 
 typedef struct grafics_ui_driver {
-    /*
-     * Name of the UI driver
-     */
-    char name[DRV_NAME_LEN + 1];
-    /*
-     * Init function, it is to be invoked at startup to discover the supported devices,
-     * assign resources for all units, and init the device.
-     * Note: init does not mean start, run, enable interrupts, enable DMA.
-     *       The kernel will not be able to handle events to or from devices until
-     *       the start_fn function is invoked.
-     *       The device should be configured to be ready to start working but kept
-     *       reset or idle.
-     * Return values:
-     * EOK in case of success (device unit inited)
-     * ENXIO in case the unitno is not supported or inited
-     * other errnos for failures
-     */
-    int (*init_fn)(void);
-    /*
-     * Start the device's operations.
-     * This include interrupt handlers, DMA, I/O activities.
-     */
-    int (*start_fn)(void);
-    /*
-     * This function should shut down the device.
-     * It will be invoked on shutdown/reboot of the kernel.
-     */
-    int (*done_fn)(void);
+	/*
+	 * Common functionalities
+	 */
+	driver_header_t cmn;    
     /*
      * Draw a pixel at coordinates a with color <color>
      */
@@ -171,7 +188,12 @@ typedef struct grafics_ui_driver {
      * assumed the number of characters is 256 (from 0 to 0xFF)
      */
     void (*set_font_fn)(uint8_t fonts[], unsigned W, unsigned H);
+    /*
+     * Set the desired resolution and color depth.
+     * In case loose is TRUE, the closest resolution available is selected
+     */
+    int (*set_res_fn)(unsigned W, unsigned H, unsigned depth, int loose);  
+	
 } grafics_driver_t;
-
 
 #endif // UI_DRIVERS_H_INCLUDED

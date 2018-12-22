@@ -25,6 +25,8 @@
 #include <fcntl.h>
 #include <diegos/interrupts.h>
 #include <diegos/delays.h>
+#include <diegos/devices.h>
+#include <diegos/drivers.h>
 
 #include "../../kernel/platform_include.h"
 #include "i8259.h"
@@ -33,11 +35,10 @@
 #include "../../drivers/tty/vga_tty.h"
 #include "../../drivers/ti16550d/16550d.h"
 #include "../../drivers/i8253/i8253.h"
-#include "../../include/diegos/devices.h"
 #include "../../drivers/i82371SB/82371SB.h"
 #include "../../drivers/lo/local_loop.h"
-#include "../../include/diegos/drivers.h"
 #include "../../include/libs/pci_lib.h"
+#include "../../drivers/i8042/i8042.h"
 
 /*
  * WARNING
@@ -49,15 +50,14 @@ struct boot_variables {
     uint32_t    free_heap_size;
 };
 
-static char_driver_t *ttylist[] = { &vga_tty_drv };
+static const void *ttylist[] = { &vga_tty_drv };
 
-static char_driver_t *drvlist[] = { &uart16550d_drv,
-                                    &i8253_drv,
-                                    &i82371sb_drv
-                                  };
-
-static net_driver_t *netlist[] = { &lo_drv
-                                 };
+static const void *drvlist[] = { &uart16550d_drv,
+                                 &i8253_drv,
+                                 &i82371sb_drv,
+                                 &i8042_kbd_drv,
+                                 &i8042_mouse_drv
+                               };
 
 static volatile unsigned long ticks = 0;
 
@@ -85,7 +85,7 @@ void platform_init()
     /*
      * enable interrupts
      */
-     unlock();
+    unlock();
 
     /*
      * Init the clock to calibrate delay loops.
@@ -93,10 +93,10 @@ void platform_init()
      * It will be inited twice when added as a device, not elegant, but....
      */
     i = 1000;
-    if ((EOK != i8253_drv.init_fn(0)) ||
-            (EOK != i8253_drv.ioctrl_fn(&i, RTC_SET_FREQ, 0)) ||
-            (EOK != i8253_drv.ioctrl_fn(calib_int_handler, RTC_SET_CB, 0)) ||
-            (EOK != i8253_drv.start_fn(0))) {
+    if ((EOK != i8253_drv.cmn.init_fn(0)) ||
+            (EOK != i8253_drv.cmn.ioctrl_fn(&i, RTC_SET_FREQ, 0)) ||
+            (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, RTC_SET_CB, 0)) ||
+            (EOK != i8253_drv.cmn.start_fn(0))) {
         abort();
     }
 
@@ -110,11 +110,11 @@ void platform_init()
     /*
      * Stop the driver, it will be inited by driver_init
      */
-    i8253_drv.stop_fn(0);
-    i8253_drv.done_fn(0);
+    i8253_drv.cmn.stop_fn(0);
+    i8253_drv.cmn.done_fn(0);
 
     /*
-     * disable interrupts, interrupts MUST BE DISABLE after this function
+     * disable interrupts, interrupts MUST BE DISABLED after this function
      * has been called.
      */
     lock();
@@ -125,11 +125,11 @@ void tty_init()
 {
     int retcode;
 
-    retcode = char_drivers_list_init(ttylist, NELEMENTS(ttylist));
+    retcode = drivers_list_init(ttylist, NELEMENTS(ttylist));
     if (EOK != retcode) {
         abort();
     }
-    vga_tty_drv.start_fn(0);
+    vga_tty_drv.cmn.start_fn(0);
 }
 
 void drivers_init()
@@ -142,20 +142,14 @@ void drivers_init()
         return;
     }
 
-    retcode = char_drivers_list_init(drvlist, NELEMENTS(drvlist));
+    retcode = drivers_list_init(drvlist, NELEMENTS(drvlist));
 
     if (EOK != retcode) {
         abort();
     }
-
-    retcode = net_drivers_list_init(netlist, NELEMENTS(netlist));
-
-    if (EOK != retcode) {
-        abort();
-    }
-
-    uart16550d_drv.ioctrl_fn(&i, UART_SET_SPEED, 0);
-    uart16550d_drv.ioctrl_fn(&j, UART_SET_BITS, 0);
+    
+    uart16550d_drv.cmn.ioctrl_fn(&i, UART_SET_SPEED, 0);
+    uart16550d_drv.cmn.ioctrl_fn(&j, UART_SET_BITS, 0);
 
     if ((STDIN_FILENO != open(DEFAULT_STDIN, O_RDONLY, 0)) ||
             (STDOUT_FILENO != open(DEFAULT_STDOUT, O_WRONLY, 0)) ||

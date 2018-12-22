@@ -58,16 +58,18 @@ int kdrvprintf(const char *fmt, ...)
 }
 
 /* Go down all the list even on error, at least some driver will be ok */
-int char_drivers_list_init(char_driver_t *drvlist[], unsigned drvlistsize)
+int drivers_list_init(const void *drvlist[], unsigned drvlistsize)
 {
     unsigned d, u;
     int retcode;
     int retval = EOK;
     device_t *retptr;
+	driver_header_t *cmn; 
 
     for (d = 0; d < drvlistsize; d++) {
-        for (u = 0; u < DRV_UNIT_MAX; u++) {
-            retcode = drvlist[d]->init_fn(u);
+        cmn = (driver_header_t *)drvlist[d];
+        for (u = 0; u < DRV_UNIT_MAX; u++) {			
+            retcode = cmn->init_fn(u);
             if (EOK != retcode) {
                 //kerrprintf("Driver %s[%u] failed to init.\n",
                 //          drvlist[d]->name,
@@ -94,7 +96,7 @@ int net_drivers_list_init(net_driver_t *drvlist[], unsigned drvlistsize)
 
     for (d = 0; d < drvlistsize; d++) {
         for (u = 0; u < DRV_UNIT_MAX; u++) {
-            retcode = drvlist[d]->init_fn(u);
+            retcode = drvlist[d]->cmn.init_fn(u);
             if (EOK != retcode) {
                 //kerrprintf("Driver %s[%u] failed to init.\n",
                 //          drvlist[d]->name,

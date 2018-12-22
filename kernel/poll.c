@@ -114,7 +114,7 @@ int poll (struct pollfd ufds[], unsigned nfds, int timeout)
     for (i = 0; i < nfds; i++) {
         cursor = fdget(ufds[i].fd);
         if (cursor) {
-            ufds[i].events = cursor->rawdev->drv->poll_fn(newtable);
+            ufds[i].events = cursor->rawdev->cmn->poll_fn(newtable);
             ufds[i].events &= ufds[i].revents;
             if (ufds[i].events) {
                 newtable->signalled = 1;
@@ -139,7 +139,7 @@ int poll (struct pollfd ufds[], unsigned nfds, int timeout)
     for (i = 0; i < nfds; i++) {
         cursor = fdget(ufds[i].fd);
         if (cursor) {
-            ufds[i].events = cursor->rawdev->drv->poll_fn(NULL);
+            ufds[i].events = cursor->rawdev->cmn->poll_fn(NULL);
             ufds[i].events &= ufds[i].revents;
         }
     }
@@ -178,7 +178,7 @@ int poll_network (struct pollfd ufds[], unsigned nfds, int timeout)
     for (i = 0; i < nfds; i++) {
         cursor = net_interface_lookup_index(ufds[i].fd);
         if (cursor) {
-            ufds[i].events = cursor->drv->poll_fn(newtable);
+            ufds[i].events = cursor->drv->cmn.poll_fn(newtable);
             ufds[i].events &= ufds[i].revents;
             if (ufds[i].events) {
                 newtable->signalled = 1;
@@ -203,7 +203,7 @@ int poll_network (struct pollfd ufds[], unsigned nfds, int timeout)
     for (i = 0; i < nfds; i++) {
         cursor = net_interface_lookup_index(ufds[i].fd);
         if (cursor) {
-            ufds[i].events = cursor->drv->poll_fn(NULL);
+            ufds[i].events = cursor->drv->cmn.poll_fn(NULL);
             ufds[i].events &= ufds[i].revents;
         }
     }

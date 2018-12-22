@@ -13,7 +13,9 @@ all:
 	$(AR) $(OBJPREFIX)_drivers.a ti16550d/$(OBJPREFIX)/16550d.o
 	$(AR) $(OBJPREFIX)_drivers.a tty/$(OBJPREFIX)/*.o
 	$(AR) $(OBJPREFIX)_drivers.a VGA/$(OBJPREFIX)/vga.o \
-				     VGA/$(OBJPREFIX)/vga_txt.o
+				     VGA/$(OBJPREFIX)/vga_txt.o \
+				     VGA/$(OBJPREFIX)/vga_palettes.o \
+				     VGA/$(OBJPREFIX)/vga_fonts.o
 	$(AR) $(OBJPREFIX)_drivers.a i82371SB/$(OBJPREFIX)/82371SB.o
 	$(AR) $(OBJPREFIX)_drivers.a lo/$(OBJPREFIX)/local_loop.o
 

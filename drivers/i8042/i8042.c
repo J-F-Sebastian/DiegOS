@@ -196,18 +196,20 @@ static short kbd_poll (poll_table_t *table)
 }
 
 char_driver_t i8042_kbd_drv = {
-    .name = "kbd",
-    .init_fn = kbd_init,
-    .start_fn = kbd_start,
-    .stop_fn = kbd_stop,
-    .done_fn = kbd_done,
-    .write_fn = NULL,
+	.cmn = {
+		.name = "kbd",
+		.init_fn = kbd_init,
+		.start_fn = kbd_start,
+		.stop_fn = kbd_stop,
+		.done_fn = kbd_done,
+		.ioctrl_fn = NULL,
+		.status_fn = kbd_status,
+		.poll_fn = kbd_poll
+	},
+	.write_fn = NULL,
     .read_fn = kbd_read,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL,
-    .ioctrl_fn = NULL,
-    .status_fn = kbd_status,
-    .poll_fn = kbd_poll
+    .read_multi_fn = NULL    
 };
 
 /*****************************************************************************/
@@ -357,16 +359,18 @@ static short mse_poll (poll_table_t *table)
 }
 
 char_driver_t i8042_mouse_drv = {
-    .name = "mouse",
-    .init_fn = mse_init,
-    .start_fn = mse_start,
-    .stop_fn = mse_stop,
-    .done_fn = mse_done,
+	.cmn = {
+		.name = "mouse",
+		.init_fn = mse_init,
+		.start_fn = mse_start,
+		.stop_fn = mse_stop,
+		.done_fn = mse_done,
+		.ioctrl_fn = NULL,
+		.status_fn = mse_status,
+		.poll_fn = mse_poll
+	},
     .write_fn = NULL,
     .read_fn = mse_read,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL,
-    .ioctrl_fn = NULL,
-    .status_fn = mse_status,
-    .poll_fn = mse_poll
+    .read_multi_fn = NULL    
 };

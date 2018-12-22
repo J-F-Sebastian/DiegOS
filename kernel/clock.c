@@ -68,11 +68,11 @@ BOOL clock_init()
     int i = DEFAULT_CLOCK_RES;
 
     if (clock) {
-        retcode = clock->drv->ioctrl_fn(clock_int_handler, RTC_SET_CB, 0);
+        retcode = clock->cmn->ioctrl_fn(clock_int_handler, RTC_SET_CB, 0);
         if (EOK != retcode) {
             return (FALSE);
         }
-        retcode = clock->drv->ioctrl_fn(&i, RTC_SET_FREQ, 0);
+        retcode = clock->cmn->ioctrl_fn(&i, RTC_SET_FREQ, 0);
     }
 
     ticks_incr_var.increment_msecs_per_tick = 1000/DEFAULT_CLOCK_RES;

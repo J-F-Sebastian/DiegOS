@@ -24,11 +24,11 @@
 
 typedef struct net_driver {
     /*
-     * Name of the driver, to be filled at compile time.
+     * Common functionalities
      */
-    char name[DRV_NAME_LEN + 1];
+    driver_header_t cmn;
     /*
-     * Name of the interface, to be filled at compile time.
+     * Interface name
      */
     char ifname[DRV_NAME_LEN + 1];
     /*
@@ -54,39 +54,6 @@ typedef struct net_driver {
      * Features are documented in if.h
      */
     unsigned short ifcaps;
-    /*
-     * Init function, it is to be invoked at startup to discover the supported devices,
-     * assign resources for all units, and init the device.
-     * Note: init does not mean start, run, enable interrupts, enable DMA.
-     *       The kernel will not be able to handle events to or from devices until
-     *       the start_fn function is invoked.
-     *       The device should be configured to be ready to start working but kept
-     *       reset or idle.
-     * Return values:
-     * EOK in case of success (device unit inited)
-     * ENXIO in case the unitno is not supported or inited
-     * other errnos for failures
-     */
-    int (*init_fn)(unsigned unitno);
-    /*
-     * Start the device's operations. This include interrupt handlers, DMA, I/O activities.
-     */
-    int (*start_fn)(unsigned unitno);
-    /*
-     * Stop the device's operations. This include I/O activities as well as events, but the
-     * device should not fail or be reset. Calling start_fn again the device should recover
-     * gracefully and start working.
-     */
-    int (*stop_fn)(unsigned unitno);
-    /*
-     * This function should shut down the device. It will be invoked on shutdown/reboot
-     * of the kernel.
-     */
-    int (*done_fn)(unsigned unitno);
-    /*
-     * Retrieve the driver status
-     */
-    unsigned (*status_fn)(unsigned unitno);
     /*
      * Write function, the data buffer pointed by buf will be output to the device
      */
@@ -114,10 +81,7 @@ typedef struct net_driver {
      * the receiving buffer
      */
     int (*rx_peak_fn)(unsigned *bsize, unsigned items, unsigned unitno);
-    /*
-     * Implement poll
-     */
-    short (*poll_fn)(poll_table_t *table);
+
 } net_driver_t;
 
 int net_drivers_list_init(net_driver_t *drvlist[], unsigned drvlistsize);

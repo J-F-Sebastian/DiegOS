@@ -168,16 +168,19 @@ static unsigned i8253_status(unsigned unitno)
 }
 
 char_driver_t i8253_drv = {
-    .name = "rtc",
-    .init_fn = i8253_init,
-    .start_fn = i8253_start,
-    .stop_fn = i8253_stop,
-    .done_fn = i8253_done,
+    .cmn = {
+		.name = "rtc",
+		.init_fn = i8253_init,
+		.start_fn = i8253_start,
+		.stop_fn = i8253_stop,
+		.done_fn = i8253_done,
+		.ioctrl_fn = i8253_ioctrl,
+		.status_fn = i8253_status,
+		.poll_fn = NULL
+	},
     .write_fn = NULL,
     .read_fn = NULL,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL,
-    .ioctrl_fn = i8253_ioctrl,
-    .status_fn = i8253_status
+    .read_multi_fn = NULL    
 };
 

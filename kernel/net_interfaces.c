@@ -117,7 +117,7 @@ void start_net_interfaces_lib(void)
      * Now loop and start drivers.
      */
     while (ptr) {
-        if (ptr->ni && ptr->ni->drv && ptr->ni->drv->start_fn(ptr->ni->unit)) {
+        if (ptr->ni && ptr->ni->drv && ptr->ni->drv->cmn.start_fn(ptr->ni->unit)) {
             kerrprintf("Failed starting %s\n", ptr->ni->name);
         } else {
             kmsgprintf("Interface %s started, MTU %u\n",

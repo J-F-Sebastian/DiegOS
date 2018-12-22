@@ -26,22 +26,36 @@
 
 #define DEV_NAME_LEN (7)
 
-enum {
+enum DEVICE_TYPE {
     /*
      * Device is a character stream device
      */
-    DEV_FLAG_CHAR = (1 << 0),
+    DEV_TYPE_CHAR,
     /*
      * Device is a block device
      */
-    DEV_FLAG_BLOCK = (1 << 1)
+    DEV_TYPE_BLOCK,
+    /*
+     * Device is a graphical video card
+     */
+    DEV_TYPE_GFX_UI,
+    /*
+     * Device is a text video card
+     */
+    DEV_TYPE_TXT_UI
 };
 
 typedef struct device {
     char name[DEV_NAME_LEN + 1];
     unsigned unit;
-    unsigned flags;
-    char_driver_t *drv;
+    unsigned type;
+	union {
+		void				*drv;
+		driver_header_t		*cmn;
+		char_driver_t		*cdrv;
+		text_driver_t		*tdrv;
+		grafics_driver_t	*gdrv;	
+	};
 } device_t;
 
 /*
@@ -51,15 +65,16 @@ typedef struct device {
  *
  * PARAMETERS IN
  * unsigned unit - the device unit, it must match a valid, supported unit
- *                 as supported by inst.
- * driver_t *inst - a pointer to a driver interface; the driver must be capable
- *                  of handling the unit number found in the parameter unit.
+ *                 as supported by inst. 
+ * const void *inst - a pointer to a driver interface; the driver must be 
+ *					  capable of handling the unit number found 
+ *                    in the parameter unit.
  *
  * RETURNS
  * A valid pointer to a new device object in case of success, NULL in any other
  * case.
  */
-device_t *device_create(unsigned unit, char_driver_t *inst);
+device_t *device_create(unsigned unit, const void *inst);
 
 /*
  * device_lookup() retrieves a pointer to a device.
@@ -103,6 +118,7 @@ device_t *device_lookup_name(const char *devname);
  * EINVAL if parameters are not valid
  * EAGAIN if the device is busy transmitting data
  * EIO if the driver failed to complete the write operation
+ * EPERM if the device is not a character stream device
  * A value greater than or equal to 0 in case of successful transmission, the
  * returned value is the amount of bytes transmitted (it might not match the
  * value passed in with the parameter bytes).
@@ -124,6 +140,7 @@ int device_io_tx(device_t *dev, const char *buf, size_t bytes);
  * EINVAL if parameters are not valid
  * EAGAIN if the device is busy reading data
  * EIO if the driver failed to complete the read operation
+ * EPERM if the device is not a character stream device
  * A value greater than or equal to 0 in case of successful read, the
  * returned value is the amount of bytes read in the buffer (it might not match
  * the value passed in with the parameter bytes).

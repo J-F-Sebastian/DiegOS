@@ -388,16 +388,19 @@ static unsigned tty_status(unsigned unitno)
  * Moreover, it is an initialization, no more than this...
  */
 char_driver_t vga_tty_drv = {
-    .name = "vgtty",
-    .init_fn = tty_init,
-    .start_fn = driver_def_ok,
-    .stop_fn = driver_def_ok,
-    .done_fn = tty_done,
+    .cmn = {
+		.name = "vgtty",
+		.init_fn = tty_init,
+		.start_fn = driver_def_ok,
+		.stop_fn = driver_def_ok,
+		.done_fn = tty_done,
+		.ioctrl_fn = NULL,
+		.status_fn = tty_status,
+		.poll_fn = NULL
+	},
     .write_fn = tty_write,
     .read_fn = NULL,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL,
-    .ioctrl_fn = NULL,
-    .status_fn = tty_status
+    .read_multi_fn = NULL    
 };
 

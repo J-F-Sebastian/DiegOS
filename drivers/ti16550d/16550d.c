@@ -564,17 +564,19 @@ static short uart_poll (poll_table_t *table)
  * Moreover, it is an initialization, no more than this...
  */
 char_driver_t uart16550d_drv = {
-    .name = "uart",
-    .init_fn = uart_init,
-    .start_fn = uart_start,
-    .stop_fn = uart_stop,
-    .done_fn = uart_done,
-    .write_fn = uart_write,
+    .cmn = {
+		.name = "uart",
+	    .init_fn = uart_init,
+	    .start_fn = uart_start,
+	    .stop_fn = uart_stop,
+	    .done_fn = uart_done,
+		.ioctrl_fn = uart_ioctrl,
+		.status_fn = uart_status,
+		.poll_fn = uart_poll
+	},
+	.write_fn = uart_write,
     .read_fn = uart_read,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL,
-    .ioctrl_fn = uart_ioctrl,
-    .status_fn = uart_status,
-    .poll_fn = uart_poll
+    .read_multi_fn = NULL    
 };
 

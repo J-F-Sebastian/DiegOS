@@ -17,24 +17,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <diegos/devices.h>
-#include <diegos/interrupts.h>
+#ifndef _VGA_PALETTES_H_
+#define _VGA_PALETTES_H_
 
-static device_t *ttydev = NULL;
+#include <diegos/drivers.h>
 
 /*
- * kputb won't take semaphores, mutexes, or any other system call.
- * output will go through anyway for debugging purposes.
+ * Preconfigured palettes
  */
-void kputb(char *buffer, unsigned bytes)
-{
-    if (!ttydev) {
-        ttydev = device_lookup_name(DEFAULT_DBG_TTY);
-        if (!ttydev) {
-            return;
-        }
-    }
+enum VGA_PALETTE {
+	VGA_PAL_VGA,
+	VGA_PAL_WIN,
+	VGA_PAL_MAC,
+	VGA_PAL_RISCOS,
+	VGA_PAL_HTML,
+	VGA_PAL_DEFAULT = VGA_PAL_VGA
+};
 
-    ttydev->cdrv->write_fn(buffer, bytes, 0);
-}
+const palette_t *vga_get_palette (enum VGA_PALETTE pal);
 
+#endif

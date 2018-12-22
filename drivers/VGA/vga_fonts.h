@@ -17,24 +17,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <diegos/devices.h>
-#include <diegos/interrupts.h>
-
-static device_t *ttydev = NULL;
+#ifndef _VGA_FONTS_H_
+#define _VGA_FONTS_H_
 
 /*
- * kputb won't take semaphores, mutexes, or any other system call.
- * output will go through anyway for debugging purposes.
+ * Preconfigured fonts
  */
-void kputb(char *buffer, unsigned bytes)
-{
-    if (!ttydev) {
-        ttydev = device_lookup_name(DEFAULT_DBG_TTY);
-        if (!ttydev) {
-            return;
-        }
-    }
+enum VGA_FONTS {
+	VGA_FONTS_CP437_8x16,
+	VGA_FONTS_DEFAULT = VGA_FONTS_CP437_8x16,	
+	VGA_FONTS_CP437_8x8,
+	VGA_FONTS_CP437_GFX_8x16,		
+};
 
-    ttydev->cdrv->write_fn(buffer, bytes, 0);
-}
+const unsigned char *vga_get_font (enum VGA_FONTS font);
 
+#endif
