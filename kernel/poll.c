@@ -133,7 +133,7 @@ int poll (struct pollfd ufds[], unsigned nfds, int timeout)
 
         schedule_thread();
         next = scheduler_running_thread();
-        switch_context(prev->context, next->context);
+        switch_context(&prev->context, next->context);
     }
 
     for (i = 0; i < nfds; i++) {
@@ -197,7 +197,7 @@ int poll_network (struct pollfd ufds[], unsigned nfds, int timeout)
 
         schedule_thread();
         next = scheduler_running_thread();
-        switch_context(prev->context, next->context);
+        switch_context(&prev->context, next->context);
     }
 
     for (i = 0; i < nfds; i++) {

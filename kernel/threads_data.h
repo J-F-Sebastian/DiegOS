@@ -57,8 +57,7 @@ typedef struct thread {
      */
     queue_node header;
     /*
-     * The context of a thread is platform dependent,
-     * the size has to be defined under platforms/<name>
+     * The context of a thread is platform dependent
      */
     void *context;
     /*

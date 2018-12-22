@@ -27,7 +27,6 @@
 #include "kprintf.h"
 
 static thread_t *thread_storage = NULL;
-static void *context_storage = NULL;
 
 static unsigned thread_num = 0;
 static unsigned thread_max = 0;
@@ -43,13 +42,8 @@ BOOL init_thread_lib()
     thread_max = DIEGOS_MAX_THREADS;
 
     thread_storage = (thread_t *)malloc(thread_max*sizeof(*thread_storage) +
-                                        CACHE_ALN);
-    context_storage = malloc(thread_max*MULTC(THREAD_CONTEXT_SIZE) + CACHE_ALN);
-
-    /*
-     * Yes we should release memory, but kernel is gonna panic so... who cares?
-     */
-    if (!thread_storage || !context_storage) {
+                                        CACHE_ALN);  
+    if (!thread_storage) {
         return (FALSE);
     }
 
@@ -59,15 +53,10 @@ BOOL init_thread_lib()
      * anything will be cleared out.
      */
     thread_storage = (thread_t *)ALNC((uintptr_t)thread_storage);
-    context_storage = (void *)ALNC((uintptr_t)context_storage);
-
     memset(thread_storage, 0, thread_max*sizeof(*thread_storage));
-    memset(context_storage, 0, thread_max*MULTC(THREAD_CONTEXT_SIZE));
-
+    
     for (i = 0; i < thread_max; i++) {
-        thread_storage[i].tid = THREAD_TID_INVALID;
-        thread_storage[i].context = (context_storage +
-                                     i*MULTC(THREAD_CONTEXT_SIZE));
+        thread_storage[i].tid = THREAD_TID_INVALID;    
     }
 
     return (TRUE);
@@ -139,7 +128,7 @@ uint8_t init_thread(const char *name,
     setup_context(thread_storage[new_tid].stack + stack_size,
                   scheduler_fail_safe,
                   thread_storage[new_tid].entry_ptr,
-                  thread_storage[new_tid].context);
+                  &thread_storage[new_tid].context);
 
     kmsgprintf("Created thread %s TID %u Stack at %p\n",
                thread_storage[new_tid].name,

@@ -31,7 +31,7 @@
 
 /*
 ** on entry, stack looks like this:
-**     16(esp)  ->		void *ctx
+**     16(esp)  ->		void **ctx
 **     12(esp)  ->      void *entry_point
 **      8(esp)  ->      void *fail_safe
 **      4(esp)  ->      void *stack_ptr
@@ -42,36 +42,31 @@
 setup_context:
 movl	P4(%esp), %edx
 movl	P3(%esp), %ecx
-# store entry point into the context
-movl    %ecx, PC(%edx)
-movl    P1(%esp), %ecx
-# store stack pointer, minus the pushed values!
-subl	$8, %ecx
-movl	%ecx, ESP(%edx)
-xorl	%eax, %eax
-# start the thread with all other registers set to 0,
-# except for EFLAGS
-movl	%eax, EAX(%edx)
-movl	%eax, EBX(%edx)
-movl	%eax, ECX(%edx)
-movl	%eax, EDX(%edx)
-movl	%eax, ESI(%edx)
-movl	%eax, EDI(%edx)
-movl	%eax, EBP(%edx)
-# push eflags, store it into eax, and then to
-# memory
-pushf
-popl    %eax
-movl    %eax, EFLAGS(%edx)
-movl	P2(%esp), %eax
-movl	%eax, 4(%ecx)		# setup fail safe, ecx
-# has the stack pointer
-# as "pushed"
-movl    P3(%esp), %eax
-movl    %eax, 0(%ecx)       # setup entry point,
-# this is not required
-# as switching context will
-# overwrite the value
-ret
+movl	P2(%esp), %ebx
+movl	P1(%esp), %eax
 
-.size	setup_context, .-setup_context
+#Step 1 update the stack pointer to the "pushed" value
+subl    $(RETPTR+4), %eax
+
+#Step 2 move fail_safe and entry_point to the thread's stack memory
+movl    %ebx, RETPTR(%eax)
+movl    %ecx, STRPTR(%eax)
+
+#Step 3 init stored registers, init values to 0 except for stack pointer and
+#flags
+subl    %ebx, %ebx
+movl    %ebx, EAX(%eax)
+movl	%ebx, ECX(%eax)
+movl	%ebx, EDX(%eax)
+movl	%ebx, EBX(%eax)
+movl    %eax, ESP(%eax) 
+movl	%ebx, EBP(%eax)
+movl	%ebx, ESI(%eax)
+movl	%ebx, EDI(%eax)
+pushfl
+popl    %ecx
+movl    %ecx, EFLAGS(%eax)
+
+#Step 4 update the context by storing the stack pointer, that's all we need
+movl    %eax, (%edx)
+ret

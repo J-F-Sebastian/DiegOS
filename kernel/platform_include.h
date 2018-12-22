@@ -27,37 +27,27 @@
  */
 
 /*
- * Thread context setup: set into the thread's context
- * the stack pointer and the program counter.
- * The common schema to be followed is
- *
- * 1) first context element is the initial stack pointer value.
- * 2) second context element is the entry point pointer value.
+ * Thread context setup
  *
  * The fail safe pointer should be stored onto the stack as a
  * return address in case the thread entry function terminates
- * without calling the proper terminating function.
- * This is true for architectures using the stack to store return
- * addresses; in case a register is used for this, the return value
- * should be stored into the context.
+ * without calling the proper terminating function. 
  * NOTE: when adding data onto the stack, simulate pushes by changing
  * the stack pointer accordingly.
  */
 extern void setup_context(void *stack_ptr,
                           void *fail_safe,
                           void *entry_point,
-                          void *ctx);
+                          void **ctx);
 /*
  * Context switching: save registers and additional data
  * into <from>, load the same data from <to>
  * You MUST ensure that from and to are properly sized
  * and aligned.
- * First value in <from> and <to> MUST be the stack pointer.
- * Second value in <from> and <to> MUST be the program counter.
  * Interrupts MUST BE DISABLED entering the function, and REENABLED
  * exiting the function.
  */
-extern void switch_context(void *from, void *to);
+extern void switch_context(void **from, const void *to);
 
 /*
  * Context loading: restore registers from a context
@@ -69,7 +59,7 @@ extern void switch_context(void *from, void *to);
  * Interrupts MUST BE DISABLED entering the function, and REENABLED
  * exiting the function.
  */
-extern void load_context(void *to);
+extern void load_context(const void *to);
 
 /*
  * Init the processor, setup all required data to run

@@ -176,7 +176,7 @@ void dump_mutex (struct mutex *mtx)
             "LOCKER TID",
             "STATE",
             "WAITING TIDs");
-    printf("______________________________________________\n");
+    fprintf(stderr,"______________________________________________\n");
     if (mtx) {
         dump_internal(mtx);
     } else {

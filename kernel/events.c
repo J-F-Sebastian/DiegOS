@@ -180,7 +180,7 @@ void wait_for_events(ev_queue_t *evqueue)
 
     next = scheduler_running_thread();
 
-    switch_context(prev->context, next->context);
+    switch_context(&prev->context, next->context);
 }
 
 BOOL init_events_lib()

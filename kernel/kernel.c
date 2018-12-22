@@ -193,7 +193,7 @@ void thread_suspend()
         return;
     }
 
-    switch_context(prev->context, next->context);
+    switch_context(&prev->context, next->context);
 }
 
 void thread_may_suspend()
@@ -235,7 +235,7 @@ void thread_delay(unsigned msecs)
 
     next = scheduler_running_thread();
 
-    switch_context(prev->context, next->context);
+    switch_context(&prev->context, next->context);
 }
 
 void thread_terminate()
@@ -337,7 +337,7 @@ void thread_lock_mutex(mutex_t *mtx)
         scheduler_wait_thread(THREAD_FLAG_WAIT_MUTEX);
         schedule_thread();
         next = scheduler_running_thread();
-        switch_context(prev->context, next->context);
+        switch_context(&prev->context, next->context);
     }
 }
 

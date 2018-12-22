@@ -27,29 +27,20 @@
 .equ    P1,     4
 /*
 ** on entry, stack looks like this:
-**      4(esp)  ->              thread *to
+**      4(esp)  ->              const void *to
 **       (esp)  ->              return address
 **
 */
 
 load_context:
 cli
-movl    P1(%esp), %eax          # move pointer to (to) into eax
+movl    P1(%esp), %eax          # move context pointer into eax
+movl    %eax, %esp              # we know the context is the stack pointer
 
-movl    EFLAGS(%eax), %ebx      # restore EFLAGS first so we do not
-pushl   %ebx                    # mess with the stack anymore
-popf
-movl    EBX(%eax), %ebx         # restore old registers
-movl    ECX(%eax), %ecx
-movl    EDX(%eax), %edx
-movl    ESI(%eax), %esi
-movl    EDI(%eax), %edi
-movl    EBP(%eax), %ebp
-movl    ESP(%eax), %esp         # restore stack pointer
-movl    PC(%eax), %eax          # restore return address into eax
-movl    %eax, (%esp)            # copy over the ret address on the stack
-movl    EAX(%eax), %eax		    # restore eax
+#recover all registers, ESP will be skipped but this is exactly what we want
+popal
+#recover EFLAGS
+popfl
 sti
+#returning will load the thread entry point from stack and jump into it
 ret
-
-.size	load_context, .-load_context

@@ -19,13 +19,16 @@
 
 .file "context_equ.s"
 
-.equ 	ESP,	0
-.equ	PC,	4
-.equ	EAX,	8
-.equ	EBX,	12
-.equ	ECX,	16
-.equ	EDX,	20
-.equ	ESI,	24
-.equ 	EDI,	28
-.equ	EBP,	32
-.equ    EFLAGS, 36
+# Layout of the initial stack of a thread
+
+.equ    EAX,    0
+.equ    ECX,    EAX + 4
+.equ    EDX,    ECX + 4
+.equ    EBX,    EDX + 4
+.equ    ESP,    EBX + 4
+.equ    EBP,    ESP + 4
+.equ    ESI,    EBP + 4
+.equ    EDI,    ESI + 4
+.equ    EFLAGS, EDI + 4
+.equ    STRPTR, EFLAGS + 4
+.equ    RETPTR, STRPTR + 4

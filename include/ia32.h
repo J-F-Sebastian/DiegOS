@@ -26,12 +26,5 @@
 /* These are required by libraries */
 #define _BYTE_ORDER _LITTLE_ENDIAN
 
-/*
- * Registers to be stored in the thread context
- * ESP, PC, EAX, EBX, ECX, EDX, ESI, EDI, EBP, EFLAGS
- * The context is cache aligned anyway
- */
-#define THREAD_CONTEXT_SIZE (4*10)
-
 #endif
 

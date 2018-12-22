@@ -131,7 +131,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 
     next = scheduler_running_thread();
 
-    switch_context(prev->context, next->context);
+    switch_context(&prev->context, next->context);
 
     return EOK;
 }

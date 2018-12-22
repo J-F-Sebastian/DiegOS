@@ -136,7 +136,7 @@ int wait_for_barrier (barrier_t *barrier)
     schedule_thread();
 
     next = scheduler_running_thread();
-    switch_context(prev->context, next->context);
+    switch_context(&prev->context, next->context);
 
     return EOK;
 }
