@@ -19,7 +19,10 @@
 
 .text
 .globl execute_cpuid
-.type	execute_cpuid, @function
+.type  execute_cpuid, @function
+.globl check_fp 
+.type  check_fp, @function
+
 
 /*
  * void execute_cpuid(void *data, unsigned infotype);
@@ -34,4 +37,17 @@ movl	%ebx, 4(%edi)
 movl	%ecx, 8(%edi)
 movl	%edx, 12(%edi)
 popl    %edi
+ret
+
+/*
+ * void check_fp (void *data);
+ */
+check_fp:
+movl	4(%esp), %ebx
+movl	%cr0, %eax
+movl    %eax, (%ebx)
+movl	%cr3, %eax
+movl    %eax, 4(%ebx)
+movl	%cr4, %eax
+movl    %eax, 8(%ebx)
 ret

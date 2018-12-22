@@ -67,6 +67,7 @@ const char *processor_init()
     }
 
     idt_init();
+    check_fp(&info);
 
     return (cpu_signature);
 }

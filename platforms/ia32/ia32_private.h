@@ -22,6 +22,8 @@
 
 void execute_cpuid(void *data, unsigned infotype);
 
+void check_fp(void *data);
+
 void idt_init(void);
 
 /*
