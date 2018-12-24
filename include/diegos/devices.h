@@ -54,7 +54,8 @@ typedef struct device {
 		driver_header_t		*cmn;
 		char_driver_t		*cdrv;
 		text_driver_t		*tdrv;
-		grafics_driver_t	*gdrv;	
+		grafics_driver_t	*gdrv;
+		net_driver_t		*ndrv;		
 	};
 } device_t;
 

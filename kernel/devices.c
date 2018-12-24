@@ -98,7 +98,7 @@ void start_devices_lib()
 	 */
 	while (ptr) {
 		switch (ptr->dv.type) {
-			case DEV_TYPE_CHAR:
+			case DEV_TYPE_CHAR:			
 				if (ptr->dv.cmn->start_fn(ptr->dv.unit)) {
 					kerrprintf("Failed starting %s\n", ptr->dv.name);
 				} else {
@@ -153,13 +153,19 @@ device_t *device_create(unsigned unit, const void *inst)
 	}
 
 	drvtype = cmn->status_fn(unit);	
-	drvtype &= (DRV_IS_CHAR | DRV_IS_BLOCK | DRV_IS_TXT_UI |DRV_IS_GFX_UI);
+	drvtype &= (DRV_IS_CHAR 	| 
+	            DRV_IS_BLOCK 	| 
+	            DRV_IS_NET 		| 
+	            DRV_IS_TXT_UI 	|
+	            DRV_IS_GFX_UI);
 	
 	switch (drvtype) {
+		case DRV_IS_NET:
+		/* FALLTRHU */
 		case DRV_IS_CHAR:
 			type = DEV_TYPE_CHAR;
-			break;
-			
+			break;		
+		
 		case DRV_IS_BLOCK:
 			type = DEV_TYPE_BLOCK;
 			break;
@@ -171,9 +177,11 @@ device_t *device_create(unsigned unit, const void *inst)
 		case DRV_IS_GFX_UI:
 			type = DEV_TYPE_GFX_UI;
 			break;
-			
+					
 		default:
-			kerrprintf("Unknown driver type or bad type format: %#x\n", drvtype);
+			kerrprintf("Unknown driver type for %s or bad type format %#x\n", 
+			           cmn->name,
+			           drvtype);
 			return (NULL);
 	}
 		

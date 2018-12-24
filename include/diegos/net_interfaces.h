@@ -50,6 +50,7 @@ typedef struct net_interface {
 	unsigned char addr_len;
 	unsigned char broadcast[MAX_ADDR_LEN];
 
+	/* device ?*/
 	net_driver_t *drv;
 } net_interface_t;
 
