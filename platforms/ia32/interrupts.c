@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <types_common.h>
@@ -82,13 +83,67 @@ exc_handler_t exc_table[MAX_EXC];
 
 static void default_exception_handler (void)
 {
-    fprintf(stderr,"Default exception handler\n");    
+    fprintf(stderr,"### Default exception handler.\n");
 }
 
 static BOOL default_int_cb (void)
 {
-    fprintf(stderr,"Default interrupt handler\n");
+    fprintf(stderr,"### Default interrupt handler.\n");
     return (TRUE);
+}
+
+/*
+ * Exception 0 - divide by 0
+ */
+static void exc0_handler (void)
+{
+    fprintf(stderr,"### Exception 0: division by 0.\n");
+    abort();
+}
+
+/*
+ * Exception 6 - Invalid opcode
+ */
+static void exc6_handler (void)
+{
+    fprintf(stderr,"### Exception 6: invalid opcode.\n");
+    abort();
+}
+
+/*
+ * Exception 8 - Double fault
+ */
+static void exc8_handler (void)
+{
+    fprintf(stderr,"### Exception 8: double fault.\n");
+    abort();
+}
+
+/*
+ * Exception 11 - Segment not present
+ */
+static void exc11_handler (void)
+{
+    fprintf(stderr,"### Exception 11: segment not present (segmentation fault).\n");
+    abort();
+}
+
+/*
+ * Exception 12 - Segment not present
+ */
+static void exc12_handler (void)
+{
+    fprintf(stderr,"### Exception 12: stack fault.\n");
+    abort();
+}
+
+/*
+ * Exception 13 - General protection exception
+ */
+static void exc13_handler (void)
+{
+    fprintf(stderr,"### Exception 13: general protection.\n");
+    abort();
 }
 
 void idt_init()
@@ -102,6 +157,16 @@ void idt_init()
         exc_table[i] = default_exception_handler;
     }
 
+    /*
+     * Assign some exception handlers
+     */
+    exc_table[0] = exc0_handler;
+    exc_table[6] = exc6_handler;
+    exc_table[8] = exc8_handler;
+    exc_table[11] = exc11_handler;
+    exc_table[12] = exc12_handler;
+    exc_table[13] = exc13_handler;
+
     i = 0;
 
     /*
@@ -113,7 +178,7 @@ void idt_init()
      * coming from other sources.
      */
 
-    /* Exceptions from 0 to 14 */
+    /* Exceptions from 0 to 19 */
     idt_table[i].offset_low = (uint16_t)((intptr_t)exc00);
     idt_table[i].segment = 8;
     idt_table[i].flags = FLAGS;
