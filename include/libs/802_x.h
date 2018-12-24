@@ -21,8 +21,8 @@
 #define _802_X_H_
 
 #define MAC_ADDR_SIZE           (6)
-#define MAC_HDR_SIZE            (14)
-#define MAC_HDR_8023Q_SIZE      (16)
+#define MAC_HDR_SIZE            (6 + 6 + 2)
+#define MAC_HDR_8023Q_SIZE      (6 + 6 + 2 + 4)
 #define MAC_FCS_SIZE            (4)
 #define MAC_MIN_FRAME_SIZE      (64)
 #define MAC_MAX_FRAME_SIZE      (1518)
