@@ -64,7 +64,7 @@ static void print_banner (void)
     puts("██████╔╝██║███████╗╚██████╔╝╚██████╔╝███████║     ██║██╗╚██████╔╝");
     puts("╚═════╝ ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚══════╝     ╚═╝╚═╝ ╚═════╝");
     puts("\n");
-    puts("DiegOS  Copyright (C) 2012-2015  Diego Gallizioli");
+    puts("DiegOS  Copyright (C) 2012-2017  Diego Gallizioli");
     puts("This program comes with ABSOLUTELY NO WARRANTY.");
     puts("This is free software, and you are welcome to redistribute it");
     puts("under certain conditions.");
