@@ -20,22 +20,11 @@
 #ifndef _STDDEF_H_
 #define _STDDEF_H_
 
-/* The following is not portable, but the compiler accepts it. */
-#ifdef __GNUC__
-//#define offsetof(type, ident)	__builtin_offsetof (type, ident)
-#else
-#define offsetof(type, ident)	((size_t) (unsigned long) &((type *)0)->ident)
-#endif
-
 typedef int ptrdiff_t;		/* result of subtracting two pointers */
 
-#ifndef _SIZE_T
-#define _SIZE_T
 typedef unsigned int size_t;	/* type returned by sizeof */
-#endif
 
-#ifndef _WCHAR_T
-#define _WCHAR_T
+#ifndef __cplusplus
 typedef char wchar_t;		/* type expanded character set */
 #endif
 

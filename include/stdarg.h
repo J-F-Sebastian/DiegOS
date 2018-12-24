@@ -53,32 +53,10 @@ typedef char *va_list;
 #define __va_rounded_size(TYPE)  \
   (((sizeof (TYPE) + sizeof (int) - 1) / sizeof (int)) * sizeof (int))
 
-#if __GNUC__ < 2
-
-#ifndef __sparc__
-#define va_start(AP, LASTARG)                                           \
- (AP = ((char *) &(LASTARG) + __va_rounded_size (LASTARG)))
-#else
-#define va_start(AP, LASTARG)                                           \
- (__builtin_saveregs (),                                                \
-  AP = ((char *) &(LASTARG) + __va_rounded_size (LASTARG)))
-#endif
-
-void va_end (va_list);          /* Defined in gnulib */
-#define va_end(AP)
-
-#define va_arg(AP, TYPE)                                                \
- (AP += __va_rounded_size (TYPE),                                       \
-  *((TYPE *) (AP - __va_rounded_size (TYPE))))
-
-#else	/* __GNUC__ >= 2 */
-
 #define va_start(ap, last) __builtin_va_start((ap), (last))
 #define va_arg(ap, type) __builtin_va_arg((ap), type)
 #define va_end(ap) __builtin_va_end(ap)
 #define va_copy(dest, src) __builtin_va_copy((dest), (src))
-
-#endif	/* __GNUC__ >= 2 */
 
 #else	/* not __GNUC__ */
 
