@@ -18,6 +18,9 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 #include <ia32/ports.h>
 #include <diegos/devices.h>
 #include <errno.h>
@@ -67,18 +70,14 @@ extern void vga_tty_bset (uint16_t *dst, uint16_t val, unsigned words);
  * significant byte of the buffer address is explicitely
  * used.
  */
-#define VRAM_BEGIN (0xB8000UL)
+#define VRAM_BEGIN 		(0xB8000UL)
 #define VRAM_FRAME_SIZE (0x1000UL)
 #define VRAM_FRAME_NUM  (8)
+
 /*
  * frames are 0 based.
  */
 #define VRAM_ADDR(frame) (VRAM_BEGIN + (frame%VRAM_FRAME_NUM)*VRAM_FRAME_SIZE)
-
-/*
- * Memory buffer lines
- */
-#define BUF_ROWS (Y_MAX*2)
 
 /*
  * Default attribute
@@ -86,7 +85,7 @@ extern void vga_tty_bset (uint16_t *dst, uint16_t val, unsigned words);
 #define DEFAULT_COLOR (0x0F)
 
 static const char first_char_visible = 0x20;
-static const char last_char_visible = 0x7F;
+static const char fill_char = ' ';
 
 /*
  * NOTE: every character on video is defined by a short
@@ -97,30 +96,26 @@ static const char last_char_visible = 0x7F;
  * ===============================
  */
 
-/* Starting row in memory buffer */
-static unsigned start_row = 0;
-/* Column (in words) in the current row */
-static unsigned cur_col = 0;
 /* Frame counter */
 static unsigned frame_no = 0;
 /* Current character position (in words) in buffer */
 static unsigned cur_pos = 0;
 /* In-memory buffer */
-static uint16_t buffer[X_MAX*BUF_ROWS];
+static uint16_t *buffer;
 /* Scrolling indicator */
 static BOOL scrolling = FALSE;
-/* Cursor position */
-static uint16_t cursor_pos = 0;
+
 static unsigned status = DRV_IS_CHAR;
+
 /*
  * Update the cursor position
  */
 static void update_cursor_position (void)
 {
-    cursor_pos = ((frame_no%VRAM_FRAME_NUM)*VRAM_FRAME_SIZE>>1);
+    uint16_t cursor_pos = ((frame_no%VRAM_FRAME_NUM)*VRAM_FRAME_SIZE>>1);
 
     if (scrolling) {
-        cursor_pos += X_MAX*(Y_MAX - 2);
+        cursor_pos += X_MAX*(Y_MAX - 1) + cur_pos%X_MAX;
     } else {
         cursor_pos += cur_pos;
     }
@@ -137,43 +132,21 @@ static void update_cursor_position (void)
  */
 static void init_memory_buffers(void)
 {
-    const uint32_t clearchar = ((0x07<<8) | first_char_visible) +
-                               (((0x07<<8) | first_char_visible) << 16);
-    uint32_t *membuf = (uint32_t *)buffer;
+    const uint32_t clearchar = ((0x07<<8) | first_char_visible);    
     uint16_t *vram = 0;
-    unsigned i;
+    unsigned i = 0;
 
     /*
      * Will clear with spaces both memory buffer and
      * video RAM. Attribute is 0 as foreground does not matter
      * (blank character !!!) and background is black.
      */
-    i = sizeof(buffer)/sizeof(uint32_t);
-    while (i--) {
-        *membuf++ = clearchar;
-    }
-
-    i = VRAM_FRAME_NUM;
-    vram = (uint16_t *)VRAM_BEGIN;
-    while (i--) {
-        vga_tty_bset(vram, first_char_visible, VRAM_SIZEW);
-        vram += VRAM_SIZEW;
-    }
-}
-
-/*
- * Fill a single row with blanks
- */
-static void blank_row(unsigned row_num)
-{
-    unsigned pos = row_num*X_MAX/2;
-    const uint32_t clearchar = ((0x07<<8) | first_char_visible) +
-                               (((0x07<<8) | first_char_visible) << 16);
-    uint32_t *membuf = (uint32_t *)buffer + pos;
-    unsigned i = X_MAX/2;
-
-    while (i--) {
-        *membuf++ = clearchar;
+    vga_tty_bset(buffer, clearchar, VRAM_SIZEW);
+    
+    while (i < VRAM_FRAME_NUM) {
+		vram = (uint16_t *)VRAM_ADDR(i);
+        vga_tty_bset(vram, clearchar, VRAM_SIZEW);
+        i++;        
     }
 }
 
@@ -225,21 +198,53 @@ static void update_vram_start(void)
  */
 static void refresh_vram(void)
 {
-    uint16_t *dest = (uint16_t *)VRAM_ADDR(frame_no);
-    uint16_t *mybuf = (uint16_t *)buffer;
-    unsigned startofs = start_row*X_MAX;
+    uint16_t *dest = (uint16_t *)VRAM_ADDR(frame_no);        
+    unsigned startofs;
 
-    /* If we are wrapping the buffer, split the copy */
-    if (start_row + Y_MAX > BUF_ROWS) {
-        mybuf += startofs;
-        vga_tty_bcopy(mybuf, dest, X_MAX*(BUF_ROWS - start_row));
-        mybuf = buffer;
-        dest += X_MAX*(BUF_ROWS - start_row);
-        vga_tty_bcopy(mybuf, dest, X_MAX*(Y_MAX + start_row - BUF_ROWS));
-    } else {
-        mybuf += startofs;
-        vga_tty_bcopy(mybuf, dest, VRAM_SIZEW);
-    }
+	if (scrolling)
+	{
+		startofs = (1 + cur_pos/X_MAX)*X_MAX;		
+		/* We are wrapping the buffer, split the copy */
+		vga_tty_bcopy(buffer + startofs, dest, VRAM_SIZEW - startofs);
+		vga_tty_bcopy(buffer, dest + VRAM_SIZEW - startofs, startofs);        
+	}
+	else
+	{
+		vga_tty_bcopy(buffer, dest, VRAM_SIZEW);
+	}
+}
+
+/*
+ * Fill a single row with blanks
+ */
+static void newline (void)
+{    
+    const uint16_t clearchar = ((0x07<<8) | fill_char);
+  
+    if (cur_pos == VRAM_SIZEW) 
+    {
+		cur_pos = 0;
+		scrolling = TRUE;
+	}
+		
+    vga_tty_bset(buffer + cur_pos, clearchar, X_MAX);
+ 
+	update_frame();
+    refresh_vram();
+    update_vram_start();
+    update_cursor_position();
+}
+
+/*
+ * Fill blanks and update video accordingly
+ */
+static void fill_blanks (unsigned num)
+{
+	while (num--)
+	{
+		buffer[cur_pos++] = (DEFAULT_COLOR<<8) | fill_char;    
+		if ((cur_pos % X_MAX) == 0) newline();
+	}
 }
 
 static int tty_init(unsigned unitno)
@@ -261,6 +266,8 @@ static int tty_init(unsigned unitno)
     regval &= ~0x18;
     out_byte(AC_REG_W, regval);
 #endif
+    buffer = calloc(1, VRAM_SIZEB);
+    if (!buffer) return ENOMEM;
     /*
      * Enable ? as D in port addressing, set compatibility
      * with color displays
@@ -291,84 +298,54 @@ static int tty_write(const void *buf, unsigned bytes, unsigned unitno)
     char *localbuf = (char *)buf;
     int retval = bytes;
 
-    if (unitno) {
+    if (unitno) 
+    {
         return ENXIO;
     }
 
-    while (bytes) {
-        if (!scrolling && (cur_pos >= VRAM_SIZEW)) {
-            scrolling = TRUE;
-        }
-
-        /*
-         * Effectively scroll the video if the current column
-         * is past the video resolution, and blank the new line
-         */
-        if (scrolling) {
-            while (cur_col >= X_MAX) {
-                cur_col -= X_MAX;
-                start_row++;
-                start_row %= BUF_ROWS;
-                blank_row((start_row + Y_MAX - 1) % BUF_ROWS);
-                update_frame();
-                refresh_vram();
-                update_vram_start();
-            }
-        } else {
-            if (cur_col >= X_MAX) {
-                cur_col -= X_MAX;
-            }
-        }
-
-        if (cur_pos >= NELEMENTS(buffer)) {
-            cur_pos -= NELEMENTS(buffer);
-        }
-
+    while (bytes) 
+    {       
         /*
          * All unmanaged ctrl chars are skipped, no output no evidence of
          * their existance...
          */
-        if (*localbuf < first_char_visible) {
-            switch(*localbuf) {
+        if (*localbuf < first_char_visible) 
+        {
+            switch(*localbuf) 
+            {
             /* horizontal tab, 4 chars per tab*/
             case 0x9:
-                cur_pos += 4;
-                cur_col += 4;
+                fill_blanks(4);
                 break;
             /* new line */
-            case 0xA:
-                cur_pos += X_MAX;
+            case 0xA:				
                 /*
                  * This is the default behavior on unix
                  */
-                cur_pos -= cur_pos%X_MAX;
-                cur_col += X_MAX;
-                cur_col -= cur_col%X_MAX;
+                fill_blanks(X_MAX - cur_pos%X_MAX);
                 break;
             /* vertical tab, 2 lines */
             case 0xB:
-                cur_pos += X_MAX*2;
-                cur_col += X_MAX*2;
+                fill_blanks(X_MAX*2);
                 break;
             /* carriage return */
             case 0xC:
                 cur_pos -= cur_pos%X_MAX;
                 break;
-            }
-
-            ++localbuf;
-        } else if (*localbuf <= last_char_visible) {
-            buffer[cur_pos] = (DEFAULT_COLOR<<8) | (*localbuf);
-            localbuf++;
-            cur_pos++;
-        } else {
-            ++localbuf;
-            ++cur_pos;
+            }                        
+        } 
+        else 
+        {            
+			buffer[cur_pos++] = (DEFAULT_COLOR<<8) | (*localbuf);
+			if ((cur_pos % X_MAX) == 0) newline();		
         }
-        --(bytes);
+        ++localbuf;
+        --bytes;
     }
 
+    update_frame();
     refresh_vram();
+    update_vram_start();
     update_cursor_position();
 
     return (retval);
