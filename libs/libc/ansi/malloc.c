@@ -195,7 +195,32 @@ void *malloc (size_t size)
 
 void *realloc(void *p, size_t size)
 {
-    return (NULL);
+    list_next *this = (list_next *)p;
+    void *temp;
+    unsigned oldsize;
+
+    if (!p) return malloc(size);
+    if (!size) {
+        free(p);
+        return (NULL);
+    }
+        
+    this--;
+    if (MAGIC_ALLOC_NUMBER != this->magic) {
+        return (NULL);
+    }
+
+    /* Now pointer is valid */
+    oldsize = (uintptr_t)this->next - (uintptr_t)this - sizeof(*this);
+    if (oldsize >= size) return (p);
+
+    /* Need more space, alloc */
+    temp = malloc(size);
+    if (temp) {
+        memcpy(temp, p, oldsize); 
+        free(p);
+    }
+    return (temp);        
 }
 
 void free (void *p)
