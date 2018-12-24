@@ -1,11 +1,8 @@
-
-#ifndef NOFLOAT
-
 #include	"../ansi/ext_fmt.h"
 void _dbl_ext_cvt(double value, struct EXTEND *e);
 char *_ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int * sign, int ecvtflag);
 
-static char *
+static inline char *
 cvt(long double value, int ndigit, int *decpt, int *sign, int ecvtflag)
 {
     struct EXTEND e;
@@ -27,4 +24,3 @@ _fcvt(long double value, int ndigit, int *decpt, int *sign)
     return (cvt(value, ndigit, decpt, sign, 0));
 }
 
-#endif	/* NOFLOAT */

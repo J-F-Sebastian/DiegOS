@@ -27,7 +27,7 @@
 
 #include "loc_incl.h"
 
-#define	NUMLEN	512
+#define	NUMLEN	    128
 #define	NR_CHARS	256
 
 static char	Xtable[NR_CHARS];
@@ -110,7 +110,6 @@ static char *o_collect(int c,
 	return (bufp - 1);
 }
 
-#ifndef	NOFLOAT
 /* The function f_collect() reads a string that has the format of a
  * floating-point number. The function returns as soon as a format-error
  * is encountered, leaving the offending character in the input. This means
@@ -179,8 +178,6 @@ static char *f_collect(int c, FILE *stream, unsigned int width)
 	*bufp = '\0';
 	return bufp - 1;
 }
-#endif	/* NOFLOAT */
-
 
 /*
  * the routine that does the scanning
@@ -200,9 +197,7 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 	int	        	reverse;	/* reverse the checking in [...] */
 	int		        kind;
 	int	            ic = EOF;	/* the input character */
-#ifndef	NOFLOAT
-	long double	ld_val;
-#endif
+	long double	    ld_val;
 
 	if (!*format) return (0);
 
@@ -240,18 +235,18 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 		flags = 0;
 		if (*format == '*') {
 			format++;
-			flags |= FL_NOASSIGN;
+			flags |= NO_ASSIGN;
 		}
 		if (isdigit (*format)) {
-			flags |= FL_WIDTHSPEC;
+			flags |= WIDTHSPEC;
 			for (width = 0; isdigit (*format);)
 				width = width * 10 + *format++ - '0';
 		}
 
 		switch (*format) {
-		case 'h': flags |= FL_SHORT; format++; break;
-		case 'l': flags |= FL_LONG; format++; break;
-		case 'L': flags |= FL_LONGDOUBLE; format++; break;
+		case 'h': flags |= SHORT; format++; break;
+		case 'l': flags |= LONG; format++; break;
+		case 'L': flags |= LONGDOUBLE; format++; break;
 		}
 		kind = *format;
 		if ((kind != 'c') && (kind != '[') && (kind != 'n')) {
@@ -271,17 +266,17 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			return ((conv || (ic != EOF)) ? (done) : (EOF));
 			break;
 		case 'n':
-			if (!(flags & FL_NOASSIGN)) {	/* silly, though */
-				if (flags & FL_SHORT)
+			if (!(flags & NO_ASSIGN)) {	/* silly, though */
+				if (flags & SHORT)
 					*va_arg(ap, short *) = (short) nrchars;
-				else if (flags & FL_LONG)
+				else if (flags & LONG)
 					*va_arg(ap, long *) = (long) nrchars;
 				else
 					*va_arg(ap, int *) = (int) nrchars;
 			}
 			break;
 		case 'p':		/* pointer */
-			flags |= FL_LONG;
+			flags |= LONG;
 			/* FALLTHRU */
 			/* no break */
 		case 'b':		/* binary */
@@ -291,7 +286,7 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 		case 'u':		/* unsigned */
 		case 'x':		/* hexadecimal */
 		case 'X':		/* ditto */
-			if (!(flags & FL_WIDTHSPEC) || width > NUMLEN)
+			if (!(flags & WIDTHSPEC) || width > NUMLEN)
 				width = NUMLEN;
 			if (!width) return (done);
 
@@ -307,28 +302,28 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			 */
 			nrchars += str - inp_buf;
 
-			if (!(flags & FL_NOASSIGN)) {
+			if (!(flags & NO_ASSIGN)) {
 				if (kind == 'd' || kind == 'i')
 				    val = strtol(inp_buf, &tmp_string, base);
 				else
 				    val = strtoul(inp_buf, &tmp_string, base);
-				if (flags & FL_LONG)
+				if (flags & LONG)
 					*va_arg(ap, unsigned long *) = (unsigned long) val;
-				else if (flags & FL_SHORT)
+				else if (flags & SHORT)
 					*va_arg(ap, unsigned short *) = (unsigned short) val;
 				else
 					*va_arg(ap, unsigned *) = (unsigned) val;
 			}
 			break;
 		case 'c':
-			if (!(flags & FL_WIDTHSPEC))
+			if (!(flags & WIDTHSPEC))
 				width = 1;
-			if (!(flags & FL_NOASSIGN))
+			if (!(flags & NO_ASSIGN))
 				str = va_arg(ap, char *);
 			if (!width) return (done);
 
 			while (width && ic != EOF) {
-				if (!(flags & FL_NOASSIGN))
+				if (!(flags & NO_ASSIGN))
 					*str++ = (char) ic;
 				if (--width) {
 					ic = getc(stream);
@@ -342,14 +337,14 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			}
 			break;
 		case 's':
-			if (!(flags & FL_WIDTHSPEC))
+			if (!(flags & WIDTHSPEC))
 				width = 0xffff;
-			if (!(flags & FL_NOASSIGN))
+			if (!(flags & NO_ASSIGN))
 				str = va_arg(ap, char *);
 			if (!width) return (done);
 
 			while (width && ic != EOF && !isspace(ic)) {
-				if (!(flags & FL_NOASSIGN))
+				if (!(flags & NO_ASSIGN))
 					*str++ = (char) ic;
 				if (--width) {
 					ic = getc(stream);
@@ -357,7 +352,7 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				}
 			}
 			/* terminate the string */
-			if (!(flags & FL_NOASSIGN))
+			if (!(flags & NO_ASSIGN))
 				*str = '\0';
 			if (width) {
 				if (ic != EOF) ungetc(ic,stream);
@@ -365,7 +360,7 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			}
 			break;
 		case '[':
-			if (!(flags & FL_WIDTHSPEC))
+			if (!(flags & WIDTHSPEC))
 				width = USHRT_MAX;
 			if (!width) return (done);
 
@@ -404,11 +399,11 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				return (done);
 			}
 
-			if (!(flags & FL_NOASSIGN))
+			if (!(flags & NO_ASSIGN))
 				str = va_arg(ap, char *);
 
 			do {
-				if (!(flags & FL_NOASSIGN))
+				if (!(flags & NO_ASSIGN))
 					*str++ = (char) ic;
 				if (--width) {
 					ic = getc(stream);
@@ -420,17 +415,17 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				if (ic != EOF) ungetc(ic, stream);
 				nrchars--;
 			}
-			if (!(flags & FL_NOASSIGN)) {	/* terminate string */
+			if (!(flags & NO_ASSIGN)) {	/* terminate string */
 				*str = '\0';
 			}
 			break;
-#ifndef	NOFLOAT
+
 		case 'e':
 		case 'E':
 		case 'f':
 		case 'g':
 		case 'G':
-			if (!(flags & FL_WIDTHSPEC) || width > NUMLEN)
+			if (!(flags & WIDTHSPEC) || width > NUMLEN)
 				width = NUMLEN;
 
 			if (!width) return done;
@@ -447,21 +442,21 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			 */
 			nrchars += str - inp_buf;
 
-			if (!(flags & FL_NOASSIGN)) {
+			if (!(flags & NO_ASSIGN)) {
 				ld_val = strtod(inp_buf, &tmp_string);
-				if (flags & FL_LONGDOUBLE)
+				if (flags & LONGDOUBLE)
 					*va_arg(ap, long double *) = (long double) ld_val;
 				else
-				    if (flags & FL_LONG)
+				    if (flags & LONG)
 					*va_arg(ap, double *) = (double) ld_val;
 				else
 					*va_arg(ap, float *) = (float) ld_val;
 			}
 			break;
-#endif
+
 		}		/* end switch */
 		conv++;
-		if (!(flags & FL_NOASSIGN) && kind != 'n') done++;
+		if (!(flags & NO_ASSIGN) && kind != 'n') done++;
 		format++;
 	}
 	return ((conv || (ic != EOF)) ? (done) : (EOF));

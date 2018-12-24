@@ -30,15 +30,6 @@
 static const char X2C_tab[] = "0123456789ABCDEF";
 static const char x2c_tab[] = "0123456789abcdef";
 
-enum {
-    LEFT = 1,
-    RIGHT = 2,
-    LONGLONG = 4,
-    LONG = 8,
-    INT = 16,
-    PREPEND = 32
-};
-
 #define TEMP_SIZE (8 * sizeof(long long) / 3 + 2)
 
 static inline int fputc_internal(int c,
@@ -55,6 +46,12 @@ static inline int fputc_internal(int c,
     return (0);
 }
 
+/*
+ * A format specifier follows this prototype:
+ * 
+ * %[flags][width][.precision][length]specifier
+ *    
+ */
 int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list ap)
 {
     int c;
@@ -67,6 +64,7 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
     char temp[TEMP_SIZE];
     unsigned bcount = 0;
     unsigned flags;
+    unsigned loopend;
 
     while ((c = *fmt++) != 0) {
         if (c != '%') {
@@ -77,26 +75,57 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
         }
 
         /* Format specifier of the form:
-         *	%[adjust][fill][width][.max]keys
+         *	%[flags][width][.precision][length]specifier
          */
         c = *fmt++;
 
+        /*
+         * Flags first. RIGHT justification is default, as well as padding with
+         * spaces.
+         */
         flags = RIGHT;
-        if (c == '-') {
-            flags = LEFT;
-            c = *fmt++;
-        }
-        if (c == '#') {
-            flags |= PREPEND;
-            c = *fmt++;
-        }
-
         fill = ' ';
-        if (c == '0') {
-            fill = '0';
-            c = *fmt++;
-        }
+        loopend = 1;
+        do {
+            switch (c) {
+                case '-':
+                    flags = LEFT;
+                    c = *fmt++;
+                    break;
 
+                case '+':
+                    flags |= FORCE_SIGN;
+                    flags &= ~FORCE_NOSIGN;
+                    c = *fmt++;
+                    break;
+
+                case ' ':
+                    flags &= ~FORCE_SIGN;
+                    flags |= FORCE_NOSIGN;
+                    c = *fmt++;
+                    break;    
+                       
+                case '#':
+                    flags |= PREPEND;
+                    c = *fmt++;
+                    break;
+                    
+                case '0':
+                    flags |= FILLZERO;
+                    fill = '0';
+                    c = *fmt++;
+                    break;
+
+                default:
+                    loopend = 0;
+                    break;
+            }
+            
+        } while (loopend);
+
+        /*
+         * Width next, must be either a star or a number
+         */
         width = 0;
         if (c == '*') {
             /* Width is specified as an argument, e.g. %*d. */
@@ -109,6 +138,9 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
             } while (isdigit(c = *fmt++));
         }
 
+        /*
+         * Then precision...
+         */
         max = INT_MAX;
         if (c == '.') {
             /* Max field length coming up. */
@@ -123,42 +155,80 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
             }
         }
 
+        /*
+         * And length ...
+         */
+
         /* Set a few flags to the default. */
         x2c = x2c_tab;
         i = 0;
         base = 10;
         flags |= INT;
-        if (c == 'l' || c == 'L') {
+        if (c == 'l') {
             /* "Long" key, e.g. %ld. */
             flags &= ~INT;
             flags |= LONG;
             c = *fmt++;
-            if (c == 'l' || c == 'L') {
+            if (c == 'l') {
                 /* "Longlong" key, e.g. %lld. */
                 flags &= ~LONG;
                 flags |= LONGLONG;
                 c = *fmt++;
             }
+        } else if (c == 'h') {            
+            flags &= ~INT;
+            flags |= SHORT;
+            c = *fmt++;
+            if (c == 'h') {                
+                flags &= ~SHORT;
+                flags |= CHAR;
+                c = *fmt++;
+            }
+        } else if (c == 'L') {
+            /* "Long" key, e.g. %ld. */
+            flags &= ~INT;
+            flags |= LONG;
+            c = *fmt++;
         }
+        
         if (c == 0)
             break;
-
+                
+        /*
+         * Then finally the specifiers
+         */
         switch (c) {
         /* Decimal. */
         case 'd':
-            switch (flags & (INT | LONG | LONGLONG)) {
-            case INT:
-                i = va_arg(ap, int);
-                break;
-            case LONG:
-                i = va_arg(ap, long);
-                break;
-            case LONGLONG:
-                i = va_arg(ap, long long);
-                break;
-            default:
-                i = va_arg(ap, int);
-                break;
+        case 'i':
+            switch (flags & (CHAR | SHORT | INT | LONG | LONGLONG)) {
+                case CHAR:
+                    /* FALLTHRU */
+                case SHORT:
+                    /* FALLTHRU */
+                case INT:
+                    i = va_arg(ap, int);
+                    break;
+                case LONG:
+                    i = va_arg(ap, long);
+                    break;
+                case LONGLONG:
+                    i = va_arg(ap, long long);
+                    break;
+                default:
+                    i = va_arg(ap, int);
+                    break;
+            }
+            /*
+             * Now adjust max
+             */
+            if (max != INT_MAX) {
+                if (flags & CHAR) max = (max > 3) ? 3 : max;
+                if (flags & SHORT) max = (max > 5) ? 5 : max;
+                if (flags & INT) max = (max > 10) ? 10 : max;
+                if (flags & LONG) max = (max > 10) ? 10 : max;
+                if (flags & LONGLONG) max = (max > (int)(TEMP_SIZE - 1)) ?
+                                             (int)(TEMP_SIZE -1) : max;            
             }
             u = i < 0 ? -i : i;
             goto int2ascii;
@@ -166,11 +236,21 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
             /* Octal. */
         case 'o':
             base = 010;
+            /*
+             * Now adjust max
+             */
+            if (max != INT_MAX) {
+                if (flags & CHAR) max = (max > 3) ? 3 : max;
+                if (flags & SHORT) max = (max > 6) ? 6 : max;
+                if (flags & INT) max = (max > 11) ? 11 : max;
+                if (flags & LONG) max = (max > 11) ? 11 : max;
+                if (flags & LONGLONG) max = (max > 22) ? 22 : max;            
+            }
             goto getint;
 
             /* Pointer, interpret as %X or %lX. */
         case 'p':
-            if (sizeof(char *) > sizeof(int)) {
+            if (sizeof(void *) > sizeof(int)) {
                 flags &= ~INT;
                 flags |= LONG;
             }
@@ -183,24 +263,38 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
             /* no break */
         case 'x':
             base = 0x10;
-            goto getint;
+            /*
+             * Now adjust max
+             */
+            if (max != INT_MAX) {
+                if (flags & CHAR) max = (max > 2) ? 2 : max;
+                if (flags & SHORT) max = (max > 4) ? 4 : max;
+                if (flags & INT) max = (max > 8) ? 8 : max;
+                if (flags & LONG) max = (max > 8) ? 8 : max;
+                if (flags & LONGLONG) max = (max > 16) ? 16 : max;            
+            }    
+            /* FALLTHRU */
 
             /* Unsigned decimal. */
         case 'u':
             getint:
-            switch (flags & (INT | LONG | LONGLONG)) {
-            case INT:
-                u = va_arg(ap, unsigned int);
-                break;
-            case LONG:
-                u = va_arg(ap, unsigned long);
-                break;
-            case LONGLONG:
-                u = va_arg(ap, unsigned long long);
-                break;
-            default:
-                u = va_arg(ap, unsigned int);
-                break;
+            switch (flags & (CHAR | SHORT | INT | LONG | LONGLONG)) {
+                case CHAR:
+                    /* FALLTHRU */
+                case SHORT:
+                    /* FALLTHRU */
+                case INT:
+                    u = va_arg(ap, unsigned int);
+                    break;
+                case LONG:
+                    u = va_arg(ap, unsigned long);
+                    break;
+                case LONGLONG:
+                    u = va_arg(ap, unsigned long long);
+                    break;
+                default:
+                    u = va_arg(ap, unsigned int);
+                    break;
             }
 
             int2ascii:
@@ -209,7 +303,15 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
             do {
                 *--p = x2c[(u % base)];
                 ++len;
-            } while ((u /= base) > 0);
+            } while (((u /= base) > 0) && (len < width));
+
+            if (max != INT_MAX) {
+                max = (max < width) ? max : width;
+                while (len < max) {
+                    *--p = fill;
+                    ++len;
+                }
+            }                    
             if (flags & PREPEND) {
                 switch (base) {
                 case 010:
@@ -249,11 +351,16 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
 
             string_print:
             width -= len;
-            if (i < 0)
+            if ((i < 0) || (flags & FORCE_SIGN))
+            {
                 width--;
-            if (fill == '0' && i < 0) {
-                if (fputc_internal('-', skipeof, stream, &bcount) < 0)
-                    return (-1);
+                if (i < 0) {
+                    if (fputc_internal('-', skipeof, stream, &bcount) < 0)
+                        return (-1);
+                } else {
+                    if (fputc_internal('+', skipeof, stream, &bcount) < 0)
+                        return (-1);
+                }
             }
             if (flags & RIGHT) {
                 while (width > 0) {
@@ -261,11 +368,7 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
                         return (-1);
                     width--;
                 }
-            }
-            if (fill == ' ' && i < 0) {
-                if (fputc_internal('-', skipeof, stream, &bcount) < 0)
-                    return (-1);
-            }
+            }            
             while (len > 0) {
                 if (fputc_internal(*p++, skipeof, stream, &bcount) < 0)
                     return (-1);
