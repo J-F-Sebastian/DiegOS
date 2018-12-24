@@ -186,15 +186,15 @@ const char *state2str(uint8_t state)
 void check_thread_stack()
 {
     unsigned i,j;
-    int *stack_top;
+    uint32_t *stack_top;
 
     for (i = 0; i < thread_max; i++) {
         if (thread_storage[i].tid == THREAD_TID_INVALID) {
             continue;
         }
         j = 0;
-        stack_top = (int *)(thread_storage[i].stack);
-        while ((int)0xdfdfdfdf == *stack_top++) {
+        stack_top = (uint32_t *)(thread_storage[i].stack);
+        while (0xdfdfdfdfUL == *stack_top++) {
             ++j;
         }
         if (!j) {
