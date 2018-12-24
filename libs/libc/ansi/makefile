@@ -10,7 +10,8 @@ OBJS = strcpy.o strncpy.o strcat.o strncat.o strcmp.o strncmp.o\
 	isalnum.o isalpha.o iscntrl.o isdigit.o isgraph.o\
 	islower.o isprint.o ispunct.o isspace.o isupper.o isxdigit.o\
 	errlist.o getenv.o assert.o clock.o asctime.o difftime.o\
-	time.o ctime.o localtime.o mktime.o tzset.o ansidata.o
+	time.o ctime.o localtime.o mktime.o tzset.o ansidata.o\
+	ext_comp.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  

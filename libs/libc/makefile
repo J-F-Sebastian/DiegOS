@@ -10,10 +10,14 @@ all: objdirs $(OBJSO)
 	cd ansi && make all
 	cd stdio && make all
 	cd quad && make all
+	cd math && make all
+	cd gnu/ieee_float && make all
 	$(AR) $(OBJPREFIX)_libc.a $(OBJSO)
 	
 clean:
 	cd ansi && make clean
 	cd stdio && make clean
 	cd quad && make clean
+	cd math && make clean
+	cd gnu/ieee_float && make clean 
 	rm -rf $(OBJSO) *.a
