@@ -557,6 +557,11 @@ static unsigned vga_status (unsigned unitno)
     return (DRV_STATUS_RUN | DRV_IS_GFX_UI);
 }
 
+static int vga_res (unsigned W, unsigned H, unsigned depth, int loose)
+{
+	return ENOTSUP;
+}
+
 /*
  * This has been placed at the end so we do not need to
  * forward static declarations etc. etc.
@@ -585,6 +590,7 @@ grafics_driver_t vga_drv = {
     .store_all_palette_fn = vga_store_all_palette,
     .draw_sprite_fn = vga_draw_sprite,
     .show_fn = vga_show,
-    .set_font_fn = vga_set_font
+    .set_font_fn = vga_set_font,
+    .set_res_fn = vga_res
 };
 
