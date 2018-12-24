@@ -41,11 +41,9 @@ decl    %ecx
 movl    %ecx, %ebx
 shrl    $2, %ecx
 andl    $3, %ebx
-rep
-movsl
+rep     movsl
 movl    %ebx, %ecx
-rep
-movsb
+rep     movsb
 
 .Lend:
 movl    %eax, %edi
