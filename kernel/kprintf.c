@@ -25,12 +25,20 @@
 #include "kprintf.h"
 
 enum {
-    LEFT = 1,
-    RIGHT = 2,
-    LONGLONG = 4,
-    LONG = 8,
-    INT = 16,
-    PREPEND = 32
+    LEFT            = (1 << 0),
+    RIGHT           = (1 << 1),
+    LONGLONG        = (1 << 2),
+    LONG            = (1 << 3),
+    INT             = (1 << 4),
+    SHORT           = (1 << 5),
+    CHAR            = (1 << 6),
+    PREPEND         = (1 << 7),
+    FORCE_SIGN      = (1 << 8),
+    FORCE_NOSIGN    = (1 << 9),
+    NO_ASSIGN       = (1 << 10),
+    LONGDOUBLE      = (1 << 11),
+    WIDTHSPEC       = (1 << 12),
+    FILLZERO        = (1 << 13)
 };
 
 int kprintf(const char *fmt, ...)
@@ -88,9 +96,8 @@ static inline void count_kputc(int c,
 }
 
 int kvprintf(const char *fmt, va_list ap)
-{
+{	
     int c, charcount = 0;
-    unsigned flags;
     int fill;
     int width, max, len, base;
     static const char X2C_tab[] = "0123456789ABCDEF";
@@ -100,37 +107,70 @@ int kvprintf(const char *fmt, va_list ap)
     long long i;
     unsigned long long u;
     char temp[8 * sizeof(long long) / 3 + 2];
-    char buffer[VPRINTF_BUFSIZE] = { 0 };
     unsigned bcount = 0;
+    unsigned flags;
+    unsigned loopend;
+    char buffer[VPRINTF_BUFSIZE] = { 0 };    
 
     while ((c = *fmt++) != 0) {
         if (c != '%') {
             /* Ordinary character. */
-            count_kputc(c, &charcount, buffer, &bcount);
+            count_kputc(c, &charcount, buffer, &bcount);            
             continue;
         }
 
         /* Format specifier of the form:
-         *	%[adjust][fill][width][.max]keys
+         *	%[flags][width][.precision][length]specifier
          */
         c = *fmt++;
 
+        /*
+         * Flags first. RIGHT justification is default, as well as padding with
+         * spaces.
+         */
         flags = RIGHT;
-        if (c == '-') {
-            flags = LEFT;
-            c = *fmt++;
-        }
-        if (c == '#') {
-            flags |= PREPEND;
-            c = *fmt++;
-        }
-
         fill = ' ';
-        if (c == '0') {
-            fill = '0';
-            c = *fmt++;
-        }
+        loopend = 1;
+        do {
+            switch (c) {
+                case '-':
+                    flags = LEFT;
+                    c = *fmt++;
+                    break;
 
+                case '+':
+                    flags |= FORCE_SIGN;
+                    flags &= ~FORCE_NOSIGN;
+                    c = *fmt++;
+                    break;
+
+                case ' ':
+                    flags &= ~FORCE_SIGN;
+                    flags |= FORCE_NOSIGN;
+                    c = *fmt++;
+                    break;    
+                       
+                case '#':
+                    flags |= PREPEND;
+                    c = *fmt++;
+                    break;
+                    
+                case '0':
+                    flags |= FILLZERO;
+                    fill = '0';
+                    c = *fmt++;
+                    break;
+
+                default:
+                    loopend = 0;
+                    break;
+            }
+            
+        } while (loopend);
+
+        /*
+         * Width next, must be either a star or a number
+         */
         width = 0;
         if (c == '*') {
             /* Width is specified as an argument, e.g. %*d. */
@@ -143,6 +183,9 @@ int kvprintf(const char *fmt, va_list ap)
             } while (isdigit(c = *fmt++));
         }
 
+        /*
+         * Then precision...
+         */
         max = INT_MAX;
         if (c == '.') {
             /* Max field length coming up. */
@@ -157,69 +200,106 @@ int kvprintf(const char *fmt, va_list ap)
             }
         }
 
+        /*
+         * And length ...
+         */
+
         /* Set a few flags to the default. */
         x2c = x2c_tab;
         i = 0;
         base = 10;
         flags |= INT;
-        if (c == 'l' || c == 'L') {
+        if (c == 'l') {
             /* "Long" key, e.g. %ld. */
             flags &= ~INT;
             flags |= LONG;
             c = *fmt++;
-            if (c == 'l' || c == 'L') {
+            if (c == 'l') {
                 /* "Longlong" key, e.g. %lld. */
                 flags &= ~LONG;
                 flags |= LONGLONG;
                 c = *fmt++;
             }
+        } else if (c == 'h') {            
+            flags &= ~INT;
+            flags |= SHORT;
+            c = *fmt++;
+            if (c == 'h') {                
+                flags &= ~SHORT;
+                flags |= CHAR;
+                c = *fmt++;
+            }
+        } else if (c == 'L') {
+            /* "Long" key, e.g. %ld. */
+            flags &= ~INT;
+            flags |= LONG;
+            c = *fmt++;
         }
+        
         if (c == 0)
             break;
-
+                
+        /*
+         * Then finally the specifiers
+         */
         switch (c) {
         /* Decimal. */
         case 'd':
-            switch (flags & (INT | LONG | LONGLONG)) {
-            case INT:
-                i = va_arg(ap, int);
-                break;
-            case LONG:
-                i = va_arg(ap, long);
-                break;
-            case LONGLONG:
-                i = va_arg(ap, long long);
-                break;
-            default:
-                i = va_arg(ap, int);
-                break;
+        case 'i':
+            switch (flags & (CHAR | SHORT | INT | LONG | LONGLONG)) {
+                case CHAR:
+                    /* FALLTHRU */
+                case SHORT:
+                    /* FALLTHRU */
+                case INT:
+                    i = va_arg(ap, int);
+                    break;
+                case LONG:
+                    i = va_arg(ap, long);
+                    break;
+                case LONGLONG:
+                    i = va_arg(ap, long long);
+                    break;
+                default:
+                    i = va_arg(ap, int);
+                    break;
             }
-            u = i < 0 ? -i : i;
+            /*
+             * Now adjust max
+             */
+            if (max != INT_MAX) {
+                if (flags & CHAR) max = (max > 3) ? 3 : max;
+                if (flags & SHORT) max = (max > 5) ? 5 : max;
+                if (flags & INT) max = (max > 10) ? 10 : max;
+                if (flags & LONG) max = (max > 10) ? 10 : max;
+                if (flags & LONGLONG) max = (max > (int)(sizeof(temp) - 1)) ?
+                                             (int)(sizeof(temp) -1) : max;            
+            }            
+            u = i < 0 ? -i : i;            
             goto int2ascii;
 
             /* Octal. */
         case 'o':
             base = 010;
+            /*
+             * Now adjust max
+             */
             if (max != INT_MAX) {
-                switch (flags & (INT | LONG | LONGLONG)) {
-                case INT:
-                    case LONG:
-                    max = (max > 11) ? 11 : max;
-                    break;
-                case LONGLONG:
-                    max = (max > 22) ? 22 : max;
-                    break;
-                }
-            }
+                if (flags & CHAR) max = (max > 3) ? 3 : max;
+                if (flags & SHORT) max = (max > 6) ? 6 : max;
+                if (flags & INT) max = (max > 11) ? 11 : max;
+                if (flags & LONG) max = (max > 11) ? 11 : max;
+                if (flags & LONGLONG) max = (max > 22) ? 22 : max;            
+            }            
             goto getint;
 
             /* Pointer, interpret as %X or %lX. */
         case 'p':
-            if (sizeof(char *) > sizeof(int)) {
+            flags |= PREPEND;            
+            if (sizeof(void *) > sizeof(int)) {
                 flags &= ~INT;
                 flags |= LONG;
             }
-
             /* Hexadecimal.  %X prints upper case A-F, not %lx. */
             /* FALLTHRU */
             /* no break */
@@ -227,61 +307,58 @@ int kvprintf(const char *fmt, va_list ap)
             x2c = X2C_tab;
             /* FALLTHRU */
             /* no break */
-
         case 'x':
             base = 0x10;
+            /*
+             * Now adjust max
+             */
             if (max != INT_MAX) {
-                switch (flags & (INT | LONG | LONGLONG)) {
-                case INT:
-                    case LONG:
-                    max = (max > 8) ? 8 : max;
-                    break;
-                case LONGLONG:
-                    max = (max > 16) ? 16 : max;
-                    break;
-                }
-            }
-            /* Unsigned decimal. */
-
+                if (flags & CHAR) max = (max > 2) ? 2 : max;
+                if (flags & SHORT) max = (max > 4) ? 4 : max;
+                if (flags & INT) max = (max > 8) ? 8 : max;
+                if (flags & LONG) max = (max > 8) ? 8 : max;
+                if (flags & LONGLONG) max = (max > 16) ? 16 : max;            
+            }    
             /* FALLTHRU */
-            /* no break */
+
+            /* Unsigned decimal. */
         case 'u':
             getint:
-            switch (flags & (INT | LONG | LONGLONG)) {
-            case INT:
-                u = va_arg(ap, unsigned int);
-                break;
-            case LONG:
-                u = va_arg(ap, unsigned long);
-                break;
-            case LONGLONG:
-                u = va_arg(ap, unsigned long long);
-                break;
-            default:
-                u = va_arg(ap, unsigned int);
-                break;
+            switch (flags & (CHAR | SHORT | INT | LONG | LONGLONG)) {
+                case CHAR:
+                    /* FALLTHRU */
+                case SHORT:
+                    /* FALLTHRU */
+                case INT:
+                    u = va_arg(ap, unsigned int);
+                    break;
+                case LONG:
+                    u = va_arg(ap, unsigned long);
+                    break;
+                case LONGLONG:
+                    u = va_arg(ap, unsigned long long);
+                    break;
+                default:
+                    u = va_arg(ap, unsigned int);
+                    break;
             }
-            int2ascii:
+
+            int2ascii:            
             p = temp + sizeof(temp) - 1;
             len = *p = 0;
-            /*
-             * Fill in the number from RIGHT to LEFT, null-terminated
-             * i.e. start with null, then numbers from LSB to MSB.
-             */
             do {
                 *--p = x2c[(u % base)];
                 ++len;
+                if  (width && !(len < width)) u = 0;
             } while ((u /= base) > 0);
-            /*
-             * Fill in zeroes if the max field is bigger than the actual
-             * precision
-             */
+
             if (max != INT_MAX) {
-                while ((p != temp) && (len < max)) {
-                    *--p = x2c[0];
+                max = (max < width) ? max : width;
+                while (len < max) {
+                    *--p = fill;
                     ++len;
                 }
-            }
+            }                    
             if (flags & PREPEND) {
                 switch (base) {
                 case 010:
@@ -321,24 +398,27 @@ int kvprintf(const char *fmt, va_list ap)
 
             string_print:
             width -= len;
-            if (i < 0)
+            if ((i < 0) || (flags & FORCE_SIGN))
+            {
                 width--;
-            if (fill == '0' && i < 0)
-                count_kputc('-', &charcount, buffer, &bcount);
-            if (flags & RIGHT) {
-                while (width > 0) {
-                    count_kputc(fill, &charcount, buffer, &bcount);
-                    width--;
+                if (i < 0) {
+					count_kputc('-', &charcount, buffer, &bcount);                    
+                } else {
+					count_kputc('+', &charcount, buffer, &bcount);                    
                 }
             }
-            if (fill == ' ' && i < 0)
-                count_kputc('-', &charcount, buffer, &bcount);
+            if (flags & RIGHT) {
+                while (width > 0) {
+					count_kputc(fill, &charcount, buffer, &bcount);                    
+                    width--;
+                }
+            }            
             while (len > 0) {
-                count_kputc((unsigned char) *p++, &charcount, buffer, &bcount);
+				count_kputc(*p++, &charcount, buffer, &bcount);                
                 len--;
             }
             while (width > 0) {
-                count_kputc(fill, &charcount, buffer, &bcount);
+				count_kputc(fill, &charcount, buffer, &bcount);                
                 width--;
             }
             break;
@@ -346,10 +426,9 @@ int kvprintf(const char *fmt, va_list ap)
             /* Unrecognized format key, echo it back. */
         default:
             count_kputc('%', &charcount, buffer, &bcount);
-            count_kputc(c, &charcount, buffer, &bcount);
+            count_kputc(c, &charcount, buffer, &bcount);            
         }
     }
-
     kputb(buffer, bcount);
     return (charcount);
 }

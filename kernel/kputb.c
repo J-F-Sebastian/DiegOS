@@ -20,7 +20,7 @@
 #include <diegos/devices.h>
 #include <diegos/interrupts.h>
 
-static device_t *ttydev = NULL;
+static device_t *outdev = NULL;
 
 /*
  * kputb won't take semaphores, mutexes, or any other system call.
@@ -28,13 +28,13 @@ static device_t *ttydev = NULL;
  */
 void kputb(char *buffer, unsigned bytes)
 {
-    if (!ttydev) {
-        ttydev = device_lookup_name(DEFAULT_DBG_TTY);
-        if (!ttydev) {
+    if (!outdev) {
+        outdev = device_lookup_name(DEFAULT_DBG_TTY);
+        if (!outdev) {
             return;
         }
     }
 
-    ttydev->cdrv->write_fn(buffer, bytes, 0);
+    outdev->cdrv->write_fn(buffer, bytes, 0);
 }
 
