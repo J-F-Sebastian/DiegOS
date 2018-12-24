@@ -21,7 +21,6 @@
 #define _ia32_h_
 
 #define CACHE_ALN 64
-#define STACK_ALN 4
 
 #define _BYTE_ORDER _LITTLE_ENDIAN
 
