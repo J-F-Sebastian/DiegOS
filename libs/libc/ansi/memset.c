@@ -38,7 +38,8 @@ void *memset(void *s, int c, size_t n)
             * Word aligned
             */
             c &= 0xff;
-            c |= (c << 8) | (c << 16) | (c << 24);
+            c |= (c << 8);
+            c |= (c << 16);
             while (n > 4) {
                 *s2++ = c;
                 n -= 4;

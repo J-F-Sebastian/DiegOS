@@ -27,10 +27,7 @@ void *calloc(size_t nelem, size_t elsize)
     size_t size = ALN(nelem * elsize, sizeof(void *));
 
     p = malloc(size);
-    if (p == NULL) {
-        return (NULL);
-    }
-    memset(p, 0, size);
+    if (p) memset(p, 0, size);
     return (p);
 }
 
