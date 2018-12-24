@@ -152,7 +152,9 @@ LINEAR_PROTO_CODE_HI 	EQU 0x00C09B00
 LINEAR_PROTO_DATA_HI 	EQU 0x00CF9200
 
 ; Protection Enable Bit in CR0, no paging
-PE_BIT EQU 1B
+PE_BIT EQU 1
+CD_BIT EQU 1<<30
+NW_BIT EQU 1<<29 
 
 BootLoader:
 CLD
@@ -332,7 +334,9 @@ o32	LGDT [GDTR_START]
 
 ; enter protected mode
 MOV 	EBX, CR0
-OR 	    BL, PE_BIT
+OR 	    EBX, PE_BIT
+AND     EBX, ~CD_BIT
+AND		EBX, ~NW_BIT
 MOV 	CR0, EBX
 
 ; clear prefetch queue, sets CS
