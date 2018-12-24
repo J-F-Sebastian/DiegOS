@@ -250,6 +250,7 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
 
             /* Pointer, interpret as %X or %lX. */
         case 'p':
+            flags |= PREPEND;            
             if (sizeof(void *) > sizeof(int)) {
                 flags &= ~INT;
                 flags |= LONG;
@@ -303,7 +304,8 @@ int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list a
             do {
                 *--p = x2c[(u % base)];
                 ++len;
-            } while (((u /= base) > 0) && (len < width));
+                if  (width && !(len < width)) u = 0;
+            } while ((u /= base) > 0);
 
             if (max != INT_MAX) {
                 max = (max < width) ? max : width;
