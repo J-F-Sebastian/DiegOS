@@ -30,7 +30,7 @@
  */
 #define DEFAULT_STDIN   "/dev/uart0"
 #define DEFAULT_STDOUT  "/dev/uart0"
-#define DEFAULT_STDERR  "/dev/vgtty0"
+#define DEFAULT_STDERR  "/dev/uart0"
 
 /*
  / Device name for kernel TTY, i.e. kprintf
