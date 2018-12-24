@@ -2,7 +2,7 @@ export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
 export AS = $(CC) -xassembler
 export ASCC = $(CC) -xassembler-with-cpp
 export LN = ld --oformat binary -eDiegOS
-export AR = ar cruT
+export AR = ar cr
 
 export OBJPREFIX = $(CPU)_$(PLATFORM)
 
