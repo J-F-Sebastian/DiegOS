@@ -23,17 +23,17 @@
 int memcmp (const void *cs, const void *ct, size_t n)
 {
     const char *p1 = cs, *p2 = ct;
-    const unsigned *p3 = cs, *p4 = ct;
+    const long *p3 = cs, *p4 = ct;
     intptr_t a = (intptr_t)cs;
     intptr_t b = (intptr_t)ct;
 
     if (p1 && p2 && (n > 0)) {
         /* Word aligned ? */
-        if (((a | b) & 3) == 0) {
-            while ((n > 4) && (*p3 == *p4)) {
+        if (((a | b) & (sizeof(long)-1)) == 0) {
+            while ((n > sizeof(long)) && (*p3 == *p4)) {
             ++p3;
             ++p4;
-            n -= 4;
+            n -= sizeof(long);
             }
             p1 = (const char *)p3;
             p2 = (const char *)p4;
