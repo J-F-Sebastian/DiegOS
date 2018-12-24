@@ -41,18 +41,40 @@ void perror(const char *s)
     case ESRCH:
         errmsg = "no such process";
         break;
-#if 0
-        case EINTR (-4) /* interrupted function call */
-        case EIO (-5) /* input/output error */
-        case ENXIO (-6) /* no such device or address */
-        case E2BIG (-7) /* arg list too long */
-        case EBADF (-9) /* bad file descriptor */
-        case EAGAIN (-11) /* resource temporarily unavailable */
-        case ENOMEM (-12) /* not enough space */
-        case EACCES (-13) /* permission denied */
-        case EFAULT (-14) /* bad address */
-        case ENOTBLK (-15) /* Block device required */
-        case EBUSY (-16) /* resource busy */
+    case EINTR:
+		errmsg = "interrupted function call";
+		break;
+    case EIO:
+		errmsg = "input/output error";
+		break;
+    case ENXIO:
+		errmsg = "no such device or address";
+		break;
+    case E2BIG:
+		errmsg = "arg list too long";
+		break;
+	case EBADF:
+		errmsg = "bad file descriptor";
+		break;
+	case EAGAIN:
+		errmsg = "resource temporarily unavailable";
+		break;		
+    case ENOMEM:
+		errmsg = "not enough space";
+		break;
+    case EACCES:
+		errmsg = "permission denied";
+		break;
+    case EFAULT:
+		errmsg = "bad address";
+		break;
+    case ENOTBLK:
+		errmsg = "Block device required";
+		break;
+    case EBUSY:
+		errmsg = "resource busy";
+		break;
+#if 0        
         case EEXIST (-17) /* file exists */
         case EXDEV (-18) /* improper link */
         case ENODEV (-19) /* no such device */
