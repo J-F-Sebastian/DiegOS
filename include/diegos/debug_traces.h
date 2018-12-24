@@ -50,19 +50,19 @@
 /*
  * Use to print a hex value
 */
-#define TRACE_PRINT_HEX(var) fprintf(stderr,"[%s,%s:%d] TRACE: PRINT HEX\n %s value is 0x%X\n",\
+#define TRACE_PRINT_HEX(var) fprintf(stderr,"[%s,%s:%d] TRACE: HEX %s value is %#X\n",\
         __FILE__, __FUNCTION__, __LINE__, #var,var);
 
 /*
  * Use to print a decimal value
 */
-#define TRACE_PRINT_DEC(var) fprintf(stderr,"[%s,%s:%d] TRACE: PRINT DEC\n %s value is %d\n",__FILE__, \
+#define TRACE_PRINT_DEC(var) fprintf(stderr,"[%s,%s:%d] TRACE: DEC %s value is %d\n",__FILE__, \
                                 __FUNCTION__, __LINE__, #var,var);
 
 /*
  * Use to print a floating point value
 */
-#define TRACE_PRINT_FLOAT(var) fprintf(stderr,"[%s,%s:%d] TRACE: PRINT FLOAT\n %s value is %f\n",__FILE__, \
+#define TRACE_PRINT_FLOAT(var) fprintf(stderr,"[%s,%s:%d] TRACE: FLOAT %s value is %f\n",__FILE__, \
                                 __FUNCTION__, __LINE__, #var,var);
 /*
  * Use a combination of TRACE_BEGIN_MSG, TRACE_PRINT_MSG, TRACE_END_MSG to
