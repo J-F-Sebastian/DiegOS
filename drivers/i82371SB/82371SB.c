@@ -26,17 +26,39 @@
 
 #include "82371SB.h"
 
-static pci_bus_device_t *instance = NULL;
+static pci_bus_device_t *instance[] = {NULL, NULL, NULL, NULL};
+
+static const uint16_t devid[] = {
+	i82371SB_BRIDGE_DID, 
+    i82371SB_IDE_DID,
+	i82371SB_USB_DID,
+	i82371AB_PWR_DID
+};
+
+static const char *names[] = {
+	"82371SB PIIX3 PCI-to-ISA Bridge (Triton II)",
+	"82371SB PIIX3 IDE Interface (Triton II)",
+	"82371SB PIIX3 USB Host Controller (Triton II)",
+	"82371AB PIIX3 Power Management"
+};
 
 static int i82371sb_init (unsigned unitno)
-{
-    if (unitno) {
+{	 
+    if (unitno >= NELEMENTS(devid)) {
         return (ENXIO);
     }
 
-    instance = pci_bus_find_device(i82371SB_VID, i82371SB_BRIDGE_DID, NULL);
+    instance[unitno] = pci_bus_find_device(i82371SB_VID, devid[unitno], NULL);
 
-    if (instance) {
+    if (instance[unitno]) {						
+		kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n",
+				   instance[unitno]->bus,
+				   instance[unitno]->device,
+				   instance[unitno]->function,
+				   instance[unitno]->vendorid,	
+				   instance[unitno]->deviceid,	
+				   names[unitno]);		
+					   	
         return (EOK);
     }
 
@@ -45,7 +67,7 @@ static int i82371sb_init (unsigned unitno)
 
  int i82371sb_start (unsigned unitno)
  {
-    if (unitno || !instance) {
+    if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
         return (ENXIO);
     }
 
@@ -54,7 +76,7 @@ static int i82371sb_init (unsigned unitno)
 
 int i82371sb_stop (unsigned unitno)
 {
-    if (unitno || !instance) {
+    if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
         return (ENXIO);
     }
 
@@ -63,7 +85,7 @@ int i82371sb_stop (unsigned unitno)
 
 int i82371sb_done (unsigned unitno)
 {
-  if (unitno || !instance) {
+  if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
         return (ENXIO);
     }
 
@@ -72,7 +94,7 @@ int i82371sb_done (unsigned unitno)
 
 static unsigned i82371sb_status (unsigned unitno)
 {
-    if (unitno) {
+    if (unitno >= NELEMENTS(devid)) {
         return 0;
     }
     return (DRV_STATUS_RUN | DRV_IS_CHAR);

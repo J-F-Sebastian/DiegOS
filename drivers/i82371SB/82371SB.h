@@ -29,6 +29,7 @@
 #define i82371SB_VID        (0x8086)
 #define i82371SB_BRIDGE_DID (0x7000)
 #define i82371SB_IDE_DID    (0x7010)
+#define i82371AB_PWR_DID    (0x7113)
 #define i82371SB_USB_DID    (0x7020)
 
 extern char_driver_t i82371sb_drv;
