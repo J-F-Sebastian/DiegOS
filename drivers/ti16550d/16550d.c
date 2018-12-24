@@ -26,6 +26,7 @@
 #include <diegos/interrupts.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <libs/cbuffers.h>
 
 #include "16550d_private.h"
@@ -77,8 +78,8 @@ static BOOL fifo_ok = FALSE;
 /*
  * buffers for asynch operations.
  */
-static char tx_buf[BUF_SIZE];
-static char rx_buf[BUF_SIZE];
+static char *tx_buf;
+static char *rx_buf;
 static struct cbuffer tx_cbuf, rx_cbuf;
 
 /*
@@ -296,6 +297,16 @@ static int uart_init(unsigned unitno)
     if (unitno) {
         return (ENXIO);
     }
+    
+    tx_buf = calloc(1, BUF_SIZE);
+    if (!tx_buf) return ENOMEM;
+    
+    rx_buf = calloc(1, BUF_SIZE);
+    if (!rx_buf) 
+    {
+		free(tx_buf);
+		return ENOMEM;
+	}    
 
     /* Start detecting the device */
     write_register(COM1, FCR, DETECT);
@@ -395,6 +406,8 @@ static int uart_done(unsigned unitno)
         return (ENXIO);
     }
 
+	free(tx_buf); 
+	free(rx_buf); 
     flags = DRV_STATUS_DONE;
     return (EOK);
 }
@@ -430,11 +443,11 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
     }
 
     copy_bytes = bytes;
-    if (tx_cbuf.tail + copy_bytes >= sizeof(tx_buf)) {
-        memcpy(tx_buf + tx_cbuf.tail, buf, sizeof(tx_buf)-tx_cbuf.tail);
-        copy_bytes -= sizeof(tx_buf)-tx_cbuf.tail;
-        buf += sizeof(tx_buf)-tx_cbuf.tail;
-        cbuffer_add_n(&tx_cbuf, sizeof(tx_buf)-tx_cbuf.tail);
+    if (tx_cbuf.tail + copy_bytes >= BUF_SIZE) {
+        memcpy(tx_buf + tx_cbuf.tail, buf, BUF_SIZE-tx_cbuf.tail);
+        copy_bytes -= BUF_SIZE-tx_cbuf.tail;
+        buf += BUF_SIZE-tx_cbuf.tail;
+        cbuffer_add_n(&tx_cbuf, BUF_SIZE-tx_cbuf.tail);
     }
     memcpy(tx_buf + tx_cbuf.tail, buf, copy_bytes);
     cbuffer_add_n(&tx_cbuf, copy_bytes);
@@ -469,11 +482,11 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
     }
 
     copy_bytes = ret_copy_bytes;
-    if (rx_cbuf.head + copy_bytes >= sizeof(rx_buf)) {
-        memcpy(buf, rx_buf + rx_cbuf.head, sizeof(rx_buf)-rx_cbuf.head);
-        copy_bytes -= sizeof(rx_buf)-rx_cbuf.head;
-        buf += sizeof(rx_buf)-rx_cbuf.head;
-        cbuffer_remove_n(&rx_cbuf, sizeof(tx_buf)-rx_cbuf.head);
+    if (rx_cbuf.head + copy_bytes >= BUF_SIZE) {
+        memcpy(buf, rx_buf + rx_cbuf.head, BUF_SIZE-rx_cbuf.head);
+        copy_bytes -= BUF_SIZE-rx_cbuf.head;
+        buf += BUF_SIZE-rx_cbuf.head;
+        cbuffer_remove_n(&rx_cbuf, BUF_SIZE-rx_cbuf.head);
     }
     memcpy(buf, rx_buf + rx_cbuf.head, copy_bytes);
     cbuffer_remove_n(&rx_cbuf, copy_bytes);
