@@ -35,12 +35,12 @@ typedef struct pci_bus_device {
     /* 16 bytes */
     /*
      *       Memory Space BAR Layout
-     * 31 - 4	                    3	            2 - 1	0
-     * 16-Byte Aligned Base Address	Prefetchable	Type	Always 0
+     * |31 ----------------------- 4 | 3	        | 2 - 1	| 0 
+     * |16-Byte Aligned Base Address | Prefetchable	| Type  | Always 0
 
      *     I/O Space BAR Layout
-     * 31 - 2	                    1	        0
-     * 4-Byte Aligned Base Address	Reserved	Always 1
+     * |31 - 2	                    | 1	       | 0
+     * |4-Byte Aligned Base Address	| Reserved | Always 1
      */
     uint32_t    BAR[6];
     /* 40 bytes */

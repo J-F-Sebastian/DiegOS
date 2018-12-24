@@ -38,51 +38,45 @@ typedef struct pci_dev_list {
     pci_bus_device_t data;
 } pci_dev_list_t;
 
-/* #define PCI_EXT_DBG */
-#ifdef PCI_EXT_DBG
-static const char *PCI_CLASSES[] = {
-    /* 00h */
-    "Device was built before Class Code definitions were finalized",
-    /* 01h */
-    "Mass storage controller",
-    /* 02h */
-    "Network controller",
-    /* 03h */
-    "Display controller",
-    /* 04h */
-    "Multimedia device",
-    /* 05h */
-    "Memory controller",
-    /* 06h */
-    "Bridge device",
-    /* 07h */
-    "Simple communication controllers",
-    /* 08h */
-    "Base system peripherals",
-    /* 09h */
-    "Input devices",
-    /* 0Ah */
-    "Docking stations",
-    /* 0Bh */
-    "Processors",
-    /* 0Ch */
-    "Serial bus controllers",
-    /* 0Dh */
-    "Wireless controller",
-    /* 0Eh */
-    "Intelligent I/O controllers",
-    /* 0Fh */
-    "Satellite communication controllers",
-    /* 10h */
-    "Encryption/Decryption controllers",
-    /* 11h */
-    "Data acquisition and signal processing controllers",
-    /* 12h - FEh Reserved */
-    "Reserved",
-    /* FFh Device does not fit in any defined classes*/
-    "Device does not fit in any defined classes"
-};
-#endif // PCI_EXT_DBG
+static const char *get_class_desc(uint8_t class)
+{
+	/* Base Class is the upper byte of the 3 bytes array */
+    if (class < 0x12) {
+        return PCI_CLASSES[class];
+    } else if (class < 0xFF) {
+        return PCI_CLASSES[0x12];
+    } else {
+        return PCI_CLASSES[0x13];
+    }
+}
+
+static const char *get_subclass_desc (uint8_t class, 
+                                      uint8_t subclass, 
+                                      uint8_t progif)
+{	
+	const struct pci_subclass *subclassptr;
+	unsigned i = 0;
+	
+	if (class < 0x12) {
+		if (!subclass_desc_tree[class].descr) return "N/A";
+		subclassptr = subclass_desc_tree[class].descr;
+		if (0x00 == class) {
+			if (0x00 == subclass) return subclassptr[0].descr;
+			if (0x01 == subclass) return subclassptr[1].descr;
+			return "N/A";
+		}
+		while (i < subclass_desc_tree[class].num) {
+			if ((subclassptr->sc == subclass) && 
+			    ((subclassptr->pif == progif) ||
+			     (subclassptr->pif == 0xFF))) {
+				return subclassptr->descr;
+			}
+			subclassptr++;
+			i++;
+		}	
+	}
+	return "N/A";    
+}
 
 /*
  * Return TRUE if a function is found as valid.
@@ -97,19 +91,16 @@ static BOOL pci_bus_enumerate_function(unsigned bus,
     pci_config_t *cfgspace = (pci_config_t *)buffer;
     pci_dev_list_t *newdev = NULL;
     bdf_addr_t address = pci_create_bdf(bus, device, function);
-    unsigned i;
-#ifdef PCI_EXT_DBG
-    unsigned j;
-    const struct pci_vendor_node *cursor;
-    const struct pci_vendor_device_node *cursor2;
+    unsigned i;   
     const char *pci_class = NULL;
-#endif
+    const char *pci_sub_class = NULL;
     uint8_t cap_ptr = 0;
+    uint8_t *class_code;
 
     pci_read_config(address, buffer);
 
-    if ((0xFFFF == cfgspace->header.vendorid) &&
-            (0xFFFF == cfgspace->header.deviceid)) {
+    if ((INVALID_VID == cfgspace->header.vendorid) &&
+        (INVALID_DID == cfgspace->header.deviceid)) {
         return (FALSE);
     }
 
@@ -140,7 +131,7 @@ static BOOL pci_bus_enumerate_function(unsigned bus,
         *is_multi = FALSE;
     }
 
-    switch (cfgspace->header.header_type & 0x7F) {
+    switch (cfgspace->header.header_type & ~HEADER_TYPE_MULTIFUNCTION) {
         case HEADER_TYPE_HOST:
             for (i = 0; i < 6; i++) {
                 newdev->data.BAR[i] = cfgspace->type0.BAR[i];
@@ -155,8 +146,8 @@ static BOOL pci_bus_enumerate_function(unsigned bus,
             */
             if (cfgspace->header.status & STATUS_CAP_LIST) {
                 cap_ptr = cfgspace->type0.cap_pointer & 0xFC;
-                while (cap_ptr) {
-                    if (0x05 == cfgspace->type0.extended[cap_ptr - 63]) {
+                while (cap_ptr) {					
+                    if (0x05 == cfgspace->type0.extended[cap_ptr - 64]) {
                         /*
                         * MSI is supported ! Store the message data
                         * (MSI identifier) as a multiple of dev_counter
@@ -169,7 +160,7 @@ static BOOL pci_bus_enumerate_function(unsigned bus,
                         /* pointer to be done ! */
                         break;
                     }
-                    cap_ptr = cfgspace->type0.extended[cap_ptr - 64] & 0xFC;
+                    cap_ptr = cfgspace->type0.extended[cap_ptr - 63] & 0xFC;
                 }
             }
             break;
@@ -189,58 +180,35 @@ static BOOL pci_bus_enumerate_function(unsigned bus,
             return (FALSE);
     }
 
-#ifdef PCI_EXT_DBG
-    /* Base Class is the upper byte of the 3 bytes array */
-    if (cfgspace->header.class_code[2] < 0x12) {
-        pci_class = PCI_CLASSES[cfgspace->header.class_code[2]];
-    } else if (cfgspace->header.class_code[2] < 0xFF) {
-        pci_class = PCI_CLASSES[0x12];
-    } else {
-        pci_class = PCI_CLASSES[0x13];
-    }
+	class_code = cfgspace->header.class_code;
+    pci_class = get_class_desc(class_code[CLASS_CODE_CLASS]);
+    pci_sub_class = get_subclass_desc(class_code[CLASS_CODE_CLASS],
+									  class_code[CLASS_CODE_SUBCLASS],
+                                      class_code[CLASS_CODE_PROG_IF]);
 
-    kprintf("[%u] bdf %.2u:%.2u.%u - (%s) id %#x:%#x, rev %#x,"
-            " INT line %#x MSI %#x,  Hdr Type %#x\n",
+#if 0
+    kprintf("[%u] %.2u:%.2u.%u - (%s, %s) id %#x:%#x,%#x,",            
             newdev->data.system_deviceid,
             bus,
             device,
             function,
             pci_class,
+            pci_sub_class,
             cfgspace->header.vendorid,
             cfgspace->header.deviceid,
-            cfgspace->header.revisionid,
+            cfgspace->header.revisionid);
+    kprintf(" INT %x MSI %x, Type %x\n",
             newdev->data.int_line,
             newdev->data.msi_msg_data,
             cfgspace->header.header_type);
-
-    /*
-     * This can be slow, so switch it off if you need more speed on
-     * booting. The right solution would be to let drivers print their
-     * own device name - and they should know best - but unknown/undetected
-     * devices would go unnoticed...
-     * NOTE: If you fail sorting the data structures defined in
-     * pci_devices.h and accessed from pci_known_devices_list, the following
-     * algorith will fail.
-     */
-
-    cursor = pci_known_devices_list;
-    for (i = 0;
-            (cursor[i].header.id < cfgspace->header.vendorid) &&
-            (cursor[i].header.id != INVALID_VID);
-            i++) {};
-
-    if (cursor[i].header.id == cfgspace->header.vendorid) {
-        for (j = 0, cursor2 = cursor[i].devices;
-                (cursor2[j].id < cfgspace->header.deviceid) &&
-                (cursor2[j].id != INVALID_DID);
-                j++) {};
-
-        if (cursor2[j].id == cfgspace->header.deviceid) {
-            kprintf("\t\t\t%s %s\n",
-                    cursor[i].header.description,
-                    cursor2[j].description);
-        }
-    }
+#else
+    kprintf("[%u] %.2u:%.2u.%u - (%s, %s)\n",
+            newdev->data.system_deviceid,
+            bus,
+            device,
+            function,
+            pci_class,
+            pci_sub_class);
 #endif
     return (TRUE);
 }

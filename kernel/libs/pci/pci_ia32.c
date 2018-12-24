@@ -90,7 +90,7 @@ void pci_read_config(bdf_addr_t address, uint32_t *confmem)
      * fill the buffer with 0xFF to stay on the safe side.
      */
     if (0xFFFFFFFFUL == confmem[0]) {
-        memset(confmem + 1, 0xFF, sizeof(confmem)-4);
+        memset(confmem + 1, 0xFF, PCI_HEADER_SIZE_REGS - sizeof(confmem));
         return;
     }
 
@@ -122,7 +122,9 @@ static inline void
 pci_config_space_set_addr (bdf_addr_t address, unsigned offset)
 {
     address &= PCI_CONFIG_BDF_MASK;
-    address += ((offset & ~3) & (PCI_HEADER_SIZE_REGS -1));
+    offset &= ~3;
+    offset &= (PCI_HEADER_SIZE_BYTES -1);
+    address |= offset;
     address |= (1<<31);
 
     out_dword(PCI_CONFIG_ADDRESS, address);

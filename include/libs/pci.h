@@ -81,6 +81,13 @@ enum {
     BIST_CAPABLE = 1 << 7
 };
 
+/* CLASS CODE register */
+enum {
+	CLASS_CODE_CLASS = 2,
+	CLASS_CODE_SUBCLASS = 1,
+	CLASS_CODE_PROG_IF = 0
+};
+
 typedef struct pci_config_space_header {
     uint16_t    vendorid;
     uint16_t    deviceid;
