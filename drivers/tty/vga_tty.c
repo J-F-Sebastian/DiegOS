@@ -83,7 +83,7 @@ extern void vga_tty_bset (uint16_t *dst, uint16_t val, unsigned words);
 /*
  * Default attribute
  */
-#define DEFAULT_COLOR (0x1F)
+#define DEFAULT_COLOR (0x0F)
 
 static const char first_char_visible = 0x20;
 static const char last_char_visible = 0x7F;
