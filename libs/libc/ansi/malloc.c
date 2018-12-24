@@ -17,12 +17,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include	<types_common.h>
-#include	<stdlib.h>
-#include	<errno.h>
+#include <types_common.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <assert.h>
 
-static const uintptr_t MAGIC_ALLOC_NUMBER = 0x1A2B3C4D;
-static const uintptr_t MAGIC_FREE_NUMBER = 0x5E6F8A9B;
+#define MAGIC_ALLOC_NUMBER (0x1A2B3C4D)
+#define MAGIC_FREE_NUMBER  (0x5E6F8A9B)
+#define MAGIC_LAST_NUMBER  (0xDEADBEEF)
+
 static size_t free_memory = 0;
 static void *heap_start = NULL;
 static void *heap_end = NULL;
@@ -47,10 +51,61 @@ static void *heap_end = NULL;
  * ....
  */
 
+/*
+ * 16 bytes for 32-bit platforms
+ * 32 bytes for 64-bit platforms
+ */
+  
 typedef struct _list_next {
     struct _list_next *next;
     uintptr_t magic;
 } list_next;
+
+
+static inline unsigned 
+free_user_mem (list_next *start, list_next *end)
+{
+     return ((uintptr_t)end - (uintptr_t)start);
+}
+
+static inline unsigned 
+free_priv_mem (list_next *start, list_next *end)
+{
+     return ((uintptr_t)end - (uintptr_t)start - sizeof(*start));
+}
+
+static inline int
+is_free (list_next *p)
+{
+    return (MAGIC_FREE_NUMBER == p->magic) ? 1 : 0;
+}
+
+static inline int
+is_last (list_next *p)
+{
+    return (p->next) ? 0 : 1;
+}
+
+static void defrag_mem (void)
+{
+    list_next *this = heap_start;
+    list_next *merge = NULL;
+ 
+    while (!is_last(this)) {
+        if (is_free(this)) {
+            merge = this;
+            while (!is_last(this) && is_free(this)) {
+                this = this->next;
+            }
+            if (merge->next != this) {
+               free_memory += free_priv_mem(merge, this);
+               merge->next = this;
+            }
+            if (is_last(this)) return;
+        }
+        this = this->next;
+   }
+}
 
 /*
  * This should not be called by platform specific code,
@@ -65,12 +120,17 @@ STATUS malloc_init(const void *heapstart, const void *heapend)
 
     heap_start = (void *)heapstart;
     heap_end = (void *)heapend;
+    heap_end -= sizeof(list_next);
 
-    free_memory = (uintptr_t)heap_end - (uintptr_t)heap_start;
+    free_memory = free_priv_mem(heap_start, heap_end);
 
     temp = (list_next *)heap_start;
     temp->next = heap_end;
     temp->magic = MAGIC_FREE_NUMBER;
+
+    temp = (list_next *)heap_end;
+    temp->next = 0;
+    temp->magic = MAGIC_LAST_NUMBER;
 
     return (EOK);
 }
@@ -89,15 +149,18 @@ void *malloc (size_t size)
      * Make size accomodate pointers, magic number and the user data,
      * ending on a (void *) boundary.
      */
-    newsize = MULT(size, sizeof(void *));
+    newsize = MULT(size, sizeof(*this));
 
     if (newsize > free_memory) {
-        errno = ENOMEM;
-        return (NULL);
+        defrag_mem();
+        if (newsize > free_memory) {
+            errno = ENOMEM;
+            return (NULL);
+        }
     }
 
-    while (this != (list_next *)heap_end) {
-        if (MAGIC_FREE_NUMBER == this->magic) {
+    while (!is_last(this)) {
+        if (is_free(this)) {
             if ((uintptr_t)this->next - (uintptr_t)this >
                     (newsize + 2*sizeof(list_next))) {
                 split = (void *)this + newsize + sizeof(*this);
@@ -137,43 +200,13 @@ void *realloc(void *p, size_t size)
 
 void free (void *p)
 {
-    list_next *this = heap_start;
-    list_next *merge = NULL;
+    list_next *this = (list_next *)p;
 
     if (!p) return;
-
-    while (this != (list_next *)heap_end) {
-        if ((list_next *)p > this->next) {
-            if (MAGIC_FREE_NUMBER == this->magic) {
-                merge = this;
-            }
-            this = this->next;
-        } else {
-            /* ptr is inside this chunk */
-            /* we need asserts !!! */
-            if (MAGIC_ALLOC_NUMBER != this->magic) {
-                /* Double free !!! */
-                return;
-            }
-
-            this->magic = MAGIC_FREE_NUMBER;
-            free_memory += (uintptr_t)this->next - (uintptr_t)this;
-
-            if (merge && (merge->next == this)) {
-                /* CASE 1: the previous chunk is free,
-                 * merge & set free
-                 */
-                merge->next = this->next;
-            } else if ((this->next != heap_end) &&
-                       (MAGIC_FREE_NUMBER == this->next->magic)) {
-                /* CASE 2: the next chunk is free,
-                 * merge & set free
-                 */
-                this->next = this->next->next;
-            }
-
-            return;
-        }
-    }
+   
+    this--;
+    assert(MAGIC_ALLOC_NUMBER == this->magic);
+    this->magic = MAGIC_FREE_NUMBER;
+    free_memory += (uintptr_t)this->next - (uintptr_t)this;
 }
 
