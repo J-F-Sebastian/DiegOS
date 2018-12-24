@@ -32,7 +32,7 @@ void calibrate_delay (volatile unsigned long *ticks)
     unsigned long oldticks;
     unsigned long resolution, finder;
 
-    finder = 10000;
+    finder = 10000U;
     resolution = UINT_MAX/1024;
 
     while (1) {
@@ -108,7 +108,7 @@ void mdelay(unsigned long msecs)
 void udelay(unsigned long usecs)
 {
     unsigned long temp = loops_mdelay*usecs/1000;
-    if (((loops_mdelay*usecs) % 1000) > 499) temp++;
+    if (((loops_mdelay*usecs) % 1000U) > 499) temp++;
 
     delay_loop(temp);
 }
@@ -116,7 +116,7 @@ void udelay(unsigned long usecs)
 void ndelay(unsigned long nsecs)
 {
     unsigned long temp = loops_mdelay*nsecs/1000000;
-    if (((loops_mdelay*nsecs) % 1000000) > 499999) temp++;
+    if (((loops_mdelay*nsecs) % 1000000U) > 499999) temp++;
 
     delay_loop(temp);
 }
