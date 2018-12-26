@@ -43,6 +43,13 @@ static uint16_t *vesa_mode_list = NULL;
 static const uint8_t *g_font = NULL;
 static unsigned W,H,max_offset;
 
+static inline void swap (int *a, int *b)
+{
+	int c = *a;
+	*a = *b;
+	*b = c;
+}
+
 static inline unsigned compute_offset (unsigned x, unsigned y)
 {
 	return y*vesa_gmode.LinBytesPerScanLine+x;
@@ -110,22 +117,17 @@ static void put_pixel (point_t pix, unsigned c)
     if (off < max_offset) frame_buffer[off] = (uint8_t)c;
 }
 
-static void horiz_line (point_t a, unsigned len, unsigned c)
-{
-    unsigned offset;
-        
-    if (!len) return;
-
-    offset = compute_offset(a.x, a.y);
-    
+static unsigned horiz_line (unsigned offset, unsigned len, unsigned c)
+{   		     
     c &= 0xFF;
     c |= c << 8;
     c |= c << 16;
          
-    while ((offset & 3) && len--)
+    while ((offset & 3) && (len > 0))
     {
         frame_buffer[offset++] = (uint8_t)c;
-	}
+        --len;
+	}		
 	offset >>= 2;
     while (len > 4) 
     {
@@ -138,40 +140,202 @@ static void horiz_line (point_t a, unsigned len, unsigned c)
 	{
 		frame_buffer[offset++] = (uint8_t)c;
 	}
+	
+	return offset;
 }
 
-static void vert_line (point_t a, unsigned len, unsigned c)
-{
-    unsigned offset;
-    
-    if (!len) return;
-
-    offset = compute_offset(a.x, a.y);
-            
+static unsigned vert_line (unsigned offset, unsigned len, unsigned c)
+{                  
     while (len--) 
     {
 		frame_buffer[offset] = (uint8_t)c;    
 		offset += vesa_gmode.LinBytesPerScanLine;
 	}
+	
+	return offset;
+}
+
+static unsigned diag_line (unsigned offset, unsigned len, unsigned c, int adv)
+{   
+	unsigned sum = vesa_gmode.LinBytesPerScanLine;
+        
+    if (adv > 0) 
+    {
+		sum++; 
+	}
+	else 
+	{
+		sum--;
+	}    
+             
+    while (len--) 
+    {
+		frame_buffer[offset] = (uint8_t)c;    
+		offset += sum;
+	}
+	
+	return offset;
 }
 
 static void line (point_t a, point_t b, unsigned width, unsigned color)
-{		
-    if (a.y == b.y) 
-    {	
-        horiz_line((a.x > b.x) ? b : a, compute_len(a.x, b.x), color);
-    } 
-    else if (a.x == b.x) 
+{			
+	unsigned offset;
+    int advancex, deltax, deltay;
+    int wholestep, adjup, adjdown;
+    int errorterm, inipixcount, finpixcount;
+    int runlen;
+    unsigned cnt;
+
+    if (a.y > b.y) {
+        swap(&a.y, &b.y);
+        swap(&a.x, &b.x);
+    }
+
+    /* first pixel in memory */
+    offset = compute_offset(a.x, a.y);
+
+    deltax = b.x - a.x;
+
+    if (deltax < 0) {
+        advancex = -1;
+        deltax = -deltax;
+    } else {
+        advancex = 1;
+    }
+
+    deltay = b.y - a.y;
+
+    if (!deltax) {
+        /* vertical line */
+        vert_line(offset, deltay + 1, color);        
+        return;
+    }
+
+    if (!deltay) {
+        /* horizontal line */
+        horiz_line(offset, deltax + 1, color);        
+        return;
+    }
+
+    if (deltax == deltay) {
+        /* diagonal line */
+        diag_line(offset, deltax + 1, color, advancex);
+    }
+    else if (deltax < deltay) 
     {
-        vert_line((a.y > b.y) ? b : a, compute_len(a.y, b.y), color);
+        /* Y major line */
+
+        /* minimum # of pixels in a run */
+        wholestep = deltay / deltax;
+
+        adjup = (deltay % deltax) * 2;
+        adjdown = deltax * 2;
+        errorterm = (deltay % deltax) - adjdown;
+
+        inipixcount = (wholestep / 2) + 1;
+        finpixcount = inipixcount;
+
+        if (!adjup && !(wholestep & 1)) {
+            inipixcount--;
+        }
+
+        if (wholestep & 1) {
+            errorterm += deltax;
+        }
+
+        /* draw the first partial run */
+        offset = vert_line(offset, inipixcount, color);        
+        offset += advancex;
+
+        /* draw all full runs */
+        for (cnt = 0; cnt < (unsigned)(deltax - 1); cnt++) {
+            runlen = wholestep;
+            errorterm += adjup;
+
+            if (errorterm > 0) {
+                runlen++;
+                errorterm -= adjdown;
+            }
+
+            offset = vert_line(offset, runlen, color);			
+			offset += advancex;
+        }
+
+        /* draw the final run of pixels */
+        vert_line(offset, finpixcount, color);
+        return;
+
+    } 
+    else 
+    {
+        /* X major */
+
+        /* minimum # of pixels in a run */
+        wholestep = deltax / deltay;
+
+        adjup = (deltax % deltay) * 2;
+        adjdown = deltay * 2;
+        errorterm = (deltax % deltay) - adjdown;
+
+        inipixcount = (wholestep / 2) + 1;
+        finpixcount = inipixcount;
+
+        if (!adjup && !(wholestep & 1)) {
+            inipixcount--;
+        }
+
+        if (wholestep & 1) {
+            errorterm += deltay;
+        }
+                
+        /* draw the first partial run */
+        if (advancex < 0) 
+        {
+			offset -= inipixcount - 1;    
+			horiz_line(offset, inipixcount, color);
+		}
+		else
+		{
+			offset = horiz_line(offset, inipixcount, color);
+		}
+        offset += vesa_gmode.LinBytesPerScanLine + advancex;
+
+        /* draw all full runs */
+        for (cnt = 0; cnt < (uint32_t)(deltay - 1); cnt++) {
+            runlen = wholestep;
+            errorterm += adjup;
+
+            if (errorterm > 0) {
+                runlen++;
+                errorterm -= adjdown;
+            }
+
+			if (advancex < 0)
+			{
+				offset -= runlen - 1;    
+				horiz_line(offset, runlen, color);
+			}
+			else
+			{
+				offset = horiz_line(offset, runlen, color);
+			}
+            offset += vesa_gmode.LinBytesPerScanLine + advancex;
+        }
+
+        /* draw the final run of pixels */
+        if (advancex < 0) offset -= finpixcount - 1;    
+        horiz_line(offset, finpixcount, color);
+        return;
     }
 }
 
 static void rect (point_t a, point_t b, unsigned wide, unsigned color)
-{    
-    point_t c,d;
+{       
     unsigned width = compute_len(a.x, b.x);
     unsigned height = compute_len(a.y, b.y);
+    unsigned offseta = compute_offset(a.x, a.y);
+    unsigned offsetd = compute_offset(a.x, b.y);
+    unsigned offsetc = compute_offset(b.x, a.y);
 
     if (width < 2*wide) return;
     if (height < 2*wide) return;
@@ -182,26 +346,19 @@ static void rect (point_t a, point_t b, unsigned wide, unsigned color)
 	 * |				 | 
 	 * |                 |
 	 * d --------------- b
-	 */ 
-    c.y = a.y;
-    c.x = b.x;
-    d.y = b.y;
-    d.x = a.x;
+	 */     
 
 	while (wide--)
 	{
-		horiz_line(a, width, color);
-        horiz_line(d, width, color);
-        vert_line(a, height, color);
-        vert_line(c, height, color);
+		horiz_line(offseta, width, color);
+        horiz_line(offsetd, width, color);
+        vert_line(offseta, height, color);
+        vert_line(offsetc, height, color);
         width -= 2;
         height -= 2;
-        a.x++;
-        a.y++;
-        d.x++;
-        d.y--; 
-        c.x--;
-        c.y++;               
+        offseta += vesa_gmode.LinBytesPerScanLine + 1;
+        offsetd -= vesa_gmode.LinBytesPerScanLine - 1;
+        offsetc += vesa_gmode.LinBytesPerScanLine - 1;        
 	}   
 }
 
@@ -209,10 +366,12 @@ static void fillrect (point_t a, point_t b, unsigned c)
 {
     unsigned width = compute_len(a.x, b.x);
     unsigned height = compute_len(a.y, b.y);
+    unsigned offset = compute_offset(a.x, a.y);
 
-    while (height--) {
-        horiz_line(a, width, c);
-        a.y++;
+    while (height--) 
+    {
+        horiz_line(offset, width, c);
+        offset += vesa_gmode.LinBytesPerScanLine;
     }
 }
 
@@ -336,7 +495,38 @@ static void draw_sprite(point_t a,
                         unsigned W,
                         unsigned H,
                         unsigned color)
-{
+{	
+	volatile uint8_t *fb = frame_buffer;
+	unsigned loop = 0, scan;	
+	unsigned char cursor;
+
+    if (!W || !H) return;
+    
+    fb = frame_buffer + compute_offset(a.x, a.y);    
+    while (H--) 
+    {
+		for (scan = W, cursor = 1; scan > 8; scan -= 8, loop++, cursor = 1)
+		{			
+			while (cursor)
+			{				
+				if (cursor & sprite[loop]) *fb = (uint8_t)color;
+				++fb;
+				cursor += cursor;			
+			}
+		}
+		if (scan)
+		{
+			cursor = 1;
+			while (scan--)
+			{				
+				if (cursor & sprite[loop]) *fb = (uint8_t)color;
+				++fb;
+				cursor += cursor;			
+			}
+			loop++;
+		}
+		fb += vesa_gmode.XResolution - W;		
+	}		
 }
 
 static void show (void)
