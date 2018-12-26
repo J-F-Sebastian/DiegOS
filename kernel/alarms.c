@@ -67,7 +67,7 @@ static void alarm_cb(uint64_t ticks)
     while (cursor) {
         if (ALM_TRIGGERED == (cursor->flags & (ALM_TRIGGERED | ALM_EXPIRED))) {
             if (ticks >= cursor->ticks) {
-                if (EOK != event_put(cursor->notify, &cursor->event)) {
+                if (EOK != event_put(cursor->notify, &cursor->event, NULL)) {
                     kerrprintf("unable to queue alarm %s\n", cursor->name);
                 } else {
                     cursor->flags |= ALM_EXPIRED;

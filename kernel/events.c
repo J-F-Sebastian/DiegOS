@@ -114,13 +114,15 @@ int event_watch_queue(ev_queue_t *evqueue)
     return (EOK);
 }
 
-int event_put(ev_queue_t *evqueue, event_t *ev)
+int event_put(ev_queue_t *evqueue, event_t *ev, event_freefn fncb)
 {
     STATUS retcode;
 
     if (!evqueue || !ev) {
         return (EINVAL);
     }
+
+    ev->freefn = fncb;
 
     retcode = queue_enqueue(&evqueue->msgqueue, &ev->header);
 
@@ -148,6 +150,13 @@ event_t *event_get(ev_queue_t *evqueue)
     }
 
     return (retval);
+}
+
+void event_free(event_t *ev)
+{
+	if (ev && ev->freefn) {
+		ev->freefn(ev);
+	}
 }
 
 void wait_for_events(ev_queue_t *evqueue)

@@ -22,10 +22,13 @@
 
 #include <queue_type.h>
 
+typedef void (*event_freefn)(void *ptr);
+
 typedef struct event {
     queue_node  header;
     uint16_t    classid;
     uint16_t    eventid;
+    event_freefn freefn;
 } event_t;
 
 typedef struct ev_queue ev_queue_t;
@@ -98,23 +101,31 @@ int event_watch_queue(ev_queue_t *evqueue);
 unsigned event_queue_size(ev_queue_t *evqueue);
 
 /*
- * Put into the queue a new event. Caller is in charge of memory management,
- * events allocation/deallocation is not handled by this API.
+ * Put into the queue a new event. 
+ * Caller is in charge of memory management,
+ * events allocation/deallocation is not directly handled by this API.
+ * The callback passed in fncb will be invoked by event_free() to release
+ * allocated memory; if the parameter is set to NULL no action will
+ * be performed.
  *
  * PARAMETERS IN
  * ev_queue_t *evqueue - pointer to a events queue object
- * event_t *ev         - pointer to the new event to be queued.
+ * event_t *ev         - pointer to the new event to be queued
+ * event_freefn fncb   - function pointer to release memory
  *
  * RETURNS
  * EINVAL if parameters are not valid
  * EPERM if the operation is not allowed or queuing failed
  * EOK in case of success
  */
-int event_put(ev_queue_t *evqueue, event_t *ev);
+int event_put(ev_queue_t *evqueue, event_t *ev, event_freefn fncb);
 
 /*
- * Get a new event from the queue. Caller is in charge of memory management,
- * events allocation/deallocation is not handled by this API.
+ * Get a new event from the queue.
+ * Caller is in charge of memory management,
+ * events allocation/deallocation is not directly handled by this API.
+ * Call event_free() to eventually release memory after having
+ * used the event.
  *
  * PARAMETERS IN
  * ev_queue_t *evqueue - pointer to a events queue object
@@ -124,6 +135,18 @@ int event_put(ev_queue_t *evqueue, event_t *ev);
  */
 event_t *event_get(ev_queue_t *evqueue);
 
+/*
+ * Release memory allocated to ev pointer.
+ * If the event structure has a release function pointer set to
+ * NULL, no action is performed.
+ * If the release function pointer is set, the callback fuction
+ * is invoked with the ev pointer passed as parameter.
+ *
+ * PARAMETERS IN
+ * event_t *ev        - pointer to an event
+ *
+ */
+void event_free(event_t *ev);
 /*
  * Suspend thread execution until one or more events are stored in the queue.
  * After at least one event is queued, the listening thread is woken up.
