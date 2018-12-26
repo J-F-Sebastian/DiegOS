@@ -1,7 +1,8 @@
 export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
+export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g
 export AS = $(CC) -xassembler
 export ASCC = $(CC) -xassembler-with-cpp
-export LN = ld --oformat binary -eDiegOS
+export LN = ld --oformat binary -eDiegOS -static
 export AR = ar cr
 
 export OBJPREFIX = $(CPU)_$(PLATFORM)
@@ -22,6 +23,12 @@ $(OBJPREFIX)/%.o: %.c
 $(OBJPREFIX)/%.o: %.s
 	$(AS) $(ASFLAGS) -c -o $@ $<
 
+$(OBJPREFIX)/%.o: %.S
+	$(ASCC) $(ASFLAGS) -c -o $@ $<
+
+$(OBJPREFIX)/%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(CDEFS) -c -o $@ $<
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -31,3 +38,5 @@ $(OBJPREFIX)/%.o: %.s
 %.o: %.S
 	$(ASCC) $(ASFLAGS) -c -o $@ $<
 
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<

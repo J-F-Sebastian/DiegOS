@@ -26,7 +26,7 @@ all: bootsect.bin
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) all
 	cd ../../applications/console && make all
 	cd ../../applications/demo && make all
-	ld -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
+	$(LD) -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
 	objcopy -S -O binary --set-section-flags .bss=alloc,load,contents DiegOS.elf DiegOS.bin
 	cat bootsect.bin DiegOS.bin > img.bin
 	dd if=img.bin of=bootflop.img ibs=2880b conv=sync
