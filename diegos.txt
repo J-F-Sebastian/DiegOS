@@ -1,0 +1,314 @@
+\documentclass[twoside,a4paper,fleqn,leqno]{book}
+\begin{document}
+
+\frontmatter
+\title{
+\noindent \rule{\linewidth}{0.1mm}
+\noindent \rule{\linewidth}{0.4mm}
+\noindent \rule{\linewidth}{0.7mm}
+\noindent \rule{\linewidth}{1mm}
+\\[5mm]
+\bf DiegOS\\ Design and Documentation
+\\[5mm]
+\noindent \rule{\linewidth}{1mm}
+\noindent \rule{\linewidth}{0.7mm}
+\noindent \rule{\linewidth}{0.4mm}
+\noindent \rule{\linewidth}{0.1mm}}
+\author{Diego Gallizioli\\
+\texttt{diego.gallizioli@libero.it}}
+\date{February 2012}
+\maketitle
+
+\tableofcontents
+
+\newpage
+\section*{Dedications}
+To my wife Monica and my children Davide Matteo and Anna, for being proud of my work
+and letting me sit in front of my terminal late at night.
+
+\chapter{Concepts}
+\section*{Inheritance and other inspirations}
+One of the main goal of an Operating System is to offer a friendly and comfortable environment
+for programmers, users, and administrators.
+This goal is not that easy: since the very first Operating System inception, a huge number of engineers 
+and scientists worked on this, developing concepts, ideas, architectures, interfaces, and documenting 
+their work to produce what we know today as Microsoft\textregistered{} Windows\textregistered{}, Linux, Unix, 
+or Apple\textregistered{} macOS\textregistered{}.
+
+All these people proved to be smarter than the Author of this book.
+Serious.
+
+I had the chance and the privilege to work on a number of Operating Systems,
+some of them with peculiar features, some of them with legacy constraints, all of
+them with a clear design.
+DiegOS was born after years of careful and intensive meditation; it has no peculiarities,
+a KISS \footnote{The acronim stands for Keep It Simple, Stupid.} approach, no legacy constraints, and above all a humble
+target: do the right thing, the easy way, the fastest way, avoiding common errors and nuisances.
+
+Development of DiegOS took a lot of my spare time, still I cannot claim a "professional" work
+behind it; it is a hobbist toy for sure, probably a useful tool to play with, definitively not
+a general purpose Operating System, although it can perform nicely as an embedded Operating System.
+
+Just like anyone out there, I did not conceive all you can find in this book by myself;
+the most inspiring source of wisdom at the heart of DiegOS is Minix. 
+Minix is definitively a fitness room, furnished with all the whistles and bells and tools you could ever dream of.
+This \textbf{\emph{does not imply}} that Minix is the best Operating System out there, 
+it simply means I consider it a delightful piece of code.
+
+On the other side, the most inspiring source to improve my programming skills is
+Michael Abrash's \emph{GRAPHICS programming black book};
+all I have to say about it is, zenning is a very long journey, and you'd better take your time and read it.
+So for all of you folks in search of an argument, have a break and practice your zen ...
+\newpage
+\vfill
+\emph{,, Form is empty, emptiness is form, Emptiness is not other than form, form is also not other than emptiness. Likewise, sensation, discrimination, conditioning, and awareness are empty. In this way, Sariputra, all things are emptiness; they are without defining characteristics; they are not born, they do not cease, they are not defiled, they are not undefiled. They have no increase, they have no decrease.\\
+Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness. There is no eye, no ear, no nose, no tongue, no body, no mind. There is no form, no sound, no smell, no taste, no texture, no phenomenon. There is no eye-element and so on up to no mind-element and also up to no element of mental awareness. There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death. Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
+\vfill
+\newpage
+
+\mainmatter
+\chapter{Architecture}
+\section{Design}
+The core of the system, the \textbf{kernel}, is separated from all other
+components and is indipendent from all other components; any software
+component can call a function found in the kernel API, but the kernel code can
+not and must not use any external software component.
+
+The kernel offers several interfaces to allow interactions between software
+and itself: drivers are an example of interface between the kernel and the
+hardware, adding a software layer to interact with peripherals without
+actually operating on them.\footnote{Always consider the kernel point of view
+when evaluating the interaction between kernel and external software}
+
+Files are another software abstraction to let application software communicate
+with the kernel; a file is simply an arbiter, reads and writes are sorted and
+the data can be passed to the kernel - and reverse - without knowledge of the
+internal structures.
+
+\section{Portability}
+The source code of DiegOS is written in plain C, with a little amount of
+assembler to perform hardware init.
+Some drivers and some libraries' API do have a double personality, one implementation
+in plain C and one implementation optimized in assembler; the former is totally portable,
+the latter is welcome when performance gets on stage.
+The system is not designed to run on 64-bit architectures, writing 32- and 64-bit compliant 
+code requires considerable time (and time is a scarce resource!).
+
+Besides, writing code able to compile and run on both 32- and 64-bit processors would break
+the rule of simplicity.
+
+\section{Features}
+DiegOS does not support multiple processors, nor multiple cores, nor even multiple hardware 
+threads of execution; it does not offer memory protection or virtual memory,
+and does not offer preemption.
+
+DiegOS is a single image application, it offers concurrent software threads, 
+a cooperative scheduler, shared structures to
+synchronize threads, a driver infrastructure, and a networking infrastructure.
+
+\section{System design}
+\subsection{Booting process}
+The rationale behind the booting stage is to have the most straighforward
+solution, adaptable to any platform and any medium, with the least
+interactions with the hardware.
+
+To satisfy this requirement DiegOS has to be built as a binary, relocated
+to start at a specific address, obviously the same that will be used to 
+load it and run it.\\
+There is no support for alternate file formats, so there are no COFF, ELF or PE
+readers.
+The default target will emit an ELF file along with the binary format, 
+to satisfy the needs of having a symbol reference for debugging, along with
+all binutils capabilities.
+In case the target EABI does not support the ELF format, any other object file
+format can be used; just be aware you always need to emit a binary file to
+load and execute the OS.
+
+There is a detailed setup procedure to have consistent booting steps across
+any kind of platform; all platforms should adhere to this procedure to avoid adding
+useless assembly code here and there, bloating the source code and making it less
+portable:
+\begin{enumerate}
+\item Setup the host processor in order to execute the boot code; since you
+are in charge of writing the boot code, it should be easy. Reserve a register
+or a memory location to store debugging data like return values or failures.
+Add comments to explain how this data can be used. Do not add debugging
+infrastructures, traces, endless strings for printouts.
+\item Access the medium where you stored the DiegOS binary, and read it into
+memory. Document where the binary is put in memory, why it is put there, and
+the memory layout during boot. The medium choice and the code required to
+drive it
+is up to you. The rationale here is, split your boot code if it grows beyond
+logic; chain booting is not an option in this case.
+\item Keep your code simple and stupid, do not try to optimize the load time
+or the medium access time: access the hardware in a safe manner, load the OS
+into memory, and run it.
+\item Before jumping to the OS entry point verify this checklist:
+
+    \begin{minipage}{0.9\textwidth}
+    \begin{enumerate}
+    \item All registers are setup to start DiegOS: scratch registers should be
+    set to null, memory registers should be set to access the whole addressing
+    space; you could also restrict the range of available addresses, but you 
+    must ensure the OS is still able to access all the memory and all the hardware.
+    \item A small stack will be used by the system init stage, be sure to set
+    it up before jumping or you'll crash the machine.
+    \item All interrupts \textbf{must be disabled} prior to jumping to the
+    DiegOS entry point. 
+    \end{enumerate}
+    \end{minipage}
+
+\item Jump to the system entry point, which is labelled as \texttt{DiegOS}.
+Be careful not to perform a function call, but simply jump to the label;
+calling implies using the stack, and setting a return address somewhere, which
+is not expected to happen.\footnote{No Operating System returns to the boot
+code after a shutdown.}
+\end{enumerate} 
+\subsection{System initialization}
+Initialization is split into a set of function calls, acting on both hardware and
+software. 
+\begin{itemize}
+\item Initialize the uninitialized data memory space (i.e. the .BSS section in
+ELF format terminology).
+\item Initialize the processor, including power save features, interrupts,
+cache memory.
+\item Initialize the platform hardware and software; usually you would init
+heap and SoC devices here, as well as platform-dependent libraries (i.e.
+malloc).
+\textbf{Do not initialize} any kind of driver at this stage.
+\item Initialize the TTY; depending on your platform, this can be a frame buffer,
+a video card, a serial line; keep in mind that this is the system's TTY, and will be used
+for debugging purposes only.
+\item Initialize the drivers; details about the drivers infrastructure are
+explained in section \ref{sub:drivers} at page \pageref{sub:drivers}
+\item Initialize the kernel
+\item Enable all interrupts
+\item Initialize the users' additions, threads added to perform specific tasks
+at user's will.
+\item Run the kernel, this actually roll the ball and kicks the scheduler.
+\end{itemize}
+\subsection{The kernel}
+The core functionalities of DiegOS are enclosed in this library.
+The kernel is a single instance, single processor component; it does not
+support any kind of memory protection, and it is expecting to be able to access the
+whole address space with no restrictions. As mentioned before, there could be restrictions
+on the address space, but the OS must still be able to drive all the hardware and must
+be able to access all the memory.
+The kernel does not support threads contention or access privilege, so any portion of
+the code (and consequently any thread) is able to peek or poke any memory location or 
+access any hardware device.
+This is questionable choice, although it is nothing the God of Information wouldn't let you in 
+heaven for (you can guess where the citation comes from, ain't you?).
+All in all, a general purpose OS would not even mention memory protection as an option; 
+again, if you need the real thing, go get it. A small bare-metal system would require lots
+of resources to assure a decent level of security if implementing memory protection,
+and this is not a goal for DiegOS.
+\subsection{Kernel services}
+The kernel offers the following services: a thread scheduler, a thread management API, 
+an alarm API, events queueing and dispatching, mutexes, barriers, I/O waiting and spin locks.\\
+Alarms, Events and Mutexes are all managed services, meaning that an owning thread
+can create, destroy, or reconfigure them at any time.\\
+\begin{description}
+\item[Scheduler] the DiegOS scheduler is as simple as possible; pre-emption is
+not supported, and threads must co-operate in order to give up CPU time when
+idling or waiting for peripherals.
+Threads can be suspended, halted, delayed, and removed\footnote{Removal means the
+thread will be killed.} but at least one thread must be ready to run at any time
+\footnote{This is the Idle thread, which cannot be killed.}.\\
+Ready threads are doubly-linked in lists.\\
+The scheduler is designed to manage the threads' finite state machine and select 
+the running thread by using a priority queue schema. There are four
+priorities in DiegOS, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
+\texttt{High Priority} and \texttt{Realtime Priority}.
+When a thread is in the ready queue, it will not substitute the running
+one, not even if the ready thread's priority is higher; pre-emption is \textbf{not
+supported} at all.
+
+Bear in mind that a higher priority thread will never give up for a lower priority
+thread; to avoid CPU hogging you must be sure that all threads will either sleep or 
+wait or delay, and they should perform their processing as fast as possible;
+if you cannot complete the required actions in a decent amount of time, you must split
+operations suspending execution.
+Failing to do so will lock your processing into one thread only.
+\item[Threads] a thread is a new, independent code path starting from a
+function (used as entry point) that can be alternated with other code paths.
+Whenever a thread hands over to another thread, the kernel has to store the
+CPU's context into the running thread, and restore the context loading it from
+the handed over thread.
+Context is defined as the set of registers and flags that differ from path to
+path in the code.
+\item[Alarms] are a fundamental feature to let threads sleep and wake up at a
+defined time. 
+Alarms queue events to a thread with a specific class ID; handling alarms is just
+like handling events. Alarms can be one-shot or recursive, and can be started or
+halted anytime.
+\item[Events] are extensible system messages, used to signal some interesting news to a thread. 
+Events are organized as queues (FIFO), and processed one by one in
+chronological order.\\
+There is no memory management for events, so both the producer and the
+consumer must take care of allocating memory when creating an event message,
+and freeing it once the event has been processed.
+\item[Mutexes] are the simplest form of semaphore. A mutex is initially
+unlocked; the first thread locking the mutex will proceed with execution,
+entering a critical code section and running as long as it needs to.
+Unless the mutex is unlocked, no other thread is allowed to enter the same
+critical code section; other threads trying to lock the same mutex will sit in a
+waiting queue. 
+Once the first thread has released (unlocked) the mutex, the threads waiting for 
+a lock will be run one at a time, until no waiting threads are left.\\
+Once no thread is waiting for a lock on the mutex, the mutex is unlocked.
+Remeber that a mutex is not a counting semaphore, threads sitting in the wait queue
+will repeatedly lock and unlock the mutex.
+\item[Spin locks] are a running, atomic wait to gain a lock on a integer used as a
+barrier or mutex. Spin locks can be locked or unlocked.\\
+A thread trying to acquire a spin lock will enter an infinite loop until the lock is 
+gained, so if the spin lock is originally locked, the thread will suspend and enter
+the ready queue continuosly.\\
+Good use of spin locks is to protect very short critical sections or hardware accesses,
+where the longer code path required to manage mutexes might be not as efficient.
+\item[I/O waits] are wait queues, useful to suspend the calling thread execution till 
+data is available, this usually happens while waiting for input from a hardware device.\\
+The suspended thread is removed from the ready queue and parked into a wait queue, multiple
+threads can sleep on the same wait queue, and can be awakened in groups.\\
+Threads are moved from wait queues to ready queues in a FIFO fashion, and it is not possible
+to priorize or sort this sequence.
+
+\end{description}
+\subsection{Recommendations and other suggestions}
+The core functionalities are very simple: spawn a number of execution threads, run all
+of them one by one, interrupts \textbf{cannot and must not} invoke a context switch,
+synchronize the execution by suspension, share resources with mutexes or spinlocks.
+
+A few words about mutexes and spinlocks and their pros and cons: mutexes have a more complex
+code path and disable or enable interrupts to avoid contention within the scheduler, while
+spinlocks are very light and simple.
+On reverse, a thread waiting to acquire a lock on a mutex will enter a wait queue, thus it will
+sit and wait (and shut up!) until its time has come to run and gain a lock; a thread waiting to
+acquire a lock on a spinlock will continuosly suspend and thus will be rescheduled until its
+time has come to gain a lock.
+
+The balance is, more complexity but lesser CPU usage, opposed to extreme simplicity but a busy CPU.
+My suggestion is to use spinlocks for very fast and short critical sections, whereas managing mutexes
+would be worser and slower; make use of mutexes if you need heavy computations inside the critical 
+section, as all other contending thread will be waiting and won't be scheduled at all, freeing up the 
+CPU and letting the locking thread complete its tasks as fast as possible.
+ 
+\subsection{Drivers}
+\label{sub:drivers}
+Drivers in DiegOS are interfaces to hardware.
+They enable software to start and stop hardware operations, configure it, and perform input and output.
+
+Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
+be carefully designed to avoid conflicts with the system-wide interrupt handling.
+DiegOS protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
+designed to be reentrant.
+The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
+and will enable the interrupt back again once the servicing routine returns.
+
+
+
+
+ 
+\subsection{File systems}
+\end{document}
+
