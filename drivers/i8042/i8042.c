@@ -360,17 +360,17 @@ static short mse_poll (poll_table_t *table)
 
 char_driver_t i8042_mouse_drv = {
 	.cmn = {
-		.name = "mouse",
-		.init_fn = mse_init,
-		.start_fn = mse_start,
-		.stop_fn = mse_stop,
-		.done_fn = mse_done,
+		.name      = "mouse",
+		.init_fn   = mse_init,
+		.start_fn  = mse_start,
+		.stop_fn   = mse_stop,
+		.done_fn   = mse_done,
 		.ioctrl_fn = NULL,
 		.status_fn = mse_status,
-		.poll_fn = mse_poll
+		.poll_fn   = mse_poll
 	},
-    .write_fn = NULL,
-    .read_fn = mse_read,
+    .write_fn       = NULL,
+    .read_fn        = mse_read,
     .write_multi_fn = NULL,
-    .read_multi_fn = NULL    
+    .read_multi_fn  = NULL    
 };
