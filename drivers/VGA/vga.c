@@ -557,8 +557,12 @@ static unsigned vga_status (unsigned unitno)
     return (DRV_STATUS_RUN | DRV_IS_GFX_UI);
 }
 
+/*
+ * This specific driver supports VGA mode 640x480, 16 colors
+ */
 static int vga_res (unsigned W, unsigned H, unsigned depth, int loose)
 {
+	if ((W == 640) && (H == 480) && (depth == 4)) return EOK;
 	return ENOTSUP;
 }
 
