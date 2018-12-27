@@ -49,13 +49,13 @@ BOOL pci_bus_check()
     BOOL retcode = FALSE;
     unsigned retries = 10;
 
-    out_dword(PCI_CONFIG_ADDRESS, (unsigned)(1<<31));
+    out_dword(PCI_CONFIG_ADDRESS, (unsigned)(1U<<31));
     tmp = in_dword(PCI_CONFIG_ADDRESS);
-    while ((tmp != (unsigned)(1<<31)) && retries--) {
+    while ((tmp != (unsigned)(1U<<31)) && retries--) {
         tmp = in_dword(PCI_CONFIG_ADDRESS);
     }
 
-    if (tmp == (unsigned)(1 << 31)) retcode = TRUE;
+    if (tmp == (unsigned)(1U<<31)) retcode = TRUE;
 
     out_dword(PCI_CONFIG_ADDRESS, tmp);
 
@@ -78,7 +78,7 @@ void pci_read_config(bdf_addr_t address, uint32_t *confmem)
     }
 
     address &= PCI_CONFIG_BDF_MASK;
-    address |= (1<<31);
+    address |= (1U<<31);
 
     out_dword(PCI_CONFIG_ADDRESS, address);
     confmem[0] = in_dword(PCI_CONFIG_DATA);
@@ -110,7 +110,7 @@ void pci_write_config(bdf_addr_t address, const uint32_t *confmem)
     }
 
     address &= PCI_CONFIG_BDF_MASK;
-    address |= (1<<31);
+    address |= (1U<<31);
 
     for (loop = 0; loop < 64; loop++, address+=4) {
         out_dword(PCI_CONFIG_ADDRESS, address);
@@ -125,7 +125,7 @@ pci_config_space_set_addr (bdf_addr_t address, unsigned offset)
     offset &= ~3;
     offset &= (PCI_HEADER_SIZE_BYTES -1);
     address |= offset;
-    address |= (1<<31);
+    address |= (1U<<31);
 
     out_dword(PCI_CONFIG_ADDRESS, address);
 }
