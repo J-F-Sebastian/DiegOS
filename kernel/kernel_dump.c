@@ -35,7 +35,7 @@ void threads_dump()
         ptr = get_thread(i);
         if (ptr) {
             fprintf(stderr,
-                    "%-15s | %3d | %6d | %s\n",
+                    "%-15s | %3u | %6u | %s\n",
                     ptr->name,
                     ptr->tid,
                     ptr->stack_size,
