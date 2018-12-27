@@ -136,6 +136,7 @@ int init_pakman (unsigned bytes, unsigned packets, pakman **pakmanptr)
     if (slot_num < packets) {
         fprintf(stderr,
                 "%s: packets number was %u, set to %u\n",
+                __FUNCTION__,
                 packets,
                 slot_num);
         packets = slot_num;
