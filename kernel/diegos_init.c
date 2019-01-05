@@ -32,6 +32,8 @@ struct boot_variables {
     uint32_t    free_heap_size;
 };
 
+extern long _text_start, _text_end, _data_start, _data_end, _bss_start, _bss_end;
+
 /*
  * This is the main entry point, loaded at a platform-specific location.
  * The linker should be instructed to produce a binary relocated at this
@@ -50,7 +52,13 @@ struct boot_variables {
 void DiegOS (void)
 {
     const char *proctype;
-    /*struct boot_variables *bootvars = (struct boot_variables *)0xF000;*/
+    struct boot_variables *bootvars = (struct boot_variables *)0xF000;
+    long *bss = &_bss_start;
+
+    /*
+     * Complete .BSS initialization
+     */
+    while (bss < &_bss_end) *bss++ = 0;
 
     /*
      * Complete processor initialization.
@@ -83,19 +91,19 @@ void DiegOS (void)
     tty_init();
 
     kmsgprintf("%s\n\n",DiegOS_banner);
-#if 0
+#if 1
     kmsgprintf("        | Text   | Data   | BSS    | Heap\n");
     kmsgprintf("--------+--------+--------+--------+--------\n");
-    kmsgprintf("Address |%#8x|%#8x|%#8x|%#8x\n",
+    kmsgprintf("Start   |%#8x|%#8x|%#8x|%#8x\n",
                &_text_start,
                &_data_start,
                &_bss_start,
                bootvars->free_heap_start);
     kmsgprintf("--------+--------+--------+--------+--------\n");
-    kmsgprintf("Size    |%8u|%8u|%8u|%8u\n",
-               &_text_end - &_text_start + 1,
-               &_data_end - &_data_start + 1,
-               &_bss_end - &_bss_start + 1,
+    kmsgprintf("End     |%#8x|%#8x|%#8x|%#8x\n",
+               &_text_end,
+               &_data_end,
+               &_bss_end,
                bootvars->free_heap_size);
     kmsgprintf("--------+--------+--------+--------+--------\n\n");
 #endif
