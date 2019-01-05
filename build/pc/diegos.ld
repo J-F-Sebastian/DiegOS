@@ -4,21 +4,20 @@ SECTIONS
      {
        .text 0x10000 : 
 	{
-		_btext = .; *(.text) *(.rodata*); KEEP(.text.*) _etext = .;
+		_text_start = .; *(.text) *(.rodata*); KEEP(.text.*) _text_end = .;
 	}
        .data :
 	{ 
-		_bdata = .; *(.data*); _edata = .;
-	}
-       .bss :
-	{ 
-		_bbss = .; *(.bss*); _ebss = .;
-	}
-	.init.array :
-	{
+		_data_start = .;
+		*(.data*)
 		__init_array_start = .;
 		*(.init_array)
 		*(.init_array.*)
 		__init_array_end = .;
+		_data_end = .;
+	}
+       .bss (NOLOAD):
+	{
+		_bss_start = .; *(.bss) *(COMMON); _bss_end = .;
 	}
      }
