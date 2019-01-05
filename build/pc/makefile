@@ -27,7 +27,8 @@ all: bootsect.bin
 	cd ../../applications/console && make all
 	cd ../../applications/demo && make all
 	$(LD) -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
-	objcopy -S -O binary --set-section-flags .bss=alloc,load,contents DiegOS.elf DiegOS.bin
+	objcopy -S DiegOS.elf DiegOS.stripped.elf
+	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
 	cat bootsect.bin DiegOS.bin > img.bin
 	dd if=img.bin of=bootflop.img ibs=2880b conv=sync
 
