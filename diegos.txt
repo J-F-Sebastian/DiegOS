@@ -1,24 +1,18 @@
-\documentclass[twoside,a4paper,fleqn,leqno]{book}
+\documentclass[12pt,a4paper]{book}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
 \begin{document}
-
-\frontmatter
 \title{
-\noindent \rule{\linewidth}{0.1mm}
-\noindent \rule{\linewidth}{0.4mm}
-\noindent \rule{\linewidth}{0.7mm}
-\noindent \rule{\linewidth}{1mm}
-\\[5mm]
-\bf DiegOS\\ Design and Documentation
-\\[5mm]
-\noindent \rule{\linewidth}{1mm}
-\noindent \rule{\linewidth}{0.7mm}
-\noindent \rule{\linewidth}{0.4mm}
-\noindent \rule{\linewidth}{0.1mm}}
-\author{Diego Gallizioli\\
-\texttt{diego.gallizioli@libero.it}}
-\date{February 2012}
-\maketitle
+\rule{\linewidth}{2mm}
+DiegOS\\ Architecture, Design and Implementation
+\rule{\linewidth}{2mm}}
+\author{Diego Gallizioli}
+\date{ \today}
 
+\maketitle
 \tableofcontents
 
 \newpage
@@ -55,35 +49,91 @@ Minix is definitively a fitness room, furnished with all the whistles and bells 
 This \textbf{\emph{does not imply}} that Minix is the best Operating System out there, 
 it simply means I consider it a delightful piece of code.
 
-On the other side, the most inspiring source to improve my programming skills is
+The most inspiring source to improve my programming skills was
 Michael Abrash's \emph{GRAPHICS programming black book};
 all I have to say about it is, zenning is a very long journey, and you'd better take your time and read it.
 So for all of you folks in search of an argument, have a break and practice your zen ...
-\newpage
-\vfill
-\emph{,, Form is empty, emptiness is form, Emptiness is not other than form, form is also not other than emptiness. Likewise, sensation, discrimination, conditioning, and awareness are empty. In this way, Sariputra, all things are emptiness; they are without defining characteristics; they are not born, they do not cease, they are not defiled, they are not undefiled. They have no increase, they have no decrease.\\
-Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness. There is no eye, no ear, no nose, no tongue, no body, no mind. There is no form, no sound, no smell, no taste, no texture, no phenomenon. There is no eye-element and so on up to no mind-element and also up to no element of mental awareness. There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death. Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
+
+\vspace{3cm}
+\emph{" Form is empty, emptiness is form, Emptiness is not other than form, form is also not other than emptiness.
+Likewise, sensation, discrimination, conditioning, and awareness are empty.}
+
+\emph{In this way, Sariputra, all things are emptiness; they are without defining characteristics; they are not born, they do not cease, they are not defiled, they are not undefiled. They have no increase, they have no decrease.}
+
+\emph{Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness. There is no eye, no ear, no nose, no tongue, no body, no mind. There is no form, no sound, no smell, no taste, no texture, no phenomenon. There is no eye-element and so on up to no mind-element and also up to no element of mental awareness. There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death. Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
 \vfill
 \newpage
 
 \mainmatter
 \chapter{Architecture}
 \section{Design}
+DiegOS has been designed to be a simple application.
+Software is partitioned in layers with defined dependencies between modules,
+the kernel being the core of the system, and therefore the only true stand-alone module.
+DiegOS does not support multiple processors,  multiple cores, or multiple hardware 
+threads of execution; it does not offer memory protection or virtual memory,
+and does not offer preemption.
+It is a single image, single process application able to run concurrent software threads of execution
+by means of a cooperative scheduler.
+Shared structures can be used to synchronize threads in different ways: \textbf{mutexes} can be used
+to grant exclusive access to shared data, \textbf{barriers} can be used to implement step-lock synchronization,
+\textbf{spin locks} can protect critical sections.
+
 The core of the system, the \textbf{kernel}, is separated from all other
 components and is indipendent from all other components; any software
 component can call a function found in the kernel API, but the kernel code can
 not and must not use any external software component.
+This rule applies to any functionality inside the kernel, including logging and debugging.
 
-The kernel offers several interfaces to allow interactions between software
-and itself: drivers are an example of interface between the kernel and the
-hardware, adding a software layer to interact with peripherals without
-actually operating on them.\footnote{Always consider the kernel point of view
-when evaluating the interaction between kernel and external software}
+The system can be easly extended to support different platforms or devices making use of its  driver infrastructure.
+Specific platform dependencies like processor initialization, interrupt support and others are defined as a platform-dependent
+API and its implementation is required in order to compile and link the kernel; while this code is not part of the kernel itself, its interface
+is defined in the kernel, in order to implement a virtual interface for all hardware.
+The kernel will access specific hardware features through generic function calls, implemented in a Board Support Package or in 
+platform-dependent modules; this way the core of the system is unique, and can be linked with modules supporting different hardware.
 
-Files are another software abstraction to let application software communicate
-with the kernel; a file is simply an arbiter, reads and writes are sorted and
-the data can be passed to the kernel - and reverse - without knowledge of the
-internal structures.
+System libraries as well as a \textbf{libc} implementation are part of DiegOS, application code can leverage on these
+APIs to use queues, lists, binary trees, hashed data structures, and to encrypt, encode or compress data.
+
+The system is able to compile and link source code written in C and C++, and supports Object Oriented Programming.
+
+%define colors
+\definecolor{fresh}{RGB}{74,189,172}
+\definecolor{vermillion}{RGB}{252,74,26}
+\definecolor{sunshine}{RGB}{247,183,51}
+\definecolor{clean}{RGB}{223,220,227}
+\definecolor{tangerine}{RGB}{227,114,34}
+\definecolor{teal}{RGB}{7,136,155}
+\definecolor{powder}{RGB}{102,185,191}
+\definecolor{tan}{RGB}{238,170,123}
+
+% Define block styles
+\tikzstyle{block} = [rectangle, draw, fill=sunshine, 
+    text width=5em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{addon} = [rectangle, draw, fill=fresh, 
+    text width=5em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{plat} = [rectangle, draw, fill=vermillion,minimum width=15em, 
+    text width=15em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{user} = [rectangle, draw, fill=clean, 
+    text width=5em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{line} = [draw, -latex']
+    
+\begin{tikzpicture}[node distance = 2cm, align=center]
+  % Place nodes
+\node [block] (kernel) {kernel};
+\node [plat, right of=kernel, node distance=15em] (plat) {platform dependent components};
+\node [addon, below of=kernel, node distance=7em] (drivers) {drivers};
+\node [addon, right of=drivers, node distance=7em] (libs) {libraries};
+\node [user, below of=drivers, node distance=10em, minimum width=12em] (devices) {devices};
+\node [user, below of=devices] (fs) {file system};
+\node [user, right of=fs] (net) {network stack and protocols};
+
+   % Draw edges
+ \path [line] (drivers) -- (kernel);
+ \path [line] (libs) -- (kernel);
+ \path [line, dashed] (plat) -- (kernel);
+ \path [line, dashed] (kernel) -- (plat);
+\end{tikzpicture}
 
 \section{Portability}
 The source code of DiegOS is written in plain C, with a little amount of
@@ -93,20 +143,15 @@ in plain C and one implementation optimized in assembler; the former is totally 
 the latter is welcome when performance gets on stage.
 The system is not designed to run on 64-bit architectures, writing 32- and 64-bit compliant 
 code requires considerable time (and time is a scarce resource!).
-
-Besides, writing code able to compile and run on both 32- and 64-bit processors would break
-the rule of simplicity.
+\footnote{writing code able to compile and run on both 32- and 64-bit processors would break
+the rule of simplicity.}
+The system supports compiling and linking source files written in C++ using classes and objects.
+Object oriented compilers are 
 
 \section{Features}
-DiegOS does not support multiple processors, nor multiple cores, nor even multiple hardware 
-threads of execution; it does not offer memory protection or virtual memory,
-and does not offer preemption.
 
-DiegOS is a single image application, it offers concurrent software threads, 
-a cooperative scheduler, shared structures to
-synchronize threads, a driver infrastructure, and a networking infrastructure.
-
-\section{System design}
+\chapter{System}
+\section{Design}
 \subsection{Booting process}
 The rationale behind the booting stage is to have the most straighforward
 solution, adaptable to any platform and any medium, with the least
@@ -137,13 +182,12 @@ infrastructures, traces, endless strings for printouts.
 \item Access the medium where you stored the DiegOS binary, and read it into
 memory. Document where the binary is put in memory, why it is put there, and
 the memory layout during boot. The medium choice and the code required to
-drive it
-is up to you. The rationale here is, split your boot code if it grows beyond
+drive it is up to you. The rationale here is, split your boot code if it grows beyond
 logic; chain booting is not an option in this case.
 \item Keep your code simple and stupid, do not try to optimize the load time
 or the medium access time: access the hardware in a safe manner, load the OS
 into memory, and run it.
-\item Before jumping to the OS entry point verify this checklist:
+\item Before jumping to the OS entry point go through this checklist:
 
     \begin{minipage}{0.9\textwidth}
     \begin{enumerate}
@@ -187,6 +231,7 @@ explained in section \ref{sub:drivers} at page \pageref{sub:drivers}
 at user's will.
 \item Run the kernel, this actually roll the ball and kicks the scheduler.
 \end{itemize}
+
 \subsection{The kernel}
 The core functionalities of DiegOS are enclosed in this library.
 The kernel is a single instance, single processor component; it does not
@@ -198,69 +243,187 @@ The kernel does not support threads contention or access privilege, so any porti
 the code (and consequently any thread) is able to peek or poke any memory location or 
 access any hardware device.
 This is questionable choice, although it is nothing the God of Information wouldn't let you in 
-heaven for (you can guess where the citation comes from, ain't you?).
+heaven for \\footnote{you can guess where the citation comes from ...}.
 All in all, a general purpose OS would not even mention memory protection as an option; 
 again, if you need the real thing, go get it. A small bare-metal system would require lots
 of resources to assure a decent level of security if implementing memory protection,
 and this is not a goal for DiegOS.
+
 \subsection{Kernel services}
 The kernel offers the following services: a thread scheduler, a thread management API, 
 an alarm API, events queueing and dispatching, mutexes, barriers, I/O waiting and spin locks.\\
 Alarms, Events and Mutexes are all managed services, meaning that an owning thread
-can create, destroy, or reconfigure them at any time.\\
+can create, destroy, or reconfigure them at any time.
+
 \begin{description}
-\item[Scheduler] the DiegOS scheduler is as simple as possible; pre-emption is
-not supported, and threads must co-operate in order to give up CPU time when
-idling or waiting for peripherals.
+\item[The Scheduler] the DiegOS scheduler is as simple as possible, and is implemented as a FIFO
+queue with several priority levels. Pre-emption is not supported, and threads must co-operate in
+ order to give up CPU time when computing is not required.
+
 Threads can be suspended, halted, delayed, and removed\footnote{Removal means the
 thread will be killed.} but at least one thread must be ready to run at any time
-\footnote{This is the Idle thread, which cannot be killed.}.\\
-Ready threads are doubly-linked in lists.\\
+\footnote{This is the Idle thread, which cannot be killed.}.
+
+% Define block styles
+\tikzstyle{idle} = [rectangle, draw, fill=teal, 
+    text width=5em, text centered,node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{norm} = [rectangle, draw, fill=fresh, 
+    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{high} = [rectangle, draw, fill=sunshine, 
+    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{rt} = [rectangle, draw, fill=vermillion, 
+    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{idle1} = [rectangle, draw, fill=teal!50, 
+    text width=5em, text centered,node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{norm1} = [rectangle, draw, fill=fresh!50, 
+    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{high1} = [rectangle, draw, fill=sunshine!1, 
+    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{r1t} = [rectangle, draw, fill=vermillion!1, 
+    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{run} = [circle, draw, fill=tangerine, 
+    text width=5em, text centered, node distance=4cm,  minimum height=5em]
+
+\begin{tikzpicture}[node distance = 3cm, outer sep=auto, inner sep=1em, thick]
+  % Place nodes
+\node [run] (run) {Running Thread};
+\node [idle, , below left of=run, node distance=5cm] (idle) {IDLE};
+\node [idle1, below of=idle] (idle1) {thread 1};
+\node [idle1, below of=idle1] (idle2) {thread 2};
+\node [idle1, below of=idle2] (idlen) {thread N};
+\node [norm, right of=idle, node distance=3cm] (norm) {NORMAL};
+\node [norm1, below of=norm, node distance=3cm] (norm1) {thread 1};
+\node [norm1, below of=norm1, node distance=3cm] (norm2) {thread 2};
+\node [norm1, below of=norm2, node distance=3cm] (normn) {thread M};
+\node [high, right of=norm, node distance=3cm] (high) {HIGH};
+\node [high, below of=high, node distance=3cm] (high1) {thread 1};
+\node [high, below of=high1, node distance=3cm] (highn) {thread O};
+\node [rt, right of=high, node distance=3cm] (rt) {REALTIME};
+\node [rt, below of=rt, node distance=3cm] (rt1) {thread P};
+
+   % Draw edges
+ \path [line, dashed] (idle) --  (run);
+ \path [line, dashed] (norm.north) -- (run);
+ \path [line, dashed] (high.north) -- (run);
+ \path [line, dashed] (rt.north) -- (run);
+ \path [line, ultra thick] (norm) -- (idle);
+ \path [line, ultra thick] (high) -- (norm);
+ \path [line, ultra thick] (rt) -- (high);
+ \path [line] (idle) -- (idle1);
+ \path [line] (idle1) -- (idle2);
+ \path [line] (idle2) -- (idlen);
+ \path [line] (norm) -- (norm1);
+ \path [line] (norm1) -- (norm2);
+ \path [line] (norm2) -- (normn);
+ \path [line] (high) -- (high1);
+ \path [line] (high1) -- (highn);
+ \path [line] (rt) -- (rt1);
+\end{tikzpicture}
+
 The scheduler is designed to manage the threads' finite state machine and select 
 the running thread by using a priority queue schema. There are four
 priorities in DiegOS, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
 \texttt{High Priority} and \texttt{Realtime Priority}.
+
 When a thread is in the ready queue, it will not substitute the running
 one, not even if the ready thread's priority is higher; pre-emption is \textbf{not
 supported} at all.
+The running thread must give up by suspending or waiting on some shared resource to let
+the scheduler select another running thread.
+
+The scheduler will loop the highest priority queue with at least a ready thread until the
+list is void; the list will be empty when all the threads with that priority have suspended or have
+been killed.
+This implies that all threads in a specific ready queue will run at least once before being evicted
+from the list itself.
+Lists are browsed in decreasing priority order down to \texttt{Idle priority} where at least one ever-running
+thread is expected to exists.
+
+Whatever the thread's priority might be, a thread owns the system until suspending or waiting: care must be taken
+in writing application code processing data to avoid hogging the CPU or - definitively worser - starving other
+threads.
 
 Bear in mind that a higher priority thread will never give up for a lower priority
 thread; to avoid CPU hogging you must be sure that all threads will either sleep or 
 wait or delay, and they should perform their processing as fast as possible;
 if you cannot complete the required actions in a decent amount of time, you must split
-operations suspending execution.
-Failing to do so will lock your processing into one thread only.
-\item[Threads] a thread is a new, independent code path starting from a
+operations and run them in chunks, suspending the thread between runs;
+failing to do so will starve all threads exept the running one.
+Even if this might be a desired behavior, it is really dangerous and might generate unwanted effects
+on accounting or performance monitoring.
+
+\item[Threads] a thread is a new independent code path starting from a
 function (used as entry point) that can be alternated with other code paths.
 Whenever a thread hands over to another thread, the kernel has to store the
 CPU's context into the running thread, and restore the context loading it from
 the handed over thread.
 Context is defined as the set of registers and flags that differ from path to
-path in the code.
+path in the code.\\
+Along with the processor context a distinctive feature of a thread is its \textbf{stack}.
+The stack pointer (which is usually part of the processor context) must be saved and restored
+and stack memory areas \textbf{must not} be corrupted at any time, or the distinctive backtrace of 
+code paths would break leading to memory corruptions or crashes.
+
+\begin{tikzpicture}[->,  outer sep=auto, inner sep=1em, thick, node distance=4cm]
+\node [circle,fill=gray!30,draw] (IDLE) {IDLE};
+\node [circle,fill=green!60,draw] (READY) [below of=IDLE] {READY};
+\node [circle,fill=orange!60,draw] (RUN) [below of=READY] {RUN};
+\node [circle,fill=gray!30,draw] (KILL) [below  of=RUN] {KILL};
+\node [circle,fill=blue!60,draw] (SLEEP) [left of=KILL] {SLEEP};
+\node [circle,fill=blue!60,draw] (WAIT) [right of=KILL] {WAIT};
+\path
+(IDLE)     edge [dashed, loop above] node [right] {On creation} (IDLE)
+(IDLE)     edge [dashed] node [right] {After creation} (READY)
+(READY)  edge node [right] {Scheduled} (RUN)
+(RUN)      edge [bend left=60]  node [left]{suspend} (READY)
+(RUN)      edge node [left]{sleep} (SLEEP)
+                edge node [left] {wait} (WAIT)
+               edge [dashed] node [left] {killed} (KILL)
+(SLEEP)   edge [bend left=60] node [left] {wake up} (READY)
+(WAIT)   edge [bend right=60] node [right] {wake up} (READY);
+\end{tikzpicture}
+
+Threads can be in four stable states, namely \texttt{RUN, WAIT, SLEEP,  READY}, and two transient states
+ \texttt{IDLE} and \texttt{KILL}.
+The latter are transient by definition as they designate a thread which has been created but never run (\texttt{IDLE})
+and a thread scheduled to be killed (\texttt{KILL})
+\footnote{A thread is not killed upon call to a specific kernel interface, it is inserted in a temporary queue for later disposal.}.\\
+Threads can be promoted from the \texttt{READY} state to the \texttt{RUN} state  by the scheduler internals only;  the reverse action is performed by \textit{suspension} function calls.\\
+Kernel APIs can change the \texttt{RUN} thread state to \texttt{WAIT} state by means of \textit{sleeping} functions or \textit{suspension points}.
+\footnote{Kernel suspension points are mutexes, barriers, I/O waits.}
+
 \item[Alarms] are a fundamental feature to let threads sleep and wake up at a
 defined time. 
-Alarms queue events to a thread with a specific class ID; handling alarms is just
+Alarms are events queued to a thread with a specific class ID; handling alarms is just
 like handling events. Alarms can be one-shot or recursive, and can be started or
 halted anytime.
 \item[Events] are extensible system messages, used to signal some interesting news to a thread. 
 Events are organized as queues (FIFO), and processed one by one in
 chronological order.\\
-There is no memory management for events, so both the producer and the
+Memory management for events is optional,  both the producer and the
 consumer must take care of allocating memory when creating an event message,
-and freeing it once the event has been processed.
+and freeing it once the event has been processed. The producer can create events
+with no memory-free handler, in this case the consumer will not release the event storage;
+if a memory-free handler is set, the consumer will invoke it passing a pointer to the event
+as a parameter to the handler.\\
+\textbf{Important:} the memory release handler (memory-free handler) is executed in
+the \textit{consumer} thread's context, possibly out of control of the producer's thread;
+if events are created on the heap a synchronization mechanism must be put in place to
+avoid corrupting data structures.
 \item[Mutexes] are the simplest form of semaphore. A mutex is initially
-unlocked; the first thread locking the mutex will proceed with execution,
-entering a critical code section and running as long as it needs to.
+unlocked; the first thread trying to acquire a lock on the mutex will actually get the lock
+and proceed with execution, entering a critical code section and running as long as it needs to.
 Unless the mutex is unlocked, no other thread is allowed to enter the same
-critical code section; other threads trying to lock the same mutex will sit in a
+critical code section; other threads trying to acquire a lock on the same mutex will sit in a
 waiting queue. 
 Once the first thread has released (unlocked) the mutex, the threads waiting for 
-a lock will be run one at a time, until no waiting threads are left.\\
-Once no thread is waiting for a lock on the mutex, the mutex is unlocked.
-Remeber that a mutex is not a counting semaphore, threads sitting in the wait queue
-will repeatedly lock and unlock the mutex.
-\item[Spin locks] are a running, atomic wait to gain a lock on a integer used as a
-barrier or mutex. Spin locks can be locked or unlocked.\\
+a lock will be run one at a time, until no waiting threads are left; every thread entering the
+critical section is guaranteed to have acquired a lock on the mutex, which means, 
+code after the lock acquisition function is guaranteed to run helding a lock on the mutex.\\
+Once no thread is waiting for a lock on the mutex, the mutex is left unlocked.
+\item[Spin locks] are a running  atomic delay to acquire a lock on a integer used as a
+barrie. Spin locks can be locked or unlocked.\\
 A thread trying to acquire a spin lock will enter an infinite loop until the lock is 
 gained, so if the spin lock is originally locked, the thread will suspend and enter
 the ready queue continuosly.\\
@@ -272,8 +435,139 @@ The suspended thread is removed from the ready queue and parked into a wait queu
 threads can sleep on the same wait queue, and can be awakened in groups.\\
 Threads are moved from wait queues to ready queues in a FIFO fashion, and it is not possible
 to priorize or sort this sequence.
-
+\item[Barriers] are a form of cumulative mutual exclusion, useful to suspend execution of several
+threads waiting for a single shared resource to be available.\\
+Barriers are \textit{closed} upon creation, and can be opened or closed by any thread; an open barrier will
+resume \textbf{all} the waiting threads at once moving them into their respective \textit{ready queues}.\\
+Optionally a barrier can automatically close after opening, creating a step-lock software gate.
 \end{description}
+
+\subsection{Drivers}
+\label{sub:drivers}
+Drivers in DiegOS are interfaces to hardware.
+They enable software to start and stop hardware operations, configure it, and perform input and output.
+Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
+be carefully designed to avoid conflicts with the system-wide interrupt handling.
+DiegOS protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
+designed to be reentrant.
+The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
+and will enable the interrupt back again once the servicing routine returns.
+
+There is a common interface for all drivers, and common rules to specify functions.\\
+All functions returning a status will return an \texttt{int} value.\\
+All functions returning a size will return an \texttt{unsigned int} value.\\
+Drivers are multi-instance, as a consequence all function prototypes must specify an \texttt{unsigned int} unit number
+as last parameter.
+
+The \texttt{init} function can be used to initialize the driver for a specific instance
+\footnote{An instance matches a hardware device, a single driver can handle multiple devices.}
+but \texttt{not} actually make the device run.
+
+Functions \texttt{start} and \texttt{stop} can run the hardware activities or stop them, this includes enabling or disabling
+interrupts, DMA transfers, I/O operations, sensors polling, and so on.
+It is assumed that alternating calls to \texttt{start} and \texttt{stop} will make the hardware device either work or not work,
+but will not change its configuration or power state.
+
+Function \texttt{done} can be used to terminate the driver and shut down the hardware device. This operation is \textbf{not reversible}
+in contrast with the \texttt{start} and \texttt{stop} functions. Once \texttt{done} has been invoked it is required to call \texttt{init} again
+to reset the device to defaults and reconfigure it.
+
+Function \texttt{status} can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization
+\footnote{Drivers have different extensions for different kind of hardware devices: block devices, character devices, graphics, networking}.
+
+\begin{lstlisting}[language=C,basicstyle=\small\ttfamily,backgroundcolor=\color{gray!10!white},keywordstyle=\bfseries\color{green!40!black},
+commentstyle=\color{orange!60!black},identifierstyle=\itshape\color{cyan!60!black}, stringstyle=\color{red!60!black}]
+
+typedef struct driver_header {
+    /*
+     * Name of the driver, to be filled at compile time.
+     */
+    char name[DRV_NAME_LEN + 1];
+    /*
+     * Init function, it is to be invoked at startup 
+     * to discover the supported devices,
+     * assign resources for all units, 
+     * and init the device.
+     * Note: init does not mean start, run,
+     *           enable interrupts, enable DMA.
+     *           The kernel will not be able to handle 
+     *           events to or from devices until
+     *           the start_fn function is invoked.
+     *           The device should be configured to 
+     *           be ready to start working but kept
+     *           reset or idle.
+     * Return values:
+     * EOK in case of success (device unit inited)
+     * ENXIO in case the unitno is not supported 
+     *            or inited
+     * other errnos for failures
+     */
+    int (*init_fn)(unsigned unitno);
+    /*
+     * Start the device's operations.
+     *  This include interrupt handlers, DMA, 
+     * I/O activities.
+     */
+    int (*start_fn)(unsigned unitno);
+    /*
+     * Stop the device's operations. 
+     * This include I/O activities as well as events,
+     * but the device should not fail or be reset.
+     * Calling start_fn again the device should recover
+     * gracefully and start working.
+     */
+    int (*stop_fn)(unsigned unitno);
+    /*
+     * This function should shut down the device.
+     * It will be invoked on shutdown/reboot
+     * of the kernel.
+     */
+    int (*done_fn)(unsigned unitno);
+    /*
+     * Retrieve the driver status
+     */
+    unsigned (*status_fn)(unsigned unitno);
+   /*
+     * I/O control, driver specific
+     */
+    int (*ioctrl_fn)(void *data,
+			unsigned opcode, 
+			unsigned unitno);
+    /*
+     * Implement poll
+     */
+    short (*poll_fn)(poll_table_t *table);
+} driver_header_t;
+
+\end{lstlisting}
+
+\subsection{File system}
+
+\subsection{Libraries}
+
+Every operating  environment offers a set of libraries to be used
+at application level.
+Applications make use of widely known data structures and algorithms
+to build even more complex algorithms.
+When an Operating System is built as a single process, running application
+level threads, the availability of such APIs enable developers to code
+highly orthogonal systems, leveraging on the same libraries for drivers,
+front ends, interfaces, databases, applications.
+
+DiegOS offers a pletora of data structures
+\subsection{Networking}
+
+\section{Drivers interface}
+
+\chapter{File System architecture}
+
+\chapter{Networking infrastructure}
+
+\chapter{The System Console}
+
+\chapter{Debug infrastructure}
+
+\chapter{Kernel implementation}
 \subsection{Recommendations and other suggestions}
 The core functionalities are very simple: spawn a number of execution threads, run all
 of them one by one, interrupts \textbf{cannot and must not} invoke a context switch,
@@ -292,23 +586,6 @@ My suggestion is to use spinlocks for very fast and short critical sections, whe
 would be worser and slower; make use of mutexes if you need heavy computations inside the critical 
 section, as all other contending thread will be waiting and won't be scheduled at all, freeing up the 
 CPU and letting the locking thread complete its tasks as fast as possible.
- 
-\subsection{Drivers}
-\label{sub:drivers}
-Drivers in DiegOS are interfaces to hardware.
-They enable software to start and stop hardware operations, configure it, and perform input and output.
 
-Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
-be carefully designed to avoid conflicts with the system-wide interrupt handling.
-DiegOS protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
-designed to be reentrant.
-The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
-and will enable the interrupt back again once the servicing routine returns.
-
-
-
-
- 
-\subsection{File systems}
 \end{document}
 
