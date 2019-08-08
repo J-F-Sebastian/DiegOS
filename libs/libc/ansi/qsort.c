@@ -34,10 +34,10 @@ void qsort (void *base, size_t n, size_t size,
 }
 
 static void
-qsort1(char *a1, char *a2, register size_t width)
+qsort1(char *a1, char *a2, size_t width)
 {
-    register char *left, *right;
-    register char *lefteq, *righteq;
+    char *left, *right;
+    char *lefteq, *righteq;
     int cmp;
 
     for (;;) {
@@ -121,12 +121,23 @@ again:
 }
 
 static void
-qexchange(register char *p, register char *q,
-          register size_t n)
+qexchange(char *p, char *q, size_t n)
 {
-    register int c;
+    long c;
+    long *pp = (long *)p;
+    long *qq = (long *)q;
 
-    while (n-- > 0) {
+    while (n > sizeof(long)) {
+        c = *pp;
+        *pp++ = *qq;
+        *qq++ = c;
+	n -= sizeof(long);
+    }
+
+    p = (char *)pp;
+    q = (char *)qq;
+
+    while (n--) {
         c = *p;
         *p++ = *q;
         *q++ = c;
@@ -134,12 +145,26 @@ qexchange(register char *p, register char *q,
 }
 
 static void
-q3exchange(register char *p, register char *q, register char *r,
-           register size_t n)
+q3exchange(char *p, char *q, char *r, size_t n)
 {
-    register int c;
+    long c;
+    long *pp = (long *)p;
+    long *qq = (long *)q;
+    long *rr = (long *)r;
 
-    while (n-- > 0) {
+    while (n > sizeof(long)) {
+        c = *pp;
+        *pp++ = *rr;
+        *rr++ = *qq;
+        *qq++ = c;
+	n -= sizeof(long);
+    }
+
+    p = (char *)pp;
+    q = (char *)qq;
+    r = (char *)rr;
+
+    while (n--) {
         c = *p;
         *p++ = *r;
         *r++ = *q;
