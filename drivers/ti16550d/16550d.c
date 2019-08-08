@@ -414,7 +414,6 @@ static int uart_done(unsigned unitno)
 
 static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 {
-    static volatile int exclusive = 0;
     unsigned copy_bytes;
     unsigned buffer_space;
 
@@ -427,13 +426,7 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
     }
 
     while (!cbuffer_is_empty(&tx_cbuf)) {
-        if (exclusive) {
-            (void)thread_io_wait(&wq_w);
-        } else {
-            exclusive = 1;
-            (void)thread_io_wait_exclusive(&wq_w);
-            exclusive = 0;
-        }
+        (void)thread_io_wait(&wq_w);
     }
 
     buffer_space = cbuffer_free_space(&tx_cbuf);

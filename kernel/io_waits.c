@@ -81,8 +81,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
     }
 
     temp->flags = flags;
-    if ((IO_WAIT_DEFAULT == flags) ||
-        (IO_WAIT_EXCLUSIVE == flags)) {
+    if (IO_WAIT_DEFAULT == flags) {
         temp->tid = scheduler_running_tid();
     } else {
         lock();
@@ -94,19 +93,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
     prev = scheduler_running_thread();
 
     lock();
-    /*
-     * Non-exclusive waits are added at the end of the list,
-     * while exclusive waits are added at the start of the list.
-     * thread_io_resume will resume threads picking items from the start
-     * of the list, hence exclusive waits are always first in line.
-     * Exclusive waits are resumed one at a time, non-exclusive all at once.
-     */
-    if (IO_WAIT_DEFAULT == flags) {
-        lstprev = list_tail(wq);
-    } else if (IO_WAIT_EXCLUSIVE == flags) {
-        lstprev = NULL;
-    }
-
+    lstprev = list_tail(wq);
     retcode = list_add(wq, lstprev, &temp->header);
     unlock();
 
@@ -141,15 +128,9 @@ int thread_io_wait(wait_queue_t *wq)
     return (thread_io_wait_internal(wq, IO_WAIT_DEFAULT));
 }
 
-int thread_io_wait_exclusive(wait_queue_t *wq)
-{
-    return (thread_io_wait_internal(wq, IO_WAIT_EXCLUSIVE));
-}
-
 int thread_io_resume(wait_queue_t *wq)
 {
     struct wait_queue_item *cursor;
-    unsigned char flags;
 
     if (!wq) {
         return (EINVAL);
@@ -167,11 +148,7 @@ int thread_io_resume(wait_queue_t *wq)
         if (EOK != list_remove(wq, &cursor->header)) {
             break;
         }
-        flags = cursor->flags;
         chunks_pool_free(wait_queue_items, cursor);
-        if (IO_WAIT_EXCLUSIVE == flags) {
-            break;
-        }
     }
     unlock();
 

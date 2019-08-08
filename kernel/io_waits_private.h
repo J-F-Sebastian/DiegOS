@@ -24,7 +24,6 @@
 
 enum {
     IO_WAIT_DEFAULT,
-    IO_WAIT_EXCLUSIVE,
     IO_WAIT_POLL
 };
 
