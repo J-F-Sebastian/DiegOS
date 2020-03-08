@@ -190,9 +190,7 @@ static void uart_handle_recv_data_fifo(void)
         cbuffer_add(&rx_cbuf);
     }
 
-    if (buffer_left < sizeof(rx_buf)/2) {
-        (void)thread_io_resume(&wq_r);
-    }
+    (void)thread_io_resume(&wq_r);
 }
 
 static void uart_handle_recv_data_timeout(void)
@@ -546,7 +544,7 @@ static unsigned uart_status(unsigned unitno)
     return (0);
 }
 
-static short uart_poll (poll_table_t *table)
+static short uart_poll(poll_table_t *table)
 {
     short ret = 0;
 
