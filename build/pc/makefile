@@ -16,7 +16,8 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../platforms/$(CPU)/$(CPU).a \
 	../../drivers/$(OBJPREFIX)_drivers.a \
 	../../libs/$(OBJPREFIX)_diegos_lib.a \
-	../../libs/libc/$(OBJPREFIX)_libc.a
+	../../libs/libc/$(OBJPREFIX)_libc.a \
+	../../fat/$(OBJPREFIX)_fat.a
    
 all: bootsect.bin 
 	cd ../../platforms/$(CPU) && make all
@@ -24,13 +25,13 @@ all: bootsect.bin
 	cd ../../kernel && make all
 	cd ../../libs && make all
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) all
+	cd ../../fat && make all
 	cd ../../applications/console && make all
 	cd ../../applications/demo && make all
 	$(LD) -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
 	objcopy -S DiegOS.elf DiegOS.stripped.elf
 	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
-	cat bootsect.bin DiegOS.bin > img.bin
-	dd if=img.bin of=bootflop.img ibs=2880b conv=sync
+	./mkimage -b bootsect.bin -s DiegOS.bin -d bootimage.img
 
 clean:
 	cd ../../kernel && make clean
@@ -43,5 +44,4 @@ clean:
 	rm -f *.o *.bin *.img *.elf
 
 bootsect.bin:
-	nasm -f bin -o $@ ../../boot/pc/boots32.s
-
+	nasm -f bin -o $@ ../../boot/pc/bootmbr32.s
