@@ -127,7 +127,7 @@ IMG_SIZE	EQU 512; in sectors, 512 bytes per sector. This value MUST NOT
                    ; be greater than 1152, or your image will be written to
                    ; the VGA memory...
 
-RAM_START	    EQU 0x0600
+RAM_START	EQU 0x0600
 STACK16_START	EQU 0x7000
 STACK32_START	EQU 0x0000F000
 DIEGOS_VARS 	EQU 0x0000F000
