@@ -1,60 +1,93 @@
-\documentclass[12pt,a4paper]{book}
-\usepackage{xcolor}
+\documentclass[a4paper, fontsize=12, parskip=half-]{scrbook}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[english]{babel}
+\usepackage{textcomp}
+\usepackage{chapterthumb}
+\usepackage{scrlayer-scrpage}
+\AddLayersToPageStyle{@everystyle@}{chapterthumb}
+\addtokomafont{chapterthumb}{\bfseries}
+\usepackage{setspace}
+\onehalfspacing
 \usepackage{listings}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows}
 
 \begin{document}
-\title{
-\rule{\linewidth}{2mm}
-DiegOS\\ Architecture, Design and Implementation
-\rule{\linewidth}{2mm}}
+\subject{Documentation}
+\title{DiegOS}
+\subtitle{Design and Implementation of a minimalistic Operating System}
 \author{Diego Gallizioli}
-\date{ \today}
-
+\date{\today}
+\uppertitleback{
+DiegOS\\
+Design and Implementation of a minimalistic Operating System\\
+Copyright \textcopyright \today \\
+Diego Gallizioli
+}
+\lowertitleback{This document was set with the help of {\KOMAScript} and
+{\LaTeX}}
+\dedication{To my wife Monica and my children Davide Matteo and Anna, for letting me sit in front of my computer late at night.}
 \maketitle
-\tableofcontents
 
-\newpage
-\section*{Dedications}
-To my wife Monica and my children Davide Matteo and Anna, for being proud of my work
-and letting me sit in front of my terminal late at night.
+\tableofcontents
 
 \chapter{Concepts}
 \section*{Inheritance and other inspirations}
-One of the main goal of an Operating System is to offer a friendly and comfortable environment
-for programmers, users, and administrators.
-This goal is not that easy: since the very first Operating System inception, a huge number of engineers 
-and scientists worked on this, developing concepts, ideas, architectures, interfaces, and documenting 
-their work to produce what we know today as Microsoft\textregistered{} Windows\textregistered{}, Linux, Unix, 
-or Apple\textregistered{} macOS\textregistered{}.
+I approached the world of computing when I was 8 years old.
+My father bought a Commodore C64 after an intensive and extensive search throughout most of the electronics shops
+available.
 
+His target --- having me and my brother understand what a computer could do --- was partially met: I went on to become an engineer,
+my brother chose a different path.\footnote{He is a doctor now.}
+I still remember when I asked for a more powerful computer: my intense desire was to explore the unknown universe of the then innovative AMIGA
+platform, but when I had to explain this idea to my father, I failed; to his eyes the Commodore machines were merely videogames.
+I succeded in replacing my beloved C64 with an i8086-based personal computer running MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
+and from then on I got more and more interested in two aspects of computing: transmitting data and having software interact with hardware.
+
+While attending university my curiosity for operating systems became a top interest.
+This interest eventually led me to try to write an operating system by myself.
+Developing a full-blown operating system as a spare time activity proved to be really challenging, besides, there are way too much
+OS in the world.
+Still, as a professional software developer I approached the embedded systems and found an interesting niche to work on.
+This is why I wrote DiegOS.
+
+From my personal standpoint the main goal of an Operating System is to offer a friendly and comfortable environment
+for both programmers, users, and administrators, or in other words, offer an effective interface to the underlying hardware.
+Scoring this goal is not easy: since the very first Operating System inception, a huge number of engineers 
+and scientists worked to develope concepts, ideas, architectures, interfaces, and documenting 
+their work to produce what we know today as Microsoft Windows, Linux, Unix, or Apple Inc. macOS.
 All these people proved to be smarter than the Author of this book.
-Serious.
 
-I had the chance and the privilege to work on a number of Operating Systems,
-some of them with peculiar features, some of them with legacy constraints, all of
+Up today I had the chance and the privilege to work on a number of Operating Systems,
+some of them with peculiar features, some of them with legacy constraints, most of
 them with a clear design.
 DiegOS was born after years of careful and intensive meditation; it has no peculiarities,
 a KISS \footnote{The acronim stands for Keep It Simple, Stupid.} approach, no legacy constraints, and above all a humble
 target: do the right thing, the easy way, the fastest way, avoiding common errors and nuisances.
 
-Development of DiegOS took a lot of my spare time, still I cannot claim a "professional" work
-behind it; it is a hobbist toy for sure, probably a useful tool to play with, definitively not
-a general purpose Operating System, although it can perform nicely as an embedded Operating System.
-
-Just like anyone out there, I did not conceive all you can find in this book by myself;
+Development of DiegOS took a lot of my spare time, still I did not conceive all the contents of this book by myself;
 the most inspiring source of wisdom at the heart of DiegOS is Minix. 
 Minix is definitively a fitness room, furnished with all the whistles and bells and tools you could ever dream of.
 This \textbf{\emph{does not imply}} that Minix is the best Operating System out there, 
 it simply means I consider it a delightful piece of code.
 
-The most inspiring source to improve my programming skills was
-Michael Abrash's \emph{GRAPHICS programming black book};
+Besides, the most inspiring source to improve my programming skills was
+Michael Abrash's \emph{Graphics Programming Black Book};
 all I have to say about it is, zenning is a very long journey, and you'd better take your time and read it.
-So for all of you folks in search of an argument, have a break and practice your zen ...
 
-\vspace{3cm}
+Last but not least, writing software requires patience. Resilience to failure. Acceptance of personal limits.
+Acknowledge of success when new code runs the way it should.
+Understanding of the true nature of software: vacuity. Because all software of any kind under any form is
+essentially an abstract algorithm performing elementary actions faster than our mind.
+The creator of all software \textbf{is} our mind, but \textbf{no software can replace} our mind.
+
+Still they both are ephemeral, abstract.
+This is why I leave to the reader an abstract taken from \quote{The Sutra of the Heart}.
+
+Enjoy my book, I hope you will enjoy my software.
+
+\newpage
+
 \emph{" Form is empty, emptiness is form, Emptiness is not other than form, form is also not other than emptiness.
 Likewise, sensation, discrimination, conditioning, and awareness are empty.}
 
@@ -62,30 +95,77 @@ Likewise, sensation, discrimination, conditioning, and awareness are empty.}
 
 \emph{Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness. There is no eye, no ear, no nose, no tongue, no body, no mind. There is no form, no sound, no smell, no taste, no texture, no phenomenon. There is no eye-element and so on up to no mind-element and also up to no element of mental awareness. There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death. Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
 \vfill
-\newpage
 
 \mainmatter
 \chapter{Architecture}
 \section{Design}
-DiegOS has been designed to be a simple application.
-Software is partitioned in layers with defined dependencies between modules,
-the kernel being the core of the system, and therefore the only true stand-alone module.
+DiegOS has been designed to be a simple application running on top of bare metal.
+It is compiled and linked as a single binary image, a single process application able to run 
+concurrent threads of execution by means of a co-operative scheduler.
+The software is partitioned in layers with defined dependencies between modules;
 DiegOS does not support multiple processors,  multiple cores, or multiple hardware 
-threads of execution; it does not offer memory protection or virtual memory,
+threads of execution; it does not offer memory protection or swappable memory,
 and does not offer preemption.
-It is a single image, single process application able to run concurrent software threads of execution
-by means of a cooperative scheduler.
-Shared structures can be used to synchronize threads in different ways: \textbf{mutexes} can be used
-to grant exclusive access to shared data, \textbf{barriers} can be used to implement step-lock synchronization,
-\textbf{spin locks} can protect critical sections.
+the \textbf{kernel} is composed of several items like a mutex manager to coordinate
+concurrency between threads, an alarm manager to implement timers, an event manager
+to exchange messages between threads, barriers, spin locks, I/O support for drivers.
+The inner part of the core is all about thread management and is not directly exposed
+to other modules, its components are the scheduler and the idle thread; a kernel API 
+is provided to access these components from threads.
 
-The core of the system, the \textbf{kernel}, is separated from all other
-components and is indipendent from all other components; any software
-component can call a function found in the kernel API, but the kernel code can
-not and must not use any external software component.
-This rule applies to any functionality inside the kernel, including logging and debugging.
+% Define block styles
+\tikzstyle{block} = [rectangle, draw, fill=Cyan, 
+    text width=5em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{block2} = [rectangle, draw, fill=Goldenrod, 
+    text width=5em, text centered, rounded corners, minimum height=5em,
+    minimum width = 20em]
+\tikzstyle{addon} = [rectangle, draw, fill=Cerulean, 
+    text width=5em, text centered, rounded corners, minimum height=5em,
+    minimum width = 20em]
+\tikzstyle{plat} = [rectangle, draw, fill=WildStrawberry,
+    text width=5em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{user} = [rectangle, draw, fill=Gray, 
+    text width=5em, text centered, rounded corners, minimum height=5em]
+\tikzstyle{user2} = [rectangle, draw, fill=Gray, 
+    text width=5em, text centered, rounded corners, minimum height=5em,
+    minimum width = 20em]
+\tikzstyle{line} = [draw, -latex']
+    
+\begin{tikzpicture}[node distance = 2cm, align=center]
+  % Place nodes
+\node [block] (scheduler) {scheduler};
+\node [block, right of=scheduler, node distance=5em] (events) {event manager};
+\node [block, right of=events, node distance=5em] (IO) {I/O manager};
+\node [block, right of=IO, node distance=5em] (alarms) {alarms manager};
+\node [block, right of=alarms, node distance=5em] (mutexes) {mutexes};
+\node [block, right of=mutexes, node distance=5em] (barriers) {barriers};
+\node [plat, right of=barriers, node distance=5em] (plat) {platform components};
+\node [block2, below of=alarms, node distance=15em] (kernel) {kernel};
+\node [addon, below of=kernel, node distance=7em] (drivers) {drivers};
+\node [addon, right of=drivers, node distance=7em] (libs) {libraries};
+\node [user, below of=drivers, node distance=10em] (devices) {devices};
+\node [user, right of=devices] (fs) {file system};
+\node [user, right of=fs] (net) {networking};
+\node [user2, below of=devices] (user) {user applications};
 
-The system can be easly extended to support different platforms or devices making use of its  driver infrastructure.
+   % Draw edges
+ \path [line] (scheduler) -- (kernel);
+ \path [line] (events) -- (kernel);
+ \path [line] (IO) -- (kernel);
+ \path [line] (alarms) -- (kernel);
+ \path [line] (mutexes) -- (kernel);
+ \path [line] (barriers) -- (kernel);
+ \path [line] (plat) -- (kernel);
+ %\path [line, dashed] (plat) -- (kernel);
+ %\path [line, dashed] (kernel) -- (plat);
+ %\path [line, dashed] (drivers) -- (devices);
+\end{tikzpicture}
+
+The managers handle shared structures that can be used to synchronize threads in different ways: 
+\textbf{mutexes} can be used to grant exclusive access to shared data, \textbf{barriers} can be used 
+to implement step-lock synchronization, \textbf{spin locks} can protect critical sections.
+
+The system can be easly extended to support different platforms or devices making use of its driver infrastructure.
 Specific platform dependencies like processor initialization, interrupt support and others are defined as a platform-dependent
 API and its implementation is required in order to compile and link the kernel; while this code is not part of the kernel itself, its interface
 is defined in the kernel, in order to implement a virtual interface for all hardware.
@@ -97,43 +177,8 @@ APIs to use queues, lists, binary trees, hashed data structures, and to encrypt,
 
 The system is able to compile and link source code written in C and C++, and supports Object Oriented Programming.
 
-%define colors
-\definecolor{fresh}{RGB}{74,189,172}
-\definecolor{vermillion}{RGB}{252,74,26}
-\definecolor{sunshine}{RGB}{247,183,51}
-\definecolor{clean}{RGB}{223,220,227}
-\definecolor{tangerine}{RGB}{227,114,34}
-\definecolor{teal}{RGB}{7,136,155}
-\definecolor{powder}{RGB}{102,185,191}
-\definecolor{tan}{RGB}{238,170,123}
-
-% Define block styles
-\tikzstyle{block} = [rectangle, draw, fill=sunshine, 
-    text width=5em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{addon} = [rectangle, draw, fill=fresh, 
-    text width=5em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{plat} = [rectangle, draw, fill=vermillion,minimum width=15em, 
-    text width=15em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{user} = [rectangle, draw, fill=clean, 
-    text width=5em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{line} = [draw, -latex']
-    
-\begin{tikzpicture}[node distance = 2cm, align=center]
-  % Place nodes
-\node [block] (kernel) {kernel};
-\node [plat, right of=kernel, node distance=15em] (plat) {platform dependent components};
-\node [addon, below of=kernel, node distance=7em] (drivers) {drivers};
-\node [addon, right of=drivers, node distance=7em] (libs) {libraries};
-\node [user, below of=drivers, node distance=10em, minimum width=12em] (devices) {devices};
-\node [user, below of=devices] (fs) {file system};
-\node [user, right of=fs] (net) {network stack and protocols};
-
-   % Draw edges
- \path [line] (drivers) -- (kernel);
- \path [line] (libs) -- (kernel);
- \path [line, dashed] (plat) -- (kernel);
- \path [line, dashed] (kernel) -- (plat);
-\end{tikzpicture}
+The native file system that comes with DiegOS is a variant of the Microsoft FAT16 file system; it is not compatible with
+the original FAT16 and at the time of this writing does not support flash memory type devices.
 
 \section{Portability}
 The source code of DiegOS is written in plain C, with a little amount of
@@ -146,9 +191,14 @@ code requires considerable time (and time is a scarce resource!).
 \footnote{writing code able to compile and run on both 32- and 64-bit processors would break
 the rule of simplicity.}
 The system supports compiling and linking source files written in C++ using classes and objects.
-Object oriented compilers are 
 
-\section{Features}
+\section{build system}
+The code base of DiegOS builds using makefiles and the make tool; output object code is stored in dedicated directories
+named after the platform/CPU configured for the specific build.
+Due to this choice it is possible to build several binary images in the same workspace without generating
+conflicts.
+It is also easier to add platform specific optimizations inside general purpose modules as all makefiles
+are aware of the platform/CPU options.
 
 \chapter{System}
 \section{Design}
@@ -181,8 +231,8 @@ Add comments to explain how this data can be used. Do not add debugging
 infrastructures, traces, endless strings for printouts.
 \item Access the medium where you stored the DiegOS binary, and read it into
 memory. Document where the binary is put in memory, why it is put there, and
-the memory layout during boot. The medium choice and the code required to
-drive it is up to you. The rationale here is, split your boot code if it grows beyond
+the memory layout during boot. The medium and the code required to
+access it is up to you. The rationale here is, split your boot code if it grows beyond
 logic; chain booting is not an option in this case.
 \item Keep your code simple and stupid, do not try to optimize the load time
 or the medium access time: access the hardware in a safe manner, load the OS
@@ -265,24 +315,24 @@ thread will be killed.} but at least one thread must be ready to run at any time
 \footnote{This is the Idle thread, which cannot be killed.}.
 
 % Define block styles
-\tikzstyle{idle} = [rectangle, draw, fill=teal, 
+\tikzstyle{idle} = [rectangle, draw, fill=TealBlue, 
     text width=5em, text centered,node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{norm} = [rectangle, draw, fill=fresh, 
+\tikzstyle{norm} = [rectangle, draw, fill=Cerulean, 
     text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{high} = [rectangle, draw, fill=sunshine, 
+\tikzstyle{high} = [rectangle, draw, fill=Goldenrod, 
     text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{rt} = [rectangle, draw, fill=vermillion, 
+\tikzstyle{rt} = [rectangle, draw, fill=Magenta, 
     text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{idle1} = [rectangle, draw, fill=teal!50, 
+\tikzstyle{idle1} = [rectangle, draw, fill=TealBlue!50, 
     text width=5em, text centered,node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{norm1} = [rectangle, draw, fill=fresh!50, 
+\tikzstyle{norm1} = [rectangle, draw, fill=Cerulean!50, 
     text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{high1} = [rectangle, draw, fill=sunshine!1, 
+\tikzstyle{high1} = [rectangle, draw, fill=Goldenrod!1, 
     text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{r1t} = [rectangle, draw, fill=vermillion!1, 
+\tikzstyle{r1t} = [rectangle, draw, fill=Magenta!1, 
     text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
 \tikzstyle{line} = [draw, -latex']
-\tikzstyle{run} = [circle, draw, fill=tangerine, 
+\tikzstyle{run} = [circle, draw, fill=BurntOrange, 
     text width=5em, text centered, node distance=4cm,  minimum height=5em]
 
 \begin{tikzpicture}[node distance = 3cm, outer sep=auto, inner sep=1em, thick]
