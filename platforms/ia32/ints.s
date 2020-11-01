@@ -20,6 +20,10 @@
 .file "ints.s"
 .include "ints_equ.s"
 
+.data
+locked:
+.int 0
+
 .text
 
 .globl lock		/* disable interrupts */
@@ -31,6 +35,7 @@
  */
 lock:
 cli
+add 	$1, locked
 ret
 
 
@@ -42,7 +47,11 @@ ret
  * Enable CPU interrupts.
  */
 unlock:
+sub	$1, locked
+cmp	$0, locked
+jne	sk1
 sti
+sk1:
 ret
 
 .globl enable_irq	/* enable an irq at the 8259 controller */
