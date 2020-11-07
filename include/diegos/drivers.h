@@ -38,16 +38,52 @@
  * Predefined, system-wide ioctrl values.
  * Adhering to these interfaces avoid platform dependencies
  */
-#define DEV_RTC "rtc"
+#define DEV_CLK "clk"
 
-enum rtc_ioctrl {
-    /* Set rtc ticks in milliseconds; 1 unsigned as parameter */
-    RTC_SET_FREQ,
+enum clk_ioctrl {
     /*
-     * Set the callback to be invoked when the rtc expires; 1 pointer
+     * Set clock period, i.e. the inverse of frequency in Hz.
+     * Value is expressed in clock ticks, the time base (i.e. clock ticks
+     * number corresponding to 1 second) is device dependent and can
+     * be retrieved using CLK_GET_PARAMS.
+     * 1 unsigned as parameter.
+     * The clock device starts counting as soon as this IOCTL is
+     * performed, if the clock mode is set to PERIODIC the ticks
+     * delay will change, if the clock mode is set to ONESHOT and
+     * the timer did not expire it will be re-triggered but no interrupt
+     * will be generated.
+     */
+    CLK_SET_PERIOD,
+    /*
+     * Get clock parameters in clock ticks.
+     * 3 unsigned as parameter.
+     * Values stored are: TIMER_BASE, TIMER_MIN, TIMER_MAX.
+     * They correspond to the number of clock ticks in 1 second,
+     * the minimum programmable number of ticks, and the maximum programmable
+     * number of ticks.
+     */
+    CLK_GET_PARAMS,
+    /*
+     * Get clock counter.
+     * 1 unsigned as parameter.
+     * The value is the reading of the clock counter, always considered as counting
+     * down to zero, starting from the value configured with CLK_SET_PERIOD.
+     * The value can be interpreted as the remaining number of clock ticks before
+     * expiration.
+     */
+    CLK_GET_ELAPSED,
+    /*
+     * Set clock mode; 1 unsigned as parameter.
+     * values are
+     * 0 for periodic mode
+     * 1 for one-shot mode
+     */
+    CLK_SET_MODE,
+    /*
+     * Set the callback to be invoked when the clock expires; 1 pointer
      * to function as parameter (i.e. void (*fn)(void) )
      */
-    RTC_SET_CB
+    CLK_SET_CB
 };
 
 #define DEV_UART "uart"
