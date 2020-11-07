@@ -70,7 +70,7 @@ extern STATUS malloc_init(const void *heapstart, const void *heapend);
 
 void platform_init()
 {
-    int i;
+    uint32_t params[3];
     struct boot_variables *bootvars = (struct boot_variables *)0xF000;
 
     (void) malloc_init((const void *) (bootvars->free_heap_start),
@@ -92,10 +92,10 @@ void platform_init()
      * MUST be called AFTER malloc_init.
      * It will be inited twice when added as a device, not elegant, but....
      */
-    i = 1000;
     if ((EOK != i8253_drv.cmn.init_fn(0)) ||
-            (EOK != i8253_drv.cmn.ioctrl_fn(&i, RTC_SET_FREQ, 0)) ||
-            (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, RTC_SET_CB, 0)) ||
+	    (EOK != i8253_drv.cmn.ioctrl_fn(params, CLK_GET_PARAMS, 0)) ||
+            (EOK != i8253_drv.cmn.ioctrl_fn(&params[1], CLK_SET_PERIOD, 0)) ||
+            (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, CLK_SET_CB, 0)) ||
             (EOK != i8253_drv.cmn.start_fn(0))) {
         abort();
     }
