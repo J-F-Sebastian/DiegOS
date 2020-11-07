@@ -55,8 +55,8 @@ enum i8253_control {
  * All values in Hz
  */
 #define TIMER_FREQ      (1193182UL) /* clock frequency for timer in PC and AT */
-#define TIMER_MAX_RES   (TIMER_FREQ/2)
-#define TIMER_MIN_RES   (TIMER_FREQ/65534)
+#define TIMER_MAX_VAL   (65534)
+#define TIMER_MIN_VAL   (256)
 
 #endif
 

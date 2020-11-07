@@ -27,7 +27,10 @@
 #include "i8253_private.h"
 #include "i8253.h"
 
-static unsigned resolution = TIMER_MIN_RES;
+/* SQUARE_WAVE, ONE_SHOT */
+static const uint8_t modes[] = {(COUNTER0 | RW_LSB_MSB | MODE3), (COUNTER0 | RW_LSB_MSB | MODE4)};
+static uint8_t mode = 0;
+static unsigned ctrvalue = TIMER_MAX_VAL;
 static unsigned flags = DRV_IS_CHAR;
 static void (*cbfn)(void) = NULL;
 
@@ -58,9 +61,6 @@ static int i8253_init(unsigned unitno)
 
 static int i8253_start(unsigned unitno)
 {
-    const uint8_t SQUARE_WAVE = (COUNTER0 | RW_LSB_MSB | MODE3);
-    unsigned tc = TIMER_FREQ / resolution;
-
     if (unitno) {
         return (EINVAL);
     }
@@ -68,24 +68,6 @@ static int i8253_start(unsigned unitno)
     if (flags & DRV_STATUS_RUN) {
         return (EOK);
     }
-
-    if ((TIMER_FREQ % resolution) > resolution/2) {
-        if (!(tc & 1)) {
-            tc++;
-        }
-    }
-
-    /*
-     * Even values are preferrable
-     */
-    if (tc & 1) {
-        tc++;
-    }
-
-    /* Initialize channel 0 of the 8253A timer */
-    out_byte(TIMER_MODE, SQUARE_WAVE);	/* set timer to run continuously */
-    out_byte(TIMER0, (uint8_t)tc);	/* load timer low byte */
-    out_byte(TIMER0, (uint8_t)(tc >> 8));	/* load timer high byte */
 
     flags &= ~DRV_STATUS_STOP;
     flags |= DRV_STATUS_RUN;
@@ -115,14 +97,12 @@ static int i8253_stop(unsigned unitno)
 
 static int i8253_done(unsigned unitno)
 {
-    const uint8_t SQUARE_WAVE = (COUNTER0 | RW_LSB_MSB | MODE3);
-
     if (unitno) {
         return (EINVAL);
     }
 
     /* Reset the clock to the BIOS rate. (For rebooting) */
-    out_byte(TIMER_MODE, SQUARE_WAVE);
+    out_byte(TIMER_MODE, modes[0]);
     out_byte(TIMER0, 0);
     out_byte(TIMER0, 0);
 
@@ -132,24 +112,47 @@ static int i8253_done(unsigned unitno)
 
 static int i8253_ioctrl(void *data, unsigned opcode, unsigned unitno)
 {
+    unsigned *udata = (unsigned *)data;
+    uint8_t *cdata = (uint8_t *)data;
+
     /* All opcodes require data */
     if (!data) {
         return (EINVAL);
     }
 
     switch (opcode) {
-    case RTC_SET_FREQ:
-        resolution = *(unsigned *)data & 0xFFFFUL;
-        if (resolution < TIMER_MIN_RES) {
-            resolution = TIMER_MIN_RES;
-        } else if (resolution > TIMER_MAX_RES) {
-            resolution = TIMER_MAX_RES;
-        }
-        i8253_stop(unitno);
-        i8253_start(unitno);
+    case CLK_SET_PERIOD:
+	if (!udata[0]) udata[0]++;
+	if ((udata[0] < TIMER_MIN_VAL) || (udata[0] > TIMER_MAX_VAL))
+		return (EINVAL);
+	ctrvalue = udata[0];
+        out_byte(TIMER0, (uint8_t)ctrvalue);	/* load timer low byte */
+        out_byte(TIMER0, (uint8_t)(ctrvalue >> 8));	/* load timer high byte */
         return (EOK);
 
-    case RTC_SET_CB:
+    case CLK_GET_PARAMS:
+	*udata++ = TIMER_FREQ;
+	*udata++ = TIMER_MIN_VAL;
+	*udata++ = TIMER_MAX_VAL;
+	return (EOK);
+
+    case CLK_GET_ELAPSED:
+	out_byte(TIMER_MODE, COUNTER0 | COUNTER_LATCH);
+	*udata = 0;
+	cdata[0] = in_byte(TIMER0);
+	cdata[1] = in_byte(TIMER0);
+	return (EOK);
+
+    case CLK_SET_MODE:
+        if (udata[0] > 1) {
+            return (EINVAL);
+        }
+
+        mode = (uint8_t)udata[0];
+        out_byte(TIMER_MODE, modes[mode]);	/* set timer to run continuously or one-shot */
+        return (EOK);
+
+    case CLK_SET_CB:
         cbfn = data;
         return (EOK);
 
@@ -169,7 +172,7 @@ static unsigned i8253_status(unsigned unitno)
 
 char_driver_t i8253_drv = {
     .cmn = {
-		.name = "rtc",
+		.name = "clk",
 		.init_fn = i8253_init,
 		.start_fn = i8253_start,
 		.stop_fn = i8253_stop,
