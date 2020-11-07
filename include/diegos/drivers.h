@@ -38,16 +38,28 @@
  * Predefined, system-wide ioctrl values.
  * Adhering to these interfaces avoid platform dependencies
  */
-#define DEV_RTC "rtc"
+#define DEV_CLK "clk"
 
-enum rtc_ioctrl {
-    /* Set rtc ticks in milliseconds; 1 unsigned as parameter */
-    RTC_SET_FREQ,
+enum clk_ioctrl {
+    /* Set clock ticks in milliseconds; 1 unsigned as parameter */
+    CLK_SET_FREQ,
+    /* Get clock minimum and maximum frequencies, i.e. the min&max rates
+     * at which the clock can tick; 2 unsigned as parameter.
+     * The values are expressed in Hz.
+     * The lowest rate is 1Hz.
+     */
+    CLK_GET_FREQ,
+    /* Set clock mode; 1 unsigned as parameter.
+     * values are
+     * 0 for periodic mode
+     * 1 for one-shot mode
+     */
+    CLK_SET_MODE,
     /*
-     * Set the callback to be invoked when the rtc expires; 1 pointer
+     * Set the callback to be invoked when the clock expires; 1 pointer
      * to function as parameter (i.e. void (*fn)(void) )
      */
-    RTC_SET_CB
+    CLK_SET_CB
 };
 
 #define DEV_UART "uart"
