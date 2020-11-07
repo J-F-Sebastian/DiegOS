@@ -64,15 +64,15 @@ BOOL clock_init()
      * Any init value is fine, as the return code is NOT an errno
      */
     int retcode = EINVAL;
-    device_t *clock = device_lookup(DEV_RTC, 0);
+    device_t *clock = device_lookup(DEV_CLK, 0);
     int i = DEFAULT_CLOCK_RES;
 
     if (clock) {
-        retcode = clock->cmn->ioctrl_fn(clock_int_handler, RTC_SET_CB, 0);
+        retcode = clock->cmn->ioctrl_fn(clock_int_handler, CLK_SET_CB, 0);
         if (EOK != retcode) {
             return (FALSE);
         }
-        retcode = clock->cmn->ioctrl_fn(&i, RTC_SET_FREQ, 0);
+        retcode = clock->cmn->ioctrl_fn(&i, CLK_SET_FREQ, 0);
     }
 
     ticks_incr_var.increment_msecs_per_tick = 1000/DEFAULT_CLOCK_RES;
