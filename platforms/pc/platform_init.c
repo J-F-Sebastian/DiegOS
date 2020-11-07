@@ -94,8 +94,8 @@ void platform_init()
      */
     i = 1000;
     if ((EOK != i8253_drv.cmn.init_fn(0)) ||
-            (EOK != i8253_drv.cmn.ioctrl_fn(&i, RTC_SET_FREQ, 0)) ||
-            (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, RTC_SET_CB, 0)) ||
+            (EOK != i8253_drv.cmn.ioctrl_fn(&i, CLK_SET_FREQ, 0)) ||
+            (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, CLK_SET_CB, 0)) ||
             (EOK != i8253_drv.cmn.start_fn(0))) {
         abort();
     }
