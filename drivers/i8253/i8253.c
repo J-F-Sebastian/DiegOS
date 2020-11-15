@@ -30,7 +30,7 @@
 /* SQUARE_WAVE, ONE_SHOT */
 static const uint8_t modes[] = {(COUNTER0 | RW_LSB_MSB | MODE3), (COUNTER0 | RW_LSB_MSB | MODE1)};
 static uint8_t mode = 0;
-static unsigned resolution = TIMER_MIN_RES;
+static unsigned period = TIMER_MAX_VAL;
 static unsigned flags = DRV_IS_CHAR;
 static void (*cbfn)(void) = NULL;
 
@@ -61,8 +61,6 @@ static int i8253_init(unsigned unitno)
 
 static int i8253_start(unsigned unitno)
 {
-    unsigned tc = TIMER_FREQ / resolution;
-
     if (unitno) {
         return (EINVAL);
     }
@@ -71,23 +69,10 @@ static int i8253_start(unsigned unitno)
         return (EOK);
     }
 
-    if ((TIMER_FREQ % resolution) > resolution/2) {
-        if (!(tc & 1)) {
-            tc++;
-        }
-    }
-
-    /*
-     * Even values are preferrable
-     */
-    if (tc & 1) {
-        tc++;
-    }
-
     /* Initialize channel 0 of the 8253A timer */
     out_byte(TIMER_MODE, modes[mode]);	/* set timer to run continuously or one-shot */
-    out_byte(TIMER0, (uint8_t)tc);	/* load timer low byte */
-    out_byte(TIMER0, (uint8_t)(tc >> 8));	/* load timer high byte */
+    out_byte(TIMER0, (uint8_t)period);	/* load timer low byte */
+    out_byte(TIMER0, (uint8_t)(period >> 8));	/* load timer high byte */
 
     flags &= ~DRV_STATUS_STOP;
     flags |= DRV_STATUS_RUN;
@@ -140,28 +125,34 @@ static int i8253_ioctrl(void *data, unsigned opcode, unsigned unitno)
     }
 
     switch (opcode) {
-    case CLK_SET_FREQ:
-        resolution = udata[0] & 0xFFFFUL;
-        if (resolution < TIMER_MIN_RES) {
-            resolution = TIMER_MIN_RES;
-        } else if (resolution > TIMER_MAX_RES) {
-            resolution = TIMER_MAX_RES;
+    case CLK_SET_PERIOD:
+        period = udata[0]*TIMER_FREQ/1000;
+        if ((udata[0]*TIMER_FREQ)%1000 > 499) {
+            period++;
         }
-        i8253_stop(unitno);
-        i8253_start(unitno);
+	if (period & 1) {
+            period++;
+	}
+        if ((period < TIMER_MIN_VAL) || (period > TIMER_MAX_VAL)) {
+            return (EINVAL);
+        }
+        out_byte(TIMER0, (uint8_t)period);	/* load timer low byte */
+        out_byte(TIMER0, (uint8_t)(period >> 8));	/* load timer high byte */
         return (EOK);
 
-    case CLK_GET_FREQ:
-	udata[0] = TIMER_MIN_RES;
-	udata[1] = TIMER_MAX_RES;
-	return (EOK);
+    case CLK_GET_PERIODS:
+        udata[0] = 1; /* TIMER_MIN_VAL*1000/TIMER_FREQ; */
+        udata[1] = TIMER_MAX_VAL*1000/TIMER_FREQ;
+        return (EOK);
 
     case CLK_SET_MODE:
-	if (udata[0] > 1)
-		return (EINVAL);
+        if (udata[0] > 1) {
+            return (EINVAL);
+        }
 
-	mode = (uint8_t)udata[0];
-	return (EOK);
+        mode = (uint8_t)udata[0];
+        out_byte(TIMER_MODE, modes[mode]);	/* set timer to run continuously or one-shot */
+        return (EOK);
 
     case CLK_SET_CB:
         cbfn = data;
