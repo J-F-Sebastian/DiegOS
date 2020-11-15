@@ -44,7 +44,7 @@ enum {
 
 struct alarm {
     list_node header;
-    uint64_t ticks;
+    uint64_t expiration;
     uint32_t flags;
     ev_queue_t *notify;
     event_t event;
@@ -54,7 +54,7 @@ struct alarm {
 
 static list_inst alarms_list;
 
-static void alarm_cb(uint64_t ticks)
+static void alarm_cb(uint64_t msecs)
 {
     struct alarm *cursor;
 
@@ -66,7 +66,7 @@ static void alarm_cb(uint64_t ticks)
 
     while (cursor) {
         if (ALM_TRIGGERED == (cursor->flags & (ALM_TRIGGERED | ALM_EXPIRED))) {
-            if (ticks >= cursor->ticks) {
+            if (msecs >= cursor->expiration) {
                 if (EOK != event_put(cursor->notify, &cursor->event, NULL)) {
                     kerrprintf("unable to queue alarm %s\n", cursor->name);
                 } else {
@@ -132,7 +132,7 @@ alarm_t *alarm_create (const char *name,
         ptr->flags |= ALM_RECURSIVE;
     }
 
-    ptr->ticks = 0;
+    ptr->expiration = 0;
     ptr->msecs = millisecs;
     ptr->notify = evqueue;
     ptr->event.classid = CLASS_ALARM;
@@ -155,11 +155,11 @@ void alarm_set (alarm_t *alm, BOOL start)
     if (start) {
         alm->flags |= ALM_TRIGGERED;
         alm->flags &= ~ALM_EXPIRED;
-        alm->ticks = clock_convert_msecs_to_ticks(alm->msecs) + clock_get_ticks();
+        alm->expiration = alm->msecs + clock_get_milliseconds();
     } else {
         alm->flags &= ~ALM_TRIGGERED;
         alm->flags |= ALM_EXPIRED;
-        alm->ticks = 0;
+        alm->expiration = 0;
     }
 
     unlock();
@@ -168,7 +168,6 @@ void alarm_set (alarm_t *alm, BOOL start)
 STATUS alarm_acknowledge (alarm_t *alm)
 {
     const uint32_t MATCH = (ALM_RECURSIVE | ALM_TRIGGERED | ALM_EXPIRED);
-    uint64_t ticks;
 
     if (!alm) {
         return (EINVAL);
@@ -177,14 +176,7 @@ STATUS alarm_acknowledge (alarm_t *alm)
     lock();
 
     if (MATCH == (alm->flags & MATCH)) {
-        ticks = clock_get_ticks() - alm->ticks;
-        /*
-         * Modulus is required to skip over an acknowledge that crossed
-         * alm->msecs, i.e. the aknowledge missed the next alarm trigger so
-         * we are aknowledging a bunch of intervals at once.
-         */
-        ticks %= clock_convert_msecs_to_ticks(alm->msecs);
-        alm->ticks += clock_convert_msecs_to_ticks(alm->msecs) - ticks;
+        alm->expiration += alm->msecs;
         alm->flags &= ~ALM_EXPIRED;
     }
 
