@@ -215,18 +215,16 @@ void thread_may_suspend()
 void thread_delay(unsigned msecs)
 {
     thread_t *prev, *next;
-    uint64_t st;
     uint64_t delay;
 
     if (!msecs)
         return;
 
-    st = clock_get_ticks();
-    delay = clock_convert_msecs_to_ticks(msecs);
+    delay = clock_get_milliseconds() + msecs;
 
     prev = scheduler_running_thread();
 
-    if (!scheduler_delay_thread(st + delay)) {
+    if (!scheduler_delay_thread(delay)) {
         kernel_panic("cannot delay a thread.\n");
         return;
     }
