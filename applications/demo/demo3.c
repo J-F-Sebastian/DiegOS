@@ -18,15 +18,17 @@
  */
 
 #include <diegos/kernel.h>
+#include <diegos/kernel_ticks.h>
 #include <diegos/kernel_dump.h>
 #include <diegos/events.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
 
 static ev_queue_t *events;
 
-static int counter = 13;
-static unsigned progress = 0;
+static int running = 1;
 
 static void demo_thread_entry(void)
 {
@@ -34,9 +36,8 @@ static void demo_thread_entry(void)
     unsigned i = 0;
     event_watch_queue(events);
 
-    while (1) {
+    while (running) {
         wait_for_events(events);
-        i++;
 
         while (event_queue_size(events)) {
             evt = event_get(events);
@@ -44,45 +45,55 @@ static void demo_thread_entry(void)
             if (evt) {
                 printf("%d classid %d eventid %d progress %u\n",
                        event_queue_size(events),
-                       evt->classid,evt->eventid,
-                       progress);
-                counter--;
-                progress++;
+                       evt->classid,
+		       evt->eventid,
+                       i++);
                 free(evt);
             } else {
                 printf("SKIP\n");
             }
         }
-        printf("Going to wait PID %d\n",my_thread_pid());
+        printf("Going to wait PID %d\n",my_thread_id());
     }
+    printf("Going going gone!!!\n");
+    thread_terminate();
 }
 
 static void demo_thread_entry2(void)
 {
     event_t *evt;
+    unsigned i = 0;
 
-    while (1) {
-        thread_delay(1000);
+    while (i < 513) {
+	if (i > 500) thread_delay(1000);
+	else if (i > 250) thread_delay(333);
+	else thread_delay(100);
+	printf("c %lld\n", clock_get_seconds());
+	i++;
         evt = malloc(sizeof(event_t));
         evt->classid = 1234;
         evt->eventid = 5678;
-        if (EOK != event_put(events, evt)) {
+        if (EOK != event_put(events, evt, NULL)) {
             printf("FAILURE 1 !!!\n");
         }
         evt = malloc(sizeof(event_t));
         evt->classid = 1234;
         evt->eventid = 0x9ABC;
-        if (EOK != event_put(events, evt)) {
+        if (EOK != event_put(events, evt, NULL)) {
             printf("FAILURE 2 !!!\n");
         }
-        printf("Going to delay PID %d\n",my_thread_pid());
+        printf("Going to delay PID %d\n",my_thread_id());
     }
+    printf("Going going gone!!!\n");
+    running = 0;
+    thread_terminate();
 }
 
 static void demo_thread_entry3(void)
 {
-    while (1) {
-        thread_may_suspend();
+    unsigned i = 1000;
+    while (i--) {
+        thread_suspend();
     }
 
     printf("Going going gone!!!\n");
