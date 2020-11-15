@@ -41,15 +41,20 @@
 #define DEV_CLK "clk"
 
 enum clk_ioctrl {
-    /* Set clock ticks in milliseconds; 1 unsigned as parameter */
-    CLK_SET_FREQ,
-    /* Get clock minimum and maximum frequencies, i.e. the min&max rates
+    /*
+     * Set clock period, i.e. the inverse of frequency in Hz.
+     * Value is expressed in milliseconds.
+     * 1 unsigned as parameter.
+     * */
+    CLK_SET_PERIOD,
+    /*
+     * Get clock minimum and maximum periods, i.e. the max&min rates
      * at which the clock can tick; 2 unsigned as parameter.
-     * The values are expressed in Hz.
-     * The lowest rate is 1Hz.
+     * The values are expressed in milliseconds.
      */
-    CLK_GET_FREQ,
-    /* Set clock mode; 1 unsigned as parameter.
+    CLK_GET_PERIODS,
+    /*
+     * Set clock mode; 1 unsigned as parameter.
      * values are
      * 0 for periodic mode
      * 1 for one-shot mode
