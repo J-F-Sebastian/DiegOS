@@ -28,12 +28,12 @@
  * and clock_del_db.
  *
  * PARAMS
- * ticks - system counter of ticks elapsed since boot time.
+ * msecs - system counter of milliseconds elapsed since boot time.
  *
  * RETURN VALUES
  * none
  */
-typedef void (*kernel_clock_cb)(uint64_t ticks);
+typedef void (*kernel_clock_cb)(uint64_t msecs);
 
 /*
  * Init clock library, this will configure the system ticks
@@ -50,6 +50,8 @@ BOOL clock_init (void);
  * Add a callback to the clock library. Every system tick
  * the registered callbacks will be invoked, having as an
  * argument the actual system tick.
+ * Ticks can be dynamic, time between two consecutive calls
+ * may vary.
  */
 BOOL clock_add_cb (kernel_clock_cb cb);
 
@@ -57,6 +59,14 @@ BOOL clock_add_cb (kernel_clock_cb cb);
  * Remove a callback from the clock library.
  */
 BOOL clock_del_cb (kernel_clock_cb cb);
+
+BOOL clock_set_periodic (void);
+
+BOOL clock_set_oneshot (void);
+
+BOOL clock_set_period (unsigned ms);
+
+uint64_t clock_get_milliseconds (void);
 
 #endif
 
