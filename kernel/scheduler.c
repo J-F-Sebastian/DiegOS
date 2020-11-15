@@ -58,6 +58,9 @@ static queue_inst delay_queue = {
     .counter = 0
 };
 
+/*
+ * Threads expiration in milliseconds
+ */
 static uint64_t delays[DIEGOS_MAX_THREADS];
 
 /*
@@ -142,10 +145,10 @@ static inline BOOL new_runner(unsigned q)
 
 static inline void schedule_delayed(void)
 {
-    uint64_t ticks = clock_get_ticks();
+    uint64_t expiration = clock_get_milliseconds();
     thread_t *ptr = queue_head(&delay_queue);
 
-    while (delays[ptr->tid] <= ticks) {
+    while (delays[ptr->tid] <= expiration) {
         if (EOK != queue_dequeue(&delay_queue, (queue_node **)&ptr)) {
             if (ptr) {
                 kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
@@ -281,7 +284,7 @@ BOOL scheduler_resume_thread(uint8_t flags, uint8_t tid)
     return (TRUE);
 }
 
-BOOL scheduler_delay_thread(uint64_t ticks)
+BOOL scheduler_delay_thread(uint64_t msecs)
 {
     thread_t *ptr, *ptr2;
 
@@ -290,7 +293,7 @@ BOOL scheduler_delay_thread(uint64_t ticks)
     }
 
     ptr = queue_head(&delay_queue);
-    if (!ptr || (ticks < delays[ptr->tid])) {
+    if (!ptr || (msecs < delays[ptr->tid])) {
         if (EOK != queue_insert(&delay_queue,
                                 &running->header,
                                 NULL)) {
@@ -300,7 +303,7 @@ BOOL scheduler_delay_thread(uint64_t ticks)
     } else {
         while (ptr->header.next) {
             ptr2 = (thread_t *)ptr->header.next;
-            if (ticks < delays[ptr2->tid]) {
+            if (msecs < delays[ptr2->tid]) {
                 break;
             }
             ptr = (thread_t *)ptr->header.next;
@@ -315,7 +318,7 @@ BOOL scheduler_delay_thread(uint64_t ticks)
 
     running->flags |= THREAD_FLAG_DELAYED;
     running->state = THREAD_WAITING;
-    delays[running->tid] = ticks;
+    delays[running->tid] = msecs;
 
     return (TRUE);
 }
