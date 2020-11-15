@@ -21,7 +21,9 @@
 #include <diegos/kernel_dump.h>
 #include <diegos/events.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
 
 static ev_queue_t *events;
 
@@ -53,7 +55,7 @@ static void demo_thread_entry(void)
                 printf("SKIP\n");
             }
         }
-        printf("Going to wait PID %d\n",my_thread_pid());
+        printf("Going to wait PID %d\n",my_thread_id());
     }
 }
 
@@ -66,22 +68,23 @@ static void demo_thread_entry2(void)
         evt = malloc(sizeof(event_t));
         evt->classid = 1234;
         evt->eventid = 5678;
-        if (EOK != event_put(events, evt)) {
+        if (EOK != event_put(events, evt, NULL)) {
             printf("FAILURE 1 !!!\n");
         }
         evt = malloc(sizeof(event_t));
         evt->classid = 1234;
         evt->eventid = 0x9ABC;
-        if (EOK != event_put(events, evt)) {
+        if (EOK != event_put(events, evt, NULL)) {
             printf("FAILURE 2 !!!\n");
         }
-        printf("Going to delay PID %d\n",my_thread_pid());
+        printf("Going to delay PID %d\n",my_thread_id());
     }
 }
 
 static void demo_thread_entry3(void)
 {
-    while (1) {
+    unsigned i = UINT_MAX/1000;
+    while (i--) {
         thread_may_suspend();
     }
 
