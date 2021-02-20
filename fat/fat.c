@@ -649,7 +649,7 @@ int FAT_create_entry(struct FATVolume *vol, const char *entryname, uint8_t attri
 
         entryfound.sector = FAT_FSoC(vol, cluster);
         entryfound.offset = 0;
-        entryfound.container = containerfound.entry.DIR_FstClus;
+        entryfound.container = (pos) ? containerfound.entry.DIR_FstClus : vol->PB.RootClus;
         if (FAT_write_FAT_table(vol))
             goto terminate;
     }
@@ -693,6 +693,7 @@ int FAT_create_entry(struct FATVolume *vol, const char *entryname, uint8_t attri
             goto terminate;
 
         free(dirbuffer);
+        dirbuffer = 0;
         FAT_set_EOC_into_table(vol, FATcluster);
         FAT_write_FAT_table(vol);
     }
@@ -817,7 +818,7 @@ int FAT_create_link (struct FATVolume *vol, const char *linkname, const char *en
 
         entryfound.sector = FAT_FSoC(vol, cluster);
         entryfound.offset = 0;
-        entryfound.container = containerfound.entry.DIR_FstClus;
+        entryfound.container = (pos) ? containerfound.entry.DIR_FstClus : vol->PB.RootClus;
         if (FAT_write_FAT_table(vol))
             goto terminate;
     }
@@ -849,6 +850,7 @@ int FAT_create_link (struct FATVolume *vol, const char *linkname, const char *en
         goto terminate;
 
     free(dirbuffer);
+    dirbuffer = 0;
     FAT_set_EOC_into_table(vol, FATcluster);
     FAT_write_FAT_table(vol);
 
