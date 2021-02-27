@@ -1,0 +1,3 @@
+config PLATFORM
+	string
+	default "pc"
