@@ -1,0 +1,3 @@
+config CPU
+	string
+	default "armv4"
