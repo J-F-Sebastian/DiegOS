@@ -939,6 +939,12 @@ static void conf_save(void)
 				return;
 			if (!conf_write(dialog_input_result)) {
 				set_config_filename(dialog_input_result);
+				if (conf_write_autoconf()) {
+					show_textbox(NULL,
+						    _("Can't create include file!  Probably a nonexistent directory."),
+						    5,
+						    60);
+				}
 				return;
 			}
 			show_textbox(NULL, _("Can't create file!  Probably a nonexistent directory."), 5, 60);
@@ -960,9 +966,9 @@ static int handle_exit(void)
 	reset_subtitle();
 	dialog_clear();
 	if (conf_get_changed())
-		res = dialog_yesno(NULL,
+		res = dialog_yesno("CONFIGURATION",
 				   _("Do you wish to save your new configuration?\n"
-				     "(Press <ESC><ESC> to continue kernel configuration.)"),
+				   "(Press <ESC><ESC> to continue kernel configuration.)"),
 				   6, 60);
 	else
 		res = -1;
@@ -972,6 +978,14 @@ static int handle_exit(void)
 	switch (res) {
 	case 0:
 		if (conf_write(filename)) {
+			fprintf(stderr, _("\n\n"
+					  "Error while writing of the configuration.\n"
+					  "Your configuration changes were NOT saved."
+					  "\n\n"));
+			return 1;
+		}
+
+		if (conf_write_autoconf()) {
 			fprintf(stderr, _("\n\n"
 					  "Error while writing of the configuration.\n"
 					  "Your configuration changes were NOT saved."
