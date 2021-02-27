@@ -32,6 +32,8 @@ static int conf_lineno, conf_warnings, conf_unsaved;
 
 const char conf_defname[] = "arch/$ARCH/defconfig";
 
+static const char *mkconf[] = {"CPU", "PLATFORM", "DBG_MODULE"};
+
 static void conf_warning(const char *fmt, ...)
 {
 	va_list ap;
@@ -623,6 +625,53 @@ static struct conf_printer tristate_printer_cb =
 {
 	.print_symbol = tristate_print_symbol,
 	.print_comment = kconfig_print_comment,
+};
+
+/*
+ * Makefile printer
+ *
+ * This printer is used when generating the 'include/diegos/config/makefile.platform' file.
+ */
+
+static void
+makefile_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
+{
+	unsigned i;
+
+	if (sym->type != S_STRING)
+		return;
+
+	for (i = 0; i < sizeof(mkconf)/sizeof(mkconf[0]); i++)
+		if (strcmp(sym->name, mkconf[i]) == 0)
+			fprintf(fp, "export %s = %s\n", sym->name, value);
+}
+
+static void
+makefile_print_comment(FILE *fp, const char *value, void *arg)
+{
+	const char *p = value;
+	size_t l;
+
+	fprintf(fp, "#\n");
+	for (;;) {
+		l = strcspn(p, "\n");
+		fprintf(fp, " #");
+		if (l) {
+			fprintf(fp, " ");
+			xfwrite(p, l, 1, fp);
+			p += l;
+		}
+		fprintf(fp, "\n");
+		if (*p++ == '\0')
+			break;
+	}
+	fprintf(fp, " #\n");
+}
+
+static struct conf_printer makefile_printer_cb =
+{
+	.print_symbol = makefile_print_symbol,
+	.print_comment = makefile_print_comment,
 };
 
 static void conf_write_symbol(FILE *fp, struct symbol *sym,
