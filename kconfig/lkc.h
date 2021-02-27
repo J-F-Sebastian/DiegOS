@@ -35,7 +35,7 @@ extern "C" {
 #define N_(text) (text)
 
 #ifndef CONFIG_
-#define CONFIG_ "CONFIG_"
+#define CONFIG_ "DIEGOS_"
 #endif
 static inline const char *CONFIG_prefix(void)
 {
