@@ -1,0 +1,52 @@
+choice Processor
+	prompt "Target processor"
+	default	IA32
+	help
+		Select the target processor
+
+config	IA32
+	bool
+	prompt "Intel 32-bit architecture"
+	help
+		Select this option if your target
+		processor is an Intel 32-bit architecture
+
+config	ARMv4
+	bool
+	prompt "ARM 32-bit architecture"
+	help
+		Select this option if your target
+		processor is an ARMv4 32-bit architecture
+
+config	ARMv5e
+	bool
+	prompt "ARM 32-bit architecture + DSP"
+	help
+		Select this option if your target
+		processor is an ARMv5 32-bit architecture
+		with additional DSP instructions
+
+config  MIPS
+	bool
+	prompt "MIPS 32-bit architecture"
+	help
+		Select this option if your target
+		processor is a MIPS 32-bit architecture
+
+endchoice
+
+if IA32
+source "./platforms/configs/Kconfig.ia32"
+endif
+
+if ARMv4
+source "./platforms/configs/Kconfig.armv4"
+endif
+
+if ARMv5e
+source "./platforms/configs/Kconfig.armv5e"
+endif
+
+if MIPS
+source "./platforms/configs/Kconfig.mips"
+endif
