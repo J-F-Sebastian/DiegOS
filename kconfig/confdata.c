@@ -69,16 +69,17 @@ static void conf_message(const char *fmt, ...)
 
 const char *conf_get_configname(void)
 {
-	char *name = getenv("KCONFIG_CONFIG");
-
-	return name ? name : ".config";
+	return ".config";
 }
 
 const char *conf_get_autoconfig_name(void)
 {
-	char *name = getenv("KCONFIG_AUTOCONFIG");
+	return "include/config/auto.conf";
+}
 
-	return name ? name : "include/config/auto.conf";
+const char *conf_get_mkname(void)
+{
+	return "include/config/makefile.config";
 }
 
 static char *conf_expand_value(const char *in)
