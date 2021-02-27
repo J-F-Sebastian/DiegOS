@@ -6,7 +6,7 @@
 
 HOSTCC = cc
 
-CFLAGS += $(HOST_CFLAGS) $(HOST_EXTRACFLAGS)
+CFLAGS += $(HOST_CFLAGS) $(HOST_EXTRACFLAGS) -pipe
 
 # lxdialog stuff
 check-lxdialog  := ./lxdialog/check-lxdialog.sh
