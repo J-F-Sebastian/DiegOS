@@ -1,3 +1,5 @@
+# Global exports with no dependencies
+
 export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
 export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g
 export AS = $(CC) -xassembler
