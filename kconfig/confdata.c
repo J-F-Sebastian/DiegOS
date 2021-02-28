@@ -1015,7 +1015,7 @@ int conf_write_autoconf(void)
 {
 	struct symbol *sym;
 	const char *name;
-	FILE *out, *tristate, *out_h;
+	FILE *out, *tristate, *out_h, *out_mk;
 	int i;
 
 	sym_clear_all_valid();
@@ -1034,11 +1034,17 @@ int conf_write_autoconf(void)
 		fclose(out);
 		return 1;
 	}
-
 	out_h = fopen(".tmpconfig.h", "w");
 	if (!out_h) {
 		fclose(out);
 		fclose(tristate);
+		return 1;
+	}
+
+	out_mk = fopen(".tmpmakefile.platform", "w");
+	if (!out_mk) {
+		fclose(out);
+		fclose(out_h);
 		return 1;
 	}
 
@@ -1047,6 +1053,13 @@ int conf_write_autoconf(void)
 	conf_write_heading(tristate, &tristate_printer_cb, NULL);
 
 	conf_write_heading(out_h, &header_printer_cb, NULL);
+
+	conf_write_heading(out_mk, &makefile_printer_cb, NULL);
+
+	fprintf(out_h, "\n"
+		       "#ifndef _PLATFORM_CONFIG_H_\n"
+		       "#define _PLATFORM_CONFIG_H_\n"
+		       "\n");
 
 	for_all_symbols(i, sym) {
 		sym_calc_value(sym);
@@ -1059,19 +1072,22 @@ int conf_write_autoconf(void)
 		conf_write_symbol(tristate, sym, &tristate_printer_cb, (void *)1);
 
 		conf_write_symbol(out_h, sym, &header_printer_cb, NULL);
+
+		conf_write_mksymbol(out_mk, sym, &makefile_printer_cb, NULL);
 	}
+
+	fprintf(out_h, "\n"
+		       "#endif\n");
+
 	fclose(out);
 	fclose(tristate);
 	fclose(out_h);
+	fclose(out_mk);
 
-	name = getenv("KCONFIG_AUTOHEADER");
-	if (!name)
-		name = "include/generated/autoconf.h";
+	name = "include/config/platform_config.h";
 	if (rename(".tmpconfig.h", name))
 		return 1;
-	name = getenv("KCONFIG_TRISTATE");
-	if (!name)
-		name = "include/config/tristate.conf";
+	name = "include/config/tristate.conf";
 	if (rename(".tmpconfig_tristate", name))
 		return 1;
 	name = conf_get_autoconfig_name();
@@ -1080,6 +1096,9 @@ int conf_write_autoconf(void)
 	 * and this marks the successful completion of the previous steps.
 	 */
 	if (rename(".tmpconfig", name))
+		return 1;
+	name = "include/config/makefile.platform";
+	if (rename(".tmpmakefile.platform", name))
 		return 1;
 
 	return 0;
