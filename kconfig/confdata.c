@@ -674,6 +674,18 @@ static struct conf_printer makefile_printer_cb =
 	.print_comment = makefile_print_comment,
 };
 
+static void conf_write_mksymbol(FILE *fp, struct symbol *sym,
+			        struct conf_printer *printer, void *printer_arg)
+{
+	const char *str;
+
+	if (sym->type == S_STRING) {
+		str = sym_get_string_value(sym);
+		printer->print_symbol(fp, sym, str, printer_arg);
+		free((void *)str);
+	}
+}
+
 static void conf_write_symbol(FILE *fp, struct symbol *sym,
 			      struct conf_printer *printer, void *printer_arg)
 {
