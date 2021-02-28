@@ -630,7 +630,7 @@ static struct conf_printer tristate_printer_cb =
 /*
  * Makefile printer
  *
- * This printer is used when generating the 'include/diegos/config/makefile.platform' file.
+ * This printer is used when generating the 'include/config/makefile.config' file.
  */
 
 static void
@@ -652,7 +652,7 @@ makefile_print_comment(FILE *fp, const char *value, void *arg)
 	const char *p = value;
 	size_t l;
 
-	fprintf(fp, "#\n");
+	fprintf(fp, " #\n");
 	for (;;) {
 		l = strcspn(p, "\n");
 		fprintf(fp, " #");
@@ -1041,7 +1041,7 @@ int conf_write_autoconf(void)
 		return 1;
 	}
 
-	out_mk = fopen(".tmpmakefile.platform", "w");
+	out_mk = fopen(".tmpmakefile.config", "w");
 	if (!out_mk) {
 		fclose(out);
 		fclose(out_h);
@@ -1097,8 +1097,8 @@ int conf_write_autoconf(void)
 	 */
 	if (rename(".tmpconfig", name))
 		return 1;
-	name = "include/config/makefile.platform";
-	if (rename(".tmpmakefile.platform", name))
+	name = "include/config/makefile.config";
+	if (rename(".tmpmakefile.config", name))
 		return 1;
 
 	return 0;
