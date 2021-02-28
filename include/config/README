@@ -1,0 +1,4 @@
+This folder is the output folder of kconfig tools.
+DO NOT save, store or add to git any of the contents of this folder.
+DO NOT use this folder for other purposes than carry the output of kconfig
+tools.
