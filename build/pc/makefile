@@ -1,8 +1,7 @@
-export CPU = ia32
-export PLATFORM = pc
-
-include ../makefiles/makefile.master
+include ../../include/config/makefile.config
 include ../makefiles/makefile.$(CPU)
+include ../makefiles/makefile.$(PLATFORM)
+include ../makefiles/makefile.master
 
 STATICLIST=../../kernel/$(OBJPREFIX)_diegos.a
 
@@ -20,7 +19,7 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../libs/libc/$(OBJPREFIX)_libc.a \
 	../../fat/$(OBJPREFIX)_fat.a
    
-all: bootsect.bin 
+all: bootloader.bin
 	cd ../../platforms/$(CPU) && make all
 	cd ../../platforms/$(PLATFORM) && make all
 	cd ../../kernel && make all
@@ -32,7 +31,7 @@ all: bootsect.bin
 	$(LD) -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
 	objcopy -S DiegOS.elf DiegOS.stripped.elf
 	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
-	./mkimage -b bootsect.bin -s DiegOS.bin -d bootimage.img
+	./mkimage -b bootloader.bin -s DiegOS.bin -d bootimage.img
 
 clean:
 	cd ../../kernel && make clean
@@ -45,5 +44,5 @@ clean:
 	cd ../../applications/demo && make clean
 	rm -f *.o *.bin *.img *.elf
 
-bootsect.bin:
-	nasm -f bin -o $@ ../../boot/pc/bootmbr32.s
+bootloader.bin:
+	nasm -f bin -o $@ ../../boot/$(PLATFORM)/bootmbr32.s
