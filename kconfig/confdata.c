@@ -542,6 +542,7 @@ static struct conf_printer kconfig_printer_cb =
 static void
 header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 {
+	int i;
 
 	switch (sym->type) {
 	case S_BOOLEAN:
@@ -569,7 +570,11 @@ header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 		    CONFIG_, sym->name, prefix, value);
 		break;
 	}
-	case S_STRING:
+	case S_STRING: {
+		for (i = 0; i < sizeof(mkconf)/sizeof(mkconf[0]); i++)
+			if (strcmp(sym->name, mkconf[i]) == 0)
+				return;
+	}
 	case S_INT:
 		fprintf(fp, "#define %s%s %s\n",
 		    CONFIG_, sym->name, value);
