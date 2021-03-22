@@ -40,9 +40,9 @@
 #define TIMER_STAGE2    (30*1000)
 
 static const char *timeout_msg[] = {
-    "\n *** Login session has been idle for 5 minutes ***\n",
-    "\n *** Login session will time out in 30 seconds ***\n",
-    "\n *** Time out ***\n"
+    "\n *** Login session has been idle for 5 minutes ***",
+    "\n *** Login session will time out in 30 seconds ***",
+    "\n *** Time out ***"
 };
 
 static unsigned volatile timeout_stage = 0;
@@ -199,15 +199,15 @@ static void login_main_entry (void)
                     (0xdead == timeout->eventid)) {
                 ++timeout_stage;
                 if (1 == timeout_stage) {
-                    printf(timeout_msg[0]);
+                    puts(timeout_msg[0]);
                     (void)alarm_update(timer, TIMER_STAGE1, FALSE);
                     alarm_set(timer, TRUE);
                 } else if (2 == timeout_stage) {
-                    printf(timeout_msg[1]);
+                    puts(timeout_msg[1]);
                     (void)alarm_update(timer, TIMER_STAGE2, FALSE);
                     alarm_set(timer, TRUE);
                 } else if (3 == timeout_stage) {
-                    printf(timeout_msg[2]);
+                    puts(timeout_msg[2]);
                     alarm_set(timer, FALSE);
                 }
             }
