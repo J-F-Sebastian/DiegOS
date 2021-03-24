@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "loc_incl.h"
 
@@ -32,9 +33,18 @@ int readbuffer (FILE *stream)
 
     stream->count = 0;
 
-    if ((fileno(stream) < 0) ||
-            stream_testflags(stream, IOBUF_EOF | IOBUF_ERROR)) {
-            abort();
+    if (fileno(stream) < 0) {
+        errno = EBADF;
+	return (EOF);
+    }
+
+    if (stream_testflags(stream, IOBUF_ERROR)) {
+        errno = EIO;
+	return (EOF);
+    }
+
+    if (stream_testflags(stream, IOBUF_EOF)) {
+        errno = 0;
         return (EOF);
     }
 
