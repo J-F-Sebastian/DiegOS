@@ -75,6 +75,8 @@ int remove (const char *filename);
 int rename (const char *oldname, const char *newname);
 void rewind (FILE *stream);
 void setbuf (FILE *stream, char *buf);
+void setbuffer (FILE *stream, char *buf, size_t size);
+void setlinebuf (FILE *stream);
 int setvbuf (FILE *stream, char *buf, int mode, size_t size);
 FILE *tmpfile (void);
 char *tmpnam (char *s);
