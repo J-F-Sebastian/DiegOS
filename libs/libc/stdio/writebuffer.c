@@ -39,22 +39,18 @@ int writebuffer(int c, FILE *stream)
     stream_setflags(stream, IOBUF_WRITING);
 
     if (!stream_testflags(stream, IOBUF_NBUF) && !stream->buffer) {
-        if (!(stream->buffer = (unsigned char *) malloc(BUFSIZ))) {
+        if (!(stream->buffer = (char *) malloc(BUFSIZ))) {
             stream_setflags(stream, IOBUF_NBUF);
             stream->count = stream->bufsize = 0;
         } else {
-            if (stream == stdout) {
-                stream_setflags(stream, IOBUF_LBUF | IOBUF_RELBUF);
-            } else {
-                stream_setflags(stream, IOBUF_RELBUF);
-            }
+            stream_setflags(stream, IOBUF_RELBUF);
             stream->count = stream->bufsize = BUFSIZ;
         }
         stream->bufptr = stream->buffer;
     }
 
     if (stream_testflags(stream, IOBUF_NBUF)) {
-        char c1 = c;
+        char c1 = (char)c;
 
         if (stream_testflags(stream, IOBUF_APPEND)) {
             if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
@@ -69,14 +65,10 @@ int writebuffer(int c, FILE *stream)
     } else if (stream_testflags(stream, IOBUF_LBUF)) {
         if (stream->count) {
             --stream->count;
-            *stream->bufptr++ = c;
+            *stream->bufptr++ = (char)c;
         }
 
         if ((c == '\n') || !stream->count) {
-
-            count = stream->bufsize - stream->count;
-            stream->bufptr = stream->buffer;
-            stream->count = stream->bufsize;
 
             if (stream_testflags(stream, IOBUF_APPEND)) {
                 if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
@@ -84,7 +76,11 @@ int writebuffer(int c, FILE *stream)
                     return (EOF);
                 }
             }
-            if (write(fileno(stream), (char *) stream->buffer, count) < 0) {
+            count = stream->bufsize - stream->count;
+            stream->bufptr = stream->buffer;
+            stream->count = stream->bufsize;
+
+            if (write(fileno(stream), stream->buffer, count) < 0) {
                 stream_setflags(stream, IOBUF_ERROR);
                 return (EOF);
             }
@@ -111,14 +107,14 @@ int writebuffer(int c, FILE *stream)
                     return (EOF);
                 }
             }
-            if (write(fileno(stream), (char *) stream->buffer, count) < 0) {
-                *stream->bufptr++ = (unsigned char) c;
+            if (write(fileno(stream), stream->buffer, count) < 0) {
+                *stream->bufptr++ = (char) c;
                 stream_setflags(stream, IOBUF_ERROR);
                 return (EOF);
             }
         }
-        *stream->bufptr++ = (unsigned char) c;
+        *stream->bufptr++ = (char) c;
     }
 
-    return ((unsigned char) c);
+    return (c);
 }
