@@ -71,17 +71,17 @@ enum {
 
 struct iobuf {
     /* file descriptor */
-    int             fd;
+    int      fd;
     /* stream flags */
-    unsigned        flags;
+    unsigned flags;
     /* buffer size in bytes */
-    unsigned        bufsize;
+    unsigned bufsize;
     /* buffer to be read or written */
-    unsigned        count;
+    unsigned count;
     /* the stream buffer */
-    unsigned char  *buffer;
+    char    *buffer;
     /* pointer to the actual buffer position for I/O */
-    unsigned char  *bufptr;
+    char    *bufptr;
 };
 
 extern FILE *iostreams[FOPEN_MAX];
@@ -139,7 +139,7 @@ inline void stream_clearflags(FILE *stream, unsigned flags)
 
 inline void stream_init (FILE *stream,
                          int fd,
-                         unsigned char *buffer,
+                         char *buffer,
                          unsigned bufsize,
                          unsigned flags)
 {
