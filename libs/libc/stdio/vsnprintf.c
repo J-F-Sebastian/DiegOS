@@ -36,7 +36,7 @@ int vsnprintf(char *s, size_t n, const char *format, va_list arg)
     if (n > 0) {
         stream_init(&tmpstream,
                     -1,
-                    (unsigned char *) s,
+                    s,
                     n,
                     (IOBUF_WRITE | IOBUF_FBUF));
         retval = formatted_printf(&tmpstream, format, TRUE, arg);
