@@ -42,7 +42,7 @@ int fflush (FILE *stream)
 
     if (stream_testflags(stream, IOBUF_READING)) {
         if (!stream_nbuf(stream)) {
-            adjust = -(off_t)stream->count;
+            adjust = (off_t)(stream->bufsize - stream->count);
         }
         stream->count = 0;
         if (lseek(stream->fd, adjust, SEEK_CUR) == (off_t)-1) {
@@ -64,6 +64,10 @@ int fflush (FILE *stream)
 
     count = (uintptr_t)stream->bufptr - (uintptr_t)stream->buffer;
 
+    /*
+     * This can happen if: the buffer is in writing mode and no data
+     * has ever been written in the buffer OR the buffer is in reading mode.
+     */
     if (!count) {
         return (0);
     }
