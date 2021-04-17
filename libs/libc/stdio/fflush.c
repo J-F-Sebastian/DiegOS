@@ -36,7 +36,7 @@ int fflush (FILE *stream)
         return (retval);
     }
 
-    if (!stream->buffer || (!stream_busy(stream))) {
+    if (!stream->buffer || (!stream_dirty(stream))) {
         return (0);
     }
 
