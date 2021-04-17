@@ -72,6 +72,7 @@ int fcntl(int fd, int cmd, ...)
         break;
     }
 
+    errno = EINVAL;
     return (-1);
 }
 
