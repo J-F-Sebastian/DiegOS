@@ -33,9 +33,9 @@ int setvbuf (FILE *stream, char *buf, int mode, size_t size)
         free(stream->buffer);
     }
 
-    stream_setflags(stream, ~(IOBUF_NBUF | IOBUF_LBUF));
+    stream_clearflags(stream, (IOBUF_NBUF | IOBUF_LBUF));
 
-    if (buf && size <= 0) {
+    if (buf && (size <= 0)) {
         retval = EOF;
     }
     if (!buf && (mode != _IONBF)) {
@@ -45,10 +45,9 @@ int setvbuf (FILE *stream, char *buf, int mode, size_t size)
         stream_setflags(stream, IOBUF_RELBUF);
     }
 
-    stream->buffer = (unsigned char *) buf;
-
+    stream->buffer = buf;
     stream->count = 0;
-    stream->flags |= mode;
+    stream_setflags(stream, mode);
     stream->bufptr = stream->buffer;
     stream->bufsize = size;
 
