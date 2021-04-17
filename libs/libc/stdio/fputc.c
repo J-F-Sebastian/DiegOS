@@ -32,5 +32,5 @@ int fputc (int c, FILE *stream)
     } else {
         return (writebuffer(c, stream));
     }
-    return ((unsigned char)c);
+    return ((int)c);
 }
