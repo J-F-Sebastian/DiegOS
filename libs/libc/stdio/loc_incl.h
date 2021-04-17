@@ -102,7 +102,7 @@ inline int stream_rw(FILE *stream)
             (IOBUF_READ | IOBUF_WRITE)) ? (1) : (0));
 }
 
-inline int stream_busy(FILE *stream)
+inline int stream_dirty(FILE *stream)
 {
     return ((stream->flags & (IOBUF_WRITING | IOBUF_READING)) ? (1) : (0));
 }
@@ -138,10 +138,10 @@ inline void stream_clearflags(FILE *stream, unsigned flags)
 }
 
 inline void stream_init (FILE *stream,
-                                int fd,
-                                unsigned char *buffer,
-                                unsigned bufsize,
-                                unsigned flags)
+                         int fd,
+                         unsigned char *buffer,
+                         unsigned bufsize,
+                         unsigned flags)
 {
     if (stream) {
         stream->fd = fd;
@@ -150,8 +150,6 @@ inline void stream_init (FILE *stream,
         stream->bufsize = stream->count = bufsize;
     }
 }
-
-typedef long long printval_s_t;
 
 int formatted_printf (FILE *stream, const char *fmt, const int skipeof, va_list ap);
 int formatted_scan (FILE * stream, const char *format, va_list ap);
