@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 #include "loc_incl.h"
 
 int fclose (FILE *stream)
@@ -31,6 +32,7 @@ int fclose (FILE *stream)
     for (i = 0; (i < FOPEN_MAX) && (stream != iostreams[i]); i++) {};
 
     if (FOPEN_MAX == i) {
+	errno = EBADF;
         return (EOF);
     } else if (stream == iostreams[i]) {
         iostreams[i] = NULL;
