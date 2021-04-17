@@ -102,14 +102,15 @@ static void console_main_entry (void)
                 /* no break */
                 case '\n':
                     cmd_typein = FALSE;
-                    buffer[buffer_head] = 0;
-                    putchar('\n');
+                    buffer[buffer_head++] = '\0';
                     break;
                 }
             }
+            fflush(stdout);
         }
 
-        system_parser(buffer, buffer_head+1);
+	puts("\r");
+        system_parser(buffer, buffer_head);
 
         cmd_typein = TRUE;
     }
