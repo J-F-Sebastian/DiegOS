@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "fdescr_private.h"
 
 #define DEV_PATH "/dev"
@@ -32,6 +33,7 @@ int open (const char *filename, int flags, int perms)
      * Only devices right now!
      */
     if (strncmp(filename, DEV_PATH, sizeof(DEV_PATH)-1)) {
+        errno = EACCES;
         return (-1);
     }
 
@@ -44,6 +46,7 @@ int open (const char *filename, int flags, int perms)
             fd++) {};
 
     if (NELEMENTS(fdarray) == fd) {
+        errno = ENFILE;
         return (-1);
     }
 
@@ -58,6 +61,7 @@ int open (const char *filename, int flags, int perms)
         flg = (FD_DATA_IS_W | FD_DATA_IS_R);
         break;
     default:
+	errno = EINVAL;
         return (-1);
     }
 
@@ -71,6 +75,7 @@ int open (const char *filename, int flags, int perms)
     if (!fdarray[fd].rawdev) {
         free(fdarray[fd].absfname);
         fdarray[fd].absfname = NULL;
+        errno = ENXIO;
         return (-1);
     }
 
