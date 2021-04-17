@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "loc_incl.h"
 
@@ -29,49 +30,52 @@
 FILE *fopen(const char *filename, const char *mode)
 {
     unsigned i;
-    unsigned flags = 0;
-    int rwmode = 0, rwflags = 0;
-    FILE *stream;
+    unsigned flags;
+    int rwmode, rwflags;
+    FILE *stream = NULL;
     int fd;
 
 
     for (i = 0; (i < FOPEN_MAX) && iostreams[i] ; i++) {};
 
     if (i == FOPEN_MAX) {
-        return ((FILE *)NULL);
+        errno = EBADF;
+        return (stream);
     }
 
     switch (*mode++) {
     case 'r':
-        flags |= (IOBUF_READ | IOBUF_READING);
+        flags = IOBUF_READ;
         rwmode = O_RDONLY;
+	rwflags = 0;
         break;
     case 'w':
-        flags |= (IOBUF_WRITE | IOBUF_WRITING);
+        flags = IOBUF_WRITE;
         rwmode = O_WRONLY;
         rwflags = (O_CREAT | O_TRUNC);
         break;
     case 'a':
-        flags |= (IOBUF_WRITE | IOBUF_WRITING | IOBUF_APPEND);
+        flags = (IOBUF_WRITE | IOBUF_APPEND);
         rwmode = O_WRONLY;
-        rwflags |= (O_APPEND | O_CREAT);
+        rwflags = (O_APPEND | O_CREAT);
         break;
     default:
-        return ((FILE *)NULL);
+	errno = EINVAL;
+        return (stream);
     }
 
     while (*mode) {
         switch(*mode++) {
         case 'b':
-            continue;
-        case '+':
-            rwmode = O_RDWR;
-            flags |= (IOBUF_READ | IOBUF_WRITE);
-            continue;
-        default:
             break;
+        case '+':
+            flags |= (IOBUF_READ | IOBUF_WRITE);
+            rwmode = O_RDWR;
+            break;
+        default:
+	    errno = EINVAL;
+	    return (stream);
         }
-        break;
     }
 
     /* Perform a creat() when the file should be truncated or when
