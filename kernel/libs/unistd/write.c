@@ -26,8 +26,13 @@ ssize_t write (int fd, const void *buf, size_t n)
     unsigned retries = 10;
     int retcode;
 
-    if (!buf || (fd < 0) || (fd >= (int)NELEMENTS(fdarray)) ||
-            !(fdarray[fd].flags & FD_DATA_IS_INUSE)) {
+    if ((fd < 0) || (fd >= (int)NELEMENTS(fdarray))) {
+	    errno = EBADF;
+	    return (-1);
+    }
+
+    if (!buf || !(fdarray[fd].flags & FD_DATA_IS_INUSE)) {
+	errno = EINVAL;
         return (-1);
     }
 
@@ -36,12 +41,13 @@ ssize_t write (int fd, const void *buf, size_t n)
             retcode = device_io_tx(fdarray[fd].rawdev, (char *)buf, n);
         } while (retries-- && (retcode == EAGAIN));
         if (retcode < EOK) {
+	    errno = EIO;
             return (-1);
         }
-    } else if (fdarray[fd].flags & FD_DATA_IS_SOCK) {
     } else {
+	errno = EINVAL;
         return (-1);
     }
 
-    return (n);
+    return ((ssize_t)retcode);
 }
