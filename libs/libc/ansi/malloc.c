@@ -193,6 +193,7 @@ void *realloc(void *p, size_t size)
     if ((MAGIC_ALLOC_NUMBER != this->magic) && 
         (MAGIC_FREE_NUMBER != this->magic)) 
     {
+        errno = ENOMEM;
         return (NULL);
     }
 
