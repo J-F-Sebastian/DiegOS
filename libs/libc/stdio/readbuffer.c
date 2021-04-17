@@ -24,12 +24,11 @@
 
 #include "loc_incl.h"
 
-static unsigned char ch[FOPEN_MAX];
-
 int readbuffer (FILE *stream)
 {
     unsigned i;
     ssize_t retcode;
+    char ch;
 
     stream->count = 0;
 
@@ -44,25 +43,24 @@ int readbuffer (FILE *stream)
     }
 
     if (stream_testflags(stream, IOBUF_EOF)) {
-        errno = 0;
+        errno = EOF;
         return (EOF);
     }
 
     if (!stream_r(stream) || stream_wrting(stream)) {
-        stream->flags |= IOBUF_ERROR;
+        stream_setflags(stream, IOBUF_ERROR);
         return (EOF);
     }
 
-    if (!stream_rding(stream)) {
-        stream->flags |= IOBUF_READING;
-    }
+    stream_setflags(stream, IOBUF_READING);
 
     if (!stream_nbuf(stream) && !stream->buffer) {
-        stream->buffer = (unsigned char *) malloc(BUFSIZ);
+        stream->buffer = (char *) malloc(BUFSIZ);
         if (!stream->buffer) {
-            stream->flags |= IOBUF_NBUF;
+            stream_setflags(stream, IOBUF_NBUF);
+            stream->bufsize = 0;
         } else {
-            stream->flags |= IOBUF_RELBUF;
+            stream_setflags(stream, IOBUF_RELBUF);
             stream->bufsize = BUFSIZ;
         }
     }
@@ -76,12 +74,13 @@ int readbuffer (FILE *stream)
         }
     }
 
-    if (stream_nbuf(stream)) {
-        stream->buffer = &ch[fileno(stream)];
-        stream->bufsize = 1;
-    }
     stream->bufptr = stream->buffer;
-    retcode = read(stream->fd, (char *)stream->buffer, stream->bufsize);
+
+    if (stream_nbuf(stream)) {
+        retcode = read(stream->fd, &ch, sizeof(ch));
+    } else {
+        retcode = read(stream->fd, stream->buffer, stream->bufsize);
+    }
 
     if (retcode <= 0) {
         stream->count = 0;
@@ -93,7 +92,13 @@ int readbuffer (FILE *stream)
         return (EOF);
     }
 
-    stream->count = (unsigned)retcode - 1;
+    /*
+     * count is the total amount of bytes read minus the returned one,
+     * so if no buffer is allocated, count is always 0 and no read
+     * from memory can take place - all stdio functions are forced to
+     * call readbuffer one byte at a time.
+     */
+    stream->count = (unsigned)(retcode - 1);
 
-    return (*stream->bufptr++);
+    return (stream_nbuf(stream) ? (int)ch : (*stream->bufptr++));
 }
