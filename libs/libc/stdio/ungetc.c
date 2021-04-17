@@ -23,11 +23,11 @@
 
 int ungetc(int ch, FILE *stream)
 {
-	unsigned char *p;
+	char *p;
 
 	if (ch == EOF  || !stream_rding(stream) || stream_nbuf(stream)) {
 		return EOF;
-    }
+        }
 
 	if (stream->bufptr == stream->buffer) {
 		if (!stream->count) {
@@ -39,8 +39,8 @@ int ungetc(int ch, FILE *stream)
 	stream->count++;
 	p = --(stream->bufptr);
 
-	if (*p != (unsigned char) ch) {
-		*p = (unsigned char) ch;
+	if (*p != (char) ch) {
+		*p = (char) ch;
     }
 
 	return (ch);
