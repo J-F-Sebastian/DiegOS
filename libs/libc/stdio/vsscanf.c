@@ -35,7 +35,7 @@ int vsscanf(const char *s, const char *format, va_list ap)
 
     stream_init(&tmpstream,
                 -1,
-                (unsigned char *) s,
+                (char *) s,
                 USHRT_MAX,
                 (IOBUF_READ | IOBUF_FBUF));
 
