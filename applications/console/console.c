@@ -56,9 +56,7 @@ static void print_input_help (void)
 
 static void print_banner (void)
 {
-    puts("\n");
-    puts("\n");
-    puts("DiegOS  Copyright (C) 2012-2017  Diego Gallizioli");
+    puts("\nDiegOS  Copyright (C) 2012-2021  Diego Gallizioli\n");
     puts("This program comes with ABSOLUTELY NO WARRANTY.");
     puts("This is free software, and you are welcome to redistribute it");
     puts("under certain conditions.");
