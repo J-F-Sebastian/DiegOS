@@ -17,147 +17,95 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libs/chunks.h>
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
 
-#include "system_parser.h"
-#include "system_parser_api.h"
+#include "system_parser_types.h"
 
-static chunks_pool_t *system_parser_chunks_pool = NULL;
+static const struct alternates *system_root = NULL;
 
-static struct parser_tree *system_root = NULL;
-
-static int system_parser_insert (struct parser_tree *root,
-                                 struct parser_tree *tree)
+const struct alt_command *system_parser_search (const struct alternates *a,
+						const char *token)
 {
-    int retcode;
+	unsigned i = a->num_commands;
+	const struct alt_command *cursor = a->commands;
 
-    do {
-        retcode = strncmp(root->chunk, tree->chunk, sizeof(root->chunk));
+	while (i--)
+	{
+		if (strcmp(token, cursor->item) == 0)
+			return cursor;
 
-        if (0 == retcode) {
-            return (EINVAL);
-        } else if (retcode < 0) {
-            root = root->alternate;
-        } else {
-            tree->alternate = root->alternate;
-            root->alternate = tree;
-            return (EOK);
-        }
-    } while (root != NULL);
+		++cursor;
+	}
 
-    return (EINVAL);
+	return NULL;
 }
 
-static struct parser_tree *system_parser_search (struct parser_tree *root,
-                                                 const char *name)
+static void system_parser_print_help (const struct alternates *root, unsigned index)
 {
-    int retcode;
+	unsigned i = root->num_commands;
+	const struct alt_command *cursor = root->commands;
 
-    do {
-        retcode = strncmp(root->chunk, name, sizeof(root->chunk));
-
-        if (0 == retcode) {
-            return (root);
-        } else if (retcode < 0) {
-            root = root->alternate;
-        } else {
-            return (NULL);
-        }
-    } while (root != NULL);
-
-    return (NULL);
+	if (index == -1U)
+	{
+		while (i--)
+		{
+			fprintf(stderr, " %-15s\t%s\n", cursor->item, cursor->help);
+			++cursor;
+		}
+	}
+	else if (index < root->num_commands)
+	{
+		printf(" %-15s\t%s\n", cursor[index].item, cursor[index].help);
+	}
 }
 
-static void system_parser_print_help (struct parser_tree *root, BOOL printchain)
+void system_parser_init (const struct alternates *root)
 {
-    if (printchain) {
-        do {
-            printf(" %-15s\t%s\n", root->chunk, root->help);
-            root = root->alternate;
-        } while (root);
-    } else {
-        printf(" %-15s\t%s\n", root->chunk, root->help);
-    }
+	//FIXME ASSERT ON NULL
+	system_root = root;
 }
-
-void system_parser_new_tree (struct parser_tree *tree)
-{
-    assert(tree != NULL);
-
-    if (system_root) {
-        assert(system_parser_insert(system_root, tree) == EOK);
-    } else {
-        system_root = tree;
-    }
-}
-
-struct parser_tree *system_parser_add_cmd (const char *name,
-                                           const char *help,
-                                           unsigned flag,
-                                           struct parser_tree *next,
-                                           struct parser_tree *alternate)
-{
-    struct parser_tree *newnode;
-
-    /* FIXME flag checks!!! */
-    if (!name || !help) {
-        return (NULL);
-    }
-
-    if (!system_parser_chunks_pool) {
-        system_parser_chunks_pool = chunks_pool_create("SystemParser",
-                                                       0,
-                                                       sizeof(struct parser_tree),
-                                                       16,
-                                                       16);
-        assert(system_parser_chunks_pool != NULL);
-    }
-
-    newnode = chunks_pool_malloc(system_parser_chunks_pool);
-    assert(newnode != NULL);
-
-    strncpy(newnode->chunk, name, sizeof(newnode->chunk));
-    newnode->chunk[SYSTEM_PARSER_CMD_MAX] = 0;
-    strncpy(newnode->help, help, sizeof(newnode->help));
-    newnode->help[SYSTEM_PARSER_HELP_MAX] = 0;
-    newnode->flag = flag;
-    newnode->next = next;
-    newnode->alternate = alternate;
-
-    return (newnode);
-}
-
 
 void system_parser(const char *buffer, unsigned bufsize)
 {
-    char buffer2[128] = {0};
-    char *token = NULL;
-    struct parser_tree *cmdchain = system_root;
+    char buffer2[128];
+    char *token = NULL, *saveptr = NULL;
+    const struct alternates *cmdchain = system_root;
+    const struct alt_command *cmd = NULL;
 
     if (!buffer || !bufsize) {
         return;
     }
 
     strncpy(buffer2, buffer, sizeof(buffer2));
-    token = strtok(buffer2," ");
+    token = strtok_r(buffer2, " ", &saveptr);
+    if (!token)
+	    return;
 
     while (token && cmdchain) {
         if (token[0] == '\t') {
-            system_parser_print_help(cmdchain, TRUE);
+            system_parser_print_help(cmdchain, -1U);
             break;
         } else {
-            cmdchain = system_parser_search(cmdchain, token);
-            if (cmdchain) {
-                cmdchain = cmdchain->next;
-                token = strtok(NULL," ");
-            } else {
-                puts("SYNTAX ERROR");
-                return;
-            }
-        }
+            cmd = system_parser_search(cmdchain, token);
+            if (cmd) {
+			if (cmd->next) {
+			    cmdchain = cmd->next;
+			    token = strtok_r(NULL, " ", &saveptr);
+			} else {
+				if (cmd->flags & PARSER_FUNC) {
+					system_parser_func0 fn = cmd->data;
+					if (fn) fn();
+				}
+				return;
+			}
+	    } else {
+		    system_parser_print_help(cmdchain, -1U);
+		    puts("SYNTAX ERROR !!!");
+		    return;
+	    }
+	}
     }
 }
