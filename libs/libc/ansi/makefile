@@ -2,7 +2,7 @@ include ../../../build/makefiles/makefile.master
 
 OBJS = strcpy.o strncpy.o strcat.o strncat.o strcmp.o strncmp.o\
 	strchr.o strrchr.o strspn.o strcspn.o strpbrk.o strstr.o\
-	strlen.o strerror.o strtok.o\
+	strlen.o strerror.o strtok.o strtok_r.o\
 	memchr.o memcpy_$(CPU).o memmove.o memset.o memcmp.o\
 	toupper.o tolower.o malloc.o calloc.o rand.o abort.o\
 	exit.o system.o getenv.o bsearch.o qsort.o abs.o labs.o\
