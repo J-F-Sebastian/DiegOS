@@ -34,7 +34,23 @@
 #include <time.h>
 
 #include "system_parser.h"
-#include "system_parser_api.h"
+#include "system_parser_macros.h"
+
+BEGIN_ALT_COMMAND(show)
+	ALT_COMMAND(interfaces, "network interfaces")
+	ALT_COMMAND_FUNC0(threads, "system threads", threads_dump)
+	ALT_COMMAND_FUNC0(mutexes, "system mutexes", mutexes_dump)
+	ALT_COMMAND(barriers, "barriers")
+END_ALT_COMMAND()
+
+CREATE_ALTERNATE(show)
+
+BEGIN_ALT_COMMAND(root)
+	ALT_COMMAND_NEXT(show, "show system informations", show)
+	ALT_COMMAND(help, "help !!!")
+END_ALT_COMMAND()
+
+CREATE_ALTERNATE(root)
 
 #define TIMER_STAGE1    (300*1000)
 #define TIMER_STAGE2    (30*1000)
@@ -110,6 +126,7 @@ static void console_main_entry (void)
         }
 
 	puts("\r");
+
         system_parser(buffer, buffer_head);
 
         cmd_typein = TRUE;
@@ -161,7 +178,7 @@ static void login_main_entry (void)
     retcode = event_watch_queue(events);
     assert(EOK == retcode);
 
-    sleep(3);
+    sleep(1);
 
     while (TRUE) {
         do {
@@ -177,7 +194,7 @@ static void login_main_entry (void)
                                 THREAD_PRIO_NORMAL,
                                 console_main_entry,
                                 0,
-                                4096,
+                                8192,
                                 &tid);
         if (!retlogin) {
             TRACE_PRINT("Failed spawning thread Console")
@@ -220,16 +237,7 @@ void console_run (void)
     uint8_t pid;
     BOOL retcode;
 
-    system_parser_new_tree(
-        system_parser_add_cmd("help","online help",SYSTEM_PARSER_FLAG_CMD,NULL,
-        system_parser_add_cmd("show","show commands",SYSTEM_PARSER_FLAG_CMD,
-            system_parser_add_cmd("threads","show threads",SYSTEM_PARSER_FLAG_CMD,
-            system_parser_add_cmd("mutexes","show mutexes",SYSTEM_PARSER_FLAG_CMD,
-            system_parser_add_cmd("alarms","show alarms",SYSTEM_PARSER_FLAG_CMD,NULL,NULL),
-            NULL),
-            NULL),
-        NULL)
-    ));
+    system_parser_init(&alternates_root);
 
     retcode = thread_create("Login",
                             THREAD_PRIO_NORMAL,
@@ -239,6 +247,4 @@ void console_run (void)
                             &pid);
 
     assert(TRUE == retcode);
-/*
-*/
 }
