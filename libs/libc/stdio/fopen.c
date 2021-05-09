@@ -67,6 +67,7 @@ FILE *fopen(const char *filename, const char *mode)
     while (*mode) {
         switch(*mode++) {
         case 'b':
+	    flags |= IOBUF_BIN;
             break;
         case '+':
             flags |= (IOBUF_READ | IOBUF_WRITE);
