@@ -59,14 +59,15 @@ enum {
     IOBUF_WRITING   = (1 << 5),
     /*
      * stream conditions: buffer handling, is in error,
-     * has reached the end-of-file
+     * has reached the end-of-file, is binary
      */
     IOBUF_NBUF      = _IONBF,
     IOBUF_LBUF      = _IOLBF,
     IOBUF_FBUF      = _IOFBF,
     IOBUF_ERROR     = (1 << 16),
     IOBUF_EOF       = (1 << 17),
-    IOBUF_RELBUF    = (1 << 18)
+    IOBUF_RELBUF    = (1 << 18),
+    IOBUF_BIN       = (1 << 19)
 };
 
 struct iobuf {
@@ -120,6 +121,16 @@ inline int stream_rding(FILE *stream)
 inline int stream_nbuf(FILE *stream)
 {
     return ((stream->flags & IOBUF_NBUF) ? (1) : (0));
+}
+
+inline int stream_fbuf(FILE *stream)
+{
+    return ((stream->flags & IOBUF_FBUF) ? (1) : (0));
+}
+
+inline int stream_isb(FILE *stream)
+{
+    return ((stream->flags & IOBUF_BIN) ? (1) : (0));
 }
 
 inline int stream_testflags(FILE *stream, unsigned flags)
