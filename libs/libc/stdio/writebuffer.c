@@ -62,6 +62,12 @@ int writebuffer(int c, FILE *stream)
             stream_setflags(stream, IOBUF_ERROR);
             return (EOF);
         }
+        if ((c == '\n') && !stream_isb(stream)) {
+            if (write(fileno(stream), "\r", 1) < 0) {
+                stream_setflags(stream, IOBUF_ERROR);
+                return (EOF);
+            }
+	}
     } else if (stream_testflags(stream, IOBUF_LBUF)) {
         if (stream->count) {
             --stream->count;
