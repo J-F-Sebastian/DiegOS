@@ -36,14 +36,15 @@ int fflush (FILE *stream)
         return (retval);
     }
 
-    if (!stream->buffer || (!stream_dirty(stream))) {
+    /*
+     * Flushing makes sense if we buffer data.
+     */
+    if (stream_nbuf(stream) || (!stream_dirty(stream))) {
         return (0);
     }
 
-    if (stream_testflags(stream, IOBUF_READING)) {
-        if (!stream_nbuf(stream)) {
-            adjust = (off_t)(stream->bufsize - stream->count);
-        }
+    if (stream_rding(stream)) {
+        adjust = (off_t)(-stream->count);
         stream->count = 0;
         if (lseek(stream->fd, adjust, SEEK_CUR) == (off_t)-1) {
             stream_setflags(stream, IOBUF_ERROR);
@@ -54,15 +55,13 @@ int fflush (FILE *stream)
         }
         stream->bufptr = stream->buffer;
         return (0);
-    } else if (stream_nbuf(stream)) {
-        return (0);
     }
 
     if (stream_r(stream)) {		/* "a" or "+" mode */
         stream_clearflags(stream, IOBUF_WRITING);
     }
 
-    count = (uintptr_t)stream->bufptr - (uintptr_t)stream->buffer;
+    count = stream->validsize - stream->count;
 
     /*
      * This can happen if: the buffer is in writing mode and no data
@@ -72,8 +71,13 @@ int fflush (FILE *stream)
         return (0);
     }
 
+    /*
+     * When writing, the buffer size can be fully used for valid data.
+     * This is not true when reading - EOF may be encountered before
+     * having read bufsize bytes.
+     */
     stream->bufptr = stream->buffer;
-    stream->count = stream->bufsize;
+    stream->count = stream->validsize = stream->bufsize;
 
     if (stream_testflags(stream, IOBUF_APPEND)) {
         if (lseek(stream->fd, 0L, SEEK_END) == (off_t)-1) {
