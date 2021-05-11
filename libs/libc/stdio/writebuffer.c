@@ -38,18 +38,18 @@ int writebuffer(int c, FILE *stream)
     stream_clearflags(stream, IOBUF_READING);
     stream_setflags(stream, IOBUF_WRITING);
 
-    if (!stream_testflags(stream, IOBUF_NBUF) && !stream->buffer) {
+    if (!stream_nbuf(stream) && !stream->buffer) {
         if (!(stream->buffer = (char *) malloc(BUFSIZ))) {
             stream_setflags(stream, IOBUF_NBUF);
-            stream->count = stream->bufsize = 0;
+            stream->count = stream->bufsize = stream->validsize = 0;
         } else {
             stream_setflags(stream, IOBUF_RELBUF);
-            stream->count = stream->bufsize = BUFSIZ;
+            stream->count = stream->bufsize = stream->validsize = BUFSIZ;
         }
         stream->bufptr = stream->buffer;
     }
 
-    if (stream_testflags(stream, IOBUF_NBUF)) {
+    if (stream_nbuf(stream)) {
         char c1 = (char)c;
 
         if (stream_testflags(stream, IOBUF_APPEND)) {
@@ -76,9 +76,9 @@ int writebuffer(int c, FILE *stream)
                     return (EOF);
                 }
             }
-            count = stream->bufsize - stream->count;
+            count = stream->validsize - stream->count;
             stream->bufptr = stream->buffer;
-            stream->count = stream->bufsize;
+            stream->count = stream->validsize;
 
             if (write(fileno(stream), stream->buffer, count) < 0) {
                 stream_setflags(stream, IOBUF_ERROR);
@@ -96,8 +96,8 @@ int writebuffer(int c, FILE *stream)
         }
     } else {
 
-        count = stream->bufsize - stream->count;
-        stream->count = stream->bufsize - 1;
+        count = stream->validsize - stream->count;
+        stream->count = stream->validsize - 1;
         stream->bufptr = stream->buffer;
 
         if (count > 0) {
