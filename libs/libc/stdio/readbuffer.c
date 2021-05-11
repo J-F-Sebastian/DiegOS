@@ -28,9 +28,7 @@ int readbuffer (FILE *stream)
 {
     unsigned i;
     ssize_t retcode;
-    char ch;
-
-    stream->count = 0;
+    char ch = '\0';
 
     if (fileno(stream) < 0) {
         errno = EBADF;
@@ -54,6 +52,12 @@ int readbuffer (FILE *stream)
 
     stream_setflags(stream, IOBUF_READING);
 
+    /*
+     * If this is the first time we call readbuffer, and the buffer
+     * is NULL, and buffering is in use, then try to allocate
+     * the buffer.
+     * If successful set IOBUF_RELBUF to release memory when closing the file.
+     */
     if (!stream_nbuf(stream) && !stream->buffer) {
         stream->buffer = (char *) malloc(BUFSIZ);
         if (!stream->buffer) {
@@ -74,6 +78,7 @@ int readbuffer (FILE *stream)
         }
     }
 
+    stream->count = 0;
     stream->bufptr = stream->buffer;
 
     if (stream_nbuf(stream)) {
@@ -83,7 +88,7 @@ int readbuffer (FILE *stream)
     }
 
     if (retcode <= 0) {
-        stream->count = 0;
+	stream->validsize = 0;
         if (retcode < 0) {
             stream_setflags(stream, IOBUF_ERROR);
         } else {
@@ -98,7 +103,7 @@ int readbuffer (FILE *stream)
      * from memory can take place - all stdio functions are forced to
      * call readbuffer one byte at a time.
      */
-    stream->count = (unsigned)(retcode - 1);
+    stream->count = stream->validsize = (unsigned)(retcode - 1);
 
     return (stream_nbuf(stream) ? (int)ch : (*stream->bufptr++));
 }
