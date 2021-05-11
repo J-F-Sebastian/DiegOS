@@ -77,6 +77,8 @@ struct iobuf {
     unsigned flags;
     /* buffer size in bytes */
     unsigned bufsize;
+    /* actual buffer size in use */
+    unsigned validsize;
     /* buffer to be read or written */
     unsigned count;
     /* the stream buffer */
