@@ -109,6 +109,12 @@ static void console_main_entry (void)
                 putchar(retval);
             } else if (iscntrl(retval)) {
                 switch (retval) {
+		case '\b':
+		    if (buffer_head) {
+		        buffer[buffer_head--] = '\0';
+			putchar(retval);
+		    }
+		    break;
                 case '\t':
                     buffer[buffer_head++] = (char)retval;
                 /* FALLTHRU */
