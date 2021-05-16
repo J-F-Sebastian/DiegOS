@@ -7,7 +7,8 @@ OBJS = sprintf.o snprintf.o vsnprintf.o printf.o fprintf.o\
 	tmpfile.o setbuf.o setvbuf.o feof.o ferror.o clearerr.o\
 	fputs.o doscan.o getc.o fgetc.o gets.o fgets.o\
 	fscanf.o scanf.o sscanf.o vscanf.o vfscanf.o vsscanf.o\
-	ungetc.o fileno.o writebuffer.o readbuffer.o\
+	ungetc.o fileno.o writebuffer.o writebufferl.o\
+	writebuffern.o readbuffer.o\
 	ftell.o fseek.o fgetpos.o fsetpos.o fread.o\
 	fwrite.o perror.o puts.o ecvt.o setbuffer.o\
 	setlinebuf.o

@@ -125,6 +125,11 @@ inline int stream_nbuf(FILE *stream)
     return ((stream->flags & IOBUF_NBUF) ? (1) : (0));
 }
 
+inline int stream_lbuf(FILE *stream)
+{
+    return ((stream->flags & IOBUF_LBUF) ? (1) : (0));
+}
+
 inline int stream_fbuf(FILE *stream)
 {
     return ((stream->flags & IOBUF_FBUF) ? (1) : (0));
@@ -168,6 +173,8 @@ int formatted_printf (FILE *stream, const char *fmt, const int skipeof, va_list 
 int formatted_scan (FILE * stream, const char *format, va_list ap);
 char *i_compute (uint64_t val, int base, char *s, unsigned nrdigits);
 char *_f_print(va_list *ap, int flags, char *s, char c, int precision);
+int writebuffern (int c, FILE *stream);
+int writebufferl (int c, FILE *stream);
 int writebuffer (int c, FILE *stream);
 int readbuffer (FILE *stream);
 
