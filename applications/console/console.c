@@ -52,11 +52,12 @@ END_ALT_COMMAND()
 
 CREATE_ALTERNATE(root)
 
-#define TIMER_STAGE1    (300*1000)
-#define TIMER_STAGE2    (30*1000)
+#define TIMER_POLL      (30*1000)
+#define TIMER_STAGE1    (2)
+#define TIMER_STAGE2    (TIMER_STAGE1 + 1)
 
 static const char *timeout_msg[] = {
-    "\n *** Login session has been idle for 5 minutes ***",
+    "\n *** Login session has been idle for 1 minute  ***",
     "\n *** Login session will time out in 30 seconds ***",
     "\n *** Time out ***"
 };
@@ -177,7 +178,7 @@ static void login_main_entry (void)
     uint8_t tid;
 
     events = event_init_queue("Login");
-    timer = alarm_create("Login", 0xdead, TIMER_STAGE1, FALSE, events);
+    timer = alarm_create("Login", 0xdead, TIMER_POLL, TRUE, events);
     assert(events != NULL);
     assert(timer != NULL);
 
@@ -207,11 +208,10 @@ static void login_main_entry (void)
             continue;
         }
 
-        timeout_stage = 1;
-        (void)alarm_update(timer, TIMER_STAGE1, FALSE);
+        timeout_stage = 0;
         alarm_set(timer, TRUE);
 
-        while (timeout_stage < 3) {
+        while (timeout_stage < TIMER_STAGE2 + 1) {
             wait_for_events(events);
             timeout = event_get(events);
             alarm_dump(NULL);
@@ -219,21 +219,19 @@ static void login_main_entry (void)
 
             if ((CLASS_ALARM == timeout->classid) &&
                     (0xdead == timeout->eventid)) {
+		alarm_acknowledge(timer);
                 ++timeout_stage;
-                if (1 == timeout_stage) {
+                if (TIMER_STAGE1 == timeout_stage) {
                     puts(timeout_msg[0]);
-                    (void)alarm_update(timer, TIMER_STAGE1, FALSE);
-                    alarm_set(timer, TRUE);
-                } else if (2 == timeout_stage) {
+                } else if (TIMER_STAGE2 == timeout_stage) {
                     puts(timeout_msg[1]);
-                    (void)alarm_update(timer, TIMER_STAGE2, FALSE);
-                    alarm_set(timer, TRUE);
-                } else if (3 == timeout_stage) {
-                    puts(timeout_msg[2]);
-                    alarm_set(timer, FALSE);
                 }
             }
         }
+
+        puts(timeout_msg[2]);
+        alarm_set(timer, FALSE);
+	alarm_done(timer);
         thread_kill(tid);
     }
 }
