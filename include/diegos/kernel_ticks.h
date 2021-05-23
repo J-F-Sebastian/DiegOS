@@ -24,6 +24,11 @@
 
 /*
  * Get system ticks.
+ * A system tick is computed virtually considering
+ * DEFAULT_CLOCK_RES as its frequency.
+ * One second equals DEFAULT_CLOCK_RES system ticks.
+ * The frequency of the CLK device is indipendent from
+ * the system ticks frequency.
  *
  * RETURN VALUES
  * 64 bit counter of ticks elapsed since boot time.
@@ -37,6 +42,14 @@ uint64_t clock_get_ticks (void);
  * 64 bit counter of seconds elapsed since boot time.
  */
 uint64_t clock_get_seconds (void);
+
+/*
+ * Get system millliseconds.
+ *
+ * RETURN VALUES
+ * 64 bit counter of milliseconds elapsed since boot time.
+ */
+uint64_t clock_get_milliseconds (void);
 
 /*
  * Convert milliseconds into system ticks.
