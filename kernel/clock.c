@@ -20,66 +20,92 @@
 #include <diegos/devices.h>
 #include <diegos/interrupts.h>
 #include <diegos/kernel_ticks.h>
+#include <libs/kernel_time.h>
 #include <errno.h>
-
 #include "clock.h"
 #include "kprintf.h"
 
-static uint64_t ticks = 0;
-static uint64_t ticks_msecs = 0;
-/* boot ticks can be set to configure the current time and date */
+/*
+ * boot ticks can be set to configure the current time and date
+ */
 static uint64_t boot_ticks = 0;
 
-struct ticks_incr {
-    uint32_t    increment_msecs_per_tick;
-    uint32_t    err_per_tick;
-    uint32_t    total_err_per_tick;
-} ticks_incr_var;
+/*
+ * clock period in clock ticks
+ */
+static uint32_t period = 0;
 
+/*
+ * clock mode (defaults to PERIODIC)
+ */
+static unsigned mode = 0;
+
+/*
+ * callbacks invoked after ticks accounting
+ */
 static kernel_clock_cb callbacks[4] = {};
 
-static void clock_int_handler(void)
+/*
+ * clock instance made global, so runtime calls to change frequency
+ * are much faster
+ */
+static device_t *clock = NULL;
+
+/*
+ * System ticks structure used with kernel_time lib
+ */
+static struct time_util sys_ticks;
+
+/*
+ * CLK device interrupt handler
+ */
+static void clock_int_handler (void)
 {
     unsigned i;
 
-    ++ticks;
-    ticks_msecs += ticks_incr_var.increment_msecs_per_tick;
-    ticks_incr_var.total_err_per_tick += ticks_incr_var.err_per_tick;
-    if (ticks_incr_var.total_err_per_tick > DEFAULT_CLOCK_RES) {
-        ++ticks_msecs;
-        ticks_incr_var.total_err_per_tick = 0;
-    }
+    kernel_time_update_elapsed_counter(period, &sys_ticks);
 
     for (i = 0; i < NELEMENTS(callbacks); i++) {
-        if (callbacks[i]) callbacks[i](ticks);
+        if (callbacks[i]) callbacks[i](kernel_time_get_elapsed_msecs(&sys_ticks));
+    }
+    if (mode == 1) {
+	if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
+	    kprintf("FAILED\n");
     }
 }
 
 /*
  * Dependencies: devices, drivers
  */
-BOOL clock_init()
+BOOL clock_init (void)
 {
-    /*
-     * Any init value is fine, as the return code is NOT an errno
-     */
-    int retcode = EINVAL;
-    device_t *clock = device_lookup(DEV_RTC, 0);
-    int i = DEFAULT_CLOCK_RES;
+    uint32_t params[3] = {0,0,0};
 
-    if (clock) {
-        retcode = clock->cmn->ioctrl_fn(clock_int_handler, RTC_SET_CB, 0);
-        if (EOK != retcode) {
+    clock = device_lookup(DEV_CLK, 0);
+
+    if (!clock) return (FALSE);
+
+    if (EOK != clock->cmn->ioctrl_fn(clock_int_handler, CLK_SET_CB, 0)) {
             return (FALSE);
-        }
-        retcode = clock->cmn->ioctrl_fn(&i, RTC_SET_FREQ, 0);
     }
 
-    ticks_incr_var.increment_msecs_per_tick = 1000/DEFAULT_CLOCK_RES;
-    ticks_incr_var.err_per_tick = 1000%DEFAULT_CLOCK_RES;
-    ticks_incr_var.total_err_per_tick = 0;
+    if (EOK != clock->cmn->ioctrl_fn(params, CLK_GET_PARAMS, 0)) {
+	    return (FALSE);
+    }
 
-    return ((EOK == retcode) ? TRUE : FALSE);
+    if (EOK != kernel_time_init(params[0], params[1], params[2], &sys_ticks)) {
+	    return (FALSE);
+    }
+
+    if (EOK != clock->cmn->ioctrl_fn(&mode, CLK_SET_MODE, 0))
+	    return (FALSE);
+
+    period = kernel_time_get_value(1000/DEFAULT_CLOCK_RES, &sys_ticks);
+
+    if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
+	    return (FALSE);
+
+    return (TRUE);
 }
 
 BOOL clock_add_cb (kernel_clock_cb cb)
@@ -120,14 +146,77 @@ BOOL clock_del_cb (kernel_clock_cb cb)
     return (FALSE);
 }
 
+static BOOL clock_set_mode (unsigned newmode)
+{
+    int retcode = EINVAL;
+
+    if (mode == newmode)
+	    return (TRUE);
+
+    if (clock) {
+	lock();
+        retcode = clock->cmn->ioctrl_fn(&newmode, CLK_SET_MODE, 0);
+        if (EOK != retcode) {
+	    unlock();
+            return (FALSE);
+        }
+	mode = newmode;
+        retcode = clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0);
+	unlock();
+    }
+
+    return ((EOK == retcode) ? TRUE : FALSE);
+}
+
+BOOL clock_set_periodic (void)
+{
+	return clock_set_mode(0);
+}
+
+BOOL clock_set_oneshot (void)
+{
+	return clock_set_mode(1);
+}
+
+BOOL clock_set_period (unsigned ms)
+{
+    int retcode = EINVAL;
+    uint32_t temp = kernel_time_get_value(ms, &sys_ticks);
+
+    if (temp == period)
+        return TRUE;
+
+    if (clock) {
+        temp = kernel_time_adjust_range(temp, &sys_ticks);
+
+	/*
+	 * A reliable method to compensate lost ticks is still required !!!
+	 */
+	lock();
+        retcode = clock->cmn->ioctrl_fn(&temp, CLK_SET_PERIOD, 0);
+	if (EOK == retcode) {
+            period = temp;
+        }
+	unlock();
+    }
+
+    return ((EOK == retcode) ? TRUE : FALSE);
+}
+
 uint64_t clock_get_ticks (void)
 {
-    return (ticks);
+    uint64_t temp = kernel_time_get_elapsed_msecs(&sys_ticks);
+    return (clock_convert_msecs_to_ticks(temp));
 }
 
 uint64_t clock_get_seconds (void)
 {
-    return (ticks_msecs/1000);
+    return (clock_get_milliseconds()/1000);
+}
+
+uint64_t clock_get_milliseconds (void)
+{
+    return (kernel_time_get_elapsed_msecs(&sys_ticks));
 }
 
 void clock_set_boot_seconds (unsigned seconds)
@@ -144,15 +233,8 @@ uint64_t clock_convert_msecs_to_ticks (unsigned msecs)
 {
     uint64_t retval = (uint64_t)msecs;
 
-    /*
-     * If a system tick lasts for a millisecond or more,
-     * divide the required msecs by the msecs_per_tick.
-     * If a system tick lasts for less than a millisecond,
-     * use the fractional err_per_tick. Return value might be 0.
-     */
-    if (ticks_incr_var.increment_msecs_per_tick) {
-        return (retval/ticks_incr_var.increment_msecs_per_tick);
-    } else {
-        return (retval*DEFAULT_CLOCK_RES/ticks_incr_var.err_per_tick);
-    }
+    retval *= DEFAULT_CLOCK_RES;
+    retval /= 1000;
+
+    return retval;
 }

@@ -28,12 +28,12 @@
  * and clock_del_db.
  *
  * PARAMS
- * ticks - system counter of ticks elapsed since boot time.
+ * msecs - system counter of milliseconds elapsed since boot time.
  *
  * RETURN VALUES
  * none
  */
-typedef void (*kernel_clock_cb)(uint64_t ticks);
+typedef void (*kernel_clock_cb)(uint64_t msecs);
 
 /*
  * Init clock library, this will configure the system ticks
@@ -41,22 +41,71 @@ typedef void (*kernel_clock_cb)(uint64_t ticks);
  * Must be called internally by kernel init routine.
  *
  * RETURN VALUES
- * TRUE if initliazation succeded
+ * TRUE if initialization is successfu
  * FALSE in any other case
  */
 BOOL clock_init (void);
 
 /*
- * Add a callback to the clock library. Every system tick
+ * Add a callback to the clock library. Every time the clock expires,
  * the registered callbacks will be invoked, having as an
- * argument the actual system tick.
+ * argument the milliseconds elapsed since boot time.
+ * Ticks can be dynamic, time between two consecutive calls
+ * may vary.
+ *
+ * PARAMS
+ * cb - a callback
+ *
+ * RETURN VALUES
+ * TRUE if the callback was properly registered
+ * FALSE in any other case
  */
 BOOL clock_add_cb (kernel_clock_cb cb);
 
 /*
  * Remove a callback from the clock library.
+ * The callback is removed only if cb matches a registered entry.
+ *
+ * PARAMS
+ * cb - a callback
+ *
+ * RETURN VALUES
+ * TRUE if the callback was properly removed
+ * FALSE in any other case
  */
 BOOL clock_del_cb (kernel_clock_cb cb);
+
+/*
+ * Set the CLK device to work in periodic mode, i.e. the device
+ * will fire an interrupt at every expiration, and will trigger
+ * automatically a new countdown to expiration.
+ *
+ * RETURN VALUES
+ * TRUE if the CLK device has been set in periodic mode
+ * FALSE in any other case
+ */
+BOOL clock_set_periodic (void);
+
+/*
+ * Set the CLK device to work in one-shot mode, i.e. the device
+ * will fire an interrupt on expiration, and then will stop counting.
+ * The CLK device must be triggered to start over.
+ *
+ * RETURN VALUES
+ * TRUE if the CLK device has been set in periodic mode
+ * FALSE in any other case
+ */
+BOOL clock_set_oneshot (void);
+
+/*
+ * Set the CLK device period, a.k.a. the time between two consecutive expirations.
+ * This value can be set at runtime.
+ *
+ * RETURN VALUES
+ * TRUE if the CLK device has been set in periodic mode
+ * FALSE in any other case
+ */
+BOOL clock_set_period (unsigned ms);
 
 #endif
 
