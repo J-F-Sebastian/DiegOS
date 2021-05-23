@@ -136,19 +136,12 @@ static inline BOOL new_runner(unsigned q)
     return (FALSE);
 }
 
-/*
- * Sleeping threads not to be woken up are queued
- * again and again - silly, unefficient, cache miss prone.
- * But reuses the queue data structure and behavior of
- * all other scheduler features.
- */
-
 static inline void schedule_delayed(void)
 {
     uint64_t expiration = clock_get_milliseconds();
     thread_t *ptr = queue_head(&delay_queue);
 
-    while (delays[ptr->tid] <= expiration) {
+    while (ptr && delays[ptr->tid] <= expiration) {
         if (EOK != queue_dequeue(&delay_queue, (queue_node **)&ptr)) {
             if (ptr) {
                 kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
@@ -168,9 +161,18 @@ static inline void schedule_delayed(void)
     }
 }
 
+static inline uint64_t peek_top_expiration(void)
+{
+    thread_t *ptr = queue_head(&delay_queue);
+    uint64_t now = clock_get_milliseconds();
+
+    return (delays[ptr->tid] > now) ? (delays[ptr->tid] - now) : 0;
+}
+
 void schedule_thread()
 {
     unsigned i = 0;
+    uint64_t new_delay = UINT_MAX;
 
     /*
      * Dead queue management
@@ -184,6 +186,13 @@ void schedule_thread()
      */
     if (queue_count(&delay_queue)) {
         schedule_delayed();
+	if (queue_count(&delay_queue)) {
+	    new_delay = peek_top_expiration();
+	}
+        if (FALSE == clock_set_period(new_delay))
+        {
+            kerrprintf("Clock device failed in %s\n", __FUNCTION__);
+	}
     }
 
     /*
