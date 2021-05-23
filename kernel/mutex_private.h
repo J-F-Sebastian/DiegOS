@@ -88,6 +88,12 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx);
  */
 BOOL mutex_is_locked(struct mutex *mtx);
 
+/*
+ * Print to stdout either a single mutex structure and state, or the whole
+ * list of active mutexes if the parameter is NULL.
+ * PARAMETERS IN
+ * struct mutex *mtx - the mutex structure to dump, it can be NULL
+ */
 void dump_mutex (struct mutex *mtx);
 
 #endif // MUTEX_H_INCLUDED
