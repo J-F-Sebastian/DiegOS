@@ -41,6 +41,6 @@
  * Default clock resolution in Hz , i.e. how many clock ticks must happen
  * in a second.
  */
-#define DEFAULT_CLOCK_RES   (250UL)
+#define DEFAULT_CLOCK_RES   (100UL)
 
 #endif
