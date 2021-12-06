@@ -40,6 +40,7 @@ clean:
 	cd ../../platforms/$(CPU) && make clean
 	cd ../../platforms/$(PLATFORM) && make clean
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) clean
+	cd ../../fat && make clean
 	cd ../../applications/console && make clean
 	cd ../../applications/demo && make clean
 	rm -f *.o *.bin *.img *.elf
