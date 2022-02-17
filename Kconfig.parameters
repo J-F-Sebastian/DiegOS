@@ -1,0 +1,25 @@
+config  MAX_THREADS
+	int
+	default 16
+	range 1 240
+	prompt "Maximum number of threads"
+	help
+		The maximum number of user threads.
+		The OS is not allowed to spawn more than
+		this amount of threads.
+
+config	CLOCK_RES
+	int
+	default 100
+	range 10 1000
+	prompt "Clock resolution (Hz)"
+	help
+		The system clock resolution in Hz,
+		system ticks will increase at this rate.
+
+config BANNER
+	string
+	default "Welcome to DiegOS"
+	prompt "Login banner"
+	help
+		The login banner

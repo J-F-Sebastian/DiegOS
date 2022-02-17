@@ -4,6 +4,7 @@
 #
 mainmenu "DiegOS Configuration"
 
+source "Kconfig.parameters"
 source "Kconfig.processor"
 source "Kconfig.platform"
 
