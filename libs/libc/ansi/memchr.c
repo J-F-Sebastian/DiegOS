@@ -20,13 +20,14 @@
 #include <string.h>
 #include <stddef.h>
 
-void *memchr (const void *cs, int c, size_t n)
+void *memchr(const void *cs, int c, size_t n)
 {
-    const unsigned char *s1 = cs;
+	const unsigned char *s1 = cs;
 
-    if (cs && n) {
-        while (n-- && *s1++ != (unsigned char)c) {};
-        return ((*--s1 == (unsigned char)c) ? ((void *)s1) : (NULL));
-    }
-    return (NULL);
+	if (cs && n) {
+		while (n-- && *s1++ != (unsigned char)c) {
+		};
+		return ((*--s1 == (unsigned char)c) ? ((void *)s1) : (NULL));
+	}
+	return (NULL);
 }

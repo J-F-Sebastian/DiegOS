@@ -37,7 +37,7 @@
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_mount (void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol);
+int FAT_mount(void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol);
 
 /**
  * @brief FAT_unmount unmounts a FAT file system. Flags and data in vol are cleared accordingly.
@@ -47,7 +47,7 @@ int FAT_mount (void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol);
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_unmount (struct FATVolume *vol);
+int FAT_unmount(struct FATVolume *vol);
 
 /**
  * @brief FAT_get_entry looks for an entry in the file system and copy it to the caller
@@ -61,7 +61,7 @@ int FAT_unmount (struct FATVolume *vol);
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_get_entry (struct FATVolume *vol, const char *entryname, struct FAT *entry);
+int FAT_get_entry(struct FATVolume *vol, const char *entryname, struct FAT *entry);
 
 /**
  * @brief FAT_create_entry creates a new entry in the file system, provided that it is not
@@ -80,7 +80,7 @@ int FAT_get_entry (struct FATVolume *vol, const char *entryname, struct FAT *ent
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_create_entry (struct FATVolume *vol, const char *entryname, uint8_t attributes);
+int FAT_create_entry(struct FATVolume *vol, const char *entryname, uint8_t attributes);
 
 /**
  * @brief FAT_create_link creates a new entry in the file system, provided that it is not
@@ -95,7 +95,7 @@ int FAT_create_entry (struct FATVolume *vol, const char *entryname, uint8_t attr
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_create_link (struct FATVolume *vol, const char *linkname, const char *entryname);
+int FAT_create_link(struct FATVolume *vol, const char *linkname, const char *entryname);
 
 /**
  * @brief FAT_modify_entry_attr updates attributes of entryname with attributes.
@@ -116,7 +116,7 @@ int FAT_create_link (struct FATVolume *vol, const char *linkname, const char *en
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_modify_entry_attr (struct FATVolume *vol, const char *entryname, uint8_t attributes);
+int FAT_modify_entry_attr(struct FATVolume *vol, const char *entryname, uint8_t attributes);
 
 /**
  * @brief FAT_rename_entry rename entryname with newname.
@@ -133,7 +133,7 @@ int FAT_modify_entry_attr (struct FATVolume *vol, const char *entryname, uint8_t
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_rename_entry (struct FATVolume *vol, const char *entryname, const char *newname);
+int FAT_rename_entry(struct FATVolume *vol, const char *entryname, const char *newname);
 
 /**
  * @brief FAT_truncate_entry truncates a file, i.e. set its size to 0 and releases the
@@ -185,11 +185,8 @@ int FAT_delete_entry(struct FATVolume *vol, const char *entryname);
  * @return -ERR on failure
  */
 int FAT_read(struct FATVolume *vol,
-             const char *entryname,
-             unsigned offset,
-             char *buffer,
-             unsigned buflen,
-             unsigned *readlen);
+	     const char *entryname,
+	     unsigned offset, char *buffer, unsigned buflen, unsigned *readlen);
 
 /**
  * @brief FAT_write writes up to buflen bytes from buffer to the file entryname, starting at offset
@@ -210,11 +207,8 @@ int FAT_read(struct FATVolume *vol,
  * @return
  */
 int FAT_write(struct FATVolume *vol,
-              const char *entryname,
-              unsigned offset,
-              char *buffer,
-              unsigned buflen,
-              unsigned *writelen);
+	      const char *entryname,
+	      unsigned offset, char *buffer, unsigned buflen, unsigned *writelen);
 
 /**
  * @brief FAT_list prints in a nice textual fashion the contents of a directory.
@@ -237,6 +231,6 @@ int FAT_list(struct FATVolume *vol, const char *directory);
  * @return 0 on success
  * @return -1 on error
  */
-int FAT_available(struct FATVolume *vol, uint32_t *bytes, uint16_t *clusters);
+int FAT_available(struct FATVolume *vol, uint32_t * bytes, uint16_t * clusters);
 
-#endif // FAT_H
+#endif				// FAT_H

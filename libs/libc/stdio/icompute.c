@@ -19,15 +19,15 @@
 
 #include "loc_incl.h"
 
-char *i_compute (uint64_t val, int base, char *s, unsigned nrdigits)
+char *i_compute(uint64_t val, int base, char *s, unsigned nrdigits)
 {
-    int c;
+	int c;
 
-    c= (int)(val % base);
-    val /= base;
-    if (val || (nrdigits > 1)) {
-        s = i_compute(val, base, s, nrdigits - 1);
-    }
-    *s++ = (c > 9) ? ('a' + c - 10) : ('0' + c);
-    return (s);
+	c = (int)(val % base);
+	val /= base;
+	if (val || (nrdigits > 1)) {
+		s = i_compute(val, base, s, nrdigits - 1);
+	}
+	*s++ = (c > 9) ? ('a' + c - 10) : ('0' + c);
+	return (s);
 }

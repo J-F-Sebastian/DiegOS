@@ -23,67 +23,63 @@
 #include <pakman_packet.h>
 
 typedef struct net_driver {
-    /*
-     * Common functionalities
-     */
-    driver_header_t cmn;
-    /*
-     * Interface name
-     */
-    char ifname[DRV_NAME_LEN + 1];
-    /*
-     * Maximum Transmission Unit of the physical device, i.e. the maximum
-     * payload per frame.
-     */
-    unsigned mtu;
-    /*
-     * Interface type, see if.h
-     */
-    unsigned iftype;
-    /*
-     * The physical device's address proper, followed by the broadcast
-     * address
-     */
-    uint8_t addr[DRV_MAX_ADDR_LEN];
-    uint8_t broadcast_addr[DRV_MAX_ADDR_LEN];
-    /*
-     * Flags are documented in if.h
-     */
-    unsigned short ifflags;
-    /*
-     * Features are documented in if.h
-     */
-    unsigned short ifcaps;
-    /*
-     * Write function, the data buffer pointed by buf will be output to the device
-     */
-    int (*tx_fn)(const struct packet *buf, unsigned unitno);
-    /*
-     * Read function, the data buffer pointed by buf will be written with data
-     */
-    int (*rx_fn)(struct packet *buf, unsigned unitno);
-    /*
-     * Multi Write function, the data buffer list pointed by buf
-     * will be output to the device
-     */
-    int (*tx_multi_fn)(const struct packet **buf,
-                       unsigned items,
-                       unsigned unitno);
-    /*
-     * Multi Read function, the data buffer list pointed by buf
-     * will be written with data
-     */
-    int (*rx_multi_fn)(struct packet **buf,
-                       unsigned items,
-                       unsigned unitno);
-    /*
-     * Peak buffer size of the next rx operation; can be used to size
-     * the receiving buffer
-     */
-    int (*rx_peak_fn)(unsigned *bsize, unsigned items, unsigned unitno);
+	/*
+	 * Common functionalities
+	 */
+	driver_header_t cmn;
+	/*
+	 * Interface name
+	 */
+	char ifname[DRV_NAME_LEN + 1];
+	/*
+	 * Maximum Transmission Unit of the physical device, i.e. the maximum
+	 * payload per frame.
+	 */
+	unsigned mtu;
+	/*
+	 * Interface type, see if.h
+	 */
+	unsigned iftype;
+	/*
+	 * The physical device's address proper, followed by the broadcast
+	 * address
+	 */
+	uint8_t addr[DRV_MAX_ADDR_LEN];
+	uint8_t broadcast_addr[DRV_MAX_ADDR_LEN];
+	/*
+	 * Flags are documented in if.h
+	 */
+	unsigned short ifflags;
+	/*
+	 * Features are documented in if.h
+	 */
+	unsigned short ifcaps;
+	/*
+	 * Write function, the data buffer pointed by buf will be output to the device
+	 */
+	int (*tx_fn) (const struct packet * buf, unsigned unitno);
+	/*
+	 * Read function, the data buffer pointed by buf will be written with data
+	 */
+	int (*rx_fn) (struct packet * buf, unsigned unitno);
+	/*
+	 * Multi Write function, the data buffer list pointed by buf
+	 * will be output to the device
+	 */
+	int (*tx_multi_fn) (const struct packet ** buf, unsigned items, unsigned unitno);
+	/*
+	 * Multi Read function, the data buffer list pointed by buf
+	 * will be written with data
+	 */
+	int (*rx_multi_fn) (struct packet ** buf, unsigned items, unsigned unitno);
+	/*
+	 * Peak buffer size of the next rx operation; can be used to size
+	 * the receiving buffer
+	 */
+	int (*rx_peak_fn) (unsigned *bsize, unsigned items, unsigned unitno);
 
 } net_driver_t;
 
-int net_drivers_list_init(net_driver_t *drvlist[], unsigned drvlistsize);
+int net_drivers_list_init(net_driver_t * drvlist[], unsigned drvlistsize);
 
-#endif // NET_DRIVERS_H_INCLUDED
+#endif				// NET_DRIVERS_H_INCLUDED

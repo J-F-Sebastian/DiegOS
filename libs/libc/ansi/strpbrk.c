@@ -20,18 +20,19 @@
 #include <string.h>
 #include <stddef.h>
 
-char *strpbrk (const char *cs, const char *ct)
+char *strpbrk(const char *cs, const char *ct)
 {
-    const char *s1;
+	const char *s1;
 
-    if (cs && ct) {
-        while (*cs) {
-            for (s1 = ct; *s1 && (*s1 != *cs); s1++) {};
-            if (*s1) {
-                return ((char *)cs);
-            }
-            cs++;
-        }
-    }
-    return (NULL);
+	if (cs && ct) {
+		while (*cs) {
+			for (s1 = ct; *s1 && (*s1 != *cs); s1++) {
+			};
+			if (*s1) {
+				return ((char *)cs);
+			}
+			cs++;
+		}
+	}
+	return (NULL);
 }

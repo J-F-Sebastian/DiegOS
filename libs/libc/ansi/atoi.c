@@ -23,5 +23,5 @@
 
 int atoi(register const char *s)
 {
-    return ((int)strtol(s, (char **) NULL, 10));
+	return ((int)strtol(s, (char **)NULL, 10));
 }

@@ -27,68 +27,68 @@ static const uint32_t FNV_OFS_32 = 2166136261UL;
 
 uint64_t fnv_buf_64(void *buffer, unsigned size)
 {
-    uint64_t hash = FNV_OFS_64;
-    uint8_t *cur = (uint8_t *)buffer;
-    uint8_t *end = (uint8_t *)(buffer + size);
+	uint64_t hash = FNV_OFS_64;
+	uint8_t *cur = (uint8_t *) buffer;
+	uint8_t *end = (uint8_t *) (buffer + size);
 
-    while (cur < end) {
-        hash ^= (uint64_t)*cur++;
-        hash *= FNV_PRIME_64;
-    }
+	while (cur < end) {
+		hash ^= (uint64_t) * cur++;
+		hash *= FNV_PRIME_64;
+	}
 
-    return (hash);
+	return (hash);
 }
 
 uint64_t fnv_str_64(char *str)
 {
-    uint64_t hash = FNV_OFS_64;
-    uint8_t *cur = (uint8_t *)str;
+	uint64_t hash = FNV_OFS_64;
+	uint8_t *cur = (uint8_t *) str;
 
-    while (*cur) {
-        hash ^= (uint64_t)*cur++;
-        hash *= FNV_PRIME_64;
-    }
+	while (*cur) {
+		hash ^= (uint64_t) * cur++;
+		hash *= FNV_PRIME_64;
+	}
 
-    return (hash);
+	return (hash);
 }
 
 uint32_t fnv_buf_32(void *buffer, unsigned size)
 {
-    uint32_t hash = FNV_OFS_32;
-    uint8_t *cur = (uint8_t *)buffer;
-    uint8_t *end = (uint8_t *)(buffer + size);
+	uint32_t hash = FNV_OFS_32;
+	uint8_t *cur = (uint8_t *) buffer;
+	uint8_t *end = (uint8_t *) (buffer + size);
 
-    while (cur < end) {
-        hash ^= (uint32_t)*cur++;
-        hash *= FNV_PRIME_32;
-    }
+	while (cur < end) {
+		hash ^= (uint32_t) * cur++;
+		hash *= FNV_PRIME_32;
+	}
 
-    return (hash);
+	return (hash);
 }
 
 uint32_t fnv_str_32(char *str)
 {
-    uint32_t hash = FNV_OFS_32;
-    uint8_t *cur = (uint8_t *)str;
+	uint32_t hash = FNV_OFS_32;
+	uint8_t *cur = (uint8_t *) str;
 
-    while (*cur) {
-        hash ^= (uint32_t)*cur++;
-        hash *= FNV_PRIME_32;
-    }
+	while (*cur) {
+		hash ^= (uint32_t) * cur++;
+		hash *= FNV_PRIME_32;
+	}
 
-    return (hash);
+	return (hash);
 }
 
 uint16_t fnv_buf_16(void *buffer, unsigned size)
 {
-    uint32_t hash = fnv_buf_32(buffer, size);
+	uint32_t hash = fnv_buf_32(buffer, size);
 
-    return ((hash >> 16) ^ (hash & 0xffff));
+	return ((hash >> 16) ^ (hash & 0xffff));
 }
 
 uint16_t fnv_str_16(char *str)
 {
-    uint32_t hash = fnv_str_32(str);
+	uint32_t hash = fnv_str_32(str);
 
-    return ((hash >> 16) ^ (hash & 0xffff));
+	return ((hash >> 16) ^ (hash & 0xffff));
 }

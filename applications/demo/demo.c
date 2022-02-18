@@ -26,85 +26,74 @@ static uint8_t mutex = 0;
 
 static void demo_thread_entry(void)
 {
-    printf("Demo!\n");
-    int i = 400;
-    int j;
+	printf("Demo!\n");
+	int i = 400;
+	int j;
 
-    while (i--) {
-        thread_lock_mutex(mutex);
-        j = 5;
-        while (j--) {
-            thread_suspend();
-        }
-        thread_unlock_mutex(mutex);
-        thread_suspend();
-    }
+	while (i--) {
+		thread_lock_mutex(mutex);
+		j = 5;
+		while (j--) {
+			thread_suspend();
+		}
+		thread_unlock_mutex(mutex);
+		thread_suspend();
+	}
 }
 
 static void demo_thread_entry2(void)
 {
-    printf("Demo2!\n");
-    int i = 500;
-    int j;
-    int k = -1;
+	printf("Demo2!\n");
+	int i = 500;
+	int j;
+	int k = -1;
 
-    while (i--) {
-        thread_delay(2);
-        thread_lock_mutex(mutex);
-        j = 200;
-        while (j--) {
-            k++;
-            thread_lock_mutex(mutex);
-        }
-        thread_unlock_mutex(mutex);
-        thread_may_suspend();
-    }
+	while (i--) {
+		thread_delay(2);
+		thread_lock_mutex(mutex);
+		j = 200;
+		while (j--) {
+			k++;
+			thread_lock_mutex(mutex);
+		}
+		thread_unlock_mutex(mutex);
+		thread_may_suspend();
+	}
 
-    threads_dump();
-    mutexes_dump();
+	threads_dump();
+	mutexes_dump();
 }
+
 static void demo_thread_entry3(void)
 {
-    printf("Demo3!\n");
-    int i = 1000;
-    int j;
-    int k = -4;
+	printf("Demo3!\n");
+	int i = 1000;
+	int j;
+	int k = -4;
 
-    while (i--) {
-        thread_delay(1);
-        thread_lock_mutex(mutex);
-        j = 100;
-        while (j--) {
-            k++;
-            thread_lock_mutex(mutex);
-        }
+	while (i--) {
+		thread_delay(1);
+		thread_lock_mutex(mutex);
+		j = 100;
+		while (j--) {
+			k++;
+			thread_lock_mutex(mutex);
+		}
 
-        thread_unlock_mutex(mutex);
-        thread_suspend();
-    }
+		thread_unlock_mutex(mutex);
+		thread_suspend();
+	}
 }
 
 void platform_run(void)
 {
-    uint8_t pid;
+	uint8_t pid;
 
-    mutex = thread_create_mutex("test mutex");
+	mutex = thread_create_mutex("test mutex");
 
-    thread_create("Demo",
-                  THREAD_PRIO_HIGH,
-                  demo_thread_entry,
-                  0,
-                  4096, &pid);
+	thread_create("Demo", THREAD_PRIO_HIGH, demo_thread_entry, 0, 4096, &pid);
 
-    thread_create("Demo2",
-                  THREAD_PRIO_HIGH,
-                  demo_thread_entry2,
-                  0,
-                  4096, &pid);
+	thread_create("Demo2", THREAD_PRIO_HIGH, demo_thread_entry2, 0, 4096, &pid);
 
-    thread_create("Demo3",
-                  THREAD_PRIO_HIGH,
-                  demo_thread_entry3,
-                  0,
-                  4096, &pid);
+	thread_create("Demo3", THREAD_PRIO_HIGH, demo_thread_entry3, 0, 4096, &pid);
 }

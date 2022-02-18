@@ -21,7 +21,7 @@
 
 #include "../console/console.h"
 
-void platform_run (void)
+void platform_run(void)
 {
-    console_run();
+	console_run();
 }

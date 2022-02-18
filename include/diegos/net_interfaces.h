@@ -35,7 +35,7 @@ typedef struct net_interface {
 	int ifindex;
 	int iflink;
 
-//	struct net_device_stats stats;
+//      struct net_device_stats stats;
 
 	unsigned char operstate;
 	unsigned char link_mode;
@@ -50,7 +50,7 @@ typedef struct net_interface {
 	unsigned char addr_len;
 	unsigned char broadcast[MAX_ADDR_LEN];
 
-	/* device ?*/
+	/* device ? */
 	net_driver_t *drv;
 } net_interface_t;
 
@@ -65,7 +65,7 @@ typedef struct net_interface {
  * A valid pointer to a new interface object in case of success, NULL in any other
  * case.
  */
-net_interface_t *net_interface_create(net_driver_t *inst);
+net_interface_t *net_interface_create(net_driver_t * inst);
 
 /*
  * net_interface_lookup_name() retrieves a pointer to an interface.
@@ -114,6 +114,6 @@ net_interface_t *net_interface_first(void);
  * A valid pointer to an existing device object in case of success,
  * NULL in any other case.
  */
-net_interface_t *net_interface_next(net_interface_t *intp);
+net_interface_t *net_interface_next(net_interface_t * intp);
 
-#endif /* _NET_INTERFACES_H_ */
+#endif				/* _NET_INTERFACES_H_ */

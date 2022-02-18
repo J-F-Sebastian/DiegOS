@@ -21,16 +21,16 @@
 #include	<stdarg.h>
 #include	<limits.h>
 
-int snprintf (char *s, size_t n, const char *format, ...)
+int snprintf(char *s, size_t n, const char *format, ...)
 {
-    va_list ap;
-    int retval;
+	va_list ap;
+	int retval;
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    retval = vsnprintf(s, n, format, ap);
+	retval = vsnprintf(s, n, format, ap);
 
-    va_end(ap);
+	va_end(ap);
 
-    return (retval);
+	return (retval);
 }

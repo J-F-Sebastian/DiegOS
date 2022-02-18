@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <types_common.h>
 
-double atof (const char *s)
+double atof(const char *s)
 {
-    return (strtod(s, (char **) NULL));
+	return (strtod(s, (char **)NULL));
 }

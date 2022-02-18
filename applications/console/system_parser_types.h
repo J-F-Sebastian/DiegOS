@@ -21,19 +21,19 @@
 #define _SYSTEM_PARSER_TYPES_H_
 
 enum PARSER_TYPES {
-	PARSER_VOID	= 1 << 0,
-	PARSER_STRING	= 1 << 1,
-	PARSER_INT	= 1 << 2,
-	PARSER_FLOAT	= 1 << 3,
-	PARSER_FUNC	= 1 << 4,
+	PARSER_VOID = 1 << 0,
+	PARSER_STRING = 1 << 1,
+	PARSER_INT = 1 << 2,
+	PARSER_FLOAT = 1 << 3,
+	PARSER_FUNC = 1 << 4,
 
-	PARSER_DEC	= 1 << 8,
-	PARSER_HEX	= 1 << 9,
-	PARSER_MAC	= 1 << 10,
-	PARSER_IPv4	= 1 << 11,
-	PARSER_IPv6	= 1 << 12,
+	PARSER_DEC = 1 << 8,
+	PARSER_HEX = 1 << 9,
+	PARSER_MAC = 1 << 10,
+	PARSER_IPv4 = 1 << 11,
+	PARSER_IPv6 = 1 << 12,
 
-	PARSER_PARAMS	= 0xFF << 24
+	PARSER_PARAMS = 0xFF << 24
 };
 
 typedef void (*system_parser_func0) (void);

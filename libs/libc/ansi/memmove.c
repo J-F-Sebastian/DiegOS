@@ -19,24 +19,24 @@
 
 #include <string.h>
 
-void *memmove (void *s, const void *ct, size_t n)
+void *memmove(void *s, const void *ct, size_t n)
 {
-    char *p1 = s;
-    const char *p2 = ct;
+	char *p1 = s;
+	const char *p2 = ct;
 
-    if (p1 && p2 && (n > 0)) {
-        if ((p2 <= p1) && (p2 + n > p1)) {
-            /* overlap, copy backwards */
-            p1 += n;
-            p2 += n;
-            while (n--) {
-                *--p1 = *--p2;
-            }
-        } else {
-            while (n--) {
-                *p1++ = *p2++;
-            }
-        }
-    }
-    return (s);
+	if (p1 && p2 && (n > 0)) {
+		if ((p2 <= p1) && (p2 + n > p1)) {
+			/* overlap, copy backwards */
+			p1 += n;
+			p2 += n;
+			while (n--) {
+				*--p1 = *--p2;
+			}
+		} else {
+			while (n--) {
+				*p1++ = *p2++;
+			}
+		}
+	}
+	return (s);
 }

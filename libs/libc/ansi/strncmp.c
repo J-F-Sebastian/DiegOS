@@ -21,20 +21,20 @@
 
 int strncmp(const char *cs, const char *ct, size_t n)
 {
-    if (cs && ct && (n > 0)) {
-        do {
-            if (*cs != *ct++)
-                break;
-            if (*cs++ == '\0')
-                return (0);
-        } while (--n > 0);
-        if (n > 0) {
-            if (*cs == '\0')
-                return (-1);
-            if (*--ct == '\0')
-                return (1);
-            return ((unsigned char) *cs - (unsigned char) *ct);
-        }
-    }
-    return (0);
+	if (cs && ct && (n > 0)) {
+		do {
+			if (*cs != *ct++)
+				break;
+			if (*cs++ == '\0')
+				return (0);
+		} while (--n > 0);
+		if (n > 0) {
+			if (*cs == '\0')
+				return (-1);
+			if (*--ct == '\0')
+				return (1);
+			return ((unsigned char)*cs - (unsigned char)*ct);
+		}
+	}
+	return (0);
 }

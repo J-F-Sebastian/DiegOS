@@ -29,12 +29,12 @@ typedef struct mutex mutex_t;
  */
 mutex_t *thread_create_mutex(const char *name);
 
-void thread_lock_mutex(mutex_t *mtx);
+void thread_lock_mutex(mutex_t * mtx);
 
-void thread_unlock_mutex(mutex_t *mtx);
+void thread_unlock_mutex(mutex_t * mtx);
 
-BOOL thread_mutex_is_locked(mutex_t *mtx);
+BOOL thread_mutex_is_locked(mutex_t * mtx);
 
-void thread_destroy_mutex(mutex_t *mtx);
+void thread_destroy_mutex(mutex_t * mtx);
 
-#endif // MUTEXES_H_INCLUDED
+#endif				// MUTEXES_H_INCLUDED

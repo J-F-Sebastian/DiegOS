@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)ashldi3.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: ashldi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -48,21 +48,19 @@ __RCSID("$NetBSD: ashldi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * Shift a (signed) quad value left (arithmetic shift left).
  * This is the same as logical shift left!
  */
-quad_t
-__ashldi3(quad_t a, qshift_t shift)
+quad_t __ashldi3(quad_t a, qshift_t shift)
 {
-    union uu aa;
+	union uu aa;
 
-    if (shift == 0)
-        return(a);
-    aa.q = a;
-    if (shift >= INT_BITS) {
-        aa.ul[H] = aa.ul[L] << (shift - INT_BITS);
-        aa.ul[L] = 0;
-    } else {
-        aa.ul[H] = (aa.ul[H] << shift) |
-                   (aa.ul[L] >> (INT_BITS - shift));
-        aa.ul[L] <<= shift;
-    }
-    return (aa.q);
+	if (shift == 0)
+		return (a);
+	aa.q = a;
+	if (shift >= INT_BITS) {
+		aa.ul[H] = aa.ul[L] << (shift - INT_BITS);
+		aa.ul[L] = 0;
+	} else {
+		aa.ul[H] = (aa.ul[H] << shift) | (aa.ul[L] >> (INT_BITS - shift));
+		aa.ul[L] <<= shift;
+	}
+	return (aa.q);
 }

@@ -24,20 +24,20 @@
 
 #include "loc_incl.h"
 
-int sprintf (char *s, const char *format, ...)
+int sprintf(char *s, const char *format, ...)
 {
-    va_list ap;
-    int retval;
+	va_list ap;
+	int retval;
 
-    if (!s || !format) {
-            return (EINVAL);
-        }
+	if (!s || !format) {
+		return (EINVAL);
+	}
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    retval = vsnprintf(s, INT_MAX, format, ap);
+	retval = vsnprintf(s, INT_MAX, format, ap);
 
-    va_end(ap);
+	va_end(ap);
 
-    return (retval);
+	return (retval);
 }

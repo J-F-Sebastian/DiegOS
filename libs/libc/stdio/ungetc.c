@@ -21,27 +21,27 @@
 
 #include "loc_incl.h"
 
-int ungetc(int ch, FILE *stream)
+int ungetc(int ch, FILE * stream)
 {
 	char *p;
 
-	if (ch == EOF  || !stream_rding(stream) || stream_nbuf(stream)) {
+	if (ch == EOF || !stream_rding(stream) || stream_nbuf(stream)) {
 		return EOF;
-        }
+	}
 
 	if (stream->bufptr == stream->buffer) {
 		if (!stream->count) {
-            return EOF;
-        }
+			return EOF;
+		}
 		stream->bufptr++;
 	}
 
 	stream->count++;
 	p = --(stream->bufptr);
 
-	if (*p != (char) ch) {
-		*p = (char) ch;
-    }
+	if (*p != (char)ch) {
+		*p = (char)ch;
+	}
 
 	return (ch);
 }

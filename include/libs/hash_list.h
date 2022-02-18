@@ -26,16 +26,16 @@
  */
 #include "hash_list_type.h"
 
-int hash_list_init(hash_list_inst_t *inst, unsigned hash_size);
+int hash_list_init(hash_list_inst_t * inst, unsigned hash_size);
 
-int hash_list_add(hash_list_inst_t *list, void *item, hash_t hash);
+int hash_list_add(hash_list_inst_t * list, void *item, hash_t hash);
 
-hash_list_item_t *hash_list_get(hash_list_inst_t *list, hash_t hash);
+hash_list_item_t *hash_list_get(hash_list_inst_t * list, hash_t hash);
 
-int hash_list_del(hash_list_inst_t *list, hash_t hash);
+int hash_list_del(hash_list_inst_t * list, hash_t hash);
 
-void hash_list_dump(hash_list_inst_t *list);
+void hash_list_dump(hash_list_inst_t * list);
 
-int hash_list_done(hash_list_inst_t *inst);
+int hash_list_done(hash_list_inst_t * inst);
 
-#endif // HASH_LIST_H_INCLUDED
+#endif				// HASH_LIST_H_INCLUDED

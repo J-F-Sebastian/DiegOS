@@ -19,29 +19,29 @@
 
 #include <string.h>
 
-void *memcpy (void *s, const void *ct, size_t n)
+void *memcpy(void *s, const void *ct, size_t n)
 {
-    char *p1 = s;
-    const char *p2 = ct;
-    long *p3 = s;
-    const long *p4 = ct;
-    intptr_t a = (intptr_t)s;
-    intptr_t b = (intptr_t)ct;
+	char *p1 = s;
+	const char *p2 = ct;
+	long *p3 = s;
+	const long *p4 = ct;
+	intptr_t a = (intptr_t) s;
+	intptr_t b = (intptr_t) ct;
 
-    if (p1 && p2 && (n > 0)) {
-        /* Word aligned ? */
-        if (((a | b) & (sizeof(long) -1)) == 0) {
-            while (n > sizeof(long)) {
-                *p3++ = *p4++;
-                n -= sizeof(long);
-            }
-            p1 = (char *)p3;
-            p2 = (const char *)p4;
-        }
-        while (n > 0) {
-            *p1++ = *p2++;
-            --n;
-        }
-    }
-    return (s);
+	if (p1 && p2 && (n > 0)) {
+		/* Word aligned ? */
+		if (((a | b) & (sizeof(long) - 1)) == 0) {
+			while (n > sizeof(long)) {
+				*p3++ = *p4++;
+				n -= sizeof(long);
+			}
+			p1 = (char *)p3;
+			p2 = (const char *)p4;
+		}
+		while (n > 0) {
+			*p1++ = *p2++;
+			--n;
+		}
+	}
+	return (s);
 }

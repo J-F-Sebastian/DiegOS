@@ -34,4 +34,4 @@
 
 extern char_driver_t i82371sb_drv;
 
-#endif // 82371SB_H_INCLUDED
+#endif				// 82371SB_H_INCLUDED

@@ -22,40 +22,40 @@
 
 void platform_run(void)
 {
-    chunks_pool_t *chunk;
-    void *test[120];
-    unsigned i;
+	chunks_pool_t *chunk;
+	void *test[120];
+	unsigned i;
 
-    printf("START\n");
+	printf("START\n");
 
-    chunk = chunks_pool_create(NULL,8, 50, 10, 50);
+	chunk = chunks_pool_create(NULL, 8, 50, 10, 50);
 
-    if (!chunk) {
-        printf("ERROR 1\n");
-    }
+	if (!chunk) {
+		printf("ERROR 1\n");
+	}
 
-    for (i = 0; i<100; i++) {
-        test[i] = chunks_pool_malloc(chunk);
+	for (i = 0; i < 100; i++) {
+		test[i] = chunks_pool_malloc(chunk);
 
-        /*    printf("%d --> %p\n",i, test[i]);*/
-    }
+		/*    printf("%d --> %p\n",i, test[i]); */
+	}
 
-    /* chunks_pool_dump(chunk);*/
+	/* chunks_pool_dump(chunk); */
 
-    chunks_pool_free(chunk, test[11]);
-    chunks_pool_free(chunk, test[1]);
-    chunks_pool_free(chunk, test[8]);
-    chunks_pool_free(chunk, test[10]);
-    chunks_pool_free(chunk, test[78]);
-    chunks_pool_free(chunk, test[101]);
+	chunks_pool_free(chunk, test[11]);
+	chunks_pool_free(chunk, test[1]);
+	chunks_pool_free(chunk, test[8]);
+	chunks_pool_free(chunk, test[10]);
+	chunks_pool_free(chunk, test[78]);
+	chunks_pool_free(chunk, test[101]);
 
-    chunks_pool_dump(chunk);
+	chunks_pool_dump(chunk);
 
-    for (i = 0; i<100; i++) {
+	for (i = 0; i < 100; i++) {
 
-        chunks_pool_free(chunk, test[i]);
-    }
+		chunks_pool_free(chunk, test[i]);
+	}
 
-    /* chunks_pool_dump(chunk);*/
-    printf("DONE\n");
+	/* chunks_pool_dump(chunk); */
+	printf("DONE\n");
 }

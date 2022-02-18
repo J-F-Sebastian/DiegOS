@@ -27,49 +27,46 @@ static ev_queue_t *events;
 
 static void demo_thread_entry(void)
 {
-    event_t *evt;
-    unsigned i = 0;
-    event_watch_queue(events);
+	event_t *evt;
+	unsigned i = 0;
+	event_watch_queue(events);
 
-    alarm_t *alm = alarm_create("testalm",100,123,TRUE,events);
-    alarm_t *alm2 = alarm_create("testalm2",101,253,TRUE,events);
+	alarm_t *alm = alarm_create("testalm", 100, 123, TRUE, events);
+	alarm_t *alm2 = alarm_create("testalm2", 101, 253, TRUE, events);
 
-    alarm_set(alm, TRUE);
-    alarm_set(alm2, TRUE);
+	alarm_set(alm, TRUE);
+	alarm_set(alm2, TRUE);
 
-    while (1) {
-        wait_for_events(events);
-        i++;
+	while (1) {
+		wait_for_events(events);
+		i++;
 
-        while (event_queue_size(events)) {
+		while (event_queue_size(events)) {
 
-            evt = event_get(events);
+			evt = event_get(events);
 
-            if (100 == evt->eventid) alarm_acknowledge(alm);
-            if (101 == evt->eventid) alarm_acknowledge(alm2);
+			if (100 == evt->eventid)
+				alarm_acknowledge(alm);
+			if (101 == evt->eventid)
+				alarm_acknowledge(alm2);
 
-            if (evt) {
-                printf("%d classid %d eventid %d\n",event_queue_size(events),
-                       evt->classid,evt->eventid);
-            }
+			if (evt) {
+				printf("%d classid %d eventid %d\n", event_queue_size(events),
+				       evt->classid, evt->eventid);
+			}
 
-            if (!(i%7)) {
-                //alarm_update(alm, 1234 + i*2, TRUE);
-            }
-        }
-    }
+			if (!(i % 7)) {
+				//alarm_update(alm, 1234 + i*2, TRUE);
+			}
+		}
+	}
 }
 
 void platform_run(void)
 {
-    uint8_t pid;
+	uint8_t pid;
 
-    events = event_init_queue("Test");
+	events = event_init_queue("Test");
 
-    thread_create("Demo",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry,
-                  0,
-                  4096,
-                  &pid);
+	thread_create("Demo", THREAD_PRIO_NORMAL, demo_thread_entry, 0, 4096, &pid);
 }

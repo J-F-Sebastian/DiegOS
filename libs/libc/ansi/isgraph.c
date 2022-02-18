@@ -19,11 +19,11 @@
 
 #include <ctype.h>
 
-int isgraph (int c)
+int isgraph(int c)
 {
-    /*
-     * All graphical characters, excluding control characters, space and the DEL
-     * value (0x7F or 127).
-     */
-    return (((c > 32) && (c < 127)) ? (1) : (0));
+	/*
+	 * All graphical characters, excluding control characters, space and the DEL
+	 * value (0x7F or 127).
+	 */
+	return (((c > 32) && (c < 127)) ? (1) : (0));
 }

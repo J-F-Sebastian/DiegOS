@@ -26,13 +26,13 @@ typedef int ssize_t;
 #endif
 
 /* Types used in disk, inode, etc. data structures. */
-typedef short          dev_t;	   /* holds (major|minor) device pair */
-typedef char           gid_t;	   /* group id */
-typedef unsigned short ino_t; 	   /* i-node number */
-typedef unsigned short mode_t;	   /* file type and permissions bits */
-typedef char         nlink_t;	   /* number of links to a file */
-typedef long int       off_t;	   /* offset within a file */
-typedef int            pid_t;	   /* process id (must be signed) */
-typedef int           Mode_t;
+typedef short dev_t;		/* holds (major|minor) device pair */
+typedef char gid_t;		/* group id */
+typedef unsigned short ino_t;	/* i-node number */
+typedef unsigned short mode_t;	/* file type and permissions bits */
+typedef char nlink_t;		/* number of links to a file */
+typedef long int off_t;		/* offset within a file */
+typedef int pid_t;		/* process id (must be signed) */
+typedef int Mode_t;
 
 #endif

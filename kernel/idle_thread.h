@@ -36,4 +36,4 @@
  */
 void idle_thread_entry(void);
 
-#endif // IDLE_THREAD_H_INCLUDED
+#endif				// IDLE_THREAD_H_INCLUDED

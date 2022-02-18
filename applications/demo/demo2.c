@@ -27,79 +27,67 @@ static spinlock_t spinlock;
 
 static void demo_thread_entry(void)
 {
-    printf("Demo!\n");
-    int i = 300;
-    int j,k = 0;
+	printf("Demo!\n");
+	int i = 300;
+	int j, k = 0;
 
-    while (i--) {
-        spinlock_lock(&spinlock);
-        j = 5;
-        while (j--) {
-            k++;
-        }
-        spinlock_unlock(&spinlock);
-        thread_suspend();
-    }
-    thread_terminate();
+	while (i--) {
+		spinlock_lock(&spinlock);
+		j = 5;
+		while (j--) {
+			k++;
+		}
+		spinlock_unlock(&spinlock);
+		thread_suspend();
+	}
+	thread_terminate();
 }
 
 static void demo_thread_entry2(void)
 {
-    printf("Demo2!\n");
-    int i = 500;
-    int j,k = 0;
+	printf("Demo2!\n");
+	int i = 500;
+	int j, k = 0;
 
-    while (i--) {
-        spinlock_lock(&spinlock);
-        j = 200;
-        while (j--) {
-            k++;
-        }
+	while (i--) {
+		spinlock_lock(&spinlock);
+		j = 200;
+		while (j--) {
+			k++;
+		}
 //        threads_dump();
-        spinlock_unlock(&spinlock);
-        thread_suspend();
-    }
+		spinlock_unlock(&spinlock);
+		thread_suspend();
+	}
 }
 
 static void demo_thread_entry3(void)
 {
-    printf("Demo3!\n");
-    int i = 8000;
-    int j,k=0;
+	printf("Demo3!\n");
+	int i = 8000;
+	int j, k = 0;
 
-    while (i--) {
-        spinlock_lock(&spinlock);
-        j = 50;
-        while (j--) {
-            k++;
-        }
-        spinlock_unlock(&spinlock);
-        thread_suspend();
-    }
-    thread_terminate();
+	while (i--) {
+		spinlock_lock(&spinlock);
+		j = 50;
+		while (j--) {
+			k++;
+		}
+		spinlock_unlock(&spinlock);
+		thread_suspend();
+	}
+	thread_terminate();
 }
 
 void platform_run(void)
 {
-    uint8_t pid;
+	uint8_t pid;
 
-    spinlock_init(&spinlock);
+	spinlock_init(&spinlock);
 
-    thread_create("Demo",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry,
-                  0,
-                  4096, &pid);
+	thread_create("Demo", THREAD_PRIO_NORMAL, demo_thread_entry, 0, 4096, &pid);
 
-    thread_create("Demo2",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry2,
-                  0,
-                  4096, &pid);
+	thread_create("Demo2", THREAD_PRIO_NORMAL, demo_thread_entry2, 0, 4096, &pid);
 
-    thread_create("Demo3",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry3,
-                  0,
-                  4096, &pid);
+	thread_create("Demo3", THREAD_PRIO_NORMAL, demo_thread_entry3, 0, 4096, &pid);
 }

@@ -28,8 +28,8 @@
 
 #include <types_common.h>
 
-typedef BOOL (*int_handler_t)(void);
-typedef void (*exc_handler_t)(void);
+typedef BOOL(*int_handler_t) (void);
+typedef void (*exc_handler_t) (void);
 
 /*
  * disable all interrupts

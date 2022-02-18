@@ -24,8 +24,8 @@
 #include <time.h>
 #include <diegos/kernel_ticks.h>
 
-clock_t clock (void)
+clock_t clock(void)
 {
-    /* FIXME add ticks to threads and return proper computation */
-	return (clock_t)(clock_get_ticks());
+	/* FIXME add ticks to threads and return proper computation */
+	return (clock_t) (clock_get_ticks());
 }

@@ -30,7 +30,7 @@
  * TRUE if initialization succeded
  * FALSE in any other case
  */
-BOOL init_barriers_lib (void);
+BOOL init_barriers_lib(void);
 
 /*
  * Resume any waiting thread on open barriers.
@@ -38,7 +38,6 @@ BOOL init_barriers_lib (void);
  * The routine loops all barriers, open barriers are scanned for pending
  * (waiting) threads, if any, they are resumed.
  */
-void resume_on_barriers (void);
+void resume_on_barriers(void);
 
 #endif
-

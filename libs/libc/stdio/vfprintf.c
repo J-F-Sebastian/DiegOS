@@ -24,15 +24,15 @@
 
 #include "loc_incl.h"
 
-int vfprintf ( FILE * stream, const char * format, va_list arg )
+int vfprintf(FILE * stream, const char *format, va_list arg)
 {
-    int retval = 0;
+	int retval = 0;
 
-    if (!stream || !format) {
-            return (EINVAL);
-        }
+	if (!stream || !format) {
+		return (EINVAL);
+	}
 
-    retval = formatted_printf(stream, format, FALSE, arg);
+	retval = formatted_printf(stream, format, FALSE, arg);
 
-    return (retval);
+	return (retval);
 }

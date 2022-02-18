@@ -22,34 +22,34 @@
 
 void *memset(void *s, int c, size_t n)
 {
-    char *s1 = s;
-    int *s2 = s;
+	char *s1 = s;
+	int *s2 = s;
 
-    if (s1 && (n > 0)) {
-        /*
-         * Byte aligned
-         */
-        if ((intptr_t)s & 3) {
-            while (n--) {
-                *s1++ = (char)c;
-            }
-        } else {
-           /*
-            * Word aligned
-            */
-            c &= 0xff;
-            c |= (c << 8);
-            c |= (c << 16);
-            while (n > 4) {
-                *s2++ = c;
-                n -= 4;
-            }
-            s1 = (char *)s2;
-            while (n > 0) {
-                --n;
-                *s1++ = (char)c;
-            }
-        }
-    }
-    return (s);
+	if (s1 && (n > 0)) {
+		/*
+		 * Byte aligned
+		 */
+		if ((intptr_t) s & 3) {
+			while (n--) {
+				*s1++ = (char)c;
+			}
+		} else {
+			/*
+			 * Word aligned
+			 */
+			c &= 0xff;
+			c |= (c << 8);
+			c |= (c << 16);
+			while (n > 4) {
+				*s2++ = c;
+				n -= 4;
+			}
+			s1 = (char *)s2;
+			while (n > 0) {
+				--n;
+				*s1++ = (char)c;
+			}
+		}
+	}
+	return (s);
 }

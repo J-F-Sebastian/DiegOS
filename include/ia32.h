@@ -36,4 +36,3 @@
 //#define ENABLE_SIMD
 
 #endif
-

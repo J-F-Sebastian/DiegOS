@@ -21,33 +21,33 @@
 #include <errno.h>
 #include "fdescr_private.h"
 
-ssize_t read (int fd, void *buf, size_t n)
+ssize_t read(int fd, void *buf, size_t n)
 {
-    unsigned retries = 10;
-    int retcode;
+	unsigned retries = 10;
+	int retcode;
 
-    if ((fd < 0) || (fd >= (int)NELEMENTS(fdarray))) {
-        errno = EBADF;
-	return (-1);
-    }
+	if ((fd < 0) || (fd >= (int)NELEMENTS(fdarray))) {
+		errno = EBADF;
+		return (-1);
+	}
 
-    if (!buf || !(fdarray[fd].flags & FD_DATA_IS_INUSE)) {
-        errno = EINVAL;
-        return (-1);
-    }
+	if (!buf || !(fdarray[fd].flags & FD_DATA_IS_INUSE)) {
+		errno = EINVAL;
+		return (-1);
+	}
 
-    if (fdarray[fd].flags & FD_DATA_IS_RAW) {
-        do {
-            retcode = device_io_rx(fdarray[fd].rawdev, (char *)buf, n);
-        } while (retries-- && (retcode == EAGAIN));
-        if (retcode < EOK) {
-	    errno = EIO;
-            return (-1);
-        }
-    } else {
-	errno = EINVAL;
-        return (-1);
-    }
+	if (fdarray[fd].flags & FD_DATA_IS_RAW) {
+		do {
+			retcode = device_io_rx(fdarray[fd].rawdev, (char *)buf, n);
+		} while (retries-- && (retcode == EAGAIN));
+		if (retcode < EOK) {
+			errno = EIO;
+			return (-1);
+		}
+	} else {
+		errno = EINVAL;
+		return (-1);
+	}
 
-    return ((ssize_t)retcode);
+	return ((ssize_t) retcode);
 }

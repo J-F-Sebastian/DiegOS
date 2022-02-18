@@ -27,35 +27,35 @@
 #define DEV_NAME_LEN (7)
 
 enum DEVICE_TYPE {
-    /*
-     * Device is a character stream device
-     */
-    DEV_TYPE_CHAR,
-    /*
-     * Device is a block device
-     */
-    DEV_TYPE_BLOCK,
-    /*
-     * Device is a graphical video card
-     */
-    DEV_TYPE_GFX_UI,
-    /*
-     * Device is a text video card
-     */
-    DEV_TYPE_TXT_UI
+	/*
+	 * Device is a character stream device
+	 */
+	DEV_TYPE_CHAR,
+	/*
+	 * Device is a block device
+	 */
+	DEV_TYPE_BLOCK,
+	/*
+	 * Device is a graphical video card
+	 */
+	DEV_TYPE_GFX_UI,
+	/*
+	 * Device is a text video card
+	 */
+	DEV_TYPE_TXT_UI
 };
 
 typedef struct device {
-    char name[DEV_NAME_LEN + 1];
-    unsigned unit;
-    unsigned type;
+	char name[DEV_NAME_LEN + 1];
+	unsigned unit;
+	unsigned type;
 	union {
-		void				*drv;
-		driver_header_t		*cmn;
-		char_driver_t		*cdrv;
-		text_driver_t		*tdrv;
-		grafics_driver_t	*gdrv;
-		net_driver_t		*ndrv;		
+		void *drv;
+		driver_header_t *cmn;
+		char_driver_t *cdrv;
+		text_driver_t *tdrv;
+		grafics_driver_t *gdrv;
+		net_driver_t *ndrv;
 	};
 } device_t;
 
@@ -124,7 +124,7 @@ device_t *device_lookup_name(const char *devname);
  * returned value is the amount of bytes transmitted (it might not match the
  * value passed in with the parameter bytes).
  */
-int device_io_tx(device_t *dev, const char *buf, size_t bytes);
+int device_io_tx(device_t * dev, const char *buf, size_t bytes);
 
 /*
  * Perform reading from devices. If the driver support suspending (blocking)
@@ -146,7 +146,6 @@ int device_io_tx(device_t *dev, const char *buf, size_t bytes);
  * returned value is the amount of bytes read in the buffer (it might not match
  * the value passed in with the parameter bytes).
  */
-int device_io_rx(device_t *dev, char *buf, size_t bytes);
+int device_io_rx(device_t * dev, char *buf, size_t bytes);
 
 #endif
-

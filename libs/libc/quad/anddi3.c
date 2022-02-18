@@ -40,21 +40,20 @@ static char sccsid[] = "@(#)anddi3.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: anddi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
 /*
  * Return a & b, in quad.
  */
-quad_t
-__anddi3(quad_t a, quad_t b)
+quad_t __anddi3(quad_t a, quad_t b)
 {
-    union uu aa, bb;
+	union uu aa, bb;
 
-    aa.q = a;
-    bb.q = b;
-    aa.ul[0] &= bb.ul[0];
-    aa.ul[1] &= bb.ul[1];
-    return (aa.q);
+	aa.q = a;
+	bb.q = b;
+	aa.ul[0] &= bb.ul[0];
+	aa.ul[1] &= bb.ul[1];
+	return (aa.q);
 }

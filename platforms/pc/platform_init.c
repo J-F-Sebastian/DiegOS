@@ -46,115 +46,113 @@
  * THE VARIABLES AREA IS AT 0xF000
  */
 struct boot_variables {
-    uint32_t    free_heap_start;
-    uint32_t    free_heap_size;
+	uint32_t free_heap_start;
+	uint32_t free_heap_size;
 };
 
 static const void *ttylist[] = { &vga_tty_drv };
 
 static const void *drvlist[] = { &uart16550d_drv,
-                                 &i8253_drv,
-                                 &i82371sb_drv,
-                                 &i8042_kbd_drv,
-                                 &i8042_mouse_drv
-                               };
+	&i8253_drv,
+	&i82371sb_drv,
+	&i8042_kbd_drv,
+	&i8042_mouse_drv
+};
 
 static volatile unsigned long ticks = 0;
 
 static void calib_int_handler(void)
 {
-    ++ticks;
+	++ticks;
 }
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
 
 void platform_init()
 {
-    uint32_t params[3];
-    struct boot_variables *bootvars = (struct boot_variables *)0xF000;
+	uint32_t params[3];
+	struct boot_variables *bootvars = (struct boot_variables *)0xF000;
 
-    (void) malloc_init((const void *) (bootvars->free_heap_start),
-                       (const void *) (bootvars->free_heap_start +
-                                       bootvars->free_heap_size));
+	(void)malloc_init((const void *)(bootvars->free_heap_start),
+			  (const void *)(bootvars->free_heap_start + bootvars->free_heap_size));
 
-    /*
-     * Init interrupts, all PIC lines are disabled
-     */
-    i8259_init();
+	/*
+	 * Init interrupts, all PIC lines are disabled
+	 */
+	i8259_init();
 
-    /*
-     * enable interrupts
-     */
-    unlock();
+	/*
+	 * enable interrupts
+	 */
+	unlock();
 
-    /*
-     * Init the clock to calibrate delay loops.
-     * MUST be called AFTER malloc_init.
-     * It will be inited twice when added as a device, not elegant, but....
-     */
-    if ((EOK != i8253_drv.cmn.init_fn(0)) ||
+	/*
+	 * Init the clock to calibrate delay loops.
+	 * MUST be called AFTER malloc_init.
+	 * It will be inited twice when added as a device, not elegant, but....
+	 */
+	if ((EOK != i8253_drv.cmn.init_fn(0)) ||
 	    (EOK != i8253_drv.cmn.ioctrl_fn(params, CLK_GET_PARAMS, 0)) ||
-            (EOK != i8253_drv.cmn.ioctrl_fn(&params[1], CLK_SET_PERIOD, 0)) ||
-            (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, CLK_SET_CB, 0)) ||
-            (EOK != i8253_drv.cmn.start_fn(0))) {
-        abort();
-    }
+	    (EOK != i8253_drv.cmn.ioctrl_fn(&params[1], CLK_SET_PERIOD, 0)) ||
+	    (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, CLK_SET_CB, 0)) ||
+	    (EOK != i8253_drv.cmn.start_fn(0))) {
+		abort();
+	}
 
-    /*
-     * Now we are updating ticks !!! Go calibrate.
-     */
-    calibrate_delay(&ticks);
+	/*
+	 * Now we are updating ticks !!! Go calibrate.
+	 */
+	calibrate_delay(&ticks);
 
-    srand(ticks);
+	srand(ticks);
 
-    /*
-     * Stop the driver, it will be inited by driver_init
-     */
-    i8253_drv.cmn.stop_fn(0);
-    i8253_drv.cmn.done_fn(0);
+	/*
+	 * Stop the driver, it will be inited by driver_init
+	 */
+	i8253_drv.cmn.stop_fn(0);
+	i8253_drv.cmn.done_fn(0);
 
-    /*
-     * disable interrupts, interrupts MUST BE DISABLED after this function
-     * has been called.
-     */
-    lock();
+	/*
+	 * disable interrupts, interrupts MUST BE DISABLED after this function
+	 * has been called.
+	 */
+	lock();
 
 }
 
 void tty_init()
 {
-    int retcode;
+	int retcode;
 
-    retcode = drivers_list_init(ttylist, NELEMENTS(ttylist));
-    if (EOK != retcode) {
-        abort();
-    }
-    vga_tty_drv.cmn.start_fn(0);
+	retcode = drivers_list_init(ttylist, NELEMENTS(ttylist));
+	if (EOK != retcode) {
+		abort();
+	}
+	vga_tty_drv.cmn.start_fn(0);
 }
 
 void drivers_init()
 {
-    unsigned i = BPS_115200;
-    unsigned j = CHAR_8BITS | STOP_BIT;
-    int retcode;
+	unsigned i = BPS_115200;
+	unsigned j = CHAR_8BITS | STOP_BIT;
+	int retcode;
 
-    if (EOK != pci_bus_init()) {
-        return;
-    }
+	if (EOK != pci_bus_init()) {
+		return;
+	}
 
-    retcode = drivers_list_init(drvlist, NELEMENTS(drvlist));
+	retcode = drivers_list_init(drvlist, NELEMENTS(drvlist));
 
-    if (EOK != retcode) {
-        abort();
-    }
-    
-    uart16550d_drv.cmn.ioctrl_fn(&i, UART_SET_SPEED, 0);
-    uart16550d_drv.cmn.ioctrl_fn(&j, UART_SET_BITS, 0);
+	if (EOK != retcode) {
+		abort();
+	}
 
-    if ((STDIN_FILENO != open(DEFAULT_STDIN, O_RDONLY, 0)) ||
-            (STDOUT_FILENO != open(DEFAULT_STDOUT, O_WRONLY, 0)) ||
-            (STDERR_FILENO != open(DEFAULT_STDERR, O_WRONLY, 0))) {
-        abort();
-    }
+	uart16550d_drv.cmn.ioctrl_fn(&i, UART_SET_SPEED, 0);
+	uart16550d_drv.cmn.ioctrl_fn(&j, UART_SET_BITS, 0);
+
+	if ((STDIN_FILENO != open(DEFAULT_STDIN, O_RDONLY, 0)) ||
+	    (STDOUT_FILENO != open(DEFAULT_STDOUT, O_WRONLY, 0)) ||
+	    (STDERR_FILENO != open(DEFAULT_STDERR, O_WRONLY, 0))) {
+		abort();
+	}
 }
-

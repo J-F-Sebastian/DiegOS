@@ -23,27 +23,27 @@
 
 #define	NEXITS	32
 
-typedef void (*exitfn)(void);
+typedef void (*exitfn) (void);
 
 static exitfn exitcbfn[NEXITS];
 
 static unsigned exitcbnum = 0;
 
-int atexit(void (*func)(void))
+int atexit(void (*func) (void))
 {
-    if (exitcbnum == NEXITS) {
-        return ENOMEM;
-    }
-    exitcbfn[exitcbnum++] = func;
-    return EOK;
+	if (exitcbnum == NEXITS) {
+		return ENOMEM;
+	}
+	exitcbfn[exitcbnum++] = func;
+	return EOK;
 }
 
-void exit (int status)
+void exit(int status)
 {
-    while (exitcbnum--) {
-        if (exitcbfn[exitcbnum]) {
-            exitcbfn[exitcbnum]();
-        }
-    }
-    kernel_done();
+	while (exitcbnum--) {
+		if (exitcbfn[exitcbnum]) {
+			exitcbfn[exitcbnum] ();
+		}
+	}
+	kernel_done();
 }

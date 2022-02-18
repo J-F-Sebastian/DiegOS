@@ -38,7 +38,7 @@
 #define XT_WINI_IRQ        5	/* xt winchester */
 #define FLOPPY_IRQ         6	/* floppy disk */
 #define PRINTER_IRQ        7
-#define RTC_IRQ		       8    /*  Cascaded IRQ 2 interrupt from master 8259 */
+#define RTC_IRQ		       8	/*  Cascaded IRQ 2 interrupt from master 8259 */
 #define PS2MOUSE_IRQ	  12
 #define CP_IRQ		      13
 #define AT_WINI_0_IRQ     14	/* at winchester */
@@ -52,10 +52,9 @@
 
 /* Magic numbers for interrupt controller. */
 #define SPEC_EOI        0x60	/* Specific End Of Interrupt, re-enable an
-                                 * interrupt after servicing it
-                                 */
+				 * interrupt after servicing it
+				 */
 
 void i8259_init(void);
 
 #endif
-

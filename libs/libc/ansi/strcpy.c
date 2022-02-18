@@ -19,13 +19,14 @@
 
 #include <string.h>
 
-char *strcpy (char *s, const char *ct)
+char *strcpy(char *s, const char *ct)
 {
-    char *s1 = s;
+	char *s1 = s;
 
-    if (s1 && ct) {
-        while ((*s1++ = *ct++) != '\0') {};
-    }
+	if (s1 && ct) {
+		while ((*s1++ = *ct++) != '\0') {
+		};
+	}
 
-    return (s);
+	return (s);
 }

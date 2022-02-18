@@ -42,41 +42,40 @@
 #define ETHERTYPE_SVLAN		0x88A8
 
 typedef union ieee_addr {
-    uint8_t     mac[MAC_ADDR_SIZE];
-    uint16_t   macw[MAC_ADDR_SIZE/2];
+	uint8_t mac[MAC_ADDR_SIZE];
+	uint16_t macw[MAC_ADDR_SIZE / 2];
 } ieee_addr_t;
 
 typedef struct ieee_802_3_hdr {
-    ieee_addr_t src;
-    ieee_addr_t dst;
-    uint16_t    type;
+	ieee_addr_t src;
+	ieee_addr_t dst;
+	uint16_t type;
 } ieee_802_3_hdr_t;
 
 /*
  * Ethernet encoded 802.1Q MAC header
  */
 typedef struct ieee_802_3q_hdr {
-    ieee_addr_t src;
-    ieee_addr_t dst;
-    /* Tag Protocol Identifier */
-    uint16_t    tpid;
-    /* Tag Control Information */
-    uint16_t    tci;
-    uint16_t    type;
+	ieee_addr_t src;
+	ieee_addr_t dst;
+	/* Tag Protocol Identifier */
+	uint16_t tpid;
+	/* Tag Control Information */
+	uint16_t tci;
+	uint16_t type;
 } ieee_802_3q_hdr_t;
 
-inline void copy_ieee_addr (const ieee_addr_t *src, ieee_addr_t *dst)
+inline void copy_ieee_addr(const ieee_addr_t * src, ieee_addr_t * dst)
 {
-    dst->macw[0] = src->macw[0];
-    dst->macw[1] = src->macw[1];
-    dst->macw[2] = src->macw[2];
+	dst->macw[0] = src->macw[0];
+	dst->macw[1] = src->macw[1];
+	dst->macw[2] = src->macw[2];
 }
 
-inline BOOL cmp_ieee_addr (const ieee_addr_t *src, const ieee_addr_t *dst)
+inline BOOL cmp_ieee_addr(const ieee_addr_t * src, const ieee_addr_t * dst)
 {
-    return (((dst->macw[0] == src->macw[0]) &&
-            (dst->macw[1] == src->macw[1]) &&
-            (dst->macw[2] == src->macw[2])) ? TRUE : FALSE);
+	return (((dst->macw[0] == src->macw[0]) &&
+		 (dst->macw[1] == src->macw[1]) && (dst->macw[2] == src->macw[2])) ? TRUE : FALSE);
 }
 
 #endif

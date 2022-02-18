@@ -19,24 +19,24 @@
 
 #include <stdio.h>
 
-size_t fread(void *ptr, size_t size, size_t count, FILE *stream)
+size_t fread(void *ptr, size_t size, size_t count, FILE * stream)
 {
-    char *dest = ptr;
-    int c;
-    size_t total;
+	char *dest = ptr;
+	int c;
+	size_t total;
 
-    if (!(ptr && size && count && stream)) {
-        return (0);
-    }
+	if (!(ptr && size && count && stream)) {
+		return (0);
+	}
 
-    for (total = 0; total < size * count; total++) {
-        c = getc(stream);
-        if (EOF != c) {
-            *dest++ = (char) c;
-        } else {
-            break;
-        }
-    }
+	for (total = 0; total < size * count; total++) {
+		c = getc(stream);
+		if (EOF != c) {
+			*dest++ = (char)c;
+		} else {
+			break;
+		}
+	}
 
-    return (total / size);
+	return (total / size);
 }

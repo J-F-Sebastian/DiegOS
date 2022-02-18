@@ -23,8 +23,8 @@
 #include "ports.h"
 #include "i8259.h"
 
-#define ICW1_AT         0x11    /* edge triggered, cascade, need ICW4 */
-#define ICW4_AT         0x01    /* not SFNM, not buffered, normal EOI, 8086 */
+#define ICW1_AT         0x11	/* edge triggered, cascade, need ICW4 */
+#define ICW4_AT         0x01	/* not SFNM, not buffered, normal EOI, 8086 */
 
 /*
  * Edge triggered interrupts are controlled by ELCR1/2 registers in PCI/ISA
@@ -33,20 +33,19 @@
 
 void i8259_init()
 {
-    /* ICW1 for master */
-    out_byte(INT_CTL, ICW1_AT);
-    /* ICW2 for master */
-    out_byte(INT_CTLMASK, IRQ0_VECTOR);
-    /* ICW3 tells slaves */
-    out_byte(INT_CTLMASK, (1 << CASCADE_IRQ));
-    out_byte(INT_CTLMASK, ICW4_AT);
-    out_byte(INT_CTLMASK, ~(1 << CASCADE_IRQ));	/* IRQ 0-7 mask */
+	/* ICW1 for master */
+	out_byte(INT_CTL, ICW1_AT);
+	/* ICW2 for master */
+	out_byte(INT_CTLMASK, IRQ0_VECTOR);
+	/* ICW3 tells slaves */
+	out_byte(INT_CTLMASK, (1 << CASCADE_IRQ));
+	out_byte(INT_CTLMASK, ICW4_AT);
+	out_byte(INT_CTLMASK, ~(1 << CASCADE_IRQ));	/* IRQ 0-7 mask */
 
-    out_byte(INT2_CTL, ICW1_AT);
-    out_byte(INT2_CTLMASK, IRQ8_VECTOR);
-    /* ICW2 for slave */
-    out_byte(INT2_CTLMASK, CASCADE_IRQ);		/* ICW3 is slave nr */
-    out_byte(INT2_CTLMASK, ICW4_AT);
-    out_byte(INT2_CTLMASK, ~0);			/* IRQ 8-15 mask */
+	out_byte(INT2_CTL, ICW1_AT);
+	out_byte(INT2_CTLMASK, IRQ8_VECTOR);
+	/* ICW2 for slave */
+	out_byte(INT2_CTLMASK, CASCADE_IRQ);	/* ICW3 is slave nr */
+	out_byte(INT2_CTLMASK, ICW4_AT);
+	out_byte(INT2_CTLMASK, ~0);	/* IRQ 8-15 mask */
 }
-

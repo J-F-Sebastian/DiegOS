@@ -21,11 +21,11 @@
 
 #include	"loc_incl.h"
 
-int feof (FILE *stream)
+int feof(FILE * stream)
 {
-    if (stream) {
-        return (stream_testflags(stream, IOBUF_EOF));
-    }
+	if (stream) {
+		return (stream_testflags(stream, IOBUF_EOF));
+	}
 
-    return (0);
+	return (0);
 }

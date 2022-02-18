@@ -39,4 +39,4 @@
 #define FLT_ROUNDS		1
 #define FLT_RADIX		2
 
-#endif /* _FLOAT_H */
+#endif				/* _FLOAT_H */

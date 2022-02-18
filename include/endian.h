@@ -80,7 +80,7 @@
 #define	HTONL(x)	(void) (x)
 #define	HTONS(x)	(void) (x)
 
-#else	/* LITTLE_ENDIAN */
+#else				/* LITTLE_ENDIAN */
 
 #define	ntohl(x)	swapl(x)
 
@@ -94,6 +94,6 @@
 #define	HTONL(x)	(x=ntohl(x))
 #define	HTONS(x)	(x=ntohs(x))
 
-#endif	/* LITTLE_ENDIAN || !defined(__lint__) */
+#endif				/* LITTLE_ENDIAN || !defined(__lint__) */
 
-#endif /* !_SYS_ENDIAN_H_ */
+#endif				/* !_SYS_ENDIAN_H_ */

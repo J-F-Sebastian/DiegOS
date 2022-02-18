@@ -61,7 +61,7 @@ static device_int_t *lookup_name(const char *name)
 	return (NULL);
 }
 
-static STATUS insert_device(device_int_t *dev)
+static STATUS insert_device(device_int_t * dev)
 {
 	device_int_t *prev = list_head(&device_list);
 	int retval;
@@ -98,53 +98,53 @@ void start_devices_lib()
 	 */
 	while (ptr) {
 		switch (ptr->dv.type) {
-			case DEV_TYPE_CHAR:			
+		case DEV_TYPE_CHAR:
+			if (ptr->dv.cmn->start_fn(ptr->dv.unit)) {
+				kerrprintf("Failed starting %s\n", ptr->dv.name);
+			} else {
+				counter++;
+			}
+			break;
+
+		case DEV_TYPE_BLOCK:
+			kerrprintf("BLOCK devices not supported yet.\n");
+			kerrprintf("Skipped starting %s\n", ptr->dv.name);
+			break;
+
+		case DEV_TYPE_TXT_UI:
+			/* FALLTHRU */
+		case DEV_TYPE_GFX_UI:
+			if (ui) {
+				kerrprintf("Multiple UI not supported for %s\n", ptr->dv.name);
+				kerrprintf("Skipped starting %s\n", ptr->dv.name);
+			} else {
 				if (ptr->dv.cmn->start_fn(ptr->dv.unit)) {
 					kerrprintf("Failed starting %s\n", ptr->dv.name);
 				} else {
+					ui = TRUE;
 					counter++;
 				}
-				break;
+			}
+			break;
 
-			case DEV_TYPE_BLOCK:
-				kerrprintf("BLOCK devices not supported yet.\n");
-				kerrprintf("Skipped starting %s\n", ptr->dv.name);
-				break;
-
-			case DEV_TYPE_TXT_UI:
-				/* FALLTHRU */
-			case DEV_TYPE_GFX_UI:
-				if (ui) {
-					kerrprintf("Multiple UI not supported for %s\n",
-					           ptr->dv.name);
-					kerrprintf("Skipped starting %s\n", ptr->dv.name);
-				} else {
-					if (ptr->dv.cmn->start_fn(ptr->dv.unit)) {
-						kerrprintf("Failed starting %s\n", ptr->dv.name);
-					} else {
-						ui = TRUE;
-						counter++;
-					}
-				}
-				break;			
-
-			default:
-				kerrprintf("Unknown device type for %s\n",ptr->dv.name);
-				break;
+		default:
+			kerrprintf("Unknown device type for %s\n", ptr->dv.name);
+			break;
 		}
 		ptr = (device_int_t *) ptr->header.next;
 	}
 
 	kmsgprintf("%u devices started\n", counter);
 }
+
 /*
  * Public section
  */
 device_t *device_create(unsigned unit, const void *inst)
 {
 	device_int_t *tmp;
-	driver_header_t *cmn = (driver_header_t *)inst;
-	char temp[DEV_NAME_LEN + 1];	
+	driver_header_t *cmn = (driver_header_t *) inst;
+	char temp[DEV_NAME_LEN + 1];
 	unsigned type;
 	unsigned drvtype;
 
@@ -152,39 +152,34 @@ device_t *device_create(unsigned unit, const void *inst)
 		return (NULL);
 	}
 
-	drvtype = cmn->status_fn(unit);	
-	drvtype &= (DRV_IS_CHAR 	| 
-	            DRV_IS_BLOCK 	| 
-	            DRV_IS_NET 		| 
-	            DRV_IS_TXT_UI 	|
-	            DRV_IS_GFX_UI);
-	
-	switch (drvtype) {
-		case DRV_IS_NET:
-		/* FALLTRHU */
-		case DRV_IS_CHAR:
-			type = DEV_TYPE_CHAR;
-			break;		
-		
-		case DRV_IS_BLOCK:
-			type = DEV_TYPE_BLOCK;
-			break;
-			
-		case DRV_IS_TXT_UI:			
-			type = DEV_TYPE_TXT_UI;
-			break;
+	drvtype = cmn->status_fn(unit);
+	drvtype &= (DRV_IS_CHAR | DRV_IS_BLOCK | DRV_IS_NET | DRV_IS_TXT_UI | DRV_IS_GFX_UI);
 
-		case DRV_IS_GFX_UI:
-			type = DEV_TYPE_GFX_UI;
-			break;
-					
-		default:
-			kerrprintf("Unknown driver type for %s or bad type format %#x\n", 
-			           cmn->name,
-			           drvtype);
-			return (NULL);
+	switch (drvtype) {
+	case DRV_IS_NET:
+		/* FALLTRHU */
+	case DRV_IS_CHAR:
+		type = DEV_TYPE_CHAR;
+		break;
+
+	case DRV_IS_BLOCK:
+		type = DEV_TYPE_BLOCK;
+		break;
+
+	case DRV_IS_TXT_UI:
+		type = DEV_TYPE_TXT_UI;
+		break;
+
+	case DRV_IS_GFX_UI:
+		type = DEV_TYPE_GFX_UI;
+		break;
+
+	default:
+		kerrprintf("Unknown driver type for %s or bad type format %#x\n",
+			   cmn->name, drvtype);
+		return (NULL);
 	}
-		
+
 	snprintf(temp, sizeof(temp), "%.5s%1u", cmn->name, unit);
 	tmp = lookup_name(temp);
 
@@ -245,7 +240,7 @@ device_t *device_lookup_name(const char *devname)
 	return ((retval) ? (&retval->dv) : (NULL));
 }
 
-int device_io_tx(device_t *dev, const char *buf, size_t bytes)
+int device_io_tx(device_t * dev, const char *buf, size_t bytes)
 {
 	int retcode = bytes;
 	size_t cbytes = 0;
@@ -256,7 +251,7 @@ int device_io_tx(device_t *dev, const char *buf, size_t bytes)
 
 	if (dev->type != DEV_TYPE_CHAR) {
 		return (EPERM);
-	}		
+	}
 
 	while (bytes > 0) {
 		retcode = dev->cdrv->write_fn(buf, bytes, dev->unit);
@@ -272,7 +267,7 @@ int device_io_tx(device_t *dev, const char *buf, size_t bytes)
 	return (cbytes);
 }
 
-int device_io_rx(device_t *dev, char *buf, size_t bytes)
+int device_io_rx(device_t * dev, char *buf, size_t bytes)
 {
 	int retcode;
 

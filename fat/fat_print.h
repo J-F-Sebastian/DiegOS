@@ -66,4 +66,4 @@ void FAT_print_entry(struct FAT *entry);
  */
 int FAT_print_loop(struct FATVolume *vol, struct FAT *buffer);
 
-#endif // FAT_PRINT_H
+#endif				// FAT_PRINT_H

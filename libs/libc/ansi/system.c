@@ -20,11 +20,11 @@
 #include <stdlib.h>
 #include <errno.h>
 
-int system (const char *s)
+int system(const char *s)
 {
-    if (!s) {
-        return (EINVAL);
-    }
+	if (!s) {
+		return (EINVAL);
+	}
 
-    return EOK;
+	return EOK;
 }

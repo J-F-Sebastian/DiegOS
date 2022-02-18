@@ -27,49 +27,48 @@
 
 FILE *fdopen(int fildes, const char *mode)
 {
-    int rwmode = 0;
-    int fdflags;
+	int rwmode = 0;
+	int fdflags;
 
-    if ((fildes < 0) || (fildes >= FOPEN_MAX)) {
-        errno = EBADF;
-        return ((FILE *) NULL);
-    }
+	if ((fildes < 0) || (fildes >= FOPEN_MAX)) {
+		errno = EBADF;
+		return ((FILE *) NULL);
+	}
 
-    fdflags = fcntl(fildes, F_GETFL) & O_ACCMODE;
+	fdflags = fcntl(fildes, F_GETFL) & O_ACCMODE;
 
-    switch (*mode++) {
-    case 'r':
-        rwmode = O_RDONLY;
-        break;
-    case 'w':
-        rwmode = O_WRONLY;
-        break;
-    case 'a':
-        rwmode = O_WRONLY;
-        break;
-    default:
-        errno = EINVAL;
-        return ((FILE *) NULL);
-    }
+	switch (*mode++) {
+	case 'r':
+		rwmode = O_RDONLY;
+		break;
+	case 'w':
+		rwmode = O_WRONLY;
+		break;
+	case 'a':
+		rwmode = O_WRONLY;
+		break;
+	default:
+		errno = EINVAL;
+		return ((FILE *) NULL);
+	}
 
-    while (*mode) {
-        switch (*mode++) {
-        case 'b':
-            continue;
-        case '+':
-            rwmode = O_RDWR;
-            continue;
-        default:
-            break;
-        }
-        break;
-    }
+	while (*mode) {
+		switch (*mode++) {
+		case 'b':
+			continue;
+		case '+':
+			rwmode = O_RDWR;
+			continue;
+		default:
+			break;
+		}
+		break;
+	}
 
-    if (rwmode != fdflags) {
-        errno = EINVAL;
-        return ((FILE *) NULL);
-    }
+	if (rwmode != fdflags) {
+		errno = EINVAL;
+		return ((FILE *) NULL);
+	}
 
-    return (iostreams[fildes]);
+	return (iostreams[fildes]);
 }
-

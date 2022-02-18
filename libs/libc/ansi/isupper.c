@@ -19,7 +19,7 @@
 
 #include <ctype.h>
 
-int isupper (int c)
+int isupper(int c)
 {
-    return (((c >= 'A') && (c <= 'Z')) ? (1) : (0));
+	return (((c >= 'A') && (c <= 'Z')) ? (1) : (0));
 }

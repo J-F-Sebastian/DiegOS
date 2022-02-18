@@ -20,18 +20,18 @@
 #include <string.h>
 #include <stddef.h>
 
-char *strrchr (const char *cs, int c)
+char *strrchr(const char *cs, int c)
 {
-    const char *result = NULL;
+	const char *result = NULL;
 
-    if (!cs) {
-        return (NULL);
-    }
+	if (!cs) {
+		return (NULL);
+	}
 
-    do {
-        if ((char)c == *cs)
-            result = cs;
-    } while (*cs++ != '\0');
+	do {
+		if ((char)c == *cs)
+			result = cs;
+	} while (*cs++ != '\0');
 
-    return ((char *)result);
+	return ((char *)result);
 }

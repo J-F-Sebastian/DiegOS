@@ -26,25 +26,23 @@
 #define FAT_TS_WRITE  2
 #define FAT_TS_READ   4
 
-struct FAT_direntry_search_result
-{
-    /* Copy of the FAT entry */
-    struct FAT entry;
-    /* disk sector relative to the volume start */
-    uint32_t sector;
-    /* Offset of the entry in the sector */
-    unsigned offset;
-    /* First cluster of the directory containing this entry. */
-    uint16_t container;
+struct FAT_direntry_search_result {
+	/* Copy of the FAT entry */
+	struct FAT entry;
+	/* disk sector relative to the volume start */
+	uint32_t sector;
+	/* Offset of the entry in the sector */
+	unsigned offset;
+	/* First cluster of the directory containing this entry. */
+	uint16_t container;
 };
 
-struct FAT_statistics
-{
-    uint32_t totbytes;
-    uint32_t totfiles;
-    uint32_t totlinks;
-    uint32_t totdirs;
-    uint32_t totavail;
+struct FAT_statistics {
+	uint32_t totbytes;
+	uint32_t totfiles;
+	uint32_t totlinks;
+	uint32_t totdirs;
+	uint32_t totavail;
 };
 
 /**
@@ -58,7 +56,7 @@ struct FAT_statistics
  */
 static inline uint32_t FAT_FSoC(struct FATVolume *vol, uint32_t N)
 {
-    return ((N - 2) * vol->PB.SecPerClus) + vol->FirstDataSector;
+	return ((N - 2) * vol->PB.SecPerClus) + vol->FirstDataSector;
 }
 
 /**
@@ -69,7 +67,7 @@ static inline uint32_t FAT_FSoC(struct FATVolume *vol, uint32_t N)
  *
  * @return cluster number
  */
-uint16_t FAT_get_cluster_from_table(struct FATVolume *vol, uint16_t N);
+uint16_t FAT_get_cluster_from_table(struct FATVolume * vol, uint16_t N);
 
 /**
  * @brief FAT_set_cluster_into_table write the value val into FAT table at cluster index N.
@@ -153,4 +151,4 @@ int FAT_update_timestamps(struct FAT *entry, int flags);
  */
 int FAT_update_statistics(struct FATVolume *vol, struct FAT *buffer, struct FAT_statistics *stats);
 
-#endif // FAT_INTERNALS_H
+#endif				// FAT_INTERNALS_H

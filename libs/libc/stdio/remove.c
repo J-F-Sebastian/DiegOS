@@ -20,13 +20,13 @@
 #include <stdio.h>
 #include <errno.h>
 
-int remove (const char *filename)
+int remove(const char *filename)
 {
-    if (!filename) {
-        errno = EINVAL;
-        return (EINVAL);
-    }
+	if (!filename) {
+		errno = EINVAL;
+		return (EINVAL);
+	}
 
-    errno = ENOTSUP;
-    return (ENOTSUP);
+	errno = ENOTSUP;
+	return (ENOTSUP);
 }

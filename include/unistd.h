@@ -92,11 +92,11 @@
 #define _POSIX_CHOWN_RESTRICTED  1
 
 /* Function Prototypes. */
-int close (int fd);
-off_t lseek (int fd, off_t offset, int _whence);
-ssize_t read (int fd, void *buf, size_t n);
-unsigned int sleep (unsigned int seconds);
-unsigned int msleep (unsigned int mseconds);
-ssize_t write (int fd, const void *buf, size_t n);
+int close(int fd);
+off_t lseek(int fd, off_t offset, int _whence);
+ssize_t read(int fd, void *buf, size_t n);
+unsigned int sleep(unsigned int seconds);
+unsigned int msleep(unsigned int mseconds);
+ssize_t write(int fd, const void *buf, size_t n);
 
-#endif /* _UNISTD_H */
+#endif				/* _UNISTD_H */

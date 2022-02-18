@@ -22,24 +22,21 @@
 
 #include "loc_incl.h"
 
-long ftell(FILE *stream)
+long ftell(FILE * stream)
 {
-    long result, adjust = 0;
+	long result, adjust = 0;
 
-    if (stream_rding(stream)) {
-        adjust = stream->count;
-    }
-    else if (stream_wrting(stream) &&
-            (stream->buffer) &&
-             !stream_nbuf(stream)) {
-        adjust = (stream->bufptr - stream->buffer);
-    }
+	if (stream_rding(stream)) {
+		adjust = stream->count;
+	} else if (stream_wrting(stream) && (stream->buffer) && !stream_nbuf(stream)) {
+		adjust = (stream->bufptr - stream->buffer);
+	}
 
-    result = lseek(fileno(stream), (off_t) 0, SEEK_CUR);
+	result = lseek(fileno(stream), (off_t) 0, SEEK_CUR);
 
-    if (result != -1) {
-        result += adjust;
-    }
+	if (result != -1) {
+		result += adjust;
+	}
 
-    return (result);
+	return (result);
 }

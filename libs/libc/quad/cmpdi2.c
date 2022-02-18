@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)cmpdi2.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: cmpdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -49,13 +49,12 @@ __RCSID("$NetBSD: cmpdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * Both a and b are considered signed---which means only the high word is
  * signed.
  */
-int
-__cmpdi2(quad_t a, quad_t b)
+int __cmpdi2(quad_t a, quad_t b)
 {
-    union uu aa, bb;
+	union uu aa, bb;
 
-    aa.q = a;
-    bb.q = b;
-    return (aa.sl[H] < bb.sl[H] ? 0 : aa.sl[H] > bb.sl[H] ? 2 :
-            aa.ul[L] < bb.ul[L] ? 0 : aa.ul[L] > bb.ul[L] ? 2 : 1);
+	aa.q = a;
+	bb.q = b;
+	return (aa.sl[H] < bb.sl[H] ? 0 : aa.sl[H] > bb.sl[H] ? 2 :
+		aa.ul[L] < bb.ul[L] ? 0 : aa.ul[L] > bb.ul[L] ? 2 : 1);
 }

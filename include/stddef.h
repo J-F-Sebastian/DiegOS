@@ -30,6 +30,6 @@ typedef char wchar_t;		/* type expanded character set */
 
 #ifndef NULL
 #define NULL (void *)0
-#endif // NULL
+#endif				// NULL
 
-#endif /* _STDDEF_H */
+#endif				/* _STDDEF_H */

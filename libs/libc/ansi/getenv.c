@@ -20,9 +20,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-char *getenv (const char *name)
+char *getenv(const char *name)
 {
-    return (NULL);
+	return (NULL);
 }
-
-

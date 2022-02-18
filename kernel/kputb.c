@@ -28,13 +28,12 @@ static device_t *outdev = NULL;
  */
 void kputb(char *buffer, unsigned bytes)
 {
-    if (!outdev) {
-        outdev = device_lookup_name(DEFAULT_DBG_TTY);
-        if (!outdev) {
-            return;
-        }
-    }
+	if (!outdev) {
+		outdev = device_lookup_name(DEFAULT_DBG_TTY);
+		if (!outdev) {
+			return;
+		}
+	}
 
-    outdev->cdrv->write_fn(buffer, bytes, 0);
+	outdev->cdrv->write_fn(buffer, bytes, 0);
 }
-

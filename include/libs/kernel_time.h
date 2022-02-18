@@ -67,10 +67,7 @@ struct time_util {
  * EOK in success
  * EINVAL if base_ticks is 0 or tu is 0
  */
-int kernel_time_init (uint32_t base_val,
-		      uint32_t min_val,
-		      uint32_t max_val,
-		      struct time_util *tu);
+int kernel_time_init(uint32_t base_val, uint32_t min_val, uint32_t max_val, struct time_util *tu);
 
 /*
  * Converts the counter value to milliseconds.
@@ -83,7 +80,7 @@ int kernel_time_init (uint32_t base_val,
  * RETURNS
  * The convertion in milliseconds
  */
-uint32_t kernel_time_get_msecs (uint32_t cntrticks, const struct time_util *tu);
+uint32_t kernel_time_get_msecs(uint32_t cntrticks, const struct time_util *tu);
 
 /*
  * Convert the elapsed counter value to milliseconds.
@@ -96,7 +93,7 @@ uint32_t kernel_time_get_msecs (uint32_t cntrticks, const struct time_util *tu);
  * RETURNS
  * The value of elapsed_counter in milliseconds
  */
-uint64_t kernel_time_get_elapsed_msecs (const struct time_util *tu);
+uint64_t kernel_time_get_elapsed_msecs(const struct time_util *tu);
 
 /*
  * Converts milliseconds to counter value.
@@ -109,7 +106,7 @@ uint64_t kernel_time_get_elapsed_msecs (const struct time_util *tu);
  * RETURNS
  * The converted counter value, adjusted to range
  */
-uint32_t kernel_time_get_value (uint32_t msecs, const struct time_util *tu);
+uint32_t kernel_time_get_value(uint32_t msecs, const struct time_util *tu);
 
 /*
  * Converts the minimum and the maximum counter values to milliseconds and store
@@ -136,24 +133,26 @@ inline int kernel_time_validate_range(uint32_t value, const struct time_util *tu
 	return EINVAL;
 }
 
-inline uint32_t kernel_time_adjust_range(uint32_t value, const struct time_util *tu)
+inline uint32_t kernel_time_adjust_range(uint32_t value, const struct time_util * tu)
 {
 	if (tu) {
-		if (value < tu->min_counter) return tu->min_counter;
-		if (value > tu->max_counter) return tu->max_counter;
+		if (value < tu->min_counter)
+			return tu->min_counter;
+		if (value > tu->max_counter)
+			return tu->max_counter;
 	}
 
 	return value;
 }
 
-inline void kernel_time_update_elapsed_counter (uint32_t value, struct time_util *tu)
+inline void kernel_time_update_elapsed_counter(uint32_t value, struct time_util *tu)
 {
-	if (tu)	{
+	if (tu) {
 		tu->elapsed_counter += value;
 	}
 }
 
-inline uint64_t kernel_time_get_elapsed_counter (const struct time_util *tu)
+inline uint64_t kernel_time_get_elapsed_counter(const struct time_util *tu)
 {
 	return (tu) ? (tu->elapsed_counter) : (0ULL);
 }

@@ -65,10 +65,10 @@ typedef uint32_t u_int;
  * one or more of the following formats.
  */
 union uu {
-    quad_t	q;		/* as a (signed) quad */
-    u_quad_t uq;		/* as an unsigned quad */
-    int32_t sl[2];		/* as two signed ints */
-    u_int ul[2];		/* as two unsigned ints */
+	quad_t q;		/* as a (signed) quad */
+	u_quad_t uq;		/* as an unsigned quad */
+	int32_t sl[2];		/* as two signed ints */
+	u_int ul[2];		/* as two unsigned ints */
 };
 
 /*
@@ -106,13 +106,12 @@ union uu {
  * both compilers.
  */
 #if __GNUC_PREREQ__(2, 0) || defined(lint)
-typedef unsigned int	qshift_t;
+typedef unsigned int qshift_t;
 #else
-typedef u_quad_t	qshift_t;
+typedef u_quad_t qshift_t;
 #endif
 
-__BEGIN_DECLS
-quad_t __adddi3 __P((quad_t, quad_t));
+__BEGIN_DECLS quad_t __adddi3 __P((quad_t, quad_t));
 quad_t __anddi3 __P((quad_t, quad_t));
 quad_t __ashldi3 __P((quad_t, qshift_t));
 quad_t __ashrdi3 __P((quad_t, qshift_t));
@@ -135,7 +134,7 @@ quad_t __one_cmpldi2 __P((quad_t));
 u_quad_t __qdivrem __P((u_quad_t, u_quad_t, u_quad_t *));
 quad_t __subdi3 __P((quad_t, quad_t));
 int __ucmpdi2 __P((u_quad_t, u_quad_t));
-u_quad_t __udivdi3 __P((u_quad_t, u_quad_t ));
-u_quad_t __umoddi3 __P((u_quad_t, u_quad_t ));
+u_quad_t __udivdi3 __P((u_quad_t, u_quad_t));
+u_quad_t __umoddi3 __P((u_quad_t, u_quad_t));
 quad_t __xordi3 __P((quad_t, quad_t));
 __END_DECLS

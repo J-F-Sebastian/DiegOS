@@ -19,12 +19,12 @@
 
 #include <ctype.h>
 
-int iscntrl (int c)
+int iscntrl(int c)
 {
-    if ((c >= 0) && (c <= 31)) {
-        return (1);
-    } else if (c == 127) {
-        return (1);
-    }
-    return (0);
+	if ((c >= 0) && (c <= 31)) {
+		return (1);
+	} else if (c == 127) {
+		return (1);
+	}
+	return (0);
 }

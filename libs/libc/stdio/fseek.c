@@ -22,7 +22,7 @@
 
 #include "loc_incl.h"
 
-int fseek(FILE *stream, long offset, int origin)
+int fseek(FILE * stream, long offset, int origin)
 {
 	int adjust = 0;
 	long pos;
@@ -31,9 +31,7 @@ int fseek(FILE *stream, long offset, int origin)
 	clearerr(stream);
 
 	if (stream_rding(stream)) {
-		if ((origin == SEEK_CUR) &&
-		    (stream->buffer) &&
-		    !stream_nbuf(stream)) {
+		if ((origin == SEEK_CUR) && (stream->buffer) && !stream_nbuf(stream)) {
 			adjust = stream->count;
 		}
 		stream->count = 0;
@@ -41,10 +39,10 @@ int fseek(FILE *stream, long offset, int origin)
 		fflush(stream);
 	}
 
-	pos = lseek(fileno(stream), (off_t)(offset - adjust), origin);
+	pos = lseek(fileno(stream), (off_t) (offset - adjust), origin);
 
 	if (stream_rw(stream)) {
-	    stream_clearflags(stream, IOBUF_READING | IOBUF_WRITING);
+		stream_clearflags(stream, IOBUF_READING | IOBUF_WRITING);
 	}
 
 	stream->bufptr = stream->buffer;

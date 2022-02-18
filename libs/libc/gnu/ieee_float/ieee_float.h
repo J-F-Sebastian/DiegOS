@@ -14,8 +14,8 @@ Define structures and macros for manipulating IEEE floats
 #define isnan __IsNan
 
 struct f64 {
-    uint32_t low_word;
-    uint32_t high_word;
+	uint32_t low_word;
+	uint32_t high_word;
 };
 
 #define F64_SIGN_SHIFT	31
@@ -45,7 +45,7 @@ struct f64 {
 				~(F64_MANT_MASK << F64_MANT_SHIFT)) |	\
 				(((val) & F64_MANT_MASK) << F64_MANT_SHIFT))
 
-#endif /* IEEE_FLOAT_H */
+#endif				/* IEEE_FLOAT_H */
 
 /*
  * $PchId: ieee_float.h,v 1.3 1996/02/22 21:01:39 philip Exp $

@@ -30,8 +30,8 @@
 #define	NUMLEN	    128
 #define	NR_CHARS	256
 
-static char	Xtable[NR_CHARS];
-static char	inp_buf[NUMLEN];
+static char Xtable[NR_CHARS];
+static char inp_buf[NUMLEN];
 
 /* Collect a number of characters which constitute an ordinal number.
  * When the type is 'i', the base can be 8, 10, or 16, depending on the
@@ -39,41 +39,37 @@ static char	inp_buf[NUMLEN];
  * according to the format of the number. At the end of the function, base
  * is then set to 0, so strtol() will get the right argument.
  */
-static char *o_collect(int c,
-                       FILE *stream,
-                       char type,
-                       unsigned int width,
-                       int *basep)
+static char *o_collect(int c, FILE * stream, char type, unsigned int width, int *basep)
 {
 	char *bufp = inp_buf;
 	int base = 10;
 
 	switch (type) {
-	case 'i':	/* i means octal, decimal or hexadecimal */
+	case 'i':		/* i means octal, decimal or hexadecimal */
 	case 'p':
 	case 'x':
 	case 'X':
-        base = 16;
-        break;
+		base = 16;
+		break;
 
 	case 'd':
 	case 'u':
-        base = 10;
-        break;
+		base = 10;
+		break;
 
 	case 'o':
-        base = 8;
-        break;
+		base = 8;
+		break;
 
 	case 'b':
-        base = 2;
-        break;
+		base = 2;
+		break;
 	}
 
 	if (c == '-' || c == '+') {
 		*bufp++ = c;
 		if (--width)
-		    c = getc(stream);
+			c = getc(stream);
 	}
 
 	if (width && c == '0' && base == 16) {
@@ -81,15 +77,15 @@ static char *o_collect(int c,
 		if (--width)
 			c = getc(stream);
 		if (c != 'x' && c != 'X') {
-			if (type == 'i') base = 8;
-		}
-		else if (width) {
+			if (type == 'i')
+				base = 8;
+		} else if (width) {
 			*bufp++ = c;
 			if (--width)
 				c = getc(stream);
 		}
-	}
-	else if (type == 'i') base = 10;
+	} else if (type == 'i')
+		base = 10;
 
 	while (width) {
 		if (((base == 10) && isdigit(c))
@@ -99,12 +95,14 @@ static char *o_collect(int c,
 			*bufp++ = c;
 			if (--width)
 				c = getc(stream);
-		}
-		else break;
+		} else
+			break;
 	}
 
-	if (width && c != EOF) ungetc(c, stream);
-	if (type == 'i') base = 0;
+	if (width && c != EOF)
+		ungetc(c, stream);
+	if (type == 'i')
+		base = 0;
 	*basep = base;
 	*bufp = '\0';
 	return (bufp - 1);
@@ -118,7 +116,7 @@ static char *o_collect(int c,
  * not necessary, although the use of the width field can cause incomplete
  * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
-static char *f_collect(int c, FILE *stream, unsigned int width)
+static char *f_collect(int c, FILE * stream, unsigned int width)
 {
 	char *bufp = inp_buf;
 	int digit_seen = 0;
@@ -137,7 +135,7 @@ static char *f_collect(int c, FILE *stream, unsigned int width)
 	}
 	if (width && c == '.') {
 		*bufp++ = c;
-		if(--width)
+		if (--width)
 			c = getc(stream);
 		while (width && isdigit(c)) {
 			digit_seen++;
@@ -148,10 +146,11 @@ static char *f_collect(int c, FILE *stream, unsigned int width)
 	}
 
 	if (!digit_seen) {
-		if (width && c != EOF) ungetc(c, stream);
+		if (width && c != EOF)
+			ungetc(c, stream);
 		return inp_buf - 1;
-	}
-	else digit_seen = 0;
+	} else
+		digit_seen = 0;
 
 	if (width && (c == 'e' || c == 'E')) {
 		*bufp++ = c;
@@ -169,12 +168,14 @@ static char *f_collect(int c, FILE *stream, unsigned int width)
 				c = getc(stream);
 		}
 		if (!digit_seen) {
-			if (width && c != EOF) ungetc(c,stream);
+			if (width && c != EOF)
+				ungetc(c, stream);
 			return inp_buf - 1;
 		}
 	}
 
-	if (width && c != EOF) ungetc(c, stream);
+	if (width && c != EOF)
+		ungetc(c, stream);
 	*bufp = '\0';
 	return bufp - 1;
 }
@@ -183,23 +184,24 @@ static char *f_collect(int c, FILE *stream, unsigned int width)
  * the routine that does the scanning
  */
 
-int formatted_scan (FILE *stream, const char *format, va_list ap)
+int formatted_scan(FILE * stream, const char *format, va_list ap)
 {
-	int		        done = 0;	/* number of items done */
-	int		        nrchars = 0;	/* number of characters read */
-	int		        conv = 0;	/* # of conversions */
-	int		        base;		/* conversion base */
-	unsigned long	val;		/* an integer value */
-	char	        *str = NULL;/* temporary pointer */
-	char		    *tmp_string;/* ditto */
-	unsigned	    width = 0;	/* width of field */
-	int		        flags;		/* some flags */
-	int	        	reverse;	/* reverse the checking in [...] */
-	int		        kind;
-	int	            ic = EOF;	/* the input character */
-	long double	    ld_val;
+	int done = 0;		/* number of items done */
+	int nrchars = 0;	/* number of characters read */
+	int conv = 0;		/* # of conversions */
+	int base;		/* conversion base */
+	unsigned long val;	/* an integer value */
+	char *str = NULL;	/* temporary pointer */
+	char *tmp_string;	/* ditto */
+	unsigned width = 0;	/* width of field */
+	int flags;		/* some flags */
+	int reverse;		/* reverse the checking in [...] */
+	int kind;
+	int ic = EOF;		/* the input character */
+	long double ld_val;
 
-	if (!*format) return (0);
+	if (!*format)
+		return (0);
 
 	while (1) {
 		if (isspace(*format)) {
@@ -211,15 +213,18 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				ic = getc(stream);
 				nrchars++;
 			}
-			if (ic != EOF) ungetc(ic,stream);
+			if (ic != EOF)
+				ungetc(ic, stream);
 			nrchars--;
 		}
-		if (!*format) break;	/* end of format */
+		if (!*format)
+			break;	/* end of format */
 
 		if (*format != '%') {
 			ic = getc(stream);
 			nrchars++;
-			if (ic != *format++) break;	/* error */
+			if (ic != *format++)
+				break;	/* error */
 			continue;
 		}
 		format++;
@@ -229,24 +234,33 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			if (ic == '%') {
 				format++;
 				continue;
-			}
-			else break;
+			} else
+				break;
 		}
 		flags = 0;
 		if (*format == '*') {
 			format++;
 			flags |= NO_ASSIGN;
 		}
-		if (isdigit (*format)) {
+		if (isdigit(*format)) {
 			flags |= WIDTHSPEC;
-			for (width = 0; isdigit (*format);)
+			for (width = 0; isdigit(*format);)
 				width = width * 10 + *format++ - '0';
 		}
 
 		switch (*format) {
-		case 'h': flags |= SHORT; format++; break;
-		case 'l': flags |= LONG; format++; break;
-		case 'L': flags |= LONGDOUBLE; format++; break;
+		case 'h':
+			flags |= SHORT;
+			format++;
+			break;
+		case 'l':
+			flags |= LONG;
+			format++;
+			break;
+		case 'L':
+			flags |= LONGDOUBLE;
+			format++;
+			break;
 		}
 		kind = *format;
 		if ((kind != 'c') && (kind != '[') && (kind != 'n')) {
@@ -254,10 +268,12 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				ic = getc(stream);
 				nrchars++;
 			} while (isspace(ic));
-			if (ic == EOF) break;		/* outer while */
-		} else if (kind != 'n') {		/* %c or %[ */
+			if (ic == EOF)
+				break;	/* outer while */
+		} else if (kind != 'n') {	/* %c or %[ */
 			ic = getc(stream);
-			if (ic == EOF) break;		/* outer while */
+			if (ic == EOF)
+				break;	/* outer while */
 			nrchars++;
 		}
 		switch (kind) {
@@ -268,33 +284,32 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 		case 'n':
 			if (!(flags & NO_ASSIGN)) {	/* silly, though */
 				if (flags & SHORT)
-					*va_arg(ap, short *) = (short) nrchars;
+					*va_arg(ap, short *) = (short)nrchars;
 				else if (flags & LONG)
-					*va_arg(ap, long *) = (long) nrchars;
+					*va_arg(ap, long *) = (long)nrchars;
 				else
-					*va_arg(ap, int *) = (int) nrchars;
+					*va_arg(ap, int *) = (int)nrchars;
 			}
 			break;
-		case 'p':		/* pointer */
+		case 'p':	/* pointer */
 			flags |= LONG;
 			/* FALLTHRU */
 			/* no break */
-		case 'b':		/* binary */
-		case 'd':		/* decimal */
-		case 'i':		/* general integer */
-		case 'o':		/* octal */
-		case 'u':		/* unsigned */
-		case 'x':		/* hexadecimal */
-		case 'X':		/* ditto */
+		case 'b':	/* binary */
+		case 'd':	/* decimal */
+		case 'i':	/* general integer */
+		case 'o':	/* octal */
+		case 'u':	/* unsigned */
+		case 'x':	/* hexadecimal */
+		case 'X':	/* ditto */
 			if (!(flags & WIDTHSPEC) || width > NUMLEN)
 				width = NUMLEN;
-			if (!width) return (done);
+			if (!width)
+				return (done);
 
 			str = o_collect(ic, stream, kind, width, &base);
-			if (str < inp_buf
-			    || (str == inp_buf
-				    && (*str == '-'
-					|| *str == '+'))) return (done);
+			if (str < inp_buf || (str == inp_buf && (*str == '-' || *str == '+')))
+				return (done);
 
 			/*
 			 * Although the length of the number is str-inp_buf+1
@@ -304,15 +319,15 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 
 			if (!(flags & NO_ASSIGN)) {
 				if (kind == 'd' || kind == 'i')
-				    val = strtol(inp_buf, &tmp_string, base);
+					val = strtol(inp_buf, &tmp_string, base);
 				else
-				    val = strtoul(inp_buf, &tmp_string, base);
+					val = strtoul(inp_buf, &tmp_string, base);
 				if (flags & LONG)
-					*va_arg(ap, unsigned long *) = (unsigned long) val;
+					*va_arg(ap, unsigned long *) = (unsigned long)val;
 				else if (flags & SHORT)
-					*va_arg(ap, unsigned short *) = (unsigned short) val;
+					*va_arg(ap, unsigned short *) = (unsigned short)val;
 				else
-					*va_arg(ap, unsigned *) = (unsigned) val;
+					*va_arg(ap, unsigned *) = (unsigned)val;
 			}
 			break;
 		case 'c':
@@ -320,11 +335,12 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				width = 1;
 			if (!(flags & NO_ASSIGN))
 				str = va_arg(ap, char *);
-			if (!width) return (done);
+			if (!width)
+				return (done);
 
 			while (width && ic != EOF) {
 				if (!(flags & NO_ASSIGN))
-					*str++ = (char) ic;
+					*str++ = (char)ic;
 				if (--width) {
 					ic = getc(stream);
 					nrchars++;
@@ -332,7 +348,8 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			}
 
 			if (width) {
-				if (ic != EOF) ungetc(ic,stream);
+				if (ic != EOF)
+					ungetc(ic, stream);
 				nrchars--;
 			}
 			break;
@@ -341,11 +358,12 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 				width = 0xffff;
 			if (!(flags & NO_ASSIGN))
 				str = va_arg(ap, char *);
-			if (!width) return (done);
+			if (!width)
+				return (done);
 
 			while (width && ic != EOF && !isspace(ic)) {
 				if (!(flags & NO_ASSIGN))
-					*str++ = (char) ic;
+					*str++ = (char)ic;
 				if (--width) {
 					ic = getc(stream);
 					nrchars++;
@@ -355,16 +373,18 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			if (!(flags & NO_ASSIGN))
 				*str = '\0';
 			if (width) {
-				if (ic != EOF) ungetc(ic,stream);
+				if (ic != EOF)
+					ungetc(ic, stream);
 				nrchars--;
 			}
 			break;
 		case '[':
 			if (!(flags & WIDTHSPEC))
 				width = USHRT_MAX;
-			if (!width) return (done);
+			if (!width)
+				return (done);
 
-			if ( *++format == '^' ) {
+			if (*++format == '^') {
 				reverse = 1;
 				format++;
 			} else
@@ -372,29 +392,28 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 
 			memset(Xtable, 0, sizeof(Xtable));
 
-			if (*format == ']') Xtable[(unsigned char)*format++] = 1;
+			if (*format == ']')
+				Xtable[(unsigned char)*format++] = 1;
 
 			while (*format && *format != ']') {
 				Xtable[(unsigned char)*format++] = 1;
 				if (*format == '-') {
 					format++;
-					if (*format
-					    && *format != ']'
-					    && *(format) >= *(format -2)) {
+					if (*format && *format != ']' && *(format) >= *(format - 2)) {
 						int c;
 
-						for( c = *(format -2) + 1
-						    ; c <= *format ; c++)
+						for (c = *(format - 2) + 1; c <= *format; c++)
 							Xtable[c] = 1;
 						format++;
-					}
-					else Xtable['-'] = 1;
+					} else
+						Xtable['-'] = 1;
 				}
 			}
-			if (!*format) return (done);
+			if (!*format)
+				return (done);
 
 			if (!(Xtable[ic] ^ reverse)) {
-			/* MAT 8/9/96 no match must return character */
+				/* MAT 8/9/96 no match must return character */
 				ungetc(ic, stream);
 				return (done);
 			}
@@ -404,7 +423,7 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 
 			do {
 				if (!(flags & NO_ASSIGN))
-					*str++ = (char) ic;
+					*str++ = (char)ic;
 				if (--width) {
 					ic = getc(stream);
 					nrchars++;
@@ -412,7 +431,8 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			} while (width && ic != EOF && (Xtable[ic] ^ reverse));
 
 			if (width) {
-				if (ic != EOF) ungetc(ic, stream);
+				if (ic != EOF)
+					ungetc(ic, stream);
 				nrchars--;
 			}
 			if (!(flags & NO_ASSIGN)) {	/* terminate string */
@@ -428,13 +448,12 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			if (!(flags & WIDTHSPEC) || width > NUMLEN)
 				width = NUMLEN;
 
-			if (!width) return done;
+			if (!width)
+				return done;
 			str = f_collect(ic, stream, width);
 
-			if (str < inp_buf
-			    || (str == inp_buf
-				&& (*str == '-'
-				    || *str == '+'))) return done;
+			if (str < inp_buf || (str == inp_buf && (*str == '-' || *str == '+')))
+				return done;
 
 			/*
 			 * Although the length of the number is str-inp_buf+1
@@ -445,18 +464,18 @@ int formatted_scan (FILE *stream, const char *format, va_list ap)
 			if (!(flags & NO_ASSIGN)) {
 				ld_val = strtod(inp_buf, &tmp_string);
 				if (flags & LONGDOUBLE)
-					*va_arg(ap, long double *) = (long double) ld_val;
+					*va_arg(ap, long double *) = (long double)ld_val;
+				else if (flags & LONG)
+					*va_arg(ap, double *) = (double)ld_val;
 				else
-				    if (flags & LONG)
-					*va_arg(ap, double *) = (double) ld_val;
-				else
-					*va_arg(ap, float *) = (float) ld_val;
+					*va_arg(ap, float *) = (float)ld_val;
 			}
 			break;
 
 		}		/* end switch */
 		conv++;
-		if (!(flags & NO_ASSIGN) && kind != 'n') done++;
+		if (!(flags & NO_ASSIGN) && kind != 'n')
+			done++;
 		format++;
 	}
 	return ((conv || (ic != EOF)) ? (done) : (EOF));

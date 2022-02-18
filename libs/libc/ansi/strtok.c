@@ -22,27 +22,27 @@
 
 char *strtok(char *s, const char *ct)
 {
-    const char *s1;
-    char *s2;
-    static char *savestring = NULL;
+	const char *s1;
+	char *s2;
+	static char *savestring = NULL;
 
-    if (s == NULL) {
-        s = savestring;
-        if (s == NULL) {
-            return ((char *)NULL);
-        }
-    }
+	if (s == NULL) {
+		s = savestring;
+		if (s == NULL) {
+			return ((char *)NULL);
+		}
+	}
 
-    s1 = s + strspn(s, ct);
-    if (*s1 == '\0') {
-        savestring = NULL;
-        return ((char *)NULL);
-    }
+	s1 = s + strspn(s, ct);
+	if (*s1 == '\0') {
+		savestring = NULL;
+		return ((char *)NULL);
+	}
 
-    s2 = strpbrk(s1, ct);
-    if (s2) {
-        *s2++ = '\0';
-    }
-    savestring = s2;
-    return ((char *)s1);
+	s2 = strpbrk(s1, ct);
+	if (s2) {
+		*s2++ = '\0';
+	}
+	savestring = s2;
+	return ((char *)s1);
 }

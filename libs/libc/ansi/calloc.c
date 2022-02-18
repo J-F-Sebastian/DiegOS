@@ -23,11 +23,11 @@
 
 void *calloc(size_t nelem, size_t elsize)
 {
-    char *p;
-    size_t size = ALN(nelem * elsize, sizeof(void *));
+	char *p;
+	size_t size = ALN(nelem * elsize, sizeof(void *));
 
-    p = malloc(size);
-    if (p) memset(p, 0, size);
-    return (p);
+	p = malloc(size);
+	if (p)
+		memset(p, 0, size);
+	return (p);
 }
-

@@ -27,255 +27,251 @@
 #include "bitmaps.h"
 
 typedef struct chunks_pool {
-    unsigned aln;
-    unsigned size;
-    unsigned delta;
-    list_inst pools;
-    char name[16];
+	unsigned aln;
+	unsigned size;
+	unsigned delta;
+	list_inst pools;
+	char name[16];
 } chunks_pool_t;
 
 typedef struct pool_array {
-    list_node header;
-    void *buffer;
-    void *bufstart;
-    unsigned numitems;
-    unsigned free;
-    long *bitmap;
+	list_node header;
+	void *buffer;
+	void *bufstart;
+	unsigned numitems;
+	unsigned free;
+	long *bitmap;
 } pool_array_t;
 
-
-static STATUS create_pool(chunks_pool_t *ptr, unsigned numitems)
+static STATUS create_pool(chunks_pool_t * ptr, unsigned numitems)
 {
-    unsigned total;
-    pool_array_t *tmp;
+	unsigned total;
+	pool_array_t *tmp;
 
-    total = ptr->size*numitems+ptr->aln;
+	total = ptr->size * numitems + ptr->aln;
 
-    tmp = malloc(sizeof(pool_array_t));
+	tmp = malloc(sizeof(pool_array_t));
 
-    if (!tmp) {
-        return (ENOMEM);
-    }
+	if (!tmp) {
+		return (ENOMEM);
+	}
 
-    tmp->buffer = malloc(total);
+	tmp->buffer = malloc(total);
 
-    if (!tmp->buffer) {
-        free(tmp);
-        return (ENOMEM);
-    }
+	if (!tmp->buffer) {
+		free(tmp);
+		return (ENOMEM);
+	}
 
-    tmp->bufstart = (void *)MULT((uintptr_t)tmp->buffer, ptr->aln);
+	tmp->bufstart = (void *)MULT((uintptr_t) tmp->buffer, ptr->aln);
 
-    tmp->numitems = numitems;
-    tmp->free = numitems;
+	tmp->numitems = numitems;
+	tmp->free = numitems;
 
-    tmp->bitmap = malloc(BITMAPBYTES(numitems));
+	tmp->bitmap = malloc(BITMAPBYTES(numitems));
 
-    if (!tmp->bitmap) {
-        free(tmp->buffer);
-        free(tmp);
-        return (ENOMEM);
-    }
+	if (!tmp->bitmap) {
+		free(tmp->buffer);
+		free(tmp);
+		return (ENOMEM);
+	}
 
-    memset(tmp->bitmap,0,BITMAPBYTES(numitems));
+	memset(tmp->bitmap, 0, BITMAPBYTES(numitems));
 
-    if (EOK != list_add(&ptr->pools, NULL, &tmp->header)) {
-        free(tmp->bitmap);
-        free(tmp->buffer);
-        free(tmp);
-        return (EGENERIC);
-    }
+	if (EOK != list_add(&ptr->pools, NULL, &tmp->header)) {
+		free(tmp->bitmap);
+		free(tmp->buffer);
+		free(tmp);
+		return (EGENERIC);
+	}
 
-    return (EOK);
+	return (EOK);
 }
 
-static void delete_pool(chunks_pool_t *ptr, pool_array_t *dlt)
+static void delete_pool(chunks_pool_t * ptr, pool_array_t * dlt)
 {
-    /*
-     * Never remove the main pool!
-     */
-    if (list_tail(&ptr->pools) == dlt) {
-        return;
-    }
+	/*
+	 * Never remove the main pool!
+	 */
+	if (list_tail(&ptr->pools) == dlt) {
+		return;
+	}
 
-    if (EOK != list_remove(&ptr->pools, &dlt->header)) {
-        return;
-    }
+	if (EOK != list_remove(&ptr->pools, &dlt->header)) {
+		return;
+	}
 
-    free(dlt->bitmap);
-    free(dlt->buffer);
-    free(dlt);
+	free(dlt->bitmap);
+	free(dlt->buffer);
+	free(dlt);
 }
 
 chunks_pool_t *chunks_pool_create(const char *name,
-                                  unsigned aln,
-                                  unsigned size,
-                                  unsigned numitems,
-                                  unsigned delta)
+				  unsigned aln, unsigned size, unsigned numitems, unsigned delta)
 {
-    chunks_pool_t *ptr;
+	chunks_pool_t *ptr;
 
-    if (!size || !numitems) {
-        return (NULL);
-    }
+	if (!size || !numitems) {
+		return (NULL);
+	}
 
-    if (!aln) {
-        aln = sizeof(long);
-    }
+	if (!aln) {
+		aln = sizeof(long);
+	}
 
-    ptr = malloc(sizeof(chunks_pool_t));
+	ptr = malloc(sizeof(chunks_pool_t));
 
-    if (!ptr) {
-        return (NULL);
-    }
+	if (!ptr) {
+		return (NULL);
+	}
 
-    if (name) {
-        snprintf(ptr->name, sizeof(ptr->name), "%s", name);
-    } else {
-        snprintf(ptr->name, sizeof(ptr->name), "Chunk_%p",ptr);
-    }
+	if (name) {
+		snprintf(ptr->name, sizeof(ptr->name), "%s", name);
+	} else {
+		snprintf(ptr->name, sizeof(ptr->name), "Chunk_%p", ptr);
+	}
 
-    ptr->aln = aln;
-    ptr->size = MULT(size, aln);
-    ptr->delta = delta;
+	ptr->aln = aln;
+	ptr->size = MULT(size, aln);
+	ptr->delta = delta;
 
-    if (EOK != list_init(&ptr->pools)) {
-        free(ptr);
-        return (NULL);
-    }
+	if (EOK != list_init(&ptr->pools)) {
+		free(ptr);
+		return (NULL);
+	}
 
-    if (EOK != create_pool(ptr, numitems)) {
-        free(ptr);
-        return (NULL);
-    }
+	if (EOK != create_pool(ptr, numitems)) {
+		free(ptr);
+		return (NULL);
+	}
 
-    return (ptr);
+	return (ptr);
 }
 
-void *chunks_pool_malloc(chunks_pool_t *pool)
+void *chunks_pool_malloc(chunks_pool_t * pool)
 {
-    pool_array_t *ptr;
-    unsigned pos;
-    STATUS retcode;
+	pool_array_t *ptr;
+	unsigned pos;
+	STATUS retcode;
 
-    if (!pool) {
-        return (NULL);
-    }
+	if (!pool) {
+		return (NULL);
+	}
 
-    ptr = list_head(&pool->pools);
+	ptr = list_head(&pool->pools);
 
-    while (ptr) {
-        if (ptr->free) {
-            pos = bitmap_first_is_clear(ptr->bitmap, BITMAPLEN(ptr->numitems));
-            if (pos < ptr->numitems) {
-                --ptr->free;
-                bitmap_set(ptr->bitmap, pos);
-                return (ptr->bufstart + (pos*pool->size));
-            }
-        }
-        ptr = (pool_array_t *)ptr->header.next;
-    }
+	while (ptr) {
+		if (ptr->free) {
+			pos = bitmap_first_is_clear(ptr->bitmap, BITMAPLEN(ptr->numitems));
+			if (pos < ptr->numitems) {
+				--ptr->free;
+				bitmap_set(ptr->bitmap, pos);
+				return (ptr->bufstart + (pos * pool->size));
+			}
+		}
+		ptr = (pool_array_t *) ptr->header.next;
+	}
 
-    /*
-     * add another pool to the list, if delta is not 0
-     */
-    if (pool->delta) {
-        retcode = create_pool(pool, pool->delta);
-    } else {
-        retcode = ENOMEM;
-    }
-    if (EOK != retcode) {
-        return (NULL);
-    }
+	/*
+	 * add another pool to the list, if delta is not 0
+	 */
+	if (pool->delta) {
+		retcode = create_pool(pool, pool->delta);
+	} else {
+		retcode = ENOMEM;
+	}
+	if (EOK != retcode) {
+		return (NULL);
+	}
 
-    ptr = list_head(&pool->pools);
-    --ptr->free;
-    bitmap_set(ptr->bitmap, 0);
+	ptr = list_head(&pool->pools);
+	--ptr->free;
+	bitmap_set(ptr->bitmap, 0);
 
-    return (ptr->bufstart);
+	return (ptr->bufstart);
 }
 
-void chunks_pool_free(chunks_pool_t *pool, void *ptr)
+void chunks_pool_free(chunks_pool_t * pool, void *ptr)
 {
-    pool_array_t *cur;
-    uintptr_t val;
+	pool_array_t *cur;
+	uintptr_t val;
 
-    if (!pool || !ptr) {
-        return;
-    }
+	if (!pool || !ptr) {
+		return;
+	}
 
-    cur = list_head(&pool->pools);
+	cur = list_head(&pool->pools);
 
-    while (cur) {
-        if ((ptr >= cur->bufstart) &&
-                (ptr <= cur->bufstart + (pool->size*(cur->numitems - 1)))) {
-            val = (uintptr_t)ptr;
-            val -= (uintptr_t)cur->bufstart;
-            val /= (uintptr_t)pool->size;
-            if (!bitmap_is_set(cur->bitmap, val)) {
-                return;
-            }
-            bitmap_clear(cur->bitmap, val);
-            ++cur->free;
-            if (cur->free == cur->numitems) {
-                delete_pool(pool, cur);
-            }
-            return;
-        }
+	while (cur) {
+		if ((ptr >= cur->bufstart) &&
+		    (ptr <= cur->bufstart + (pool->size * (cur->numitems - 1)))) {
+			val = (uintptr_t) ptr;
+			val -= (uintptr_t) cur->bufstart;
+			val /= (uintptr_t) pool->size;
+			if (!bitmap_is_set(cur->bitmap, val)) {
+				return;
+			}
+			bitmap_clear(cur->bitmap, val);
+			++cur->free;
+			if (cur->free == cur->numitems) {
+				delete_pool(pool, cur);
+			}
+			return;
+		}
 
-        cur = (pool_array_t *)cur->header.next;
-    }
+		cur = (pool_array_t *) cur->header.next;
+	}
 }
 
-void chunks_pool_done(chunks_pool_t *pool)
+void chunks_pool_done(chunks_pool_t * pool)
 {
-    pool_array_t *cur;
+	pool_array_t *cur;
 
-    if (!pool) {
-        return;
-    }
+	if (!pool) {
+		return;
+	}
 
-    while (list_count(&pool->pools)) {
+	while (list_count(&pool->pools)) {
 
-        cur = list_head(&pool->pools);
+		cur = list_head(&pool->pools);
 
-        if (EOK == list_remove(&pool->pools, &cur->header)) {
-            free(cur->bitmap);
-            free(cur->buffer);
-            free(cur);
-        } else {
-            break;
-        }
-    }
+		if (EOK == list_remove(&pool->pools, &cur->header)) {
+			free(cur->bitmap);
+			free(cur->buffer);
+			free(cur);
+		} else {
+			break;
+		}
+	}
 
-    free(pool);
+	free(pool);
 }
 
-void chunks_pool_dump(chunks_pool_t *pool)
+void chunks_pool_dump(chunks_pool_t * pool)
 {
-    pool_array_t *cur;
-    unsigned i = 0;
+	pool_array_t *cur;
+	unsigned i = 0;
 
-    if (!pool) {
-        return;
-    }
+	if (!pool) {
+		return;
+	}
 
-    printf("\nChunk name: %s\n ============\n Alignment..... %u\n"
-           " Element size.. %u\n Delta......... %u\n",
-           pool->name, pool->aln, pool->size, pool->delta);
+	printf("\nChunk name: %s\n ============\n Alignment..... %u\n"
+	       " Element size.. %u\n Delta......... %u\n",
+	       pool->name, pool->aln, pool->size, pool->delta);
 
-    cur = list_head(&pool->pools);
+	cur = list_head(&pool->pools);
 
-    printf(" ------------\n");
+	printf(" ------------\n");
 
-    while (cur) {
-        printf("Pool array %u\n", i++);
+	while (cur) {
+		printf("Pool array %u\n", i++);
 
-        printf(" Buffer start 0x%p\n Items... %u\n Free.... %u\n",
-               cur->bufstart, cur->numitems, cur->free);
+		printf(" Buffer start 0x%p\n Items... %u\n Free.... %u\n",
+		       cur->bufstart, cur->numitems, cur->free);
 
-        printf(" ------------\n");
+		printf(" ------------\n");
 
-        cur = (pool_array_t *)cur->header.next;
-    }
+		cur = (pool_array_t *) cur->header.next;
+	}
 }

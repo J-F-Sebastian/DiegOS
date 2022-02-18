@@ -35,13 +35,13 @@
 #include <types_common.h>
 
 typedef struct _queue_node {
-    struct _queue_node *next;
+	struct _queue_node *next;
 } queue_node;
 
 typedef struct _queue_inst {
-    queue_node *head;
-    queue_node *tail;
-    unsigned counter;
+	queue_node *head;
+	queue_node *tail;
+	unsigned counter;
 } queue_inst;
 
-#endif // QUEUE_TYPE_H_INCLUDED
+#endif				// QUEUE_TYPE_H_INCLUDED

@@ -24,11 +24,11 @@
 #define SYSTEM_PARSER_HELP_MAX (31)
 
 enum {
-    SYSTEM_PARSER_FLAG_CMD  = (1 << 0),
-    SYSTEM_PARSER_FLAG_INT  = (1 << 1),
-    SYSTEM_PARSER_FLAG_UINT = (1 << 2),
-    SYSTEM_PARSER_FLAG_HEX  = (1 << 3),
-    SYSTEM_PARSER_FLAG_STR  = (1 << 4)
+	SYSTEM_PARSER_FLAG_CMD = (1 << 0),
+	SYSTEM_PARSER_FLAG_INT = (1 << 1),
+	SYSTEM_PARSER_FLAG_UINT = (1 << 2),
+	SYSTEM_PARSER_FLAG_HEX = (1 << 3),
+	SYSTEM_PARSER_FLAG_STR = (1 << 4)
 };
 
 /*
@@ -51,19 +51,18 @@ enum {
  *    NULL
  */
 struct parser_tree {
-    char chunk[SYSTEM_PARSER_CMD_MAX + 1];
-    char help[SYSTEM_PARSER_HELP_MAX + 1];
-    unsigned flag;
-    struct parser_tree *next;
-    struct parser_tree *alternate;
+	char chunk[SYSTEM_PARSER_CMD_MAX + 1];
+	char help[SYSTEM_PARSER_HELP_MAX + 1];
+	unsigned flag;
+	struct parser_tree *next;
+	struct parser_tree *alternate;
 };
 
-void system_parser_new_tree (struct parser_tree *tree);
+void system_parser_new_tree(struct parser_tree *tree);
 
-struct parser_tree *system_parser_add_cmd (const char *name,
-                                           const char *help,
-                                           unsigned flag,
-                                           struct parser_tree *next,
-                                           struct parser_tree *alternate);
+struct parser_tree *system_parser_add_cmd(const char *name,
+					  const char *help,
+					  unsigned flag,
+					  struct parser_tree *next, struct parser_tree *alternate);
 
-#endif // SYSTEM_PARSER_MACROS_H_INCLUDED
+#endif				// SYSTEM_PARSER_MACROS_H_INCLUDED

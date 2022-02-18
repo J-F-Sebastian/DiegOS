@@ -35,10 +35,7 @@
  * NOTE: when adding data onto the stack, simulate pushes by changing
  * the stack pointer accordingly.
  */
-extern void setup_context(void *stack_ptr,
-                          void *fail_safe,
-                          void *entry_point,
-                          void **ctx);
+extern void setup_context(void *stack_ptr, void *fail_safe, void *entry_point, void **ctx);
 /*
  * Context switching: save registers and additional data
  * into <from>, load the same data from <to>
@@ -125,4 +122,3 @@ extern void power_save(void);
 extern void delay_loop(unsigned long loops);
 
 #endif
-

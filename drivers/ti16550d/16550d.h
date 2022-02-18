@@ -25,44 +25,43 @@
 extern char_driver_t uart16550d_drv;
 
 enum uart_speed {
-    /* 0*/
-    BPS_50,
-    /* 1*/
-    BPS_110,
-    /* 2*/
-    BPS_150,
-    /* 3*/
-    BPS_300,
-    /* 4*/
-    BPS_600,
-    /* 5*/
-    BPS_1200,
-    /* 6*/
-    BPS_2400,
-    /* 7*/
-    BPS_4800,
-    /* 8*/
-    BPS_9600,
-    /* 9*/
-    BPS_19200,
-    /* 10*/
-    BPS_38400,
-    /* 11*/
-    BPS_57600,
-    /* 12*/
-    BPS_115200
+	/* 0 */
+	BPS_50,
+	/* 1 */
+	BPS_110,
+	/* 2 */
+	BPS_150,
+	/* 3 */
+	BPS_300,
+	/* 4 */
+	BPS_600,
+	/* 5 */
+	BPS_1200,
+	/* 6 */
+	BPS_2400,
+	/* 7 */
+	BPS_4800,
+	/* 8 */
+	BPS_9600,
+	/* 9 */
+	BPS_19200,
+	/* 10 */
+	BPS_38400,
+	/* 11 */
+	BPS_57600,
+	/* 12 */
+	BPS_115200
 };
 
 enum uart_bits {
-    CHAR_5BITS      = (0 << 0),
-    CHAR_6BITS      = (1 << 0),
-    CHAR_7BITS      = (2 << 0),
-    CHAR_8BITS      = (3 << 0),
-    STOP_BIT        = (1 << 2),
-    PARITY_BIT      = (1 << 3),
-    PARITY_EVEN     = (1 << 5),
-    STICKY_BIT      = (1 << 6)
+	CHAR_5BITS = (0 << 0),
+	CHAR_6BITS = (1 << 0),
+	CHAR_7BITS = (2 << 0),
+	CHAR_8BITS = (3 << 0),
+	STOP_BIT = (1 << 2),
+	PARITY_BIT = (1 << 3),
+	PARITY_EVEN = (1 << 5),
+	STICKY_BIT = (1 << 6)
 };
 
 #endif
-

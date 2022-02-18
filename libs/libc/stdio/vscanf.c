@@ -22,7 +22,7 @@
 
 #include "loc_incl.h"
 
-int vscanf (const char *format, va_list ap)
+int vscanf(const char *format, va_list ap)
 {
 	return (formatted_scan(stdin, format, ap));
 }

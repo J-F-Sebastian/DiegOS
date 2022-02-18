@@ -20,9 +20,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
-void abort (void)
+void abort(void)
 {
-    exit(EGENERIC);
-    /* End of the game!!! */
+	exit(EGENERIC);
+	/* End of the game!!! */
 }
-

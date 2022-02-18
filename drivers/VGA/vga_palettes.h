@@ -34,6 +34,6 @@ enum VGA_PALETTE {
 	VGA_PAL_DEFAULT = VGA_PAL_VGA
 };
 
-const palette_t *vga_get_palette (enum VGA_PALETTE pal);
+const palette_t *vga_get_palette(enum VGA_PALETTE pal);
 
 #endif

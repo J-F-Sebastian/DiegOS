@@ -28,7 +28,7 @@ extern void init_simd(void);
 
 void idt_init(void);
 
-void exc_handler_fp (void);
+void exc_handler_fp(void);
 
 /*
  * externs for hw_interrupts.s and
@@ -89,4 +89,3 @@ extern void exc18(void);
 extern void exc19(void);
 
 #endif
-

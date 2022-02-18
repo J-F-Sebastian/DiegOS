@@ -26,29 +26,24 @@
 
 int vsnprintf(char *s, size_t n, const char *format, va_list arg)
 {
-    int retval = 0;
-    FILE tmpstream;
+	int retval = 0;
+	FILE tmpstream;
 
-    if (!s || !format) {
-        return (EINVAL);
-    }
+	if (!s || !format) {
+		return (EINVAL);
+	}
 
-    if (n > 0) {
-        stream_init(&tmpstream,
-                    -1,
-                    s,
-                    n,
-                    (IOBUF_WRITE | IOBUF_FBUF));
-        retval = formatted_printf(&tmpstream, format, TRUE, arg);
-        if (retval >= 0) {
-            if (retval < (int)n) {
-                s[retval] = '\0';
-            } else {
-                s[n-1] = '\0';
-            }
-        }
-    }
+	if (n > 0) {
+		stream_init(&tmpstream, -1, s, n, (IOBUF_WRITE | IOBUF_FBUF));
+		retval = formatted_printf(&tmpstream, format, TRUE, arg);
+		if (retval >= 0) {
+			if (retval < (int)n) {
+				s[retval] = '\0';
+			} else {
+				s[n - 1] = '\0';
+			}
+		}
+	}
 
-    return (retval);
+	return (retval);
 }
-

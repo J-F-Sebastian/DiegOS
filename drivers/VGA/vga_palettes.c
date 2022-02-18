@@ -128,97 +128,96 @@ static const palette_t Mac_16_palette[] = {
 };
 
 static const palette_t RISC_OS_palette[] = {
-    /* RGB, 16 palettes */
-    /* White */
+	/* RGB, 16 palettes */
+	/* White */
 	{0xFF, 0xFF, 0xFF},
-    /* Grey 1/7 */
+	/* Grey 1/7 */
 	{0xDD, 0xDD, 0xDD},
-    /* Grey 2/7 */
+	/* Grey 2/7 */
 	{0xBB, 0xBB, 0xBB},
-    /* Grey 3/7 */
+	/* Grey 3/7 */
 	{0x99, 0x99, 0x99},
-    /* Grey 4/7 */
+	/* Grey 4/7 */
 	{0x77, 0x77, 0x77},
-    /* Grey 5/7 */
+	/* Grey 5/7 */
 	{0x55, 0x55, 0x55},
-    /* Grey 6/7 */
+	/* Grey 6/7 */
 	{0x33, 0x33, 0x33},
-    /* Black */
+	/* Black */
 	{0x00, 0x00, 0x00},
-    /* Dark Blue */
+	/* Dark Blue */
 	{0x00, 0x44, 0x99},
-    /* Yellow */
+	/* Yellow */
 	{0xEE, 0xEE, 0x00},
-    /* Green */
+	/* Green */
 	{0x00, 0xCC, 0x00},
-    /* Red */
+	/* Red */
 	{0xDD, 0x00, 0x00},
-    /* Beige */
+	/* Beige */
 	{0xEE, 0xEE, 0xBB},
-    /* Dark Green */
+	/* Dark Green */
 	{0x55, 0x88, 0x00},
-    /* Orange */
+	/* Orange */
 	{0xFF, 0xBB, 0x00},
-    /* Light Blue */
+	/* Light Blue */
 	{0x00, 0xBB, 0xFF}
 };
 
 static const palette_t HTML_palette[] = {
-    /* RGB, 16 palettes */
-    /* White */
+	/* RGB, 16 palettes */
+	/* White */
 	{0xFF, 0xFF, 0xFF},
-    /* Silver */
+	/* Silver */
 	{0xC0, 0xC0, 0xC0},
-    /* Gray */
+	/* Gray */
 	{0x80, 0x80, 0x80},
-    /* Black */
+	/* Black */
 	{0x00, 0x00, 0x00},
-    /* Red */
+	/* Red */
 	{0xFF, 0x00, 0x00},
-    /* Maroon */
+	/* Maroon */
 	{0x80, 0x00, 0x00},
-    /* Yellow */
+	/* Yellow */
 	{0xFF, 0xFF, 0x00},
-    /* Olive */
+	/* Olive */
 	{0x80, 0x80, 0x00},
-    /* Lime */
+	/* Lime */
 	{0x00, 0xFF, 0x00},
-    /* Green */
+	/* Green */
 	{0x00, 0x80, 0x00},
-    /* Aqua */
+	/* Aqua */
 	{0x00, 0xFF, 0xFF},
-    /* Teal */
+	/* Teal */
 	{0x00, 0x80, 0x80},
-    /* Blue */
+	/* Blue */
 	{0x00, 0x00, 0xFF},
-    /* Navy */
+	/* Navy */
 	{0x00, 0x00, 0x80},
-    /* Fuchsia */
+	/* Fuchsia */
 	{0xFF, 0x00, 0xFF},
-    /* Purple */
+	/* Purple */
 	{0x80, 0x00, 0x80}
 };
 
-const palette_t *vga_get_palette (enum VGA_PALETTE pal)
+const palette_t *vga_get_palette(enum VGA_PALETTE pal)
 {
-	switch (pal)
-	{
-		case VGA_PAL_VGA:
-			return CGA_16_palette;
-			
-		case VGA_PAL_WIN:
-			return Windows_16_palette;
-			
-		case VGA_PAL_MAC:
-			return Mac_16_palette;
-			
-		case VGA_PAL_RISCOS:
-			return RISC_OS_palette;
+	switch (pal) {
+	case VGA_PAL_VGA:
+		return CGA_16_palette;
 
-		case VGA_PAL_HTML:
-			return HTML_palette;
-			
-		default:
-			return CGA_16_palette; 
+	case VGA_PAL_WIN:
+		return Windows_16_palette;
+
+	case VGA_PAL_MAC:
+		return Mac_16_palette;
+
+	case VGA_PAL_RISCOS:
+		return RISC_OS_palette;
+
+	case VGA_PAL_HTML:
+		return HTML_palette;
+
+	default:
+		return CGA_16_palette;
 	}
 }

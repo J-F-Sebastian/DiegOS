@@ -53,35 +53,35 @@ static void *heap_end = NULL;
  * 16 bytes for 32-bit platforms
  * 32 bytes for 64-bit platforms
  */
-  
+
 typedef struct _list_next {
-    struct _list_next *next;
-    uintptr_t magic;
+	struct _list_next *next;
+	uintptr_t magic;
 } list_next;
 
-static inline int is_free (list_next *p)
+static inline int is_free(list_next * p)
 {
-    return (MAGIC_FREE_NUMBER == p->magic) ? 1 : 0;
+	return (MAGIC_FREE_NUMBER == p->magic) ? 1 : 0;
 }
 
-static void defrag_mem (void)
+static void defrag_mem(void)
 {
-    list_next *this = heap_start;
-    list_next *merge = NULL;
- 
-    while (this != this->next) {
-        if (is_free(this)) {
-            merge = this;
-            this = this->next;
-            while (is_free(this)) {
-                this = this->next;
-            }
-            if (merge->next != this) {               
-               merge->next = this;
-            }            
-        }
-        this = this->next;
-   }
+	list_next *this = heap_start;
+	list_next *merge = NULL;
+
+	while (this != this->next) {
+		if (is_free(this)) {
+			merge = this;
+			this = this->next;
+			while (is_free(this)) {
+				this = this->next;
+			}
+			if (merge->next != this) {
+				merge->next = this;
+			}
+		}
+		this = this->next;
+	}
 }
 
 /*
@@ -91,138 +91,135 @@ static void defrag_mem (void)
  */
 STATUS malloc_init(const void *heapstart, const void *heapend)
 {
-    list_next *temp;
+	list_next *temp;
 
-    if (heapstart > heapend) return (EINVAL);
+	if (heapstart > heapend)
+		return (EINVAL);
 
-    heap_start = (void *)heapstart;
-    heap_end = (void *)heapend;
-    heap_end -= sizeof(list_next);
+	heap_start = (void *)heapstart;
+	heap_end = (void *)heapend;
+	heap_end -= sizeof(list_next);
 
-    temp = (list_next *)heap_start;
-    temp->next = heap_end;
-    temp->magic = MAGIC_FREE_NUMBER;
+	temp = (list_next *) heap_start;
+	temp->next = heap_end;
+	temp->magic = MAGIC_FREE_NUMBER;
 
-    temp = (list_next *)heap_end;
-    temp->next = temp;
-    temp->magic = MAGIC_ALLOC_NUMBER;
+	temp = (list_next *) heap_end;
+	temp->next = temp;
+	temp->magic = MAGIC_ALLOC_NUMBER;
 
-    return (EOK);
+	return (EOK);
 }
 
-static void *malloc_internal (size_t newsize)
+static void *malloc_internal(size_t newsize)
 {
 	list_next *this = heap_start;
-    list_next *split;    
-    uintptr_t avail;
-    
-    while (this != this->next) 
-	{
-		while ((this != this->next) && !is_free(this)) this = this->next;
-		if (this == this->next) break;
-        avail = (uintptr_t)this->next - (uintptr_t)(this + 1);
-        /* 
-         * Available space cannot fit the requested size
-         */
-        if (avail < newsize)
-        {
+	list_next *split;
+	uintptr_t avail;
+
+	while (this != this->next) {
+		while ((this != this->next) && !is_free(this))
+			this = this->next;
+		if (this == this->next)
+			break;
+		avail = (uintptr_t) this->next - (uintptr_t) (this + 1);
+		/* 
+		 * Available space cannot fit the requested size
+		 */
+		if (avail < newsize) {
 			this = this->next;
 			continue;
 		}
 		/*
 		 * Available space fits the requested size
 		 */
-        if (avail < newsize + sizeof(list_next))
-        {
+		if (avail < newsize + sizeof(list_next)) {
 			this->magic = MAGIC_ALLOC_NUMBER;
 			return (void *)(this + 1);
 		}
-        /*
+		/*
 		 * Available space fits the requested size and new free space 
 		 * can be carved
 		 */
 		split = (void *)(this + 1) + newsize;
-        split->next = this->next;
-        split->magic = MAGIC_FREE_NUMBER;
-        this->next = split;        
-        this->magic = MAGIC_ALLOC_NUMBER;
-        return (void *)(this + 1);        
-    }
-    
-    return NULL;
+		split->next = this->next;
+		split->magic = MAGIC_FREE_NUMBER;
+		this->next = split;
+		this->magic = MAGIC_ALLOC_NUMBER;
+		return (void *)(this + 1);
+	}
+
+	return NULL;
 }
 
-void *malloc (size_t size)
-{    
-    size_t newsize; 
-    void *retval;
+void *malloc(size_t size)
+{
+	size_t newsize;
+	void *retval;
 
-    if (!size) {
-        return (NULL);
-    }
+	if (!size) {
+		return (NULL);
+	}
 
-    /*
-     * Make size accomodate pointers, magic number and the user data,
-     * ending on a (void *) boundary.
-     */
-    newsize = MULT(size, sizeof(list_next));
+	/*
+	 * Make size accomodate pointers, magic number and the user data,
+	 * ending on a (void *) boundary.
+	 */
+	newsize = MULT(size, sizeof(list_next));
 	retval = malloc_internal(newsize);
-	if (!retval) 
-	{
+	if (!retval) {
 		defrag_mem();
 		retval = malloc_internal(newsize);
 	}
 
-    if (!retval) errno = ENOMEM;
-    return (retval);
+	if (!retval)
+		errno = ENOMEM;
+	return (retval);
 }
 
 void *realloc(void *p, size_t size)
 {
-    list_next *this = (list_next *)p;
-    void *temp;
-    unsigned oldsize;
+	list_next *this = (list_next *) p;
+	void *temp;
+	unsigned oldsize;
 
-    if (!p) return malloc(size);
-    if (!size) {
-        free(p);
-        return (NULL);
-    }
-        
-    this--;
-    if ((MAGIC_ALLOC_NUMBER != this->magic) && 
-        (MAGIC_FREE_NUMBER != this->magic)) 
-    {
-        errno = ENOMEM;
-        return (NULL);
-    }
+	if (!p)
+		return malloc(size);
+	if (!size) {
+		free(p);
+		return (NULL);
+	}
 
-    /* Now pointer is valid */
-    oldsize = (uintptr_t)this->next - (uintptr_t)(this + 1);
-    if (oldsize >= size) 
-    {
+	this--;
+	if ((MAGIC_ALLOC_NUMBER != this->magic) && (MAGIC_FREE_NUMBER != this->magic)) {
+		errno = ENOMEM;
+		return (NULL);
+	}
+
+	/* Now pointer is valid */
+	oldsize = (uintptr_t) this->next - (uintptr_t) (this + 1);
+	if (oldsize >= size) {
 		this->magic = MAGIC_ALLOC_NUMBER;
 		return (p);
 	}
 
-    /* Need more space, alloc */
-    temp = malloc(size);
-    if (temp) {
-        memcpy(temp, p, oldsize); 
-        free(p);
-    }
-    return (temp);        
+	/* Need more space, alloc */
+	temp = malloc(size);
+	if (temp) {
+		memcpy(temp, p, oldsize);
+		free(p);
+	}
+	return (temp);
 }
 
-void free (void *p)
+void free(void *p)
 {
-    list_next *this = (list_next *)p;
+	list_next *this = (list_next *) p;
 
-    if (!p) return;
-   
-    this--;
-    assert(MAGIC_ALLOC_NUMBER == this->magic);
-    this->magic = MAGIC_FREE_NUMBER;    
+	if (!p)
+		return;
+
+	this--;
+	assert(MAGIC_ALLOC_NUMBER == this->magic);
+	this->magic = MAGIC_FREE_NUMBER;
 }
-
-

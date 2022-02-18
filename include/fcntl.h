@@ -28,14 +28,14 @@
 #define F_SETFD            2	/* set file descriptor flags */
 #define F_GETFL            3	/* get file status flags */
 #define F_SETFL            4	/* set file status flags */
-#define F_GETOWN           5    /* get the process or process group ID specified to
-                                 * receive SIGURG signals when out-of-band data is available.
-                                 * SOCKETS ONLY
-                                 */
-#define F_SETOWN           6    /* set the process or process group ID specified to
-                                 * receive SIGURG signals when out-of-band data is available.
-                                 * SOCKETS ONLY
-                                 */
+#define F_GETOWN           5	/* get the process or process group ID specified to
+				 * receive SIGURG signals when out-of-band data is available.
+				 * SOCKETS ONLY
+				 */
+#define F_SETOWN           6	/* set the process or process group ID specified to
+				 * receive SIGURG signals when out-of-band data is available.
+				 * SOCKETS ONLY
+				 */
 #define F_GETLK            7	/* get record locking information */
 #define F_SETLK            8	/* set record locking information */
 #define F_SETLKW           9	/* set record locking info; wait if blocked */
@@ -68,11 +68,11 @@
 
 /* Struct used for locking.  POSIX Table 6-8. */
 struct flock {
-    short l_type; /* type: F_RDLCK, F_WRLCK, or F_UNLCK */
-    short l_whence; /* flag for starting offset */
-    off_t l_start; /* relative offset in bytes */
-    off_t l_len; /* size; if 0, then until EOF */
-    pid_t l_pid; /* process id of the locks' owner */
+	short l_type;		/* type: F_RDLCK, F_WRLCK, or F_UNLCK */
+	short l_whence;		/* flag for starting offset */
+	off_t l_start;		/* relative offset in bytes */
+	off_t l_len;		/* size; if 0, then until EOF */
+	pid_t l_pid;		/* process id of the locks' owner */
 };
 
 /* Function Prototypes. */
@@ -80,4 +80,4 @@ int creat(const char *name, int perms);
 int fcntl(int fd, int cmd, ...);
 int open(const char *name, int flags, int perms);
 
-#endif /* _FCNTL_H */
+#endif				/* _FCNTL_H */

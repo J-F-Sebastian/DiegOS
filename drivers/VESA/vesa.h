@@ -24,4 +24,4 @@
 
 extern grafics_driver_t vesa_drv;
 
-#endif // VESA_H_INCLUDED
+#endif				// VESA_H_INCLUDED

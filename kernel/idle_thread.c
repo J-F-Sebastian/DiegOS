@@ -24,9 +24,8 @@
 
 void idle_thread_entry()
 {
-    while (TRUE) {
-        power_save();
-        thread_suspend();
-    }
+	while (TRUE) {
+		power_save();
+		thread_suspend();
+	}
 }
-

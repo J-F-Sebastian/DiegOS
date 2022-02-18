@@ -21,16 +21,16 @@
 #include <stdarg.h>
 #include "loc_incl.h"
 
-int fprintf (FILE *stream, const char *format, ...)
+int fprintf(FILE * stream, const char *format, ...)
 {
-    va_list ap;
-    int retval;
+	va_list ap;
+	int retval;
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    retval = formatted_printf(stream, format, FALSE, ap);
+	retval = formatted_printf(stream, format, FALSE, ap);
 
-    va_end(ap);
+	va_end(ap);
 
-    return (retval);
+	return (retval);
 }

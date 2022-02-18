@@ -25,22 +25,22 @@ char *gets(char *s)
 	char *dest = s;
 
 	if (!s) {
-	    return (s);
+		return (s);
 	}
 
 	ch = getc(stdin);
-	while((EOF != ch) && ('\n' != ch)) {
-	    *dest++ = (char)ch;
-	    ch = getc(stdin);
+	while ((EOF != ch) && ('\n' != ch)) {
+		*dest++ = (char)ch;
+		ch = getc(stdin);
 	}
 
 	if (EOF == ch) {
 		if (feof(stdin)) {
 			if (dest == s) {
-			    return (NULL);
+				return (NULL);
 			}
 		} else {
-		    return (NULL);
+			return (NULL);
 		}
 	}
 

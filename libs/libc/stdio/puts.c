@@ -21,23 +21,23 @@
 
 int puts(const char *s)
 {
-    int i = 0;
+	int i = 0;
 
-    if (!s) {
-        return (EOF);
-    }
+	if (!s) {
+		return (EOF);
+	}
 
-    while (*s) {
-        if (putc(*s++, stdout) == EOF) {
-            return (EOF);
-        }
-        ++i;
-    }
+	while (*s) {
+		if (putc(*s++, stdout) == EOF) {
+			return (EOF);
+		}
+		++i;
+	}
 
-    if (putc('\n', stdout) == EOF) {
-        return (EOF);
-    }
-    ++i;
+	if (putc('\n', stdout) == EOF) {
+		return (EOF);
+	}
+	++i;
 
-    return (i);
+	return (i);
 }

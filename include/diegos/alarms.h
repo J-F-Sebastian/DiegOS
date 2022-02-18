@@ -52,11 +52,8 @@ typedef struct alarm alarm_t;
  * RETURNS
  * A pointer to an alarm handle or NULL in case of failure.
  */
-alarm_t *alarm_create (const char *name,
-                       uint16_t alarmid,
-                       unsigned millisecs,
-                       BOOL recursive,
-                       ev_queue_t *evqueue);
+alarm_t *alarm_create(const char *name,
+		      uint16_t alarmid, unsigned millisecs, BOOL recursive, ev_queue_t * evqueue);
 
 /*
  * Set an alarm, i.e. enable an alarm and start counting until expiration.
@@ -66,7 +63,7 @@ alarm_t *alarm_create (const char *name,
  * BOOL start - if start is TRUE the alarm will be set and counting; if start
  *               is false the alarm will be inactive.
  */
-void alarm_set (alarm_t *alm, BOOL start);
+void alarm_set(alarm_t * alm, BOOL start);
 
 /*
  * Acknowledge a recursive alarm. A recursive alarm won't send more events
@@ -92,7 +89,7 @@ void alarm_set (alarm_t *alm, BOOL start);
  * EINVAL if alm is not a valid pointer
  * EOK in any other case.
  */
-int alarm_acknowledge (alarm_t *alm);
+int alarm_acknowledge(alarm_t * alm);
 
 /*
  * Update the period duration and recursiveness of an alarm.
@@ -106,7 +103,7 @@ int alarm_acknowledge (alarm_t *alm);
  * EINVAL if alm is not a valid pointer or millisecs is 0.
  * EOK in any other case.
  */
-int alarm_update (alarm_t *alm, unsigned millisecs, BOOL recursive);
+int alarm_update(alarm_t * alm, unsigned millisecs, BOOL recursive);
 
 /*
  * Remove an alarm.
@@ -119,7 +116,7 @@ int alarm_update (alarm_t *alm, unsigned millisecs, BOOL recursive);
  * EGENERIC if removal fails
  * EOK in any other case.
  */
-int alarm_done (alarm_t *alm);
+int alarm_done(alarm_t * alm);
 
 /*
  * Print to stderr the specified alarms's configuration and status.
@@ -128,7 +125,6 @@ int alarm_done (alarm_t *alm);
  * PARAMETERS IN
  * alarm_t *alm - a specific alarm to be dumped, or NULL to dump'em all
  */
-void alarm_dump (const alarm_t *alm);
+void alarm_dump(const alarm_t * alm);
 
 #endif
-

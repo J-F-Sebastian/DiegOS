@@ -24,52 +24,50 @@
 #include	"loc_time.h"
 
 static const char *days_of_week[] = {
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday"
+	"Sunday",
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday"
 };
 
 static const const char *months[] = {
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December"
 };
 
 static const char datefrmt1[] = "%.3s %.3s%3d %2.d:%2.d:%2.d %d\n";
 
 char *asctime(const struct tm *timeptr)
 {
-	static char buf[26] = {0};
+	static char buf[26] = { 0 };
 
-    memset(buf, 0 ,sizeof(buf));
+	memset(buf, 0, sizeof(buf));
 
-    if (timeptr) {
-        snprintf(buf,
-                 sizeof(buf),
-                 datefrmt1,
-                 days_of_week[timeptr->tm_wday%7],
-                 months[timeptr->tm_mon%12],
-                 timeptr->tm_mday,
-                 timeptr->tm_hour,
-                 timeptr->tm_min,
-                 timeptr->tm_sec,
-                 timeptr->tm_year + YEAR0);
-    } else {
-        buf[0] = '\n';
-    }
+	if (timeptr) {
+		snprintf(buf,
+			 sizeof(buf),
+			 datefrmt1,
+			 days_of_week[timeptr->tm_wday % 7],
+			 months[timeptr->tm_mon % 12],
+			 timeptr->tm_mday,
+			 timeptr->tm_hour,
+			 timeptr->tm_min, timeptr->tm_sec, timeptr->tm_year + YEAR0);
+	} else {
+		buf[0] = '\n';
+	}
 
 	return buf;
 }

@@ -24,4 +24,4 @@
 
 extern net_driver_t lo_drv;
 
-#endif /* LOCAL_LOOP_H_ */
+#endif				/* LOCAL_LOOP_H_ */

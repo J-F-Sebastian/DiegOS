@@ -23,14 +23,14 @@
 #include <types_common.h>
 
 typedef struct _list_node {
-    struct _list_node *prev;
-    struct _list_node *next;
+	struct _list_node *prev;
+	struct _list_node *next;
 } list_node;
 
 typedef struct _list_inst {
-    list_node *head;
-    list_node *tail;
-    uint32_t counter;
+	list_node *head;
+	list_node *tail;
+	uint32_t counter;
 } list_inst;
 
-#endif // LIST_TYPE_H_INCLUDED
+#endif				// LIST_TYPE_H_INCLUDED

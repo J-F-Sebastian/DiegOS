@@ -20,16 +20,16 @@
 #include <string.h>
 #include <stddef.h>
 
-char *strchr (const char *cs, int c)
+char *strchr(const char *cs, int c)
 {
-    if (!cs) {
-        return (NULL);
-    }
+	if (!cs) {
+		return (NULL);
+	}
 
-    while ((char)c != *cs) {
-        if (*cs++ == '\0') {
-            return (NULL);
-        }
-    }
-    return ((char *)cs);
+	while ((char)c != *cs) {
+		if (*cs++ == '\0') {
+			return (NULL);
+		}
+	}
+	return ((char *)cs);
 }

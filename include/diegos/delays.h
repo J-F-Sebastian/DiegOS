@@ -27,7 +27,7 @@
  * RETURNS
  * unsigned long - number of loops per second
  */
-unsigned long loops_per_second (void);
+unsigned long loops_per_second(void);
 
 /*
  * This function should be invoked at boot time (much probably in platform
@@ -41,7 +41,7 @@ unsigned long loops_per_second (void);
  *                                 in hardware or by clock-driven interrupts.
  *
  */
-void calibrate_delay (volatile unsigned long *ticks);
+void calibrate_delay(volatile unsigned long *ticks);
 
 /*
  * Delay execution by at least msecs milliseconds.
@@ -49,7 +49,7 @@ void calibrate_delay (volatile unsigned long *ticks);
  * CPU will enter a no-op loop and no other activity (except for interrupts)
  * will be served meanwhile.
  */
-void mdelay (unsigned long msecs);
+void mdelay(unsigned long msecs);
 
 /*
  * Delay execution by at least usecs microseconds.
@@ -57,7 +57,7 @@ void mdelay (unsigned long msecs);
  * CPU will enter a no-op loop and no other activity (except for interrupts)
  * will be served meanwhile.
  */
-void udelay (unsigned long usecs);
+void udelay(unsigned long usecs);
 
 /*
  * Delay execution by at least nsecs nanoseconds.
@@ -65,6 +65,6 @@ void udelay (unsigned long usecs);
  * CPU will enter a no-op loop and no other activity (except for interrupts)
  * will be served meanwhile.
  */
-void ndelay (unsigned long nsecs);
+void ndelay(unsigned long nsecs);
 
 #endif

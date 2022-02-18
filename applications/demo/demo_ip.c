@@ -25,38 +25,33 @@
 #include <stdlib.h>
 #include <ip.h>
 
-static void demo_thread_entry (void)
+static void demo_thread_entry(void)
 {
-    net_interface_t *eth;
+	net_interface_t *eth;
 
-    if (EOK != netw_init()) {
-        exit(-1);
-    }
+	if (EOK != netw_init()) {
+		exit(-1);
+	}
 
-    eth = net_interface_lookup_name("eth0");
-    if (eth) {
-        netw_add_protocol(eth, &ip_proto);
-    }
+	eth = net_interface_lookup_name("eth0");
+	if (eth) {
+		netw_add_protocol(eth, &ip_proto);
+	}
 
-    eth = net_interface_lookup_name("lo0");
-    if (eth) {
-        netw_add_protocol(eth, &ip_proto);
-    }
+	eth = net_interface_lookup_name("lo0");
+	if (eth) {
+		netw_add_protocol(eth, &ip_proto);
+	}
 
-    while (TRUE) {
-        thread_suspend();
-    }
-    thread_terminate();
+	while (TRUE) {
+		thread_suspend();
+	}
+	thread_terminate();
 }
 
-void platform_run ()
+void platform_run()
 {
-    uint8_t pid;
+	uint8_t pid;
 
-    thread_create("IPDemo",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry,
-                  0,
-                  8192,
-                  &pid);
+	thread_create("IPDemo", THREAD_PRIO_NORMAL, demo_thread_entry, 0, 8192, &pid);
 }

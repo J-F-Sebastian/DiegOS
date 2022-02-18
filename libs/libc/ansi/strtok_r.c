@@ -22,29 +22,29 @@
 
 char *strtok_r(char *s, const char *ct, char **saveptr)
 {
-    const char *s1;
-    char *s2;
+	const char *s1;
+	char *s2;
 
-    if (!saveptr)
-	    return ((char *)NULL);
+	if (!saveptr)
+		return ((char *)NULL);
 
-    if (s == NULL) {
-        s = *saveptr;
-        if (s == NULL) {
-            return ((char *)NULL);
-        }
-    }
+	if (s == NULL) {
+		s = *saveptr;
+		if (s == NULL) {
+			return ((char *)NULL);
+		}
+	}
 
-    s1 = s + strspn(s, ct);
-    if (*s1 == '\0') {
-        *saveptr = NULL;
-        return ((char *)NULL);
-    }
+	s1 = s + strspn(s, ct);
+	if (*s1 == '\0') {
+		*saveptr = NULL;
+		return ((char *)NULL);
+	}
 
-    s2 = strpbrk(s1, ct);
-    if (s2) {
-        *s2++ = '\0';
-    }
-    *saveptr = s2;
-    return ((char *)s1);
+	s2 = strpbrk(s1, ct);
+	if (s2) {
+		*s2++ = '\0';
+	}
+	*saveptr = s2;
+	return ((char *)s1);
 }

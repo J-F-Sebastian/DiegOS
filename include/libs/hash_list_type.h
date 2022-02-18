@@ -25,15 +25,15 @@
 typedef uint16_t hash_t;
 
 typedef struct hash_list_item {
-    void *data;
-    hash_t hash;
-    struct hash_list_item *next;
+	void *data;
+	hash_t hash;
+	struct hash_list_item *next;
 } hash_list_item_t;
 
 typedef struct hash_list_inst {
-    /*char *name*/
-    hash_list_item_t *list;
-    unsigned hash_size;
+	/*char *name */
+	hash_list_item_t *list;
+	unsigned hash_size;
 } hash_list_inst_t;
 
-#endif // HASH_LIST_TYPE_H_INCLUDED
+#endif				// HASH_LIST_TYPE_H_INCLUDED

@@ -22,8 +22,8 @@
 
 #include "io_waits_private.h"
 
-BOOL init_poll_lib (void);
+BOOL init_poll_lib(void);
 
-int poll_wakeup (struct wait_queue_item *wqi);
+int poll_wakeup(struct wait_queue_item *wqi);
 
 #endif

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "loc_incl.h"
 
-int fileno (FILE *stream)
+int fileno(FILE * stream)
 {
-    return ((stream) ? (stream->fd) : (-1));
+	return ((stream) ? (stream->fd) : (-1));
 }

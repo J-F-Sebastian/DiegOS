@@ -32,10 +32,9 @@
 
 #include <stdint.h>
 
-struct disk_geometry
-{
-    uint16_t bytes_per_sector;
-    uint32_t num_of_sectors;
+struct disk_geometry {
+	uint16_t bytes_per_sector;
+	uint32_t num_of_sectors;
 };
 
 /**
@@ -58,7 +57,7 @@ struct disk_geometry
  * @return 0 in case of success
  * @return -1 in case of error
  */
-int disk_init (const char *dev, void **ctx);
+int disk_init(const char *dev, void **ctx);
 
 /**
  * @brief disk_done terminate access to the storage media addressed by ctx; the API must release
@@ -71,7 +70,7 @@ int disk_init (const char *dev, void **ctx);
  * @return 0 in case of success
  * @return -1 in case of error
  */
-int disk_done (void *ctx);
+int disk_done(void *ctx);
 
 /**
  * @brief disk_get_geometry returns a basic media geometry description in geom; the returned
@@ -83,7 +82,7 @@ int disk_done (void *ctx);
  * @return 0 in case of success
  * @return -1 in case of error
  */
-int disk_get_geometry (void *ctx, struct disk_geometry *geom);
+int disk_get_geometry(void *ctx, struct disk_geometry *geom);
 
 /**
  * @brief disk_read read multiple sectors from the device addressed by ctx and write the data
@@ -100,7 +99,7 @@ int disk_get_geometry (void *ctx, struct disk_geometry *geom);
  * @return 0 in case of success
  * @return -1 in case of error
  */
-int disk_read (void *ctx, unsigned sec, unsigned numsec, char *buf);
+int disk_read(void *ctx, unsigned sec, unsigned numsec, char *buf);
 
 /**
  * @brief disk_write write multiple sectors to the device addressed by ctx and read the data
@@ -117,6 +116,6 @@ int disk_read (void *ctx, unsigned sec, unsigned numsec, char *buf);
  * @return 0 in case of success
  * @return -1 in case of error
  */
-int disk_write (void *ctx, unsigned sec, unsigned numsec, char *buf);
+int disk_write(void *ctx, unsigned sec, unsigned numsec, char *buf);
 
-#endif // DISK_ACCESS_H
+#endif				// DISK_ACCESS_H

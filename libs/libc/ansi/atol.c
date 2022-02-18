@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <types_common.h>
 
-long atol (const char *s)
+long atol(const char *s)
 {
-    return (strtol(s, (char **) NULL, 10));
+	return (strtol(s, (char **)NULL, 10));
 }

@@ -25,72 +25,72 @@
 
 #define	PMODE		0666
 
-FILE *freopen (const char *filename, const char *mode, FILE *stream)
+FILE *freopen(const char *filename, const char *mode, FILE * stream)
 {
-    unsigned i;
-    unsigned flags = stream->flags & (_IONBF | _IOFBF | _IOLBF);
-    int rwmode = 0, rwflags = 0;
-    int fd;
+	unsigned i;
+	unsigned flags = stream->flags & (_IONBF | _IOFBF | _IOLBF);
+	int rwmode = 0, rwflags = 0;
+	int fd;
 
-    (void) fflush(stream);				/* ignore errors */
-    (void) close(fileno(stream));
+	(void)fflush(stream);	/* ignore errors */
+	(void)close(fileno(stream));
 
-    switch (*mode++) {
-    case 'r':
-        flags |= (IOBUF_READ);
-        rwmode = O_RDONLY;
-        break;
-    case 'w':
-        flags |= (IOBUF_WRITE);
-        rwmode = O_WRONLY;
-        rwflags = (O_CREAT | O_TRUNC);
-        break;
-    case 'a':
-        flags |= (IOBUF_WRITE | IOBUF_APPEND);
-        rwmode = O_WRONLY;
-        rwflags |= (O_APPEND | O_CREAT);
-        break;
-    default:
-        return ((FILE *)NULL);
-    }
+	switch (*mode++) {
+	case 'r':
+		flags |= (IOBUF_READ);
+		rwmode = O_RDONLY;
+		break;
+	case 'w':
+		flags |= (IOBUF_WRITE);
+		rwmode = O_WRONLY;
+		rwflags = (O_CREAT | O_TRUNC);
+		break;
+	case 'a':
+		flags |= (IOBUF_WRITE | IOBUF_APPEND);
+		rwmode = O_WRONLY;
+		rwflags |= (O_APPEND | O_CREAT);
+		break;
+	default:
+		return ((FILE *) NULL);
+	}
 
-    while (*mode) {
-        switch(*mode++) {
-        case 'b':
-            continue;
-        case '+':
-            rwmode = O_RDWR;
-            flags |= (IOBUF_READ | IOBUF_WRITE);
-            continue;
-        default:
-            break;
-        }
-        break;
-    }
+	while (*mode) {
+		switch (*mode++) {
+		case 'b':
+			continue;
+		case '+':
+			rwmode = O_RDWR;
+			flags |= (IOBUF_READ | IOBUF_WRITE);
+			continue;
+		default:
+			break;
+		}
+		break;
+	}
 
-    if ((rwflags & O_TRUNC)
-            || (((fd = open(filename, rwmode, 0)) < 0)
-                && (rwflags & O_CREAT))) {
-        if (((fd = creat(filename, PMODE)) < 0) && (flags | IOBUF_READ)) {
-            (void) close(fd);
-            fd = open(filename, rwmode, 0);
-        }
-    }
+	if ((rwflags & O_TRUNC)
+	    || (((fd = open(filename, rwmode, 0)) < 0)
+		&& (rwflags & O_CREAT))) {
+		if (((fd = creat(filename, PMODE)) < 0) && (flags | IOBUF_READ)) {
+			(void)close(fd);
+			fd = open(filename, rwmode, 0);
+		}
+	}
 
-    if (fd < 0) {
-        for( i = 0; i < FOPEN_MAX; i++) {
-            if (stream == iostreams[i]) {
-                iostreams[i] = NULL;
-                break;
-            }
-        }
-        if (stream != stdin && stream != stdout && stream != stderr)
-            free((void *)stream);
-        return ((FILE *)NULL);
-    }
+	if (fd < 0) {
+		for (i = 0; i < FOPEN_MAX; i++) {
+			if (stream == iostreams[i]) {
+				iostreams[i] = NULL;
+				break;
+			}
+		}
+		if (stream != stdin && stream != stdout && stream != stderr)
+			free((void *)stream);
+		return ((FILE *) NULL);
+	}
 
-    stream->count = 0;
-    stream->fd = fd;
-    stream->flags = flags;
-    return (stream);
+	stream->count = 0;
+	stream->fd = fd;
+	stream->flags = flags;
+	return (stream);
 }

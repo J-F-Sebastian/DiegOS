@@ -25,19 +25,19 @@
 
 typedef struct packet_buffer pakman;
 
-int init_pakman (unsigned bytes, unsigned packets, pakman **pakmanptr);
+int init_pakman(unsigned bytes, unsigned packets, pakman ** pakmanptr);
 
-int delete_pakman (pakman *pakmanptr);
+int delete_pakman(pakman * pakmanptr);
 
 /*
  * bufmgr_get_slot() will return a free slot descriptor, or NULL if no more free
  * slots are available. Slot state is set to busy.
  */
-struct packet *pakman_get_packet (pakman *pakmanptr, uint16_t len);
+struct packet *pakman_get_packet(pakman * pakmanptr, uint16_t len);
 
 /*
  * pakman_put_packet() will drop the slot, i.e. will set it to free state.
  */
-int pakman_put_packet (pakman *bufmgrptr, struct packet *pkt);
+int pakman_put_packet(pakman * bufmgrptr, struct packet *pkt);
 
 #endif

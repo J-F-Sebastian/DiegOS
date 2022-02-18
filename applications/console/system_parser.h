@@ -22,8 +22,8 @@
 
 #include "system_parser_types.h"
 
-void system_parser_init (const struct alternates *root);
+void system_parser_init(const struct alternates *root);
 
 void system_parser(const char *buffer, unsigned bufsize);
 
-#endif // SYSTEM_PARSER_H_INCLUDED
+#endif				// SYSTEM_PARSER_H_INCLUDED

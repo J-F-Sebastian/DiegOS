@@ -41,103 +41,97 @@
  * Callback function, to be used with bitmap_for_each_set,
  * bitmap_for_each_clear, bitmap_if_any_set
  */
-typedef void (*bitmapcb)(long *bitmap, unsigned bitpos, void *);
+typedef void (*bitmapcb) (long *bitmap, unsigned bitpos, void *);
 
 /*
  * For any function, bitpos is 0 BASED
  */
 inline void bitmap_set(long *bitmap, unsigned bitpos)
 {
-    bitmap[bitpos/BINL] |= (long)1 << (bitpos%BINL);
+	bitmap[bitpos / BINL] |= (long)1 << (bitpos % BINL);
 }
 
 inline void bitmap_clear(long *bitmap, unsigned bitpos)
 {
-    bitmap[bitpos/BINL] &= ~((long)1 << (bitpos%BINL));
+	bitmap[bitpos / BINL] &= ~((long)1 << (bitpos % BINL));
 }
 
 inline BOOL bitmap_is_set(long *bitmap, unsigned bitpos)
 {
-    if (bitmap[bitpos/BINL] & ((long)1 << (bitpos%BINL))) {
-        return (TRUE);
-    }
+	if (bitmap[bitpos / BINL] & ((long)1 << (bitpos % BINL))) {
+		return (TRUE);
+	}
 
-    return (FALSE);
+	return (FALSE);
 }
 
 inline unsigned bitmap_first_is_set(long *bitmap, unsigned leninlongs)
 {
-    unsigned i = 0,j,k;
+	unsigned i = 0, j, k;
 
-    while (i < leninlongs) {
-        if (bitmap[i]) {
-            for (j = 1, k =0; j; j+=j,k++) {
-                if (bitmap[i] & j) {
-                    return (i*BINL + k);
-                }
-            }
-        }
-        ++i;
-    }
+	while (i < leninlongs) {
+		if (bitmap[i]) {
+			for (j = 1, k = 0; j; j += j, k++) {
+				if (bitmap[i] & j) {
+					return (i * BINL + k);
+				}
+			}
+		}
+		++i;
+	}
 
-    return (leninlongs*sizeof(long)*8);
+	return (leninlongs * sizeof(long) * 8);
 }
 
 inline unsigned bitmap_first_is_clear(long *bitmap, unsigned leninlongs)
 {
-    unsigned i = 0,j,k;
+	unsigned i = 0, j, k;
 
-    while (i < leninlongs) {
-        if (!bitmap[i]) {
-            return (i*BINL);
-        }
-        for (j = 1, k = 0; j; j+=j,k++) {
-            if (!(bitmap[i] & j)) {
-                return (i*BINL + k);
-            }
-        }
-        ++i;
-    }
+	while (i < leninlongs) {
+		if (!bitmap[i]) {
+			return (i * BINL);
+		}
+		for (j = 1, k = 0; j; j += j, k++) {
+			if (!(bitmap[i] & j)) {
+				return (i * BINL + k);
+			}
+		}
+		++i;
+	}
 
-    return (leninlongs*BINL);
+	return (leninlongs * BINL);
 }
 
-inline void bitmap_for_each_set(long *bitmap,
-                                       unsigned leninlongs,
-                                       bitmapcb cbfn,
-                                       void *param)
+inline void bitmap_for_each_set(long *bitmap, unsigned leninlongs, bitmapcb cbfn, void *param)
 {
-    unsigned i = 0,j,k;
+	unsigned i = 0, j, k;
 
-    while (i < leninlongs) {
-        if (bitmap[i]) {
-            for (j = 1, k =0; j; j+=j,k++) {
-                if (bitmap[i] & j) {
-                    cbfn(bitmap, i*BINL+k, param);
-                }
-            }
-        }
-        ++i;
-    }
+	while (i < leninlongs) {
+		if (bitmap[i]) {
+			for (j = 1, k = 0; j; j += j, k++) {
+				if (bitmap[i] & j) {
+					cbfn(bitmap, i * BINL + k, param);
+				}
+			}
+		}
+		++i;
+	}
 }
 
-inline void bitmap_for_each_clear(long *bitmap,
-                                         unsigned leninlongs,
-                                         bitmapcb cbfn,
-                                         void *param)
+inline void bitmap_for_each_clear(long *bitmap, unsigned leninlongs, bitmapcb cbfn, void *param)
 {
-    unsigned i = 0,j,k;
+	unsigned i = 0, j, k;
 
-    while (i < leninlongs) {
-        if (-1 != bitmap[i]) {
-            for (j = 1, k = 0; j; j+=j,k++) {
-                if (!(bitmap[i] & j)) {
-                    cbfn(bitmap, i*BINL+k, param);
-                }
-            }
-            ++i;
-        }
-    }
+	while (i < leninlongs) {
+		if (-1 != bitmap[i]) {
+			for (j = 1, k = 0; j; j += j, k++) {
+				if (!(bitmap[i] & j)) {
+					cbfn(bitmap, i * BINL + k, param);
+				}
+			}
+			++i;
+		}
+	}
 }
 
 #endif

@@ -89,33 +89,33 @@
 #define	___CONCAT(x,y)	__CONCAT(x,y)
 
 #if __STDC__ || defined(__cplusplus)
-#define	__P(protos)	protos		/* full-blown ANSI C */
+#define	__P(protos)	protos	/* full-blown ANSI C */
 #define	__CONCAT1(x,y)	x ## y
 #define	__CONCAT(x,y)	__CONCAT1(x,y)
 #define	__STRING(x)	#x
 
-#define	__const		const		/* define reserved names to standard */
+#define	__const		const	/* define reserved names to standard */
 #define	__signed	signed
 #define	__volatile	volatile
 #if defined(__cplusplus) || defined(__PCC__)
-#define	__inline	inline		/* convert to C++/C99 keyword */
+#define	__inline	inline	/* convert to C++/C99 keyword */
 #else
 #if !defined(__GNUC__) && !defined(__lint__)
-#define	__inline			/* delete GCC keyword */
-#endif /* !__GNUC__  && !__lint__ */
-#endif /* !__cplusplus */
+#define	__inline		/* delete GCC keyword */
+#endif				/* !__GNUC__  && !__lint__ */
+#endif				/* !__cplusplus */
 
-#else	/* !(__STDC__ || __cplusplus) */
-#define	__P(protos)	()		/* traditional C preprocessor */
+#else				/* !(__STDC__ || __cplusplus) */
+#define	__P(protos)	()	/* traditional C preprocessor */
 #define	__CONCAT(x,y)	x/**/y
 #define	__STRING(x)	"x"
 
 #ifndef __GNUC__
-#define	__const				/* delete pseudo-ANSI C keywords */
+#define	__const			/* delete pseudo-ANSI C keywords */
 #define	__inline
 #define	__signed
 #define	__volatile
-#endif	/* !__GNUC__ */
+#endif				/* !__GNUC__ */
 
 /*
  * In non-ANSI C environments, new programs will want ANSI-only C keywords
@@ -124,12 +124,12 @@
  * identifiers should define -DNO_ANSI_KEYWORDS.
  */
 #ifndef	NO_ANSI_KEYWORDS
-#define	const		__const		/* convert ANSI C keywords */
+#define	const		__const	/* convert ANSI C keywords */
 #define	inline		__inline
 #define	signed		__signed
 #define	volatile	__volatile
-#endif /* !NO_ANSI_KEYWORDS */
-#endif	/* !(__STDC__ || __cplusplus) */
+#endif				/* !NO_ANSI_KEYWORDS */
+#endif				/* !(__STDC__ || __cplusplus) */
 
 /*
  * Used for internal auditing of the NetBSD source tree.
@@ -218,13 +218,13 @@
 #if __GNUC_PREREQ__(3, 0)
 #define	__noinline	__attribute__((__noinline__))
 #else
-#define	__noinline	/* nothing */
+#define	__noinline		/* nothing */
 #endif
 
 #if __GNUC_PREREQ__(2, 7)
 #define	__unused	__attribute__((__unused__))
 #else
-#define	__unused	/* delete */
+#define	__unused		/* delete */
 #endif
 
 #if __GNUC_PREREQ__(3, 1)
@@ -235,8 +235,8 @@
 
 #if defined(__lint__)
 #define	__packed	__packed
-#define	__aligned(x)	/* delete */
-#define	__section(x)	/* delete */
+#define	__aligned(x)		/* delete */
+#define	__section(x)		/* delete */
 #elif __GNUC_PREREQ__(2, 7)
 #define	__packed	__attribute__((__packed__))
 #define	__aligned(x)	__attribute__((__aligned__(x)))
@@ -256,11 +256,11 @@
  * in GCC 2.92.
  */
 #if defined(__lint__)
-#define	__restrict	/* delete __restrict when not supported */
+#define	__restrict		/* delete __restrict when not supported */
 #elif __STDC_VERSION__ >= 199901L
 #define	__restrict	restrict
 #elif !__GNUC_PREREQ__(2, 92)
-#define	__restrict	/* delete __restrict when not supported */
+#define	__restrict		/* delete __restrict when not supported */
 #endif
 
 /*
@@ -275,14 +275,14 @@
 #else
 #define	__func__	""
 #endif
-#endif /* !(__STDC_VERSION__ >= 199901L) */
+#endif				/* !(__STDC_VERSION__ >= 199901L) */
 
 #if defined(_KERNEL)
 #if defined(NO_KERNEL_RCSIDS)
 #undef __KERNEL_RCSID
-#define	__KERNEL_RCSID(_n, _s)		/* nothing */
-#endif /* NO_KERNEL_RCSIDS */
-#endif /* _KERNEL */
+#define	__KERNEL_RCSID(_n, _s)	/* nothing */
+#endif				/* NO_KERNEL_RCSIDS */
+#endif				/* _KERNEL */
 
 #if 0
 #if !defined(_STANDALONE) && !defined(_KERNEL)
@@ -293,9 +293,9 @@
 #define	__RENAME(x)	__symbolrename(x)
 #else
 #error "No function renaming possible"
-#endif /* __lint__ */
-#endif /* __GNUC__ */
-#else /* _STANDALONE || _KERNEL */
+#endif				/* __lint__ */
+#endif				/* __GNUC__ */
+#else				/* _STANDALONE || _KERNEL */
 #define	__RENAME(x)	no renaming in kernel or standalone environment
 #endif
 #endif
@@ -380,7 +380,7 @@
 #else
 #define __printflike(fmtarg, firstvararg)	/* nothing */
 #define __scanflike(fmtarg, firstvararg)	/* nothing */
-#define __format_arg(fmtarg)			/* nothing */
+#define __format_arg(fmtarg)	/* nothing */
 #endif
 
 /*
@@ -469,4 +469,4 @@
 #define __CAST(__dt, __st)	((__dt)(__st))
 #endif
 
-#endif /* !_SYS_CDEFS_H_ */
+#endif				/* !_SYS_CDEFS_H_ */

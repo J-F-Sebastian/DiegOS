@@ -40,20 +40,19 @@ static char sccsid[] = "@(#)negdi2.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: negdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
 /*
  * Return -a (or, equivalently, 0 - a), in quad.  See subdi3.c.
  */
-quad_t
-__negdi2(quad_t a)
+quad_t __negdi2(quad_t a)
 {
-    union uu aa, res;
+	union uu aa, res;
 
-    aa.q = a;
-    res.ul[L] = -aa.ul[L];
-    res.ul[H] = -aa.ul[H] - (res.ul[L] > 0);
-    return (res.q);
+	aa.q = a;
+	res.ul[L] = -aa.ul[L];
+	res.ul[H] = -aa.ul[H] - (res.ul[L] > 0);
+	return (res.q);
 }

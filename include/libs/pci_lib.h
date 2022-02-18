@@ -23,115 +23,93 @@
 #include <types_common.h>
 
 typedef struct pci_bus_device {
-    uint16_t    function:3,
-                device:5,
-                bus:8;
-    uint16_t    vendorid;
-    uint16_t    deviceid;
-    uint8_t     revisionid;
-    uint8_t     system_deviceid;
-    uint8_t     class_code[3];
-    uint32_t    CIS_pointer;
-    /* 16 bytes */
-    /*
-     *       Memory Space BAR Layout
-     * |31 ----------------------- 4 | 3	        | 2 - 1	| 0 
-     * |16-Byte Aligned Base Address | Prefetchable	| Type  | Always 0
+	uint16_t function:3, device:5, bus:8;
+	uint16_t vendorid;
+	uint16_t deviceid;
+	uint8_t revisionid;
+	uint8_t system_deviceid;
+	uint8_t class_code[3];
+	uint32_t CIS_pointer;
+	/* 16 bytes */
+	/*
+	 *       Memory Space BAR Layout
+	 * |31 ----------------------- 4 | 3                | 2 - 1 | 0 
+	 * |16-Byte Aligned Base Address | Prefetchable     | Type  | Always 0
 
-     *     I/O Space BAR Layout
-     * |31 - 2	                    | 1	       | 0
-     * |4-Byte Aligned Base Address	| Reserved | Always 1
-     */
-    uint32_t    BAR[6];
-    /* 40 bytes */
-    uint8_t     int_pin;
-    uint8_t     int_line;
-    uint16_t    msi_msg_data;
-    uint32_t    *msi_msg_ptr;
-    /* 48 bytes */
+	 *     I/O Space BAR Layout
+	 * |31 - 2                      | 1        | 0
+	 * |4-Byte Aligned Base Address     | Reserved | Always 1
+	 */
+	uint32_t BAR[6];
+	/* 40 bytes */
+	uint8_t int_pin;
+	uint8_t int_line;
+	uint16_t msi_msg_data;
+	uint32_t *msi_msg_ptr;
+	/* 48 bytes */
 } pci_bus_device_t;
 
-inline void pci_device_read (volatile uint32_t *bar,
-                             unsigned offset,
-                             uint32_t *value)
+inline void pci_device_read(volatile uint32_t * bar, unsigned offset, uint32_t * value)
 {
-    *value = *(bar + offset/4);
+	*value = *(bar + offset / 4);
 }
 
-inline void pci_device_write (volatile uint32_t *bar,
-                              unsigned offset,
-                              const uint32_t value)
+inline void pci_device_write(volatile uint32_t * bar, unsigned offset, const uint32_t value)
 {
-    *(bar + offset/4) = value;
+	*(bar + offset / 4) = value;
 }
 
 inline void
-pci_device_read_multi (volatile uint32_t *bar,
-                       unsigned offset,
-                       uint32_t *values,
-                       unsigned numregs)
+pci_device_read_multi(volatile uint32_t * bar, unsigned offset, uint32_t * values, unsigned numregs)
 {
-    bar += offset/4;
-    while (numregs--) {
-        *values++ = *bar++;
-    }
+	bar += offset / 4;
+	while (numregs--) {
+		*values++ = *bar++;
+	}
 }
 
 inline void
-pci_device_write_multi (volatile uint32_t *bar,
-                        unsigned offset,
-                        const uint32_t *values,
-                        unsigned numregs)
+pci_device_write_multi(volatile uint32_t * bar,
+		       unsigned offset, const uint32_t * values, unsigned numregs)
 {
-    bar += offset/4;
-    while (numregs--) {
-        *bar++ = *values++;
-    }
+	bar += offset / 4;
+	while (numregs--) {
+		*bar++ = *values++;
+	}
 }
 
-inline void pci_device_readb (volatile uint8_t *bar,
-                              unsigned offset,
-                              uint8_t *value)
+inline void pci_device_readb(volatile uint8_t * bar, unsigned offset, uint8_t * value)
 {
-    *value = *(bar + offset);
+	*value = *(bar + offset);
 }
 
-inline void pci_device_writeb (volatile uint8_t *bar,
-                               unsigned offset,
-                               const uint8_t value)
+inline void pci_device_writeb(volatile uint8_t * bar, unsigned offset, const uint8_t value)
 {
-    *(bar + offset) = value;
+	*(bar + offset) = value;
 }
 
 inline void
-pci_device_read_multib (volatile uint8_t *bar,
-                        unsigned offset,
-                        uint8_t *values,
-                        unsigned numregs)
+pci_device_read_multib(volatile uint8_t * bar, unsigned offset, uint8_t * values, unsigned numregs)
 {
-    bar += offset;
-    while (numregs--) {
-        *values++ = *bar++;
-    }
+	bar += offset;
+	while (numregs--) {
+		*values++ = *bar++;
+	}
 }
 
 inline void
-pci_device_write_multib (volatile uint8_t *bar,
-                         unsigned offset,
-                         const uint8_t *values,
-                         unsigned numregs)
+pci_device_write_multib(volatile uint8_t * bar,
+			unsigned offset, const uint8_t * values, unsigned numregs)
 {
-    bar += offset;
-    while (numregs--) {
-        *bar++ = *values++;
-    }
+	bar += offset;
+	while (numregs--) {
+		*bar++ = *values++;
+	}
 }
 
 STATUS pci_bus_init(void);
 
 pci_bus_device_t *pci_bus_find_device(uint16_t vendorid,
-                                      uint16_t deviceid,
-                                      pci_bus_device_t *prev);
+				      uint16_t deviceid, pci_bus_device_t * prev);
 
 #endif
-

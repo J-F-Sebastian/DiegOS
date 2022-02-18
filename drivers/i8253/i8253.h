@@ -25,4 +25,3 @@
 extern char_driver_t i8253_drv;
 
 #endif
-

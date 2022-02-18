@@ -19,22 +19,24 @@
 
 #include <stdio.h>
 
-char *fgets(char *s, int n, FILE *stream)
+char *fgets(char *s, int n, FILE * stream)
 {
-    int ch = EOF;
-    char *ptr;
+	int ch = EOF;
+	char *ptr;
 
-    ptr = s;
-    while (--n > 0 && (ch = getc(stream)) != EOF) {
-        *ptr++ = ch;
-        if ( ch == '\n')
-            break;
-    }
-    if (ch == EOF) {
-        if (feof(stream)) {
-            if (ptr == s) return (NULL);
-        } else return (NULL);
-    }
-    *ptr = '\0';
-    return (s);
+	ptr = s;
+	while (--n > 0 && (ch = getc(stream)) != EOF) {
+		*ptr++ = ch;
+		if (ch == '\n')
+			break;
+	}
+	if (ch == EOF) {
+		if (feof(stream)) {
+			if (ptr == s)
+				return (NULL);
+		} else
+			return (NULL);
+	}
+	*ptr = '\0';
+	return (s);
 }

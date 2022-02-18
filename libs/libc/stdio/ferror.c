@@ -20,11 +20,11 @@
 #include	<stdio.h>
 #include	"loc_incl.h"
 
-int ferror (FILE *stream)
+int ferror(FILE * stream)
 {
-    if (stream) {
-        return (stream_testflags(stream, IOBUF_ERROR));
-    }
+	if (stream) {
+		return (stream_testflags(stream, IOBUF_ERROR));
+	}
 
-    return (0);
+	return (0);
 }

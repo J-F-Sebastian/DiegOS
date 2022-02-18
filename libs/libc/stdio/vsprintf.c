@@ -26,13 +26,13 @@
 
 int vsprintf(char *s, const char *format, va_list arg)
 {
-    int retval;
+	int retval;
 
-    if (!s || !format) {
-        return (EINVAL);
-    }
+	if (!s || !format) {
+		return (EINVAL);
+	}
 
-    retval = vsnprintf(s, INT_MAX, format, arg);
+	retval = vsnprintf(s, INT_MAX, format, arg);
 
-    return (retval);
+	return (retval);
 }

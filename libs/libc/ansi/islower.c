@@ -19,8 +19,8 @@
 
 #include <ctype.h>
 
-int islower (int c)
+int islower(int c)
 {
-    /* All lower case characters */
-    return (((c >= 'a') && (c <= 'z')) ? (1) : (0));
+	/* All lower case characters */
+	return (((c >= 'a') && (c <= 'z')) ? (1) : (0));
 }

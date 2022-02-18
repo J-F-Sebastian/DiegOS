@@ -21,23 +21,23 @@
 #define IF_H_INCLUDED_
 
 enum {
-    /* Interface is up */
-    IFF_UP              =   (1 << 0),
-    /* Interface has a valid broadcast address */
-    IFF_BROADCAST       =   (1 << 1),
-    /* Interface supports multicast */
-    IFF_MULTICAST       =   (1 << 2),
-    /* Interface can receive all multicast packets */
-    IFF_ALLMULTI        =   (1 << 3),
-    /* Interface can receive all packets */
-    IFF_PROMISC         =   (1 << 4),
-    /* Interface is a loopback */
-    IFF_LOOPBACK        =   (1 << 5)
+	/* Interface is up */
+	IFF_UP = (1 << 0),
+	/* Interface has a valid broadcast address */
+	IFF_BROADCAST = (1 << 1),
+	/* Interface supports multicast */
+	IFF_MULTICAST = (1 << 2),
+	/* Interface can receive all multicast packets */
+	IFF_ALLMULTI = (1 << 3),
+	/* Interface can receive all packets */
+	IFF_PROMISC = (1 << 4),
+	/* Interface is a loopback */
+	IFF_LOOPBACK = (1 << 5)
 };
 
 enum {
-    NETIF_F_SG          =   (1 << 0),
-    NETIF_F_NO_CSUM     =   (1 << 1)
+	NETIF_F_SG = (1 << 0),
+	NETIF_F_NO_CSUM = (1 << 1)
 };
 
-#endif // IF_H_INCLUDED_
+#endif				// IF_H_INCLUDED_

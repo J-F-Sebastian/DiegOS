@@ -22,15 +22,15 @@
 
 #include "queue_type.h"
 
-STATUS stack_init(queue_inst *queue);
+STATUS stack_init(queue_inst * queue);
 
-STATUS stack_push(queue_inst *queue, queue_node *data);
+STATUS stack_push(queue_inst * queue, queue_node * data);
 
-STATUS stack_pop(queue_inst *queue, queue_node **data);
+STATUS stack_pop(queue_inst * queue, queue_node ** data);
 
-inline uint32_t stack_count(queue_inst *queue)
+inline uint32_t stack_count(queue_inst * queue)
 {
-    return ((queue) ? (queue->counter) : (0));
+	return ((queue) ? (queue->counter) : (0));
 }
 
-#endif // STACK_H_INCLUDED
+#endif				// STACK_H_INCLUDED

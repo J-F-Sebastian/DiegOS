@@ -36,81 +36,81 @@
 
 int driver_def_ok(unsigned unitno)
 {
-    return (EOK);
+	return (EOK);
 }
 
 int driver_def_error(unsigned unitno)
 {
-    return (EGENERIC);
+	return (EGENERIC);
 }
 
 int kdrvprintf(const char *fmt, ...)
 {
-    int n;
-    va_list ap;
+	int n;
+	va_list ap;
 
-    va_start(ap, fmt);
-    kvprintf("[DRV]: ", ap);
-    n = kvprintf(fmt, ap);
-    va_end(ap);
+	va_start(ap, fmt);
+	kvprintf("[DRV]: ", ap);
+	n = kvprintf(fmt, ap);
+	va_end(ap);
 
-    return (n);
+	return (n);
 }
 
 /* Go down all the list even on error, at least some driver will be ok */
 int drivers_list_init(const void *drvlist[], unsigned drvlistsize)
 {
-    unsigned d, u;
-    int retcode;
-    int retval = EOK;
-    device_t *retptr;
-	driver_header_t *cmn; 
+	unsigned d, u;
+	int retcode;
+	int retval = EOK;
+	device_t *retptr;
+	driver_header_t *cmn;
 
-    for (d = 0; d < drvlistsize; d++) {
-        cmn = (driver_header_t *)drvlist[d];
-        for (u = 0; u < DRV_UNIT_MAX; u++) {			
-            retcode = cmn->init_fn(u);
-            if (EOK != retcode) {
-                //kerrprintf("Driver %s[%u] failed to init.\n",
-                //          drvlist[d]->name,
-                //        u);
-            } else {
-                retptr = device_create(u, drvlist[d]);
-                if (!retptr) {
-                    retval = EGENERIC;
-                }
-            }
-        }
-    }
+	for (d = 0; d < drvlistsize; d++) {
+		cmn = (driver_header_t *) drvlist[d];
+		for (u = 0; u < DRV_UNIT_MAX; u++) {
+			retcode = cmn->init_fn(u);
+			if (EOK != retcode) {
+				//kerrprintf("Driver %s[%u] failed to init.\n",
+				//          drvlist[d]->name,
+				//        u);
+			} else {
+				retptr = device_create(u, drvlist[d]);
+				if (!retptr) {
+					retval = EGENERIC;
+				}
+			}
+		}
+	}
 
-    return (retval);
+	return (retval);
 }
 
-int net_drivers_list_init(net_driver_t *drvlist[], unsigned drvlistsize)
+int net_drivers_list_init(net_driver_t * drvlist[], unsigned drvlistsize)
 {
-    /* Ethernet only !!! */
-    unsigned d, u;
-    int retcode;
-    int retval = EOK;
-    net_interface_t *retptr;
+	/* Ethernet only !!! */
+	unsigned d, u;
+	int retcode;
+	int retval = EOK;
+	net_interface_t *retptr;
 
-    for (d = 0; d < drvlistsize; d++) {
-        for (u = 0; u < DRV_UNIT_MAX; u++) {
-            retcode = drvlist[d]->cmn.init_fn(u);
-            if (EOK != retcode) {
-                //kerrprintf("Driver %s[%u] failed to init.\n",
-                //          drvlist[d]->name,
-                //        u);
-            } else {
-                retptr = net_interface_create(drvlist[d]);
-                if (!retptr) {
-                    retval = EGENERIC;
-                }
-            }
-        }
-    }
+	for (d = 0; d < drvlistsize; d++) {
+		for (u = 0; u < DRV_UNIT_MAX; u++) {
+			retcode = drvlist[d]->cmn.init_fn(u);
+			if (EOK != retcode) {
+				//kerrprintf("Driver %s[%u] failed to init.\n",
+				//          drvlist[d]->name,
+				//        u);
+			} else {
+				retptr = net_interface_create(drvlist[d]);
+				if (!retptr) {
+					retval = EGENERIC;
+				}
+			}
+		}
+	}
 
-    return (retval);
+	return (retval);
 }
 
 /*
@@ -119,5 +119,5 @@ int net_drivers_list_init(net_driver_t *drvlist[], unsigned drvlistsize)
 
 BOOL init_drivers_lib()
 {
-    return (TRUE);
+	return (TRUE);
 }

@@ -6,71 +6,70 @@
 
 double ldexp(double value, int exp)
 {
-    struct f64 *f64p;
-    int oldexp;
-    double factor;
+	struct f64 *f64p;
+	int oldexp;
+	double factor;
 
-    f64p= (struct f64 *)&value;
-    
-    oldexp= F64_GET_EXP(f64p);
-    if (oldexp == F64_EXP_MAX) {
-        /* Either infinity or Nan */
-        return value;
-    }
-    if (oldexp == 0) {
-        /* Either 0 or denormal */
-        if (F64_GET_MANT_LOW(f64p) == 0 &&
-                F64_GET_MANT_HIGH(f64p) == 0) {
-            return value;
-        }
-    }
+	f64p = (struct f64 *)&value;
 
-    /* If exp is too large (> 2*F64_EXP_MAX) or too small
-     * (< -2*F64_EXP_MAX) return HUGE_VAL or 0. This prevents overflows
-     * in exp if exp is really weird
-     */
-    if (exp >= 2*F64_EXP_MAX) {
-        errno= ERANGE;
-        return HUGE_VAL;
-    }
-    if (exp <= -2*F64_EXP_MAX) {
-        errno= ERANGE;
-        return 0;
-    }
+	oldexp = F64_GET_EXP(f64p);
+	if (oldexp == F64_EXP_MAX) {
+		/* Either infinity or Nan */
+		return value;
+	}
+	if (oldexp == 0) {
+		/* Either 0 or denormal */
+		if (F64_GET_MANT_LOW(f64p) == 0 && F64_GET_MANT_HIGH(f64p) == 0) {
+			return value;
+		}
+	}
 
-    /* Normalize a denormal */
-    if (oldexp == 0) {
-        /* Multiply by 2^64 */
-        factor= 65536.0;	/* 2^16 */
-        factor *= factor;	/* 2^32 */
-        factor *= factor;	/* 2^64 */
-        value *= factor;
-        exp= -64;
-        oldexp= F64_GET_EXP(f64p);
-    }
+	/* If exp is too large (> 2*F64_EXP_MAX) or too small
+	 * (< -2*F64_EXP_MAX) return HUGE_VAL or 0. This prevents overflows
+	 * in exp if exp is really weird
+	 */
+	if (exp >= 2 * F64_EXP_MAX) {
+		errno = ERANGE;
+		return HUGE_VAL;
+	}
+	if (exp <= -2 * F64_EXP_MAX) {
+		errno = ERANGE;
+		return 0;
+	}
 
-    exp= oldexp + exp;
-    if (exp >= F64_EXP_MAX) {
-        /* Overflow */
-        errno= ERANGE;
-        return HUGE_VAL;
-    }
-    if (exp > 0) {
-        /* Normal */
-        F64_SET_EXP(f64p, exp);
-        return value;
-    }
-    /* Denormal, or underflow. */
-    exp += 64;
-    F64_SET_EXP(f64p, exp);
-    /* Divide by 2^64 */
-    factor= 65536.0;	/* 2^16 */
-    factor *= factor;	/* 2^32 */
-    factor *= factor;	/* 2^64 */
-    value /= factor;
-    if (value == 0.0) {
-        /* Underflow */
-        errno= ERANGE;
-    }
-    return value;
+	/* Normalize a denormal */
+	if (oldexp == 0) {
+		/* Multiply by 2^64 */
+		factor = 65536.0;	/* 2^16 */
+		factor *= factor;	/* 2^32 */
+		factor *= factor;	/* 2^64 */
+		value *= factor;
+		exp = -64;
+		oldexp = F64_GET_EXP(f64p);
+	}
+
+	exp = oldexp + exp;
+	if (exp >= F64_EXP_MAX) {
+		/* Overflow */
+		errno = ERANGE;
+		return HUGE_VAL;
+	}
+	if (exp > 0) {
+		/* Normal */
+		F64_SET_EXP(f64p, exp);
+		return value;
+	}
+	/* Denormal, or underflow. */
+	exp += 64;
+	F64_SET_EXP(f64p, exp);
+	/* Divide by 2^64 */
+	factor = 65536.0;	/* 2^16 */
+	factor *= factor;	/* 2^32 */
+	factor *= factor;	/* 2^64 */
+	value /= factor;
+	if (value == 0.0) {
+		/* Underflow */
+		errno = ERANGE;
+	}
+	return value;
 }

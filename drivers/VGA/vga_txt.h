@@ -24,4 +24,4 @@
 
 extern text_driver_t vgatxt_drv;
 
-#endif // VGA_TXT_H_INCLUDED
+#endif				// VGA_TXT_H_INCLUDED

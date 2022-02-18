@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)notdi2.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: notdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -48,13 +48,12 @@ __RCSID("$NetBSD: notdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * Return ~a.  For some reason gcc calls this `one's complement' rather
  * than `not'.
  */
-quad_t
-__one_cmpldi2(quad_t a)
+quad_t __one_cmpldi2(quad_t a)
 {
-    union uu aa;
+	union uu aa;
 
-    aa.q = a;
-    aa.ul[0] = ~aa.ul[0];
-    aa.ul[1] = ~aa.ul[1];
-    return (aa.q);
+	aa.q = a;
+	aa.ul[0] = ~aa.ul[0];
+	aa.ul[1] = ~aa.ul[1];
+	return (aa.q);
 }

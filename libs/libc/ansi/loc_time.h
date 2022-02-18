@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define	YEAR0		2000			/* the first year */
-#define	EPOCH_YR	2015		/* EPOCH = Jan 1 2015 00:00:00 */
+#define	YEAR0		2000	/* the first year */
+#define	EPOCH_YR	2015	/* EPOCH = Jan 1 2015 00:00:00 */
 #define	SECS_DAY	(24L * 60L * 60L)
 #define	LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
 #define	YEARSIZE(year)	(LEAPYEAR(year) ? 366 : 365)

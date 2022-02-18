@@ -20,24 +20,22 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-void *bsearch (const void *key,
-               const void *base,
-               size_t n,
-               size_t size,
-               int (*cmp)(const void *keyval, const void *datum))
+void *bsearch(const void *key,
+	      const void *base,
+	      size_t n, size_t size, int (*cmp) (const void *keyval, const void *datum))
 {
-    const void *mid_point;
-    int retval;
+	const void *mid_point;
+	int retval;
 
-    while (n > 0) {
-        mid_point = (char *)base + size * (n >> 1);
-        if ((retval = cmp(key, mid_point)) == 0)
-            return ((void *)mid_point);
-        if (retval >= 0) {
-            base  = (char *)mid_point + size;
-            n = (n - 1) >> 1;
-        } else
-            n >>= 1;
-    }
-    return (NULL);
+	while (n > 0) {
+		mid_point = (char *)base + size * (n >> 1);
+		if ((retval = cmp(key, mid_point)) == 0)
+			return ((void *)mid_point);
+		if (retval >= 0) {
+			base = (char *)mid_point + size;
+			n = (n - 1) >> 1;
+		} else
+			n >>= 1;
+	}
+	return (NULL);
 }

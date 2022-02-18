@@ -21,7 +21,7 @@
 
 #include	"loc_incl.h"
 
-void setbuffer (FILE *stream, char *buf, size_t size)
+void setbuffer(FILE * stream, char *buf, size_t size)
 {
-    (void)setvbuf(stream, buf, (buf ? IOBUF_FBUF : IOBUF_NBUF), size);
+	(void)setvbuf(stream, buf, (buf ? IOBUF_FBUF : IOBUF_NBUF), size);
 }

@@ -36,15 +36,15 @@
 #define INT_MAX   2147483647	/* maximum value of a 32-bit int */
 #define UINT_MAX  0xFFFFFFFF	/* maximum value of an unsigned 32-bit int */
 
-#define LONG_MIN (-2147483647L-1) /* minimum value of a long */
-#define LONG_MAX  2147483647L	  /* maximum value of a long */
-#define ULONG_MAX 0xFFFFFFFFL	  /* maximum value of an unsigned long */
+#define LONG_MIN (-2147483647L-1)	/* minimum value of a long */
+#define LONG_MAX  2147483647L	/* maximum value of a long */
+#define ULONG_MAX 0xFFFFFFFFL	/* maximum value of an unsigned long */
 
-#define LLONG_MIN  (-0x7FFFFFFFFFFFFFFFLL-1) 
+#define LLONG_MIN  (-0x7FFFFFFFFFFFFFFFLL-1)
 /* minimum value of a long long */
-#define LLONG_MAX  0x7FFFFFFFFFFFFFFFLL	     
+#define LLONG_MAX  0x7FFFFFFFFFFFFFFFLL
 /* maximum value of a long long */
-#define ULLONG_MAX 0xFFFFFFFFFFFFFFFFULL     
+#define ULLONG_MAX 0xFFFFFFFFFFFFFFFFULL
 /* maximum value of an unsigned long long */
 
 #define NAME_MAX 255
@@ -52,4 +52,4 @@
 
 #define OPEN_MAX 64
 
-#endif /* _LIMITS_H */
+#endif				/* _LIMITS_H */

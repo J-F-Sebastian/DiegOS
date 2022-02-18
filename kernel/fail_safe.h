@@ -49,4 +49,3 @@
 void scheduler_fail_safe(void);
 
 #endif
-

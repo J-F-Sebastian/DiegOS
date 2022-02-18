@@ -21,18 +21,18 @@
 #define _CTYPE_H_
 
 /* Function Prototypes */
-int isalnum (int c);	/* alphanumeric [a-z], [A-Z], [0-9] */
-int isalpha (int c);	/* alphabetic */
-int iscntrl (int c);	/* control characters */
-int isdigit (int c);	/* digit [0-9] */
-int isgraph (int c);	/* graphic character */
-int islower (int c);	/* lower-case letter [a-z] */
-int isprint (int c);	/* printable character */
-int ispunct (int c);	/* punctuation mark */
-int isspace (int c);	/* white space sp, \f, \n, \r, \t, \v*/
-int isupper (int c);	/* upper-case letter [A-Z] */
-int isxdigit (int c);	/* hex digit [0-9], [a-f], [A-F] */
-int tolower (int c);	/* convert to lower-case */
-int toupper (int c);	/* convert to upper-case */
+int isalnum(int c);		/* alphanumeric [a-z], [A-Z], [0-9] */
+int isalpha(int c);		/* alphabetic */
+int iscntrl(int c);		/* control characters */
+int isdigit(int c);		/* digit [0-9] */
+int isgraph(int c);		/* graphic character */
+int islower(int c);		/* lower-case letter [a-z] */
+int isprint(int c);		/* printable character */
+int ispunct(int c);		/* punctuation mark */
+int isspace(int c);		/* white space sp, \f, \n, \r, \t, \v */
+int isupper(int c);		/* upper-case letter [A-Z] */
+int isxdigit(int c);		/* hex digit [0-9], [a-f], [A-F] */
+int tolower(int c);		/* convert to lower-case */
+int toupper(int c);		/* convert to upper-case */
 
-#endif 
+#endif

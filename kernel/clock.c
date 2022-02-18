@@ -43,7 +43,7 @@ static unsigned mode = 0;
 /*
  * callbacks invoked after ticks accounting
  */
-static kernel_clock_cb callbacks[4] = {};
+static kernel_clock_cb callbacks[4] = { };
 
 /*
  * clock instance made global, so runtime calls to change frequency
@@ -59,182 +59,184 @@ static struct time_util sys_ticks;
 /*
  * CLK device interrupt handler
  */
-static void clock_int_handler (void)
+static void clock_int_handler(void)
 {
-    unsigned i;
+	unsigned i;
 
-    kernel_time_update_elapsed_counter(period, &sys_ticks);
+	kernel_time_update_elapsed_counter(period, &sys_ticks);
 
-    for (i = 0; i < NELEMENTS(callbacks); i++) {
-        if (callbacks[i]) callbacks[i](kernel_time_get_elapsed_msecs(&sys_ticks));
-    }
-    if (mode == 1) {
-	if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
-	    kprintf("FAILED\n");
-    }
+	for (i = 0; i < NELEMENTS(callbacks); i++) {
+		if (callbacks[i])
+			callbacks[i] (kernel_time_get_elapsed_msecs(&sys_ticks));
+	}
+	if (mode == 1) {
+		if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
+			kprintf("FAILED\n");
+	}
 }
 
 /*
  * Dependencies: devices, drivers
  */
-BOOL clock_init (void)
+BOOL clock_init(void)
 {
-    uint32_t params[3] = {0,0,0};
+	uint32_t params[3] = { 0, 0, 0 };
 
-    clock = device_lookup(DEV_CLK, 0);
+	clock = device_lookup(DEV_CLK, 0);
 
-    if (!clock) return (FALSE);
+	if (!clock)
+		return (FALSE);
 
-    if (EOK != clock->cmn->ioctrl_fn(clock_int_handler, CLK_SET_CB, 0)) {
-            return (FALSE);
-    }
+	if (EOK != clock->cmn->ioctrl_fn(clock_int_handler, CLK_SET_CB, 0)) {
+		return (FALSE);
+	}
 
-    if (EOK != clock->cmn->ioctrl_fn(params, CLK_GET_PARAMS, 0)) {
-	    return (FALSE);
-    }
+	if (EOK != clock->cmn->ioctrl_fn(params, CLK_GET_PARAMS, 0)) {
+		return (FALSE);
+	}
 
-    if (EOK != kernel_time_init(params[0], params[1], params[2], &sys_ticks)) {
-	    return (FALSE);
-    }
+	if (EOK != kernel_time_init(params[0], params[1], params[2], &sys_ticks)) {
+		return (FALSE);
+	}
 
-    if (EOK != clock->cmn->ioctrl_fn(&mode, CLK_SET_MODE, 0))
-	    return (FALSE);
+	if (EOK != clock->cmn->ioctrl_fn(&mode, CLK_SET_MODE, 0))
+		return (FALSE);
 
-    period = kernel_time_get_value(1000/DEFAULT_CLOCK_RES, &sys_ticks);
+	period = kernel_time_get_value(1000 / DEFAULT_CLOCK_RES, &sys_ticks);
 
-    if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
-	    return (FALSE);
+	if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
+		return (FALSE);
 
-    return (TRUE);
+	return (TRUE);
 }
 
-BOOL clock_add_cb (kernel_clock_cb cb)
+BOOL clock_add_cb(kernel_clock_cb cb)
 {
-    unsigned i;
+	unsigned i;
 
-    lock();
-
-    for (i = 0; i < NELEMENTS(callbacks); i++) {
-        if (!callbacks[i]) {
-            callbacks[i] = cb;
-            unlock();
-            return (TRUE);
-        }
-    }
-
-    unlock();
-
-    return (FALSE);
-}
-
-BOOL clock_del_cb (kernel_clock_cb cb)
-{
-    unsigned i;
-
-    lock();
-
-    for (i = 0; i < NELEMENTS(callbacks); i++) {
-        if (cb == callbacks[i]) {
-            callbacks[i] = NULL;
-            unlock();
-            return (TRUE);
-        }
-    }
-
-    unlock();
-
-    return (FALSE);
-}
-
-static BOOL clock_set_mode (unsigned newmode)
-{
-    int retcode = EINVAL;
-
-    if (mode == newmode)
-	    return (TRUE);
-
-    if (clock) {
 	lock();
-        retcode = clock->cmn->ioctrl_fn(&newmode, CLK_SET_MODE, 0);
-        if (EOK != retcode) {
-	    unlock();
-            return (FALSE);
-        }
-	mode = newmode;
-        retcode = clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0);
-	unlock();
-    }
 
-    return ((EOK == retcode) ? TRUE : FALSE);
+	for (i = 0; i < NELEMENTS(callbacks); i++) {
+		if (!callbacks[i]) {
+			callbacks[i] = cb;
+			unlock();
+			return (TRUE);
+		}
+	}
+
+	unlock();
+
+	return (FALSE);
 }
 
-BOOL clock_set_periodic (void)
+BOOL clock_del_cb(kernel_clock_cb cb)
+{
+	unsigned i;
+
+	lock();
+
+	for (i = 0; i < NELEMENTS(callbacks); i++) {
+		if (cb == callbacks[i]) {
+			callbacks[i] = NULL;
+			unlock();
+			return (TRUE);
+		}
+	}
+
+	unlock();
+
+	return (FALSE);
+}
+
+static BOOL clock_set_mode(unsigned newmode)
+{
+	int retcode = EINVAL;
+
+	if (mode == newmode)
+		return (TRUE);
+
+	if (clock) {
+		lock();
+		retcode = clock->cmn->ioctrl_fn(&newmode, CLK_SET_MODE, 0);
+		if (EOK != retcode) {
+			unlock();
+			return (FALSE);
+		}
+		mode = newmode;
+		retcode = clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0);
+		unlock();
+	}
+
+	return ((EOK == retcode) ? TRUE : FALSE);
+}
+
+BOOL clock_set_periodic(void)
 {
 	return clock_set_mode(0);
 }
 
-BOOL clock_set_oneshot (void)
+BOOL clock_set_oneshot(void)
 {
 	return clock_set_mode(1);
 }
 
-BOOL clock_set_period (unsigned ms)
+BOOL clock_set_period(unsigned ms)
 {
-    int retcode = EINVAL;
-    uint32_t temp = kernel_time_get_value(ms, &sys_ticks);
+	int retcode = EINVAL;
+	uint32_t temp = kernel_time_get_value(ms, &sys_ticks);
 
-    if (temp == period)
-        return TRUE;
+	if (temp == period)
+		return TRUE;
 
-    if (clock) {
-        temp = kernel_time_adjust_range(temp, &sys_ticks);
+	if (clock) {
+		temp = kernel_time_adjust_range(temp, &sys_ticks);
 
-	/*
-	 * A reliable method to compensate lost ticks is still required !!!
-	 */
-	lock();
-        retcode = clock->cmn->ioctrl_fn(&temp, CLK_SET_PERIOD, 0);
-	if (EOK == retcode) {
-            period = temp;
-        }
-	unlock();
-    }
+		/*
+		 * A reliable method to compensate lost ticks is still required !!!
+		 */
+		lock();
+		retcode = clock->cmn->ioctrl_fn(&temp, CLK_SET_PERIOD, 0);
+		if (EOK == retcode) {
+			period = temp;
+		}
+		unlock();
+	}
 
-    return ((EOK == retcode) ? TRUE : FALSE);
+	return ((EOK == retcode) ? TRUE : FALSE);
 }
 
-uint64_t clock_get_ticks (void)
+uint64_t clock_get_ticks(void)
 {
-    uint64_t temp = kernel_time_get_elapsed_msecs(&sys_ticks);
-    return (clock_convert_msecs_to_ticks(temp));
+	uint64_t temp = kernel_time_get_elapsed_msecs(&sys_ticks);
+	return (clock_convert_msecs_to_ticks(temp));
 }
 
-uint64_t clock_get_seconds (void)
+uint64_t clock_get_seconds(void)
 {
-    return (clock_get_milliseconds()/1000);
+	return (clock_get_milliseconds() / 1000);
 }
 
-uint64_t clock_get_milliseconds (void)
+uint64_t clock_get_milliseconds(void)
 {
-    return (kernel_time_get_elapsed_msecs(&sys_ticks));
+	return (kernel_time_get_elapsed_msecs(&sys_ticks));
 }
 
-void clock_set_boot_seconds (unsigned seconds)
+void clock_set_boot_seconds(unsigned seconds)
 {
-    boot_ticks = (uint64_t)seconds*DEFAULT_CLOCK_RES;
+	boot_ticks = (uint64_t) seconds *DEFAULT_CLOCK_RES;
 }
 
-unsigned clock_get_boot_seconds (void)
+unsigned clock_get_boot_seconds(void)
 {
-    return (unsigned)(boot_ticks/DEFAULT_CLOCK_RES);
+	return (unsigned)(boot_ticks / DEFAULT_CLOCK_RES);
 }
 
-uint64_t clock_convert_msecs_to_ticks (unsigned msecs)
+uint64_t clock_convert_msecs_to_ticks(unsigned msecs)
 {
-    uint64_t retval = (uint64_t)msecs;
+	uint64_t retval = (uint64_t) msecs;
 
-    retval *= DEFAULT_CLOCK_RES;
-    retval /= 1000;
+	retval *= DEFAULT_CLOCK_RES;
+	retval /= 1000;
 
-    return retval;
+	return retval;
 }

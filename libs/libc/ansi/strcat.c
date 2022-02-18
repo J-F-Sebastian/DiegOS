@@ -19,14 +19,16 @@
 
 #include <string.h>
 
-char *strcat (char *s, const char *ct)
+char *strcat(char *s, const char *ct)
 {
-    char *s1 = s;
+	char *s1 = s;
 
-    if (s && ct) {
-        while (*s1++ != '\0') {};
-        s1--;
-        while ((*s1++ = *ct++) != '\0') {};
-    }
-    return (s);
+	if (s && ct) {
+		while (*s1++ != '\0') {
+		};
+		s1--;
+		while ((*s1++ = *ct++) != '\0') {
+		};
+	}
+	return (s);
 }

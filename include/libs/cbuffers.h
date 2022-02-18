@@ -54,30 +54,30 @@
  */
 
 struct cbuffer {
-    /*
-     * The first element of the buffer, or the fist element to be removed.
-     * Reading from the buffer (removing items from the buffer) means moving
-     * the head to the tail.
-     */
-    unsigned head;
-    /*
-     * The last element of the buffer, or the last element added.
-     * Writing to the buffer (adding items to the buffer) means moving
-     * the tail away from the head.
-     */
-    unsigned tail;
-    /*
-     * The total size items in the buffer; this is the maximum difference
-     * from tail to head, equalling the maximum storage capability minus bufstep.
-     * When the buffer is full, the last item cannot be stored in the buffer,
-     * so that the total amount of items in the buffer is bufsize - bufstep.
-     */
-    unsigned bufsize;
-    /*
-     * The value to be added to head or tail when advancing their values.
-     * the number of advancing steps equals bufsize/bufstep.
-     */
-    unsigned bufstep;
+	/*
+	 * The first element of the buffer, or the fist element to be removed.
+	 * Reading from the buffer (removing items from the buffer) means moving
+	 * the head to the tail.
+	 */
+	unsigned head;
+	/*
+	 * The last element of the buffer, or the last element added.
+	 * Writing to the buffer (adding items to the buffer) means moving
+	 * the tail away from the head.
+	 */
+	unsigned tail;
+	/*
+	 * The total size items in the buffer; this is the maximum difference
+	 * from tail to head, equalling the maximum storage capability minus bufstep.
+	 * When the buffer is full, the last item cannot be stored in the buffer,
+	 * so that the total amount of items in the buffer is bufsize - bufstep.
+	 */
+	unsigned bufsize;
+	/*
+	 * The value to be added to head or tail when advancing their values.
+	 * the number of advancing steps equals bufsize/bufstep.
+	 */
+	unsigned bufstep;
 };
 
 #define CBUFFER_STATIC_INIT(cbuffername, buffersize, step) \
@@ -88,65 +88,65 @@ struct cbuffer listname = {     \
     .bufstep = step             \
 }
 
-inline void cbuffer_init (struct cbuffer *cbuf,
-                                 unsigned buffersize,
-                                 unsigned bufferstep)
+inline void cbuffer_init(struct cbuffer *cbuf, unsigned buffersize, unsigned bufferstep)
 {
-    cbuf->head = cbuf->tail = 0;
-    cbuf->bufsize = buffersize;
-    cbuf->bufstep = bufferstep;
-    if (buffersize < bufferstep) {
-        cbuf->bufstep = cbuf->bufsize;
-    }
+	cbuf->head = cbuf->tail = 0;
+	cbuf->bufsize = buffersize;
+	cbuf->bufstep = bufferstep;
+	if (buffersize < bufferstep) {
+		cbuf->bufstep = cbuf->bufsize;
+	}
 }
 
-inline void cbuffer_add (struct cbuffer *cbuf)
+inline void cbuffer_add(struct cbuffer *cbuf)
 {
-    cbuf->tail += cbuf->bufstep;
-    cbuf->tail %= cbuf->bufsize;
+	cbuf->tail += cbuf->bufstep;
+	cbuf->tail %= cbuf->bufsize;
 }
 
-inline void cbuffer_remove (struct cbuffer *cbuf)
+inline void cbuffer_remove(struct cbuffer *cbuf)
 {
-    cbuf->head += cbuf->bufstep;
-    cbuf->head %= cbuf->bufsize;
+	cbuf->head += cbuf->bufstep;
+	cbuf->head %= cbuf->bufsize;
 }
 
-inline void cbuffer_add_n (struct cbuffer *cbuf, unsigned n)
+inline void cbuffer_add_n(struct cbuffer *cbuf, unsigned n)
 {
-    cbuf->tail += cbuf->bufstep*n;
-    cbuf->tail %= cbuf->bufsize;
+	cbuf->tail += cbuf->bufstep * n;
+	cbuf->tail %= cbuf->bufsize;
 }
 
-inline void cbuffer_remove_n (struct cbuffer *cbuf, unsigned n)
+inline void cbuffer_remove_n(struct cbuffer *cbuf, unsigned n)
 {
-    cbuf->head += cbuf->bufstep*n;
-    cbuf->head %= cbuf->bufsize;
+	cbuf->head += cbuf->bufstep * n;
+	cbuf->head %= cbuf->bufsize;
 }
 
-inline unsigned cbuffer_free_space (struct cbuffer *cbuf)
+inline unsigned cbuffer_free_space(struct cbuffer *cbuf)
 {
-    if (cbuf->head == cbuf->tail) return (cbuf->bufsize - cbuf->bufstep);
-    if (cbuf->head < cbuf->tail) {
-        return (cbuf->head + cbuf->bufsize - cbuf->tail - cbuf->bufstep);
-    } else {
-        return (cbuf->head - cbuf->tail - cbuf->bufstep);
-    }
+	if (cbuf->head == cbuf->tail)
+		return (cbuf->bufsize - cbuf->bufstep);
+	if (cbuf->head < cbuf->tail) {
+		return (cbuf->head + cbuf->bufsize - cbuf->tail - cbuf->bufstep);
+	} else {
+		return (cbuf->head - cbuf->tail - cbuf->bufstep);
+	}
 }
 
-inline unsigned cbuffer_in_use (struct cbuffer *cbuf)
+inline unsigned cbuffer_in_use(struct cbuffer *cbuf)
 {
-    if (cbuf->head == cbuf->tail) return (0);
-    if (cbuf->head < cbuf->tail) {
-        return (cbuf->tail - cbuf->head);
-    } else {
-        return (cbuf->bufsize - cbuf->head + cbuf->tail);
-    }
+	if (cbuf->head == cbuf->tail)
+		return (0);
+	if (cbuf->head < cbuf->tail) {
+		return (cbuf->tail - cbuf->head);
+	} else {
+		return (cbuf->bufsize - cbuf->head + cbuf->tail);
+	}
 }
 
-inline BOOL cbuffer_is_empty (struct cbuffer *cbuf)
+inline BOOL cbuffer_is_empty(struct cbuffer * cbuf)
 {
-    return (cbuf->head == cbuf->tail) ? TRUE : FALSE;
+	return (cbuf->head == cbuf->tail) ? TRUE : FALSE;
 }
 
-#endif // CBUFFERS_H_INCLUDED
+#endif				// CBUFFERS_H_INCLUDED

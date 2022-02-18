@@ -24,4 +24,4 @@
 
 extern grafics_driver_t vga_drv;
 
-#endif // VGA_H_INCLUDED
+#endif				// VGA_H_INCLUDED

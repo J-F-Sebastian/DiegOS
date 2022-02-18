@@ -25,11 +25,11 @@
  */
 enum VGA_FONTS {
 	VGA_FONTS_CP437_8x16,
-	VGA_FONTS_DEFAULT = VGA_FONTS_CP437_8x16,	
+	VGA_FONTS_DEFAULT = VGA_FONTS_CP437_8x16,
 	VGA_FONTS_CP437_8x8,
-	VGA_FONTS_CP437_GFX_8x16,		
+	VGA_FONTS_CP437_GFX_8x16,
 };
 
-const unsigned char *vga_get_font (enum VGA_FONTS font);
+const unsigned char *vga_get_font(enum VGA_FONTS font);
 
 #endif

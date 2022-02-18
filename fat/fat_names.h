@@ -34,7 +34,8 @@
  *
  * @return length of the chunk in bytes
  */
-size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t *startpos, size_t *endpos);
+size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t * startpos,
+			   size_t * endpos);
 
 /**
  * @brief FAT_parse_directory_last parse a standard path string and returns the position
@@ -65,4 +66,4 @@ int FAT_make_path_relative(const char *directory, const char *relto, char *outpu
 
 int FAT_check_character(char chk);
 
-#endif // FAT_NAMES_H
+#endif				// FAT_NAMES_H

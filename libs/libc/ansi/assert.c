@@ -21,13 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void assertion (const char *expr, const char *file, int line, const char *fn)
+void assertion(const char *expr, const char *file, int line, const char *fn)
 {
-    fprintf(stderr,
-            "Assertion \"%s\" failed, file %s, line %d, function %s\n",
-            expr,
-            file,
-            line,
-            fn);
-    abort();
+	fprintf(stderr,
+		"Assertion \"%s\" failed, file %s, line %d, function %s\n", expr, file, line, fn);
+	abort();
 }

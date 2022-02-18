@@ -94,6 +94,6 @@ BOOL mutex_is_locked(struct mutex *mtx);
  * PARAMETERS IN
  * struct mutex *mtx - the mutex structure to dump, it can be NULL
  */
-void dump_mutex (struct mutex *mtx);
+void dump_mutex(struct mutex *mtx);
 
-#endif // MUTEX_H_INCLUDED
+#endif				// MUTEX_H_INCLUDED

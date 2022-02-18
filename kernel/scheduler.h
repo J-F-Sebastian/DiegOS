@@ -48,5 +48,4 @@ uint8_t scheduler_ready_threads(uint8_t prio);
 
 void scheduler_fail_safe(void);
 
-#endif // SCHEDULER_H_INCLUDED
-
+#endif				// SCHEDULER_H_INCLUDED

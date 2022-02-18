@@ -26,25 +26,21 @@
 
 int sscanf(const char *s, const char *format, ...)
 {
-    va_list ap;
-    int retval;
-    FILE tmpstream;
+	va_list ap;
+	int retval;
+	FILE tmpstream;
 
-    if (!s || !format) {
-        return (EINVAL);
-    }
+	if (!s || !format) {
+		return (EINVAL);
+	}
 
-    stream_init(&tmpstream,
-                -1,
-                (char *)s,
-                USHRT_MAX,
-                (IOBUF_READ | IOBUF_FBUF));
+	stream_init(&tmpstream, -1, (char *)s, USHRT_MAX, (IOBUF_READ | IOBUF_FBUF));
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    retval = formatted_scan(&tmpstream, format, ap);
+	retval = formatted_scan(&tmpstream, format, ap);
 
-    va_end(ap);
+	va_end(ap);
 
-    return (retval);
+	return (retval);
 }

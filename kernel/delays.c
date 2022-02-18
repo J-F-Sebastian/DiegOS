@@ -27,96 +27,101 @@
 
 unsigned long loops_mdelay;
 
-void calibrate_delay (volatile unsigned long *ticks)
+void calibrate_delay(volatile unsigned long *ticks)
 {
-    unsigned long oldticks;
-    unsigned long resolution, finder;
+	unsigned long oldticks;
+	unsigned long resolution, finder;
 
-    finder = 10000U;
-    resolution = UINT_MAX/1024;
+	finder = 10000U;
+	resolution = UINT_MAX / 1024;
 
-    while (1) {
-        oldticks = *ticks;
+	while (1) {
+		oldticks = *ticks;
 
-        /*
-         * wait for the tick to be updated
-         */
-        while (oldticks == *ticks) {};
-        oldticks = *ticks;
-        delay_loop(finder);
-        if (oldticks < *ticks) {
-            break;
-        } else {
-            finder += resolution;
-        }
-    }
+		/*
+		 * wait for the tick to be updated
+		 */
+		while (oldticks == *ticks) {
+		};
+		oldticks = *ticks;
+		delay_loop(finder);
+		if (oldticks < *ticks) {
+			break;
+		} else {
+			finder += resolution;
+		}
+	}
 
-    /*
-     * We know finder's value is overestimating the correct value
-     */
-    resolution /= 2;
+	/*
+	 * We know finder's value is overestimating the correct value
+	 */
+	resolution /= 2;
 
-    while (1) {
-        oldticks = *ticks;
+	while (1) {
+		oldticks = *ticks;
 
-        /*
-         * wait for the tick to be updated
-         */
-        while (oldticks == *ticks) {};
-        oldticks = *ticks;
-        delay_loop(finder);
-        if (oldticks < *ticks) {
-            if (finder < resolution) {
-                resolution = finder/2 + 1;
-            }
-            finder -= resolution;
-        } else {
-            finder += resolution;
-            resolution /= 2;
-            if (!resolution) {
-                finder--;
-                break;
-            }
-        }
-    }
+		/*
+		 * wait for the tick to be updated
+		 */
+		while (oldticks == *ticks) {
+		};
+		oldticks = *ticks;
+		delay_loop(finder);
+		if (oldticks < *ticks) {
+			if (finder < resolution) {
+				resolution = finder / 2 + 1;
+			}
+			finder -= resolution;
+		} else {
+			finder += resolution;
+			resolution /= 2;
+			if (!resolution) {
+				finder--;
+				break;
+			}
+		}
+	}
 
-    resolution = 8;
-    while (resolution--) {
-        oldticks = *ticks;
+	resolution = 8;
+	while (resolution--) {
+		oldticks = *ticks;
 
-        /*
-         * wait for the tick to be updated
-         */
-        while (oldticks == *ticks) {};
-        oldticks = *ticks;
-        delay_loop(finder);
-        if (oldticks < *ticks) {
-            finder++;
-        } else {
-            finder--;
-        }
-    }
+		/*
+		 * wait for the tick to be updated
+		 */
+		while (oldticks == *ticks) {
+		};
+		oldticks = *ticks;
+		delay_loop(finder);
+		if (oldticks < *ticks) {
+			finder++;
+		} else {
+			finder--;
+		}
+	}
 
-    loops_mdelay = finder;
+	loops_mdelay = finder;
 }
 
 void mdelay(unsigned long msecs)
 {
-    delay_loop(loops_mdelay*msecs);
+	delay_loop(loops_mdelay * msecs);
 }
 
 void udelay(unsigned long usecs)
 {
-    unsigned long temp = loops_mdelay*usecs/1000;
-    if (((loops_mdelay*usecs) % 1000U) > 499) temp++;
+	unsigned long temp = loops_mdelay * usecs / 1000;
+	if (((loops_mdelay * usecs) % 1000U) > 499)
+		temp++;
 
-    delay_loop(temp);
+	delay_loop(temp);
 }
 
 void ndelay(unsigned long nsecs)
 {
-    unsigned long temp = loops_mdelay*nsecs/1000000;
-    if (((loops_mdelay*nsecs) % 1000000U) > 499999) temp++;
+	unsigned long temp = loops_mdelay * nsecs / 1000000;
+	if (((loops_mdelay * nsecs) % 1000000U) > 499999)
+		temp++;
 
-    delay_loop(temp);
+	delay_loop(temp);
 }

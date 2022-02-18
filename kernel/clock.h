@@ -33,7 +33,7 @@
  * RETURN VALUES
  * none
  */
-typedef void (*kernel_clock_cb)(uint64_t msecs);
+typedef void (*kernel_clock_cb) (uint64_t msecs);
 
 /*
  * Init clock library, this will configure the system ticks
@@ -44,7 +44,7 @@ typedef void (*kernel_clock_cb)(uint64_t msecs);
  * TRUE if initialization is successfu
  * FALSE in any other case
  */
-BOOL clock_init (void);
+BOOL clock_init(void);
 
 /*
  * Add a callback to the clock library. Every time the clock expires,
@@ -60,7 +60,7 @@ BOOL clock_init (void);
  * TRUE if the callback was properly registered
  * FALSE in any other case
  */
-BOOL clock_add_cb (kernel_clock_cb cb);
+BOOL clock_add_cb(kernel_clock_cb cb);
 
 /*
  * Remove a callback from the clock library.
@@ -73,7 +73,7 @@ BOOL clock_add_cb (kernel_clock_cb cb);
  * TRUE if the callback was properly removed
  * FALSE in any other case
  */
-BOOL clock_del_cb (kernel_clock_cb cb);
+BOOL clock_del_cb(kernel_clock_cb cb);
 
 /*
  * Set the CLK device to work in periodic mode, i.e. the device
@@ -84,7 +84,7 @@ BOOL clock_del_cb (kernel_clock_cb cb);
  * TRUE if the CLK device has been set in periodic mode
  * FALSE in any other case
  */
-BOOL clock_set_periodic (void);
+BOOL clock_set_periodic(void);
 
 /*
  * Set the CLK device to work in one-shot mode, i.e. the device
@@ -95,7 +95,7 @@ BOOL clock_set_periodic (void);
  * TRUE if the CLK device has been set in periodic mode
  * FALSE in any other case
  */
-BOOL clock_set_oneshot (void);
+BOOL clock_set_oneshot(void);
 
 /*
  * Set the CLK device period, a.k.a. the time between two consecutive expirations.
@@ -105,7 +105,6 @@ BOOL clock_set_oneshot (void);
  * TRUE if the CLK device has been set in periodic mode
  * FALSE in any other case
  */
-BOOL clock_set_period (unsigned ms);
+BOOL clock_set_period(unsigned ms);
 
 #endif
-

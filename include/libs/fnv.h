@@ -38,4 +38,4 @@ uint16_t fnv_buf_16(void *buffer, unsigned size);
 
 uint16_t fnv_str_16(char *str);
 
-#endif // FNV_H_INCLUDED
+#endif				// FNV_H_INCLUDED

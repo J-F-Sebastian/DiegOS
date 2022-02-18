@@ -21,9 +21,9 @@
 
 #include	"loc_incl.h"
 
-void clearerr (FILE *stream)
+void clearerr(FILE * stream)
 {
-    if (stream) {
-        stream_clearflags(stream, IOBUF_EOF | IOBUF_ERROR);
-    }
+	if (stream) {
+		stream_clearflags(stream, IOBUF_EOF | IOBUF_ERROR);
+	}
 }

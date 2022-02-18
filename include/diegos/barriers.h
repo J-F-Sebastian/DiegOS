@@ -49,7 +49,7 @@ typedef struct barrier barrier_t;
  * RETURNS
  * A pointer to a barrier handle or NULL in case of failure.
  */
-barrier_t *barrier_create (const char *name, BOOL autoclose);
+barrier_t *barrier_create(const char *name, BOOL autoclose);
 
 /*
  * Sets a barrier state to open.
@@ -61,7 +61,7 @@ barrier_t *barrier_create (const char *name, BOOL autoclose);
  * EOK in case of success
  * EINVAL if barrier is invalid
  */
-int barrier_open (barrier_t *barrier);
+int barrier_open(barrier_t * barrier);
 
 /*
  * Sets a barrier state to open.
@@ -73,7 +73,7 @@ int barrier_open (barrier_t *barrier);
  * EOK in case of success
  * EINVAL if barrier is invalid
  */
-int barrier_close (barrier_t *barrier);
+int barrier_close(barrier_t * barrier);
 
 /*
  * Set the running thread in wait state; opening the barrier will
@@ -87,7 +87,7 @@ int barrier_close (barrier_t *barrier);
  * EINVAL if barrier is invalid
  * EPERM if the thread cannot be set to wait state
  */
-int wait_for_barrier (barrier_t *barrier);
+int wait_for_barrier(barrier_t * barrier);
 
 /*
  * Print to stderr the specified barrier's configuration and status.
@@ -96,6 +96,6 @@ int wait_for_barrier (barrier_t *barrier);
  * PARAMETERS IN
  * barrier_t *barrier - a specific barrier to be dumped, or NULL to dump'em all
  */
-void barrier_dump (const barrier_t *barrier);
+void barrier_dump(const barrier_t * barrier);
 
-#endif // BARRIERS_H_INCLUDED
+#endif				// BARRIERS_H_INCLUDED

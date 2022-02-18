@@ -27,13 +27,13 @@
 #define	RULE_LEN	120
 #define	TZ_LEN		10
 
-long    timezone = 0;
-long    dst_off = 60 * 60;
-int	    daylight = 0;
+long timezone = 0;
+long dst_off = 60 * 60;
+int daylight = 0;
 
 const int days_per_month[2][12] = {
-    /* non-leap year */
-    { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
-    /* leap year */
-    { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
+	/* non-leap year */
+	{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+	/* leap year */
+	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };

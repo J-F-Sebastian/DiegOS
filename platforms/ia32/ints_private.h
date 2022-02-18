@@ -25,4 +25,3 @@ extern void enable_irq(unsigned irq);
 extern void disable_irq(unsigned irq);
 
 #endif
-

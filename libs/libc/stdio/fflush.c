@@ -22,75 +22,75 @@
 
 #include	"loc_incl.h"
 
-int fflush (FILE *stream)
+int fflush(FILE * stream)
 {
-    unsigned i, count;
-    int c1, retval = 0;
-    off_t adjust = 0;
+	unsigned i, count;
+	int c1, retval = 0;
+	off_t adjust = 0;
 
-    if (!stream) {
-        for(i = 0; i < FOPEN_MAX; i++)
-            if (iostreams[i] && fflush(iostreams[i])) {
-                retval = EOF;
-            }
-        return (retval);
-    }
+	if (!stream) {
+		for (i = 0; i < FOPEN_MAX; i++)
+			if (iostreams[i] && fflush(iostreams[i])) {
+				retval = EOF;
+			}
+		return (retval);
+	}
 
-    /*
-     * Flushing makes sense if we buffer data.
-     */
-    if (stream_nbuf(stream) || (!stream_dirty(stream))) {
-        return (0);
-    }
+	/*
+	 * Flushing makes sense if we buffer data.
+	 */
+	if (stream_nbuf(stream) || (!stream_dirty(stream))) {
+		return (0);
+	}
 
-    if (stream_rding(stream)) {
-        adjust = (off_t)(-stream->count);
-        stream->count = 0;
-        if (lseek(stream->fd, adjust, SEEK_CUR) == (off_t)-1) {
-            stream_setflags(stream, IOBUF_ERROR);
-            return (EOF);
-        }
-        if (stream_w(stream)) {
-            stream_clearflags(stream, IOBUF_READING | IOBUF_WRITING);
-        }
-        stream->bufptr = stream->buffer;
-        return (0);
-    }
+	if (stream_rding(stream)) {
+		adjust = (off_t) (-stream->count);
+		stream->count = 0;
+		if (lseek(stream->fd, adjust, SEEK_CUR) == (off_t) - 1) {
+			stream_setflags(stream, IOBUF_ERROR);
+			return (EOF);
+		}
+		if (stream_w(stream)) {
+			stream_clearflags(stream, IOBUF_READING | IOBUF_WRITING);
+		}
+		stream->bufptr = stream->buffer;
+		return (0);
+	}
 
-    if (stream_r(stream)) {		/* "a" or "+" mode */
-        stream_clearflags(stream, IOBUF_WRITING);
-    }
+	if (stream_r(stream)) {	/* "a" or "+" mode */
+		stream_clearflags(stream, IOBUF_WRITING);
+	}
 
-    count = stream->validsize - stream->count;
+	count = stream->validsize - stream->count;
 
-    /*
-     * This can happen if: the buffer is in writing mode and no data
-     * has ever been written in the buffer OR the buffer is in reading mode.
-     */
-    if (!count) {
-        return (0);
-    }
+	/*
+	 * This can happen if: the buffer is in writing mode and no data
+	 * has ever been written in the buffer OR the buffer is in reading mode.
+	 */
+	if (!count) {
+		return (0);
+	}
 
-    /*
-     * When writing, the buffer size can be fully used for valid data.
-     * This is not true when reading - EOF may be encountered before
-     * having read bufsize bytes.
-     */
-    stream->bufptr = stream->buffer;
-    stream->count = stream->validsize = stream->bufsize;
+	/*
+	 * When writing, the buffer size can be fully used for valid data.
+	 * This is not true when reading - EOF may be encountered before
+	 * having read bufsize bytes.
+	 */
+	stream->bufptr = stream->buffer;
+	stream->count = stream->validsize = stream->bufsize;
 
-    if (stream_testflags(stream, IOBUF_APPEND)) {
-        if (lseek(stream->fd, 0L, SEEK_END) == (off_t)-1) {
-            stream_setflags(stream, IOBUF_ERROR);
-            return (EOF);
-        }
-    }
-    c1 = write(stream->fd, stream->buffer, count);
+	if (stream_testflags(stream, IOBUF_APPEND)) {
+		if (lseek(stream->fd, 0L, SEEK_END) == (off_t) - 1) {
+			stream_setflags(stream, IOBUF_ERROR);
+			return (EOF);
+		}
+	}
+	c1 = write(stream->fd, stream->buffer, count);
 
-    if ((ssize_t)count == c1) {
-        return (0);
-    }
+	if ((ssize_t) count == c1) {
+		return (0);
+	}
 
-    stream_setflags(stream, IOBUF_ERROR);
-    return (EOF);
+	stream_setflags(stream, IOBUF_ERROR);
+	return (EOF);
 }

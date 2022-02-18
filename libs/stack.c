@@ -21,56 +21,54 @@
 
 #include "stack.h"
 
-STATUS stack_init(queue_inst *queue)
+STATUS stack_init(queue_inst * queue)
 {
-    if (!queue) {
-        return (EINVAL);
-    }
+	if (!queue) {
+		return (EINVAL);
+	}
 
-    queue->head = NULL;
-    queue->tail = NULL;
-    queue->counter = 0;
+	queue->head = NULL;
+	queue->tail = NULL;
+	queue->counter = 0;
 
-    return (EOK);
+	return (EOK);
 }
 
-
-STATUS stack_push(queue_inst *queue, queue_node *data)
+STATUS stack_push(queue_inst * queue, queue_node * data)
 {
-    if (!queue || !data) {
-        return (EINVAL);
-    }
+	if (!queue || !data) {
+		return (EINVAL);
+	}
 
-    if (!queue->head) {
-        queue->head = data;
-        queue->counter = 1;
-        data->next = NULL;
-        return (EOK);
-    }
+	if (!queue->head) {
+		queue->head = data;
+		queue->counter = 1;
+		data->next = NULL;
+		return (EOK);
+	}
 
-    data->next = queue->head;
-    queue->head = data;
-    queue->counter++;
+	data->next = queue->head;
+	queue->head = data;
+	queue->counter++;
 
-    return (EOK);
+	return (EOK);
 }
 
-STATUS stack_pop(queue_inst *queue, queue_node **data)
+STATUS stack_pop(queue_inst * queue, queue_node ** data)
 {
-    if (!queue || !data) {
-        return (EINVAL);
-    }
+	if (!queue || !data) {
+		return (EINVAL);
+	}
 
-    if (!queue->counter) {
-        *data = NULL;
-        return (EGENERIC);
-    }
+	if (!queue->counter) {
+		*data = NULL;
+		return (EGENERIC);
+	}
 
-    *data = queue->head;
-    queue->head = queue->head->next;
-    (*data)->next = NULL;
-    queue->counter--;
+	*data = queue->head;
+	queue->head = queue->head->next;
+	(*data)->next = NULL;
+	queue->counter--;
 
-    return (EOK);
+	return (EOK);
 }
-

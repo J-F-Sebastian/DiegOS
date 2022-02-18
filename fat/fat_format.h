@@ -25,18 +25,18 @@
 #include "disk_access.h"
 
 struct FATPartition {
-    /* zero based LBA addresses */
-    uint32_t startsector;
-    uint32_t endsector;
-    uint8_t  secpercluster;
-    char label[16];
+	/* zero based LBA addresses */
+	uint32_t startsector;
+	uint32_t endsector;
+	uint8_t secpercluster;
+	char label[16];
 };
 
 int FAT_format(void *ctx, struct FATPartition *part);
 
 inline int FAT_mkfs(void *ctx, struct FATPartition *part)
 {
-    return FAT_format(ctx, part);
+	return FAT_format(ctx, part);
 }
 
-#endif // FAT_FORMAT_H
+#endif				// FAT_FORMAT_H

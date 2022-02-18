@@ -25,4 +25,3 @@
 extern char_driver_t vga_tty_drv;
 
 #endif
-

@@ -21,10 +21,10 @@
 #define MUTEX_DATA_H_INCLUDED
 
 struct mutex {
-    list_node header;
-    queue_inst wait_queue;
-    uint8_t locker_tid;
-    char name[16];
+	list_node header;
+	queue_inst wait_queue;
+	uint8_t locker_tid;
+	char name[16];
 };
 
-#endif // MUTEX_DATA_H_INCLUDED
+#endif				// MUTEX_DATA_H_INCLUDED

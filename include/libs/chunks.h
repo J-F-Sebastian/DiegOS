@@ -38,30 +38,27 @@ typedef struct chunks_pool chunks_pool_t;
  * return NULL on error, a valid pointer on success.
  */
 chunks_pool_t *chunks_pool_create(const char *name,
-                                  unsigned aln,
-                                  unsigned size,
-                                  unsigned numitems,
-                                  unsigned delta);
+				  unsigned aln, unsigned size, unsigned numitems, unsigned delta);
 
 /*
  * Get a chunk from the pool
  */
-void *chunks_pool_malloc(chunks_pool_t *pool);   
+void *chunks_pool_malloc(chunks_pool_t * pool);
 
 /*
  * Return a chunk to the pool
  */
-void chunks_pool_free(chunks_pool_t *pool, void *ptr);
+void chunks_pool_free(chunks_pool_t * pool, void *ptr);
 
 /*
  * Destroys the pool - no destructor is invoked for the chunks,
  * memory will be deallocated only.
  */
-void chunks_pool_done(chunks_pool_t *pool);
+void chunks_pool_done(chunks_pool_t * pool);
 
 /*
  * Print pool stats
  */
-void chunks_pool_dump(chunks_pool_t *pool);
+void chunks_pool_dump(chunks_pool_t * pool);
 
 #endif

@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)ucmpdi2.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: ucmpdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -48,13 +48,12 @@ __RCSID("$NetBSD: ucmpdi2.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * Return 0, 1, or 2 as a <, =, > b respectively.
  * Neither a nor b are considered signed.
  */
-int
-__ucmpdi2(u_quad_t a, u_quad_t b)
+int __ucmpdi2(u_quad_t a, u_quad_t b)
 {
-    union uu aa, bb;
+	union uu aa, bb;
 
-    aa.uq = a;
-    bb.uq = b;
-    return (aa.ul[H] < bb.ul[H] ? 0 : aa.ul[H] > bb.ul[H] ? 2 :
-            aa.ul[L] < bb.ul[L] ? 0 : aa.ul[L] > bb.ul[L] ? 2 : 1);
+	aa.uq = a;
+	bb.uq = b;
+	return (aa.ul[H] < bb.ul[H] ? 0 : aa.ul[H] > bb.ul[H] ? 2 :
+		aa.ul[L] < bb.ul[L] ? 0 : aa.ul[L] > bb.ul[L] ? 2 : 1);
 }

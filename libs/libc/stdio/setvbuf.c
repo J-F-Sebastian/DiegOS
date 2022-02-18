@@ -21,35 +21,35 @@
 #include	<stdlib.h>
 #include	"loc_incl.h"
 
-int setvbuf (FILE *stream, char *buf, int mode, size_t size)
+int setvbuf(FILE * stream, char *buf, int mode, size_t size)
 {
-    int retval = 0;
+	int retval = 0;
 
-    if ((mode != _IOFBF) && (mode != _IOLBF) && (mode != _IONBF)) {
-        return EOF;
-    }
+	if ((mode != _IOFBF) && (mode != _IOLBF) && (mode != _IONBF)) {
+		return EOF;
+	}
 
-    if (stream->buffer && stream_testflags(stream, IOBUF_RELBUF)) {
-        free(stream->buffer);
-    }
+	if (stream->buffer && stream_testflags(stream, IOBUF_RELBUF)) {
+		free(stream->buffer);
+	}
 
-    stream_clearflags(stream, (IOBUF_NBUF | IOBUF_LBUF));
+	stream_clearflags(stream, (IOBUF_NBUF | IOBUF_LBUF));
 
-    if (buf && (size <= 0)) {
-        retval = EOF;
-    }
-    if (!buf && (mode != _IONBF)) {
-        if ((size <= 0) || (buf = (char *) malloc(size)) == NULL) {
-            retval = EOF;
-        }
-        stream_setflags(stream, IOBUF_RELBUF);
-    }
+	if (buf && (size <= 0)) {
+		retval = EOF;
+	}
+	if (!buf && (mode != _IONBF)) {
+		if ((size <= 0) || (buf = (char *)malloc(size)) == NULL) {
+			retval = EOF;
+		}
+		stream_setflags(stream, IOBUF_RELBUF);
+	}
 
-    stream->buffer = buf;
-    stream->count = 0;
-    stream_setflags(stream, mode);
-    stream->bufptr = stream->buffer;
-    stream->bufsize = size;
+	stream->buffer = buf;
+	stream->count = 0;
+	stream_setflags(stream, mode);
+	stream->bufptr = stream->buffer;
+	stream->bufsize = size;
 
-    return (retval);
+	return (retval);
 }

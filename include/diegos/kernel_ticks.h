@@ -33,7 +33,7 @@
  * RETURN VALUES
  * 64 bit counter of ticks elapsed since boot time.
  */
-uint64_t clock_get_ticks (void);
+uint64_t clock_get_ticks(void);
 
 /*
  * Get system seconds.
@@ -41,7 +41,7 @@ uint64_t clock_get_ticks (void);
  * RETURN VALUES
  * 64 bit counter of seconds elapsed since boot time.
  */
-uint64_t clock_get_seconds (void);
+uint64_t clock_get_seconds(void);
 
 /*
  * Get system millliseconds.
@@ -49,7 +49,7 @@ uint64_t clock_get_seconds (void);
  * RETURN VALUES
  * 64 bit counter of milliseconds elapsed since boot time.
  */
-uint64_t clock_get_milliseconds (void);
+uint64_t clock_get_milliseconds(void);
 
 /*
  * Convert milliseconds into system ticks.
@@ -57,7 +57,7 @@ uint64_t clock_get_milliseconds (void);
  * RETURN VALUES
  * 64 bit counter of ticks elapsed in msecs.
  */
-uint64_t clock_convert_msecs_to_ticks (unsigned msecs);
+uint64_t clock_convert_msecs_to_ticks(unsigned msecs);
 
 /*
  * Set boot-time seconds, the initial amount of elapsed seconds
@@ -68,7 +68,7 @@ uint64_t clock_convert_msecs_to_ticks (unsigned msecs);
  * RETURN VALUES
  * None
  */
-void clock_set_boot_seconds (unsigned seconds);
+void clock_set_boot_seconds(unsigned seconds);
 
 /*
  * Get boot time seconds.
@@ -76,6 +76,6 @@ void clock_set_boot_seconds (unsigned seconds);
  * RETURN VALUES
  * unsigned counter of seconds elapsed "before" boot time.
  */
-unsigned clock_get_boot_seconds (void);
+unsigned clock_get_boot_seconds(void);
 
 #endif

@@ -22,29 +22,29 @@
 
 #include "queue_type.h"
 
-STATUS queue_init(queue_inst *queue);
+STATUS queue_init(queue_inst * queue);
 
-STATUS queue_enqueue(queue_inst *queue, queue_node *data);
+STATUS queue_enqueue(queue_inst * queue, queue_node * data);
 
-STATUS queue_dequeue(queue_inst *queue, queue_node **data);
+STATUS queue_dequeue(queue_inst * queue, queue_node ** data);
 
-STATUS queue_roll(queue_inst *queue);
+STATUS queue_roll(queue_inst * queue);
 
-STATUS queue_insert(queue_inst *queue, queue_node *data, queue_node *after);
+STATUS queue_insert(queue_inst * queue, queue_node * data, queue_node * after);
 
-inline void *queue_head(queue_inst *queue)
+inline void *queue_head(queue_inst * queue)
 {
-    return ((queue) ? (queue->head) : (NULL));
+	return ((queue) ? (queue->head) : (NULL));
 }
 
-inline void *queue_tail(queue_inst *queue)
+inline void *queue_tail(queue_inst * queue)
 {
-    return ((queue) ? (queue->tail) : (NULL));
+	return ((queue) ? (queue->tail) : (NULL));
 }
 
-inline unsigned queue_count(queue_inst *queue)
+inline unsigned queue_count(queue_inst * queue)
 {
-    return ((queue) ? (queue->counter) : (0));
+	return ((queue) ? (queue->counter) : (0));
 }
 
 #endif

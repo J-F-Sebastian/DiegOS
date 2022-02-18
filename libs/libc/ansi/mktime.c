@@ -22,9 +22,9 @@
 
 #include	"loc_time.h"
 
-time_t mktime (struct tm *timeptr)
+time_t mktime(struct tm *timeptr)
 {
-    long day, year;
+	long day, year;
 	int tm_year;
 	int yday, month;
 	long seconds;
@@ -44,7 +44,7 @@ time_t mktime (struct tm *timeptr)
 		timeptr->tm_hour--;
 	}
 	day = timeptr->tm_hour / 24;
-	timeptr->tm_hour= timeptr->tm_hour % 24;
+	timeptr->tm_hour = timeptr->tm_hour % 24;
 	if (timeptr->tm_hour < 0) {
 		timeptr->tm_hour += 24;
 		day--;
@@ -57,7 +57,7 @@ time_t mktime (struct tm *timeptr)
 	}
 	day += (timeptr->tm_mday - 1);
 	while (day < 0) {
-		if(--timeptr->tm_mon < 0) {
+		if (--timeptr->tm_mon < 0) {
 			timeptr->tm_year--;
 			timeptr->tm_mon = 11;
 		}
@@ -72,10 +72,11 @@ time_t mktime (struct tm *timeptr)
 	}
 	timeptr->tm_mday = day + 1;
 	tzset();
-    year = EPOCH_YR;
-	if (timeptr->tm_year < year - YEAR0) return (time_t)-1;
+	year = EPOCH_YR;
+	if (timeptr->tm_year < year - YEAR0)
+		return (time_t) - 1;
 	seconds = 0;
-	day = 0;			/* means days since day 0 now */
+	day = 0;		/* means days since day 0 now */
 	overflow = 0;
 
 	/* Assume that when day becomes negative, there will certainly
@@ -89,15 +90,14 @@ time_t mktime (struct tm *timeptr)
 #endif
 	tm_year = timeptr->tm_year + YEAR0;
 
-	if (LONG_MAX / 365 < tm_year - year) overflow++;
+	if (LONG_MAX / 365 < tm_year - year)
+		overflow++;
 	day = (tm_year - year) * 365;
-	if (LONG_MAX - day < (tm_year - year) / 4 + 1) overflow++;
-	day += (tm_year - year) / 4
-		+ ((tm_year % 4) && tm_year % 4 < year % 4);
-	day -= (tm_year - year) / 100
-		+ ((tm_year % 100) && tm_year % 100 < year % 100);
-	day += (tm_year - year) / 400
-		+ ((tm_year % 400) && tm_year % 400 < year % 400);
+	if (LONG_MAX - day < (tm_year - year) / 4 + 1)
+		overflow++;
+	day += (tm_year - year) / 4 + ((tm_year % 4) && tm_year % 4 < year % 4);
+	day -= (tm_year - year) / 100 + ((tm_year % 100) && tm_year % 100 < year % 100);
+	day += (tm_year - year) / 400 + ((tm_year % 400) && tm_year % 400 < year % 400);
 
 	yday = month = 0;
 	while (month < timeptr->tm_mon) {
@@ -105,34 +105,38 @@ time_t mktime (struct tm *timeptr)
 		month++;
 	}
 	yday += (timeptr->tm_mday - 1);
-	if (day + yday < 0) overflow++;
+	if (day + yday < 0)
+		overflow++;
 	day += yday;
 
 	timeptr->tm_yday = yday;
-	timeptr->tm_wday = (day + 4) % 7;		/* day 0 was thursday (4) */
+	timeptr->tm_wday = (day + 4) % 7;	/* day 0 was thursday (4) */
 
 	seconds = ((timeptr->tm_hour * 60L) + timeptr->tm_min) * 60L + timeptr->tm_sec;
 
-	if ((LONG_MAX - seconds) / SECS_DAY < day) overflow++;
+	if ((LONG_MAX - seconds) / SECS_DAY < day)
+		overflow++;
 	seconds += day * SECS_DAY;
 
 	/* Now adjust according to timezone and daylight saving time */
 
 	if (((timezone > 0) && (LONG_MAX - timezone < seconds))
-	    || ((timezone < 0) && (seconds < - timezone)))
+	    || ((timezone < 0) && (seconds < -timezone)))
 		overflow++;
 	seconds += timezone;
 
 	if (timeptr->tm_isdst) {
 		dst = dst_off;
-    } else {
-        dst = 0;
-    }
+	} else {
+		dst = 0;
+	}
 
-	if (dst > seconds) overflow++;	/* dst is always non-negative */
+	if (dst > seconds)
+		overflow++;	/* dst is always non-negative */
 	seconds -= dst;
 
-	if (overflow) return (time_t)-1;
+	if (overflow)
+		return (time_t) - 1;
 
-	return (time_t)seconds;
+	return (time_t) seconds;
 }

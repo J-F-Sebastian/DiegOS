@@ -34,38 +34,38 @@
  */
 
 struct packet {
-    /*
-     * This is the pointer to the data slot
-     */
-    void *data;
+	/*
+	 * This is the pointer to the data slot
+	 */
+	void *data;
 
-    /*
-     * This is the pointer to the payload data
-     * real data starts at data_payload_start and
-     * ends at data_payload_start + data_payload_size
-     */
-    void *data_payload_start;
+	/*
+	 * This is the pointer to the payload data
+	 * real data starts at data_payload_start and
+	 * ends at data_payload_start + data_payload_size
+	 */
+	void *data_payload_start;
 
-    /*
-     * This is the temporary pointer to the payload data
-     * the cursor is used to read/write data inside the slot
-     * it MUST BE aligned to a protocol header boundary
-     */
-    void *data_payload_cursor;
+	/*
+	 * This is the temporary pointer to the payload data
+	 * the cursor is used to read/write data inside the slot
+	 * it MUST BE aligned to a protocol header boundary
+	 */
+	void *data_payload_cursor;
 
-    /*
-     * This is the size in bytes of what
-     * has been saved into the packet
-     * this is the payload storage size (ranging from 0
-     * to data_size)
-     */
-    uint16_t data_payload_size;
+	/*
+	 * This is the size in bytes of what
+	 * has been saved into the packet
+	 * this is the payload storage size (ranging from 0
+	 * to data_size)
+	 */
+	uint16_t data_payload_size;
 
-    /*
-     * This is the size in bytes of memory allocation for data
-     * this is the overall storage size
-     */
-    uint16_t data_size;
+	/*
+	 * This is the size in bytes of memory allocation for data
+	 * this is the overall storage size
+	 */
+	uint16_t data_size;
 };
 
 #endif

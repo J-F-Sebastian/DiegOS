@@ -19,19 +19,20 @@
 
 #include <string.h>
 
-size_t strspn (const char *cs, const char *ct)
+size_t strspn(const char *cs, const char *ct)
 {
-    const char *s1, *s2;
+	const char *s1, *s2;
 
-    if (cs && ct) {
-        for (s1 = cs; *s1; s1++) {
-            for (s2 = ct; *s2 && (*s2 != *s1); s2++) {};
-            if (*s2 == '\0') {
-                break;
-            }
-        }
-        return ((size_t)(s1 - cs));
-    } else {
-        return (0);
-    }
+	if (cs && ct) {
+		for (s1 = cs; *s1; s1++) {
+			for (s2 = ct; *s2 && (*s2 != *s1); s2++) {
+			};
+			if (*s2 == '\0') {
+				break;
+			}
+		}
+		return ((size_t) (s1 - cs));
+	} else {
+		return (0);
+	}
 }

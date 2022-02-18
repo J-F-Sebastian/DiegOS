@@ -19,19 +19,20 @@
 
 #include <string.h>
 
-char *strncat (char *s, const char *ct, size_t n)
+char *strncat(char *s, const char *ct, size_t n)
 {
-    char *s1 = s;
+	char *s1 = s;
 
-    if (s && ct && (n > 0)) {
-        while (*s1++) {};
-        s1--;
-        while (n--)  {
-            if ((*s1++ = *ct++) == '\0') {
-                break;
-            }
-        }
-        *s1 = '\0';
-    }
-    return (s);
+	if (s && ct && (n > 0)) {
+		while (*s1++) {
+		};
+		s1--;
+		while (n--) {
+			if ((*s1++ = *ct++) == '\0') {
+				break;
+			}
+		}
+		*s1 = '\0';
+	}
+	return (s);
 }

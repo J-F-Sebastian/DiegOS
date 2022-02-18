@@ -40,28 +40,26 @@ static char sccsid[] = "@(#)lshrdi3.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: lshrdi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
 /*
  * Shift an (unsigned) quad value right (logical shift right).
  */
-quad_t
-__lshrdi3(quad_t a, qshift_t shift)
+quad_t __lshrdi3(quad_t a, qshift_t shift)
 {
-    union uu aa;
+	union uu aa;
 
-    if (shift == 0)
-        return(a);
-    aa.q = a;
-    if (shift >= INT_BITS) {
-        aa.ul[L] = aa.ul[H] >> (shift - INT_BITS);
-        aa.ul[H] = 0;
-    } else {
-        aa.ul[L] = (aa.ul[L] >> shift) |
-                   (aa.ul[H] << (INT_BITS - shift));
-        aa.ul[H] >>= shift;
-    }
-    return (aa.q);
+	if (shift == 0)
+		return (a);
+	aa.q = a;
+	if (shift >= INT_BITS) {
+		aa.ul[L] = aa.ul[H] >> (shift - INT_BITS);
+		aa.ul[H] = 0;
+	} else {
+		aa.ul[L] = (aa.ul[L] >> shift) | (aa.ul[H] << (INT_BITS - shift));
+		aa.ul[H] >>= shift;
+	}
+	return (aa.q);
 }

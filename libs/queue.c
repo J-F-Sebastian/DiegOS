@@ -21,102 +21,101 @@
 
 #include "queue.h"
 
-STATUS queue_init(queue_inst *queue)
+STATUS queue_init(queue_inst * queue)
 {
-    if (!queue) {
-        return (EGENERIC);
-    }
+	if (!queue) {
+		return (EGENERIC);
+	}
 
-    queue->head = NULL;
-    queue->tail = NULL;
-    queue->counter = 0;
+	queue->head = NULL;
+	queue->tail = NULL;
+	queue->counter = 0;
 
-    return (EOK);
+	return (EOK);
 }
 
-
-STATUS queue_enqueue(queue_inst *queue, queue_node *data)
+STATUS queue_enqueue(queue_inst * queue, queue_node * data)
 {
-    if (!queue || !data) {
-        return (EINVAL);
-    }
+	if (!queue || !data) {
+		return (EINVAL);
+	}
 
-    if (!queue->head) {
-        queue->head = queue->tail = data;
-        queue->counter = 1;
-        data->next = NULL;
-        return (EOK);
-    }
+	if (!queue->head) {
+		queue->head = queue->tail = data;
+		queue->counter = 1;
+		data->next = NULL;
+		return (EOK);
+	}
 
-    queue->tail->next = data;
-    queue->tail = data;
-    queue->counter++;
-    data->next = NULL;
+	queue->tail->next = data;
+	queue->tail = data;
+	queue->counter++;
+	data->next = NULL;
 
-    return (EOK);
+	return (EOK);
 }
 
-STATUS queue_dequeue(queue_inst *queue, queue_node **data)
+STATUS queue_dequeue(queue_inst * queue, queue_node ** data)
 {
-    if (!queue || !data) {
-        return (EINVAL);
-    }
+	if (!queue || !data) {
+		return (EINVAL);
+	}
 
-    if (!queue->counter) {
-        *data = NULL;
-        return (EGENERIC);
-    }
+	if (!queue->counter) {
+		*data = NULL;
+		return (EGENERIC);
+	}
 
-    *data = queue->head;
-    queue->head = queue->head->next;
-    (*data)->next = NULL;
-    queue->counter--;
+	*data = queue->head;
+	queue->head = queue->head->next;
+	(*data)->next = NULL;
+	queue->counter--;
 
-    if (!queue->counter) {
-        queue->tail = NULL;
-    }
+	if (!queue->counter) {
+		queue->tail = NULL;
+	}
 
-    return (EOK);
+	return (EOK);
 }
 
-STATUS queue_roll(queue_inst *queue)
+STATUS queue_roll(queue_inst * queue)
 {
-    if (!queue || !queue->counter) {
-        return (EINVAL);
-    }
+	if (!queue || !queue->counter) {
+		return (EINVAL);
+	}
 
-    if (queue->counter > 1) {
-        queue->tail->next = queue->head;
-        queue->head = queue->head->next;
-        queue->tail = queue->tail->next;
-        queue->tail->next = NULL;
-    }
+	if (queue->counter > 1) {
+		queue->tail->next = queue->head;
+		queue->head = queue->head->next;
+		queue->tail = queue->tail->next;
+		queue->tail->next = NULL;
+	}
 
-    return (EOK);
+	return (EOK);
 }
 
-STATUS queue_insert(queue_inst *queue, queue_node *data, queue_node *after)
+STATUS queue_insert(queue_inst * queue, queue_node * data, queue_node * after)
 {
-    if (!queue || !data) {
-        return (EINVAL);
-    }
+	if (!queue || !data) {
+		return (EINVAL);
+	}
 
-    if (!queue_count(queue)) {
-        return (queue_enqueue(queue, data));
-    }
+	if (!queue_count(queue)) {
+		return (queue_enqueue(queue, data));
+	}
 
-    if (!after) {
-        data->next = queue->head;
-        queue->head = data;
-        queue->counter++;
-    } else {
-        data->next = after->next;
-        after->next = data;
-        queue->counter++;
-        if (!data->next) {
-            queue->tail = data;
-        }
-    }
+	if (!after) {
+		data->next = queue->head;
+		queue->head = data;
+		queue->counter++;
+	} else {
+		data->next = after->next;
+		after->next = data;
+		queue->counter++;
+		if (!data->next) {
+			queue->tail = data;
+		}
+	}
 
-    return (EOK);
+	return (EOK);
 }

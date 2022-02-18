@@ -20,17 +20,17 @@
 #include <stdio.h>
 #include "loc_incl.h"
 
-static FILE locstdin = {0, IOBUF_READ | IOBUF_NBUF, 0, 0, 0, 0, 0};
-static FILE locstdout = {1, IOBUF_WRITE | IOBUF_LBUF, 0, 0, 0, 0, 0};
-static FILE locstderr = {2, IOBUF_WRITE | IOBUF_NBUF, 0, 0, 0, 0, 0};
+static FILE locstdin = { 0, IOBUF_READ | IOBUF_NBUF, 0, 0, 0, 0, 0 };
+static FILE locstdout = { 1, IOBUF_WRITE | IOBUF_LBUF, 0, 0, 0, 0, 0 };
+static FILE locstderr = { 2, IOBUF_WRITE | IOBUF_NBUF, 0, 0, 0, 0, 0 };
 
 FILE *stdin = &locstdin;
 FILE *stdout = &locstdout;
 FILE *stderr = &locstderr;
 
 FILE *iostreams[FOPEN_MAX] = {
-    &locstdin,
-    &locstdout,
-    &locstderr,
-    NULL
+	&locstdin,
+	&locstdout,
+	&locstderr,
+	NULL
 };

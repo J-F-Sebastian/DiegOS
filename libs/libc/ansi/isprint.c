@@ -19,11 +19,11 @@
 
 #include <ctype.h>
 
-int isprint (int c)
+int isprint(int c)
 {
-    /*
-     * All printable characters, excluding control characters and the DEL
-     * value (0x7F or 127).
-     */
-    return (((c > 31) && (c < 127)) ? (1) : (0));
+	/*
+	 * All printable characters, excluding control characters and the DEL
+	 * value (0x7F or 127).
+	 */
+	return (((c > 31) && (c < 127)) ? (1) : (0));
 }

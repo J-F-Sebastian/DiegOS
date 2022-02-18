@@ -21,62 +21,62 @@
 #include <stdlib.h>
 #include "loc_incl.h"
 
-int fputc (int c, FILE *stream)
+int fputc(int c, FILE * stream)
 {
-    /*
-     * First stage: check stream validity and update flags
-     * in case of error.
-     * If the stream is good switch it to IOBUF_WRITING.
-     */
-    if (!stream) {
-        return (EOF);
-    }
-
-    if (!stream_w(stream)) {
-	return (EOF);
-    }
-
-    if (stream_rding(stream)) {
-	if (!feof(stream)) {
-	    return (EOF);
+	/*
+	 * First stage: check stream validity and update flags
+	 * in case of error.
+	 * If the stream is good switch it to IOBUF_WRITING.
+	 */
+	if (!stream) {
+		return (EOF);
 	}
-        stream_clearflags(stream, IOBUF_READING);
-    }
 
-    stream_setflags(stream, IOBUF_WRITING);
+	if (!stream_w(stream)) {
+		return (EOF);
+	}
 
-    /*
-     * Second stage: the stream is unbuffered, call writebuffern
-     */
-    if (stream_nbuf(stream)) {
-	    return writebuffern(c, stream);
-    }
+	if (stream_rding(stream)) {
+		if (!feof(stream)) {
+			return (EOF);
+		}
+		stream_clearflags(stream, IOBUF_READING);
+	}
 
-    /*
-     * Third stage: the stream is buffered, allocate the buffer if
-     * necessary.
-     * In case of failure the stream is configured as unbuffered and
-     * processed as such.
-     */
-    if (!stream->buffer) {
-        if (!(stream->buffer = (char *) malloc(BUFSIZ))) {
-            stream_setflags(stream, IOBUF_NBUF);
-            stream->count = stream->bufsize = stream->validsize = 0;
-	    return writebuffern(c, stream);
-        } else {
-            stream_setflags(stream, IOBUF_RELBUF);
-            stream->count = stream->bufsize = stream->validsize = BUFSIZ;
-        }
-        stream->bufptr = stream->buffer;
-    }
+	stream_setflags(stream, IOBUF_WRITING);
 
-    /*
-     * Fourth stage: process buffers
-     */
-    if (stream_lbuf(stream)) {
-        return writebufferl(c, stream);
-    } else {
-        return (writebuffer(c, stream));
-    }
-    return ((int)c);
+	/*
+	 * Second stage: the stream is unbuffered, call writebuffern
+	 */
+	if (stream_nbuf(stream)) {
+		return writebuffern(c, stream);
+	}
+
+	/*
+	 * Third stage: the stream is buffered, allocate the buffer if
+	 * necessary.
+	 * In case of failure the stream is configured as unbuffered and
+	 * processed as such.
+	 */
+	if (!stream->buffer) {
+		if (!(stream->buffer = (char *)malloc(BUFSIZ))) {
+			stream_setflags(stream, IOBUF_NBUF);
+			stream->count = stream->bufsize = stream->validsize = 0;
+			return writebuffern(c, stream);
+		} else {
+			stream_setflags(stream, IOBUF_RELBUF);
+			stream->count = stream->bufsize = stream->validsize = BUFSIZ;
+		}
+		stream->bufptr = stream->buffer;
+	}
+
+	/*
+	 * Fourth stage: process buffers
+	 */
+	if (stream_lbuf(stream)) {
+		return writebufferl(c, stream);
+	} else {
+		return (writebuffer(c, stream));
+	}
+	return ((int)c);
 }

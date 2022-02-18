@@ -25,10 +25,10 @@
 
 typedef list_inst wait_queue_t;
 
-int thread_io_wait_init (wait_queue_t *wq);
+int thread_io_wait_init(wait_queue_t * wq);
 
-int thread_io_wait (wait_queue_t *wq);
+int thread_io_wait(wait_queue_t * wq);
 
-int thread_io_resume (wait_queue_t *wq);
+int thread_io_resume(wait_queue_t * wq);
 
-#endif // IO_WAITS_H_INCLUDED
+#endif				// IO_WAITS_H_INCLUDED

@@ -27,116 +27,106 @@
 
 static inline int check(const char chk)
 {
-    return ((chk < 0x20) || (chk == 0x22) ||
-            ((chk >= 0x2A) && (chk <= 0x2C)) ||
-            ((chk == 0x2F)) ||
-            ((chk >= 0x3A) && (chk <= 0x3F)) ||
-            ((chk >= 0x5B) && (chk <= 0x5D)) ||
-            (chk == 0x7C));
+	return ((chk < 0x20) || (chk == 0x22) ||
+		((chk >= 0x2A) && (chk <= 0x2C)) ||
+		((chk == 0x2F)) ||
+		((chk >= 0x3A) && (chk <= 0x3F)) ||
+		((chk >= 0x5B) && (chk <= 0x5D)) || (chk == 0x7C));
 }
 
-size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t *startpos, size_t *endpos)
+size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t * startpos, size_t * endpos)
 {
-    while (*startpos < dirlen)
-    {
-        if (directory[*startpos] == '\\')
-            break;
-        (*startpos)++;
-    }
+	while (*startpos < dirlen) {
+		if (directory[*startpos] == '\\')
+			break;
+		(*startpos)++;
+	}
 
-    if (*startpos == dirlen)
-        return 0;
+	if (*startpos == dirlen)
+		return 0;
 
-    *startpos += 1;
-    *endpos = *startpos + 1;
-    while (*endpos < dirlen)
-    {
-        if (directory[*endpos] == '\\')
-            break;
-        (*endpos)++;
-    }
-    return (*endpos - *startpos);
+	*startpos += 1;
+	*endpos = *startpos + 1;
+	while (*endpos < dirlen) {
+		if (directory[*endpos] == '\\')
+			break;
+		(*endpos)++;
+	}
+	return (*endpos - *startpos);
 }
 
 size_t FAT_parse_directory_last(const char *directory, size_t dirlen)
 {
-    while (directory[--dirlen] != '\\')
-    {
-        if (!dirlen)
-            break;
-    }
+	while (directory[--dirlen] != '\\') {
+		if (!dirlen)
+			break;
+	}
 
-    return dirlen;
+	return dirlen;
 }
 
 int FAT_build_DIR_name(const char *name, size_t len, char *output)
 {
-    size_t pos = 0;
+	size_t pos = 0;
 
-    if (len > DIR_NAMELEN)
-        return -1;
+	if (len > DIR_NAMELEN)
+		return -1;
 
-    while (pos < len)
-    {
-        if (check(name[pos]))
-        {
-            output[0] = '\0';
-            return -1;
-        }
-        output[pos] = name[pos];
-        pos++;
-    }
+	while (pos < len) {
+		if (check(name[pos])) {
+			output[0] = '\0';
+			return -1;
+		}
+		output[pos] = name[pos];
+		pos++;
+	}
 
-    /* Pad with trailing spaces */
-    while (pos < DIR_NAMELEN)
-        output[pos++] = ' ';
+	/* Pad with trailing spaces */
+	while (pos < DIR_NAMELEN)
+		output[pos++] = ' ';
 
-    return 0;
+	return 0;
 }
 
 int FAT_make_path_relative(const char *filename, const char *relto, char *output)
 {
-    size_t startrelto, endrelto, reltolen, reltochunk;
+	size_t startrelto, endrelto, reltolen, reltochunk;
 
-    if (!filename || !relto || !output)
-        return -1;
+	if (!filename || !relto || !output)
+		return -1;
 
-    /* skip over common root path */
-    while (*filename == *relto)
-    {
-        if (*filename == '\0')
-            return -1;
-        ++filename;
-        ++relto;
-    }
+	/* skip over common root path */
+	while (*filename == *relto) {
+		if (*filename == '\0')
+			return -1;
+		++filename;
+		++relto;
+	}
 
-    reltolen = strlen(relto);
-    startrelto = 0;
+	reltolen = strlen(relto);
+	startrelto = 0;
 
-    /*
-     * add a step back '..' for each not-common folder, and break at the end of
-     * the relto path.
-     */
-    do
-    {
-        reltochunk = FAT_parse_directory(relto, reltolen, &startrelto, &endrelto);
-        if (reltochunk)
-        {
-            strcpy(output, "..\\");
-            output += 3;
-        }
-        else
-            break;
+	/*
+	 * add a step back '..' for each not-common folder, and break at the end of
+	 * the relto path.
+	 */
+	do {
+		reltochunk = FAT_parse_directory(relto, reltolen, &startrelto, &endrelto);
+		if (reltochunk) {
+			strcpy(output, "..\\");
+			output += 3;
+		} else
+			break;
 
-         endrelto = startrelto;
+		endrelto = startrelto;
 
-    } while (1);
+	} while (1);
 
-    strcat(output, filename);
-    return 0;
+	strcat(output, filename);
+	return 0;
 }
 
 int FAT_check_character(char chk)
 {
-    return (check(chk)) ? -1 : 0;
+	return (check(chk)) ? -1 : 0;
 }

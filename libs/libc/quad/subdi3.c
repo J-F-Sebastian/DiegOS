@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)subdi3.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: subdi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -48,14 +48,13 @@ __RCSID("$NetBSD: subdi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * Subtract two quad values.  This is trivial since a one-bit carry
  * from a single u_int difference x-y occurs if and only if (x-y) > x.
  */
-quad_t
-__subdi3(quad_t a, quad_t b)
+quad_t __subdi3(quad_t a, quad_t b)
 {
-    union uu aa, bb, diff;
+	union uu aa, bb, diff;
 
-    aa.q = a;
-    bb.q = b;
-    diff.ul[L] = aa.ul[L] - bb.ul[L];
-    diff.ul[H] = aa.ul[H] - bb.ul[H] - (diff.ul[L] > aa.ul[L]);
-    return (diff.q);
+	aa.q = a;
+	bb.q = b;
+	diff.ul[L] = aa.ul[L] - bb.ul[L];
+	diff.ul[H] = aa.ul[H] - bb.ul[H] - (diff.ul[L] > aa.ul[L]);
+	return (diff.q);
 }

@@ -19,20 +19,20 @@
 
 #include <stdio.h>
 
-int fputs (const char *s, FILE *stream)
+int fputs(const char *s, FILE * stream)
 {
-    int i = 0;
+	int i = 0;
 
-    if (!s || !stream) {
-        return (EOF);
-    }
+	if (!s || !stream) {
+		return (EOF);
+	}
 
-    while (*s) {
-        if (putc(*s++, stream) == EOF) {
-            return (EOF);
-        }
-        ++i;
-    }
+	while (*s) {
+		if (putc(*s++, stream) == EOF) {
+			return (EOF);
+		}
+		++i;
+	}
 
-    return (i);
+	return (i);
 }

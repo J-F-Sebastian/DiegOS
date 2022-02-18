@@ -22,17 +22,17 @@
 
 char *strstr(const char *cs, const char *ct)
 {
-    const size_t len = strlen(ct);
+	const size_t len = strlen(ct);
 
-    if (!len || !cs) {
-        return ((char *)cs);
-    }
+	if (!len || !cs) {
+		return ((char *)cs);
+	}
 
-    while ((*cs != *ct) || (strncmp(cs, ct, len))) {
-        if (*cs++ == '\0') {
-            return ((char *)NULL);
-        }
-    }
+	while ((*cs != *ct) || (strncmp(cs, ct, len))) {
+		if (*cs++ == '\0') {
+			return ((char *)NULL);
+		}
+	}
 
-    return ((char *)cs);
+	return ((char *)cs);
 }

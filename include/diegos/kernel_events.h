@@ -26,22 +26,21 @@
  */
 
 enum kernel_classes {
-    /*
-     * Alarms as implemented in the kernel.
-     * Eventid is used to address the alarmid.
-     */
-    CLASS_ALARM = 1,
-    /*
-     * Devices as implemented under kernel libraries.
-     * Events are listed in devices_events.h
-     */
-    CLASS_DEV   = 2,
-    /*
-     * Packet events as implemented in the kernel.
-     * Events are listed in network_events.h
-     */
-    CLASS_NET   = 3
+	/*
+	 * Alarms as implemented in the kernel.
+	 * Eventid is used to address the alarmid.
+	 */
+	CLASS_ALARM = 1,
+	/*
+	 * Devices as implemented under kernel libraries.
+	 * Events are listed in devices_events.h
+	 */
+	CLASS_DEV = 2,
+	/*
+	 * Packet events as implemented in the kernel.
+	 * Events are listed in network_events.h
+	 */
+	CLASS_NET = 3
 };
 
 #endif
-

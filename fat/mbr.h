@@ -28,35 +28,33 @@
 #define PART_AOPDS   0x7F
 
 #pragma pack(1)
-struct MBR_partition_entry
-{
-    char status;
-    /*
-     * Bits
-     * 0-7 Heads
-     * 0-5 Sectors, 6-7 Cylinders (High 2 bits)
-     * 0-7 Cylinders
-     *
-     * Ranges
-     * Heads 0 - 255
-     * Sectors 1 - 64
-     * Cylinders 0 -1023
-     */
-    char CHS_first_sector[3];
-    char type;
-    char CHS_last_sector[3];
-    uint32_t LBA_first_Sector;
-    uint32_t num_of_sectors;
+struct MBR_partition_entry {
+	char status;
+	/*
+	 * Bits
+	 * 0-7 Heads
+	 * 0-5 Sectors, 6-7 Cylinders (High 2 bits)
+	 * 0-7 Cylinders
+	 *
+	 * Ranges
+	 * Heads 0 - 255
+	 * Sectors 1 - 64
+	 * Cylinders 0 -1023
+	 */
+	char CHS_first_sector[3];
+	char type;
+	char CHS_last_sector[3];
+	uint32_t LBA_first_Sector;
+	uint32_t num_of_sectors;
 };
 
-struct MBR
-{
-    char bootcode[446];
-    struct MBR_partition_entry partitions[4];
-    /*
-     * 0x55 - 0xAA
-     */
-    char boot_signature[2];
+struct MBR {
+	char bootcode[446];
+	struct MBR_partition_entry partitions[4];
+	/*
+	 * 0x55 - 0xAA
+	 */
+	char boot_signature[2];
 };
 #pragma pack(0)
 
@@ -117,4 +115,4 @@ int MBR_get_partition_entry(struct MBR *mbr, int partnum, struct MBR_partition_e
  */
 void MBR_list(struct MBR *mbr);
 
-#endif // MBR_H
+#endif				// MBR_H

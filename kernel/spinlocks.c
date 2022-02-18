@@ -21,22 +21,21 @@
 #include <diegos/spinlocks.h>
 #include <diegos/kernel.h>
 
-void spinlock_init(spinlock_t *sl)
+void spinlock_init(spinlock_t * sl)
 {
-    *sl = FALSE;
+	*sl = FALSE;
 }
 
-void spinlock_lock(spinlock_t *sl)
+void spinlock_lock(spinlock_t * sl)
 {
-    while (TRUE == *sl) {
-        thread_suspend();
-    }
+	while (TRUE == *sl) {
+		thread_suspend();
+	}
 
-    *sl = TRUE;
+	*sl = TRUE;
 }
 
-void spinlock_unlock(spinlock_t *sl)
+void spinlock_unlock(spinlock_t * sl)
 {
-    *sl = FALSE;
+	*sl = FALSE;
 }
-

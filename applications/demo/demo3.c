@@ -32,96 +32,84 @@ static int running = 1;
 
 static void demo_thread_entry(void)
 {
-    event_t *evt;
-    unsigned i = 0;
-    event_watch_queue(events);
+	event_t *evt;
+	unsigned i = 0;
+	event_watch_queue(events);
 
-    while (running) {
-        wait_for_events(events);
+	while (running) {
+		wait_for_events(events);
 
-        while (event_queue_size(events)) {
-            evt = event_get(events);
+		while (event_queue_size(events)) {
+			evt = event_get(events);
 
-            if (evt) {
-                printf("%d classid %d eventid %d progress %u\n",
-                       event_queue_size(events),
-                       evt->classid,
-		       evt->eventid,
-                       i++);
-                free(evt);
-            } else {
-                printf("SKIP\n");
-            }
-        }
-        printf("Going to wait PID %d\n",my_thread_id());
-    }
-    printf("Going going gone!!!\n");
-    thread_terminate();
+			if (evt) {
+				printf("%d classid %d eventid %d progress %u\n",
+				       event_queue_size(events), evt->classid, evt->eventid, i++);
+				free(evt);
+			} else {
+				printf("SKIP\n");
+			}
+		}
+		printf("Going to wait PID %d\n", my_thread_id());
+	}
+	printf("Going going gone!!!\n");
+	thread_terminate();
 }
 
 static void demo_thread_entry2(void)
 {
-    event_t *evt;
-    unsigned i = 0;
+	event_t *evt;
+	unsigned i = 0;
 
-    while (i < 513) {
-	if (i > 500) thread_delay(1000);
-	else if (i > 250) thread_delay(333);
-	else thread_delay(100);
-	printf("c %lld\n", clock_get_seconds());
-	i++;
-        evt = malloc(sizeof(event_t));
-        evt->classid = 1234;
-        evt->eventid = 5678;
-        if (EOK != event_put(events, evt, NULL)) {
-            printf("FAILURE 1 !!!\n");
-        }
-        evt = malloc(sizeof(event_t));
-        evt->classid = 1234;
-        evt->eventid = 0x9ABC;
-        if (EOK != event_put(events, evt, NULL)) {
-            printf("FAILURE 2 !!!\n");
-        }
-        printf("Going to delay PID %d\n",my_thread_id());
-    }
-    printf("Going going gone!!!\n");
-    running = 0;
-    thread_terminate();
+	while (i < 513) {
+		if (i > 500)
+			thread_delay(1000);
+		else if (i > 250)
+			thread_delay(333);
+		else
+			thread_delay(100);
+		printf("c %lld\n", clock_get_seconds());
+		i++;
+		evt = malloc(sizeof(event_t));
+		evt->classid = 1234;
+		evt->eventid = 5678;
+		if (EOK != event_put(events, evt, NULL)) {
+			printf("FAILURE 1 !!!\n");
+		}
+		evt = malloc(sizeof(event_t));
+		evt->classid = 1234;
+		evt->eventid = 0x9ABC;
+		if (EOK != event_put(events, evt, NULL)) {
+			printf("FAILURE 2 !!!\n");
+		}
+		printf("Going to delay PID %d\n", my_thread_id());
+	}
+	printf("Going going gone!!!\n");
+	running = 0;
+	thread_terminate();
 }
 
 static void demo_thread_entry3(void)
 {
-    unsigned i = 1000;
-    while (i--) {
-        thread_suspend();
-    }
+	unsigned i = 1000;
+	while (i--) {
+		thread_suspend();
+	}
 
-    printf("Going going gone!!!\n");
+	printf("Going going gone!!!\n");
 
-    thread_terminate();
+	thread_terminate();
 }
 
 void platform_run(void)
 {
-    uint8_t pid;
+	uint8_t pid;
 
-    events = event_init_queue("Test");
+	events = event_init_queue("Test");
 
-    thread_create("Demo",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry,
-                  0,
-                  4096, &pid);
+	thread_create("Demo", THREAD_PRIO_NORMAL, demo_thread_entry, 0, 4096, &pid);
 
-    thread_create("Demo2",
-                  THREAD_PRIO_NORMAL,
-                  demo_thread_entry2,
-                  0,
-                  4096, &pid);
+	thread_create("Demo2", THREAD_PRIO_NORMAL, demo_thread_entry2, 0, 4096, &pid);
 
-    thread_create("Demo3",
-                  THREAD_PRIO_IDLE,
-                  demo_thread_entry3,
-                  0,
-                  4096, &pid);
+	thread_create("Demo3", THREAD_PRIO_IDLE, demo_thread_entry3, 0, 4096, &pid);
 }

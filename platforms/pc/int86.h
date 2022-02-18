@@ -23,43 +23,43 @@
 #include <stdint.h>
 
 typedef struct __attribute__ ((packed)) {
-uint16_t di, si, bp, sp, bx, dx, cx, ax;
-uint16_t gs, fs, es, ds, eflags;
+	uint16_t di, si, bp, sp, bx, dx, cx, ax;
+	uint16_t gs, fs, es, ds, eflags;
 } regs16_t;
 
-inline void prot_to_seg_ofs (void *prot, uint16_t *seg, uint16_t *ofs)
+inline void prot_to_seg_ofs(void *prot, uint16_t * seg, uint16_t * ofs)
 {
-	*seg = ((uintptr_t)prot >> 4) & 0xFFFFUL;
-	*ofs = ((uintptr_t)prot & 0xFUL);
+	*seg = ((uintptr_t) prot >> 4) & 0xFFFFUL;
+	*ofs = ((uintptr_t) prot & 0xFUL);
 }
 
-inline void *seg_ofs_to_prot (uint16_t seg, uint16_t ofs)
+inline void *seg_ofs_to_prot(uint16_t seg, uint16_t ofs)
 {
 	uintptr_t retval = seg;
-	retval *=16;
+	retval *= 16;
 	retval += ofs;
 	return (void *)retval;
 }
 
-inline void *prot_to_real (const void *prot)
+inline void *prot_to_real(const void *prot)
 {
-	uintptr_t retval = ((uintptr_t)prot & 0xFFFF0UL) << 12;
-	retval |= ((uintptr_t)prot & 0xFUL);
+	uintptr_t retval = ((uintptr_t) prot & 0xFFFF0UL) << 12;
+	retval |= ((uintptr_t) prot & 0xFUL);
 	return (void *)retval;
 }
 
-inline void *real_to_prot (const void *real)
+inline void *real_to_prot(const void *real)
 {
-	uintptr_t retval = (uintptr_t)real >> 16;
+	uintptr_t retval = (uintptr_t) real >> 16;
 	retval *= 16;
-	retval += (uintptr_t)real & 0xFFFFUL;
+	retval += (uintptr_t) real & 0xFFFFUL;
 	return (void *)retval;
 }
 
-extern void int86(unsigned char intnum, regs16_t *regs);
+extern void int86(unsigned char intnum, regs16_t * regs);
 
-extern void *real_buffer (void);
+extern void *real_buffer(void);
 
-extern unsigned real_buffer_size (void);
+extern unsigned real_buffer_size(void);
 
 #endif

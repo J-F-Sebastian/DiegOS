@@ -41,10 +41,10 @@
  * always 0. The lowest is up to this enumeration.
   */
 typedef enum {
-    THREAD_PRIO_REALTIME,
-    THREAD_PRIO_HIGH,
-    THREAD_PRIO_NORMAL,
-    THREAD_PRIO_IDLE
+	THREAD_PRIO_REALTIME,
+	THREAD_PRIO_HIGH,
+	THREAD_PRIO_NORMAL,
+	THREAD_PRIO_IDLE
 } diegos_prio_t;
 
 /*
@@ -80,16 +80,13 @@ void thread_terminate(void);
  * creation or termination.
  */
 BOOL thread_create(const char *name,
-                   diegos_prio_t prio,
-                   void (*entry_ptr)(void),
-                   void *stack,
-                   unsigned stack_size,
-                   uint8_t *tid);
+		   diegos_prio_t prio,
+		   void (*entry_ptr) (void), void *stack, unsigned stack_size, uint8_t * tid);
 
 void thread_kill(uint8_t tid);
 
 uint8_t my_thread_id(void);
 
-const char * my_thread_name(void);
+const char *my_thread_name(void);
 
-#endif // KERNEL_H_INCLUDED
+#endif				// KERNEL_H_INCLUDED

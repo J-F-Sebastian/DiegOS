@@ -25,19 +25,18 @@
 
 int scanf(const char *format, ...)
 {
-    va_list ap;
-    int retval;
+	va_list ap;
+	int retval;
 
-    if (!format) {
-        return (EINVAL);
-    }
+	if (!format) {
+		return (EINVAL);
+	}
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    retval = formatted_scan(stdin, format, ap);
+	retval = formatted_scan(stdin, format, ap);
 
-    va_end(ap);
+	va_end(ap);
 
-    return (retval);
+	return (retval);
 }
-

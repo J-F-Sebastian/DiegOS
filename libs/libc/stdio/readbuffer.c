@@ -24,86 +24,86 @@
 
 #include "loc_incl.h"
 
-int readbuffer (FILE *stream)
+int readbuffer(FILE * stream)
 {
-    unsigned i;
-    ssize_t retcode;
-    char ch = '\0';
+	unsigned i;
+	ssize_t retcode;
+	char ch = '\0';
 
-    if (fileno(stream) < 0) {
-        errno = EBADF;
-	return (EOF);
-    }
+	if (fileno(stream) < 0) {
+		errno = EBADF;
+		return (EOF);
+	}
 
-    if (stream_testflags(stream, IOBUF_ERROR)) {
-        errno = EIO;
-	return (EOF);
-    }
+	if (stream_testflags(stream, IOBUF_ERROR)) {
+		errno = EIO;
+		return (EOF);
+	}
 
-    if (stream_testflags(stream, IOBUF_EOF)) {
-        errno = EOF;
-        return (EOF);
-    }
+	if (stream_testflags(stream, IOBUF_EOF)) {
+		errno = EOF;
+		return (EOF);
+	}
 
-    if (!stream_r(stream) || stream_wrting(stream)) {
-        stream_setflags(stream, IOBUF_ERROR);
-        return (EOF);
-    }
+	if (!stream_r(stream) || stream_wrting(stream)) {
+		stream_setflags(stream, IOBUF_ERROR);
+		return (EOF);
+	}
 
-    stream_setflags(stream, IOBUF_READING);
+	stream_setflags(stream, IOBUF_READING);
 
-    /*
-     * If this is the first time we call readbuffer, and the buffer
-     * is NULL, and buffering is in use, then try to allocate
-     * the buffer.
-     * If successful set IOBUF_RELBUF to release memory when closing the file.
-     */
-    if (!stream_nbuf(stream) && !stream->buffer) {
-        stream->buffer = (char *) malloc(BUFSIZ);
-        if (!stream->buffer) {
-            stream_setflags(stream, IOBUF_NBUF);
-            stream->bufsize = 0;
-        } else {
-            stream_setflags(stream, IOBUF_RELBUF);
-            stream->bufsize = BUFSIZ;
-        }
-    }
+	/*
+	 * If this is the first time we call readbuffer, and the buffer
+	 * is NULL, and buffering is in use, then try to allocate
+	 * the buffer.
+	 * If successful set IOBUF_RELBUF to release memory when closing the file.
+	 */
+	if (!stream_nbuf(stream) && !stream->buffer) {
+		stream->buffer = (char *)malloc(BUFSIZ);
+		if (!stream->buffer) {
+			stream_setflags(stream, IOBUF_NBUF);
+			stream->bufsize = 0;
+		} else {
+			stream_setflags(stream, IOBUF_RELBUF);
+			stream->bufsize = BUFSIZ;
+		}
+	}
 
-    /* flush line-buffered output when filling an input buffer */
-    for (i = 0; i < FOPEN_MAX; i++) {
-        if (iostreams[i] && stream_testflags(iostreams[i], IOBUF_LBUF)) {
-            if (stream_wrting(iostreams[i])) {
-                (void) fflush(iostreams[i]);
-            }
-        }
-    }
+	/* flush line-buffered output when filling an input buffer */
+	for (i = 0; i < FOPEN_MAX; i++) {
+		if (iostreams[i] && stream_testflags(iostreams[i], IOBUF_LBUF)) {
+			if (stream_wrting(iostreams[i])) {
+				(void)fflush(iostreams[i]);
+			}
+		}
+	}
 
-    stream->count = 0;
-    stream->bufptr = stream->buffer;
+	stream->count = 0;
+	stream->bufptr = stream->buffer;
 
-    if (stream_nbuf(stream)) {
-        retcode = read(stream->fd, &ch, sizeof(ch));
-    } else {
-        retcode = read(stream->fd, stream->buffer, stream->bufsize);
-    }
+	if (stream_nbuf(stream)) {
+		retcode = read(stream->fd, &ch, sizeof(ch));
+	} else {
+		retcode = read(stream->fd, stream->buffer, stream->bufsize);
+	}
 
-    if (retcode <= 0) {
-	stream->validsize = 0;
-        if (retcode < 0) {
-            stream_setflags(stream, IOBUF_ERROR);
-        } else {
-            stream_setflags(stream, IOBUF_EOF);
-        }
-        return (EOF);
-    }
+	if (retcode <= 0) {
+		stream->validsize = 0;
+		if (retcode < 0) {
+			stream_setflags(stream, IOBUF_ERROR);
+		} else {
+			stream_setflags(stream, IOBUF_EOF);
+		}
+		return (EOF);
+	}
 
-    /*
-     * count is the total amount of bytes read minus the returned one,
-     * so if no buffer is allocated, count is always 0 and no read
-     * from memory can take place - all stdio functions are forced to
-     * call readbuffer one byte at a time.
-     */
-    stream->count = stream->validsize = (unsigned)(retcode - 1);
+	/*
+	 * count is the total amount of bytes read minus the returned one,
+	 * so if no buffer is allocated, count is always 0 and no read
+	 * from memory can take place - all stdio functions are forced to
+	 * call readbuffer one byte at a time.
+	 */
+	stream->count = stream->validsize = (unsigned)(retcode - 1);
 
-    return (stream_nbuf(stream) ? (int)ch : (*stream->bufptr++));
+	return (stream_nbuf(stream) ? (int)ch : (*stream->bufptr++));
 }

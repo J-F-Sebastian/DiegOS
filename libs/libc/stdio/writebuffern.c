@@ -20,33 +20,32 @@
 #include <unistd.h>
 #include "loc_incl.h"
 
-int writebuffern(int c, FILE *stream)
+int writebuffern(int c, FILE * stream)
 {
-    size_t count = 1;
-    char cout[2];
+	size_t count = 1;
+	char cout[2];
 
-    if (fileno(stream) < 0) {
-        stream_setflags(stream, IOBUF_ERROR);
-        return (EOF);
-    }
+	if (fileno(stream) < 0) {
+		stream_setflags(stream, IOBUF_ERROR);
+		return (EOF);
+	}
 
-    cout[0] = (char)c;
-    if ((cout[0] == '\n') && !stream_isb(stream)) {
-        cout[1] = '\r';
-	++count;
-    }
+	cout[0] = (char)c;
+	if ((cout[0] == '\n') && !stream_isb(stream)) {
+		cout[1] = '\r';
+		++count;
+	}
 
-    if (stream_testflags(stream, IOBUF_APPEND)) {
-        if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
-            stream_setflags(stream, IOBUF_ERROR);
-            return (EOF);
-        }
-    }
-    if (write(fileno(stream), cout, count) < 0) {
-        stream_setflags(stream, IOBUF_ERROR);
-        return (EOF);
-    }
+	if (stream_testflags(stream, IOBUF_APPEND)) {
+		if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
+			stream_setflags(stream, IOBUF_ERROR);
+			return (EOF);
+		}
+	}
+	if (write(fileno(stream), cout, count) < 0) {
+		stream_setflags(stream, IOBUF_ERROR);
+		return (EOF);
+	}
 
-    return (c);
+	return (c);
 }
-

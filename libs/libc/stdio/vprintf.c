@@ -23,15 +23,15 @@
 
 #include "loc_incl.h"
 
-int vprintf(const char * format, va_list arg)
+int vprintf(const char *format, va_list arg)
 {
-    int retval;
+	int retval;
 
-    if (!format) {
-        return (EINVAL);
-    }
+	if (!format) {
+		return (EINVAL);
+	}
 
-    retval = formatted_printf(stdout, format, FALSE, arg);
+	retval = formatted_printf(stdout, format, FALSE, arg);
 
-    return (retval);
+	return (retval);
 }

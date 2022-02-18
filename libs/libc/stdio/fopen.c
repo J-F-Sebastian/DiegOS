@@ -29,103 +29,103 @@
 
 FILE *fopen(const char *filename, const char *mode)
 {
-    unsigned i;
-    unsigned flags;
-    int rwmode, rwflags;
-    FILE *stream = NULL;
-    int fd;
+	unsigned i;
+	unsigned flags;
+	int rwmode, rwflags;
+	FILE *stream = NULL;
+	int fd;
 
+	for (i = 0; (i < FOPEN_MAX) && iostreams[i]; i++) {
+	};
 
-    for (i = 0; (i < FOPEN_MAX) && iostreams[i] ; i++) {};
+	if (i == FOPEN_MAX) {
+		errno = EBADF;
+		return (stream);
+	}
 
-    if (i == FOPEN_MAX) {
-        errno = EBADF;
-        return (stream);
-    }
+	switch (*mode++) {
+	case 'r':
+		flags = IOBUF_READ;
+		rwmode = O_RDONLY;
+		rwflags = 0;
+		break;
+	case 'w':
+		flags = IOBUF_WRITE;
+		rwmode = O_WRONLY;
+		rwflags = (O_CREAT | O_TRUNC);
+		break;
+	case 'a':
+		flags = (IOBUF_WRITE | IOBUF_APPEND);
+		rwmode = O_WRONLY;
+		rwflags = (O_APPEND | O_CREAT);
+		break;
+	default:
+		errno = EINVAL;
+		return (stream);
+	}
 
-    switch (*mode++) {
-    case 'r':
-        flags = IOBUF_READ;
-        rwmode = O_RDONLY;
-	rwflags = 0;
-        break;
-    case 'w':
-        flags = IOBUF_WRITE;
-        rwmode = O_WRONLY;
-        rwflags = (O_CREAT | O_TRUNC);
-        break;
-    case 'a':
-        flags = (IOBUF_WRITE | IOBUF_APPEND);
-        rwmode = O_WRONLY;
-        rwflags = (O_APPEND | O_CREAT);
-        break;
-    default:
-	errno = EINVAL;
-        return (stream);
-    }
+	while (*mode) {
+		switch (*mode++) {
+		case 'b':
+			flags |= IOBUF_BIN;
+			break;
+		case '+':
+			flags |= (IOBUF_READ | IOBUF_WRITE);
+			rwmode = O_RDWR;
+			break;
+		default:
+			errno = EINVAL;
+			return (stream);
+		}
+	}
 
-    while (*mode) {
-        switch(*mode++) {
-        case 'b':
-	    flags |= IOBUF_BIN;
-            break;
-        case '+':
-            flags |= (IOBUF_READ | IOBUF_WRITE);
-            rwmode = O_RDWR;
-            break;
-        default:
-	    errno = EINVAL;
-	    return (stream);
-        }
-    }
+	/* Perform a creat() when the file should be truncated or when
+	 * the file is opened for writing and the open() failed.
+	 */
+	if (rwflags & O_TRUNC) {
+		fd = creat(filename, PMODE);
+		if ((fd > 0) && (flags & IOBUF_READ)) {
+			if (close(fd)) {
+				fd = -1;
+			} else {
+				fd = open(filename, rwmode, 0);
+			}
+		}
+	} else {
+		fd = open(filename, rwmode, 0);
+		if ((fd < 0) && (rwflags & O_CREAT)) {
+			fd = open(filename, rwmode, 0);
+			if (fd < 0) {
+				fd = creat(filename, PMODE);
+				if ((fd > 0) && (flags & IOBUF_READ)) {
+					if (close(fd)) {
+						fd = -1;
+					} else {
+						fd = open(filename, rwmode, 0);
+					}
+				}
+			}
+		}
+	}
 
-    /* Perform a creat() when the file should be truncated or when
-     * the file is opened for writing and the open() failed.
-     */
-    if (rwflags & O_TRUNC) {
-        fd = creat(filename, PMODE);
-        if ((fd > 0) && (flags & IOBUF_READ)) {
-            if (close(fd)) {
-                fd = -1;
-            } else {
-                fd = open(filename, rwmode, 0);
-            }
-        }
-    } else {
-        fd = open(filename, rwmode, 0);
-        if ((fd < 0) && (rwflags & O_CREAT)) {
-            fd = open(filename, rwmode, 0);
-            if (fd < 0) {
-                fd = creat(filename, PMODE);
-                if ((fd > 0) && (flags & IOBUF_READ)) {
-                    if (close(fd)) {
-                        fd = -1;
-                    } else {
-                        fd = open(filename, rwmode, 0);
-                    }
-                }
-            }
-        }
-    }
+	if (fd < 0)
+		return ((FILE *) NULL);
 
+	stream = (FILE *) malloc(sizeof(FILE));
+	if (!stream) {
+		(void)close(fd);
+		return ((FILE *) NULL);
+	}
 
-    if (fd < 0) return ((FILE *)NULL);
+	if ((flags & (IOBUF_READ | IOBUF_WRITE)) == (IOBUF_READ | IOBUF_WRITE)) {
+		flags &= ~(IOBUF_READING | IOBUF_WRITING);
+	}
 
-    stream = (FILE *) malloc(sizeof(FILE));
-    if (!stream) {
-        (void)close(fd);
-        return ((FILE *)NULL);
-    }
+	/*
+	 * NO BUFFERING BY DEFAULTS RIGHT NOW !!!
+	 */
+	stream_init(stream, fd, NULL, 0, flags);
+	iostreams[i] = stream;
 
-    if ((flags & (IOBUF_READ | IOBUF_WRITE))  == (IOBUF_READ | IOBUF_WRITE)) {
-        flags &= ~(IOBUF_READING | IOBUF_WRITING);
-    }
-
-    /*
-     * NO BUFFERING BY DEFAULTS RIGHT NOW !!!
-     */
-    stream_init(stream, fd, NULL, 0, flags);
-    iostreams[i] = stream;
-
-    return (stream);
+	return (stream);
 }

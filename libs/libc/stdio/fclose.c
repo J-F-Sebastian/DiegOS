@@ -24,31 +24,32 @@
 #include <errno.h>
 #include "loc_incl.h"
 
-int fclose (FILE *stream)
+int fclose(FILE * stream)
 {
-    unsigned i;
-    int retval = 0;
+	unsigned i;
+	int retval = 0;
 
-    for (i = 0; (i < FOPEN_MAX) && (stream != iostreams[i]); i++) {};
+	for (i = 0; (i < FOPEN_MAX) && (stream != iostreams[i]); i++) {
+	};
 
-    if (FOPEN_MAX == i) {
-	errno = EBADF;
-        return (EOF);
-    } else if (stream == iostreams[i]) {
-        iostreams[i] = NULL;
-    }
+	if (FOPEN_MAX == i) {
+		errno = EBADF;
+		return (EOF);
+	} else if (stream == iostreams[i]) {
+		iostreams[i] = NULL;
+	}
 
-    if (fflush(stream)) {
-        retval = EOF;
-    }
-    if (close(fileno(stream))) {
-        retval = EOF;
-    }
-    if (stream->buffer) {
-        free(stream->buffer);
-    }
-    if ((stream != stdin) && (stream != stdout) && (stream != stderr)) {
-        free(stream);
-    }
-    return (retval);
+	if (fflush(stream)) {
+		retval = EOF;
+	}
+	if (close(fileno(stream))) {
+		retval = EOF;
+	}
+	if (stream->buffer) {
+		free(stream->buffer);
+	}
+	if ((stream != stdin) && (stream != stdout) && (stream != stderr)) {
+		free(stream);
+	}
+	return (retval);
 }

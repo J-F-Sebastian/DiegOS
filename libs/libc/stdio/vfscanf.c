@@ -23,15 +23,15 @@
 
 #include "loc_incl.h"
 
-int vfscanf(FILE * stream, const char * format, va_list arg)
+int vfscanf(FILE * stream, const char *format, va_list arg)
 {
-    int retval;
+	int retval;
 
-    if (!stream || !format) {
-        return (EINVAL);
-    }
+	if (!stream || !format) {
+		return (EINVAL);
+	}
 
-    retval = formatted_scan(stream, format, arg);
+	retval = formatted_scan(stream, format, arg);
 
-    return (retval);
+	return (retval);
 }

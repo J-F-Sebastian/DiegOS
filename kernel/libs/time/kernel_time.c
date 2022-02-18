@@ -20,10 +20,7 @@
 #include <errno.h>
 #include <kernel_time.h>
 
-int kernel_time_init (uint32_t base_val,
-		      uint32_t min_val,
-		      uint32_t max_val,
-		      struct time_util *tu)
+int kernel_time_init(uint32_t base_val, uint32_t min_val, uint32_t max_val, struct time_util *tu)
 {
 	if (!base_val || !min_val || !max_val || !tu)
 		return EINVAL;
@@ -38,7 +35,7 @@ int kernel_time_init (uint32_t base_val,
 	return (EOK);
 }
 
-uint32_t kernel_time_get_msecs (uint32_t cntrticks, const struct time_util *tu)
+uint32_t kernel_time_get_msecs(uint32_t cntrticks, const struct time_util * tu)
 {
 	uint32_t retval = 0;
 	uint32_t fract = 0;
@@ -47,12 +44,12 @@ uint32_t kernel_time_get_msecs (uint32_t cntrticks, const struct time_util *tu)
 	retval = cntrticks / tu->cntr_ticks_per_msecs_int;
 	fract = cntrticks % tu->cntr_ticks_per_msecs_int;
 	/* rounding */
-	if (fract >= tu->cntr_ticks_per_msecs_int/2)
+	if (fract >= tu->cntr_ticks_per_msecs_int / 2)
 		retval++;
 	return (retval);
 }
 
-uint64_t kernel_time_get_elapsed_msecs (const struct time_util *tu)
+uint64_t kernel_time_get_elapsed_msecs(const struct time_util * tu)
 {
 	uint64_t retval = 0ULL;
 
@@ -60,7 +57,7 @@ uint64_t kernel_time_get_elapsed_msecs (const struct time_util *tu)
 		/*
 		 * Split computation: compute integer seconds
 		 */
-		retval = tu->elapsed_counter / (uint64_t)tu->base_counter;
+		retval = tu->elapsed_counter / (uint64_t) tu->base_counter;
 		/*
 		 * Transform into milliseconds
 		 */
@@ -68,13 +65,15 @@ uint64_t kernel_time_get_elapsed_msecs (const struct time_util *tu)
 		/*
 		 * Add remainder in milliseconds
 		 */
-		retval +=  1000ULL * (tu->elapsed_counter % (uint64_t)tu->base_counter) / (uint64_t)tu->base_counter;
+		retval +=
+		    1000ULL * (tu->elapsed_counter % (uint64_t) tu->base_counter) /
+		    (uint64_t) tu->base_counter;
 	}
 
 	return (retval);
 }
 
-uint32_t kernel_time_get_value (uint32_t msecs, const struct time_util *tu)
+uint32_t kernel_time_get_value(uint32_t msecs, const struct time_util * tu)
 {
 	if (!msecs || !tu)
 		return 0;

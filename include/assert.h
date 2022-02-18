@@ -41,7 +41,7 @@
 #else
 /* Debugging enabled -- verify assertions at run time. */
 
-void assertion (const char *expr, const char *file, int line, const char *fn);
+void assertion(const char *expr, const char *file, int line, const char *fn);
 
 #define	assert(expr)\
     if (!(expr)) {\
@@ -49,4 +49,4 @@ void assertion (const char *expr, const char *file, int line, const char *fn);
     }
 
 #endif
-#endif 
+#endif

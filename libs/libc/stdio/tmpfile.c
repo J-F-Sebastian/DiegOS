@@ -29,37 +29,34 @@ static char name_buffer[TMP_NAMELEN];
 static unsigned long fcount = 0;
 static unsigned long count = 0;
 
-FILE *tmpfile (void)
+FILE *tmpfile(void)
 {
-    FILE *file;
-    char *name;
+	FILE *file;
+	char *name;
 
-    strncpy(name_buffer, TMPNAME, sizeof(name_buffer));
-    name = name_buffer + strlen(name_buffer);
-    snprintf(name,
-             sizeof(name_buffer) - strlen(name_buffer),
-             "%d_pid_%.3u",
-             fcount++,
-             my_thread_id());
+	strncpy(name_buffer, TMPNAME, sizeof(name_buffer));
+	name = name_buffer + strlen(name_buffer);
+	snprintf(name,
+		 sizeof(name_buffer) - strlen(name_buffer),
+		 "%d_pid_%.3u", fcount++, my_thread_id());
 
-    file = fopen(name_buffer,"wb+");
-    if (!file) return ((FILE *)NULL);
-    (void) remove(name_buffer);
-    return (file);
+	file = fopen(name_buffer, "wb+");
+	if (!file)
+		return ((FILE *) NULL);
+	(void)remove(name_buffer);
+	return (file);
 }
 
 char *tmpnam(char *s)
 {
-    char *name;
+	char *name;
 
-    if (++count > TMP_MAX) count = 1;	/* wrap-around */
-    strncpy(name_buffer, TMPNAME, sizeof(name_buffer));
-    name = name_buffer + strlen(name_buffer);
-    snprintf(name,
-             sizeof(name_buffer) - strlen(name_buffer),
-             "%d_pid_%.3u",
-             count,
-             my_thread_id());
+	if (++count > TMP_MAX)
+		count = 1;	/* wrap-around */
+	strncpy(name_buffer, TMPNAME, sizeof(name_buffer));
+	name = name_buffer + strlen(name_buffer);
+	snprintf(name,
+		 sizeof(name_buffer) - strlen(name_buffer), "%d_pid_%.3u", count, my_thread_id());
 
-    return ((s) ? (strcpy(s, name_buffer)) : (name_buffer));
+	return ((s) ? (strcpy(s, name_buffer)) : (name_buffer));
 }

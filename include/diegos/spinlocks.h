@@ -25,10 +25,10 @@ typedef volatile long spinlock_t;
 /*
  * spinlock management
  */
-void spinlock_init(spinlock_t *sl);
+void spinlock_init(spinlock_t * sl);
 
-void spinlock_lock(spinlock_t *sl);
+void spinlock_lock(spinlock_t * sl);
 
-void spinlock_unlock(spinlock_t *sl);
+void spinlock_unlock(spinlock_t * sl);
 
-#endif // SPINLOCKS_H_INCLUDED
+#endif				// SPINLOCKS_H_INCLUDED

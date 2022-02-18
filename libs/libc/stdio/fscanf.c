@@ -23,20 +23,20 @@
 
 #include "loc_incl.h"
 
-int fscanf(FILE *stream, const char *format, ...)
+int fscanf(FILE * stream, const char *format, ...)
 {
-    va_list ap;
-    int retval;
+	va_list ap;
+	int retval;
 
-    if (!stream || !format) {
-        return (EINVAL);
-    }
+	if (!stream || !format) {
+		return (EINVAL);
+	}
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    retval = formatted_scan(stream, format, ap);
+	retval = formatted_scan(stream, format, ap);
 
-    va_end(ap);
+	va_end(ap);
 
-    return (retval);
+	return (retval);
 }

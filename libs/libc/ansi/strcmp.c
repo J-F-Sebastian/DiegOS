@@ -19,19 +19,19 @@
 
 #include <string.h>
 
-int strcmp (const char *cs, const char *ct)
+int strcmp(const char *cs, const char *ct)
 {
-    if (cs && ct) {
-        while (*cs == *ct) {
-            if (*cs == '\0') {
-                return (0);
-            }
-            ++cs;
-            ++ct;
-        }
+	if (cs && ct) {
+		while (*cs == *ct) {
+			if (*cs == '\0') {
+				return (0);
+			}
+			++cs;
+			++ct;
+		}
 
-        return (*cs - *ct);
-    }
+		return (*cs - *ct);
+	}
 
-    return (0);
+	return (0);
 }

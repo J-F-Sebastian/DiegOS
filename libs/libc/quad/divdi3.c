@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)divdi3.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: divdi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -48,22 +48,21 @@ __RCSID("$NetBSD: divdi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * Divide two signed quads.
  * ??? if -1/2 should produce -1 on this machine, this code is wrong
  */
-quad_t
-__divdi3(quad_t a, quad_t b)
+quad_t __divdi3(quad_t a, quad_t b)
 {
-    u_quad_t ua, ub, uq;
-    int neg = 0;
+	u_quad_t ua, ub, uq;
+	int neg = 0;
 
-    ua = a;
-    ub = b;
+	ua = a;
+	ub = b;
 
-    if (a < 0)
-        ua = -ua, neg ^= 1;
-    if (b < 0)
-        ub = -ub, neg ^= 1;
+	if (a < 0)
+		ua = -ua, neg ^= 1;
+	if (b < 0)
+		ub = -ub, neg ^= 1;
 
-    uq = __qdivrem(ua, ub, (u_quad_t *)0);
-    if (neg)
-        uq = - uq;
-    return uq;
+	uq = __qdivrem(ua, ub, (u_quad_t *) 0);
+	if (neg)
+		uq = -uq;
+	return uq;
 }

@@ -21,17 +21,17 @@
 
 ldiv_t ldiv(long num, long denom)
 {
-    ldiv_t r;
+	ldiv_t r;
 
-    if (num == 0) {
-        r.quot = num / denom; /* might trap if denom == 0 */
-        r.rem = num % denom;
-    } else if ((num < 0) != (denom < 0)) {
-        r.quot = (num / denom) + 1;
-        r.rem = num - (num / denom + 1) * denom;
-    } else {
-        r.quot = num / denom;
-        r.rem = num % denom;
-    }
-    return (r);
+	if (num == 0) {
+		r.quot = num / denom;	/* might trap if denom == 0 */
+		r.rem = num % denom;
+	} else if ((num < 0) != (denom < 0)) {
+		r.quot = (num / denom) + 1;
+		r.rem = num - (num / denom + 1) * denom;
+	} else {
+		r.quot = num / denom;
+		r.rem = num % denom;
+	}
+	return (r);
 }

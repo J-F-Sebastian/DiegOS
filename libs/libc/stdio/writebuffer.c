@@ -20,41 +20,41 @@
 #include <unistd.h>
 #include "loc_incl.h"
 
-int writebuffer(int c, FILE *stream)
+int writebuffer(int c, FILE * stream)
 {
-    size_t count;
+	size_t count;
 
-    /*
-     * Save the char in the buffer
-     */
-    if (stream->count) {
-        --stream->count;
-        *stream->bufptr++ = (char)c;
-    } else {
+	/*
+	 * Save the char in the buffer
+	 */
+	if (stream->count) {
+		--stream->count;
+		*stream->bufptr++ = (char)c;
+	} else {
 
-        if (fileno(stream) < 0) {
-            stream_setflags(stream, IOBUF_ERROR);
-            return (EOF);
-        }
+		if (fileno(stream) < 0) {
+			stream_setflags(stream, IOBUF_ERROR);
+			return (EOF);
+		}
 
-        if (stream_testflags(stream, IOBUF_APPEND)) {
-            if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
-                stream_setflags(stream, IOBUF_ERROR);
-                return (EOF);
-            }
-        }
+		if (stream_testflags(stream, IOBUF_APPEND)) {
+			if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
+				stream_setflags(stream, IOBUF_ERROR);
+				return (EOF);
+			}
+		}
 
-        count = stream->validsize - stream->count;
-        stream->count = stream->validsize - 1;
-        stream->bufptr = stream->buffer;
+		count = stream->validsize - stream->count;
+		stream->count = stream->validsize - 1;
+		stream->bufptr = stream->buffer;
 
-        if (write(fileno(stream), stream->buffer, count) != (ssize_t)count) {
-            *stream->bufptr++ = (char) c;
-            stream_setflags(stream, IOBUF_ERROR);
-            return (EOF);
-        }
-        *stream->bufptr++ = (char) c;
-    }
+		if (write(fileno(stream), stream->buffer, count) != (ssize_t) count) {
+			*stream->bufptr++ = (char)c;
+			stream_setflags(stream, IOBUF_ERROR);
+			return (EOF);
+		}
+		*stream->bufptr++ = (char)c;
+	}
 
-    return (c);
+	return (c);
 }

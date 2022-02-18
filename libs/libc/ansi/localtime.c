@@ -29,67 +29,67 @@ static int wday(int year, int month, int day)
 	adjustment = (14 - month) / 12;
 	mm = month + 12 * adjustment - 2;
 	yy = year - adjustment;
-	return (day + (13 * mm - 1) / 5 +
-		yy + yy / 4 - yy / 100 + yy / 400) % 7;
+	return (day + (13 * mm - 1) / 5 + yy + yy / 4 - yy / 100 + yy / 400) % 7;
 }
 
-struct tm * localtime (const time_t * timer)
+struct tm *localtime(const time_t * timer)
 {
-    static struct tm retval = {0};
-    time_t  counter;
-    int myvar;
-    int secy = 0;
+	static struct tm retval = { 0 };
+	time_t counter;
+	int myvar;
+	int secy = 0;
 
-    if (!timer || *timer == 0) {
-        return (&retval);
-    }
+	if (!timer || *timer == 0) {
+		return (&retval);
+	}
 
-    time_t tmp = *timer;
-    tmp -= timezone;
-    if (daylight) {
-        tmp -= dst_off;
-    }
+	time_t tmp = *timer;
+	tmp -= timezone;
+	if (daylight) {
+		tmp -= dst_off;
+	}
 
-    retval.tm_sec = tmp % 60;			/* seconds after the minute [0, 59] */
-    retval.tm_min = (tmp % (60*60))/60;	/* minutes after the hour [0, 59] */
-    retval.tm_hour = (tmp % (24*60*60))/(60*60);/* hours since midnight [0, 23] */
+	retval.tm_sec = tmp % 60;	/* seconds after the minute [0, 59] */
+	retval.tm_min = (tmp % (60 * 60)) / 60;	/* minutes after the hour [0, 59] */
+	retval.tm_hour = (tmp % (24 * 60 * 60)) / (60 * 60);	/* hours since midnight [0, 23] */
 
-    /* count seconds per year up to tmp, keep track of passing years */
-    counter = 0;
-    myvar = 0;
-    while (counter < tmp) {
-        myvar++;
-        secy = YEARSIZE(myvar);
-        secy *= 24*60*60;
-        counter += secy;
-    }
-    retval.tm_year = (myvar) ? (myvar -1) : myvar;		/* years since 2000 */
+	/* count seconds per year up to tmp, keep track of passing years */
+	counter = 0;
+	myvar = 0;
+	while (counter < tmp) {
+		myvar++;
+		secy = YEARSIZE(myvar);
+		secy *= 24 * 60 * 60;
+		counter += secy;
+	}
+	retval.tm_year = (myvar) ? (myvar - 1) : myvar;	/* years since 2000 */
 
-    /* compute remaining seconds in tmp */
-    counter -= secy;
-    tmp -= counter;
+	/* compute remaining seconds in tmp */
+	counter -= secy;
+	tmp -= counter;
 
-    /* compute remaining days */
-    retval.tm_yday = tmp / (24*60*60);			/* days since January 1 [0, 365] */
+	/* compute remaining days */
+	retval.tm_yday = tmp / (24 * 60 * 60);	/* days since January 1 [0, 365] */
 
-    counter = 0;
-    myvar = 0;
-    while (counter < tmp) {
-        secy = days_per_month[LEAPYEAR(retval.tm_year)][myvar];
-        secy *= 24*60*60;
-        counter += secy;
-        myvar++;
-    }
-    if (counter != tmp) myvar--;
-    retval.tm_mon = myvar; 		/* months since January [0, 11] */
+	counter = 0;
+	myvar = 0;
+	while (counter < tmp) {
+		secy = days_per_month[LEAPYEAR(retval.tm_year)][myvar];
+		secy *= 24 * 60 * 60;
+		counter += secy;
+		myvar++;
+	}
+	if (counter != tmp)
+		myvar--;
+	retval.tm_mon = myvar;	/* months since January [0, 11] */
 
-    /* compute remaining seconds in tmp */
-    counter -= tmp;
-    retval.tm_mday = (counter/(24*60*60)) + 1;			/* day of the month [1, 31] */
+	/* compute remaining seconds in tmp */
+	counter -= tmp;
+	retval.tm_mday = (counter / (24 * 60 * 60)) + 1;	/* day of the month [1, 31] */
 
-    retval.tm_wday = wday(retval.tm_year,retval.tm_mon,retval.tm_mday);/* days since Sunday [0, 6] */
+	retval.tm_wday = wday(retval.tm_year, retval.tm_mon, retval.tm_mday);	/* days since Sunday [0, 6] */
 
-    retval.tm_isdst = daylight;			/* Daylight Saving Time flag */
+	retval.tm_isdst = daylight;	/* Daylight Saving Time flag */
 
-    return (&retval);
+	return (&retval);
 }

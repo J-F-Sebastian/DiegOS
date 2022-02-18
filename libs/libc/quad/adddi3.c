@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)adddi3.c	8.1 (Berkeley) 6/4/93";
 #else
 __RCSID("$NetBSD: adddi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
 #endif
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include "quad.h"
 
@@ -49,14 +49,13 @@ __RCSID("$NetBSD: adddi3.c,v 1.2 2009/03/15 22:31:12 cegger Exp $");
  * u_int addition x+y occurs if and only if the sum x+y is less than
  * either x or y (the choice to compare with x or y is arbitrary).
  */
-quad_t
-__adddi3(quad_t a, quad_t b)
+quad_t __adddi3(quad_t a, quad_t b)
 {
-    union uu aa, bb, sum;
+	union uu aa, bb, sum;
 
-    aa.q = a;
-    bb.q = b;
-    sum.ul[L] = aa.ul[L] + bb.ul[L];
-    sum.ul[H] = aa.ul[H] + bb.ul[H] + (sum.ul[L] < bb.ul[L]);
-    return (sum.q);
+	aa.q = a;
+	bb.q = b;
+	sum.ul[L] = aa.ul[L] + bb.ul[L];
+	sum.ul[H] = aa.ul[H] + bb.ul[H] + (sum.ul[L] < bb.ul[L]);
+	return (sum.q);
 }

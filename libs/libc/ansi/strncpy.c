@@ -19,22 +19,22 @@
 
 #include <string.h>
 
-char *strncpy (char *s, const char *ct, size_t n)
+char *strncpy(char *s, const char *ct, size_t n)
 {
-    char *s1 = s;
+	char *s1 = s;
 
-    if (s && ct && (n > 0)) {
-        while (n) {
-            --n;
-            if ((*s1++ = *ct++) == '\0') {
-                break;
-            }
-        }
-        while (n) {
-            *s1++ = '\0';
-            --n;
-        }
-    }
+	if (s && ct && (n > 0)) {
+		while (n) {
+			--n;
+			if ((*s1++ = *ct++) == '\0') {
+				break;
+			}
+		}
+		while (n) {
+			*s1++ = '\0';
+			--n;
+		}
+	}
 
-    return (s);
+	return (s);
 }

@@ -20,14 +20,13 @@
 #include <stdio.h>
 #include <errno.h>
 
-int rename (const char *old, const char *new)
+int rename(const char *old, const char *new)
 {
-    if (!old || !new) {
-        errno = EINVAL;
-        return (EINVAL);
-    }
+	if (!old || !new) {
+		errno = EINVAL;
+		return (EINVAL);
+	}
 
-    errno = ENOTSUP;
-    return (ENOTSUP);
+	errno = ENOTSUP;
+	return (ENOTSUP);
 }
-

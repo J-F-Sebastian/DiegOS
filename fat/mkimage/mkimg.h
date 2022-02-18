@@ -23,8 +23,6 @@
 #include "../mbr.h"
 
 int mkimg(const char *image,
-          const char *bootsec,
-          const char *diegos,
-          const struct MBR_partition_entry *table);
+	  const char *bootsec, const char *diegos, const struct MBR_partition_entry *table);
 
-#endif // MKIMG_H
+#endif				// MKIMG_H

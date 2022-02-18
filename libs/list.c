@@ -21,103 +21,99 @@
 
 #include "list.h"
 
-int list_init(list_inst *list)
+int list_init(list_inst * list)
 {
-    if (!list) {
-        return (EINVAL);
-    }
+	if (!list) {
+		return (EINVAL);
+	}
 
-    list->head = NULL;
-    list->tail = NULL;
-    list->counter = 0;
+	list->head = NULL;
+	list->tail = NULL;
+	list->counter = 0;
 
-    return (EOK);
+	return (EOK);
 }
 
-
-int list_add(list_inst *list, list_node *prev, list_node *data)
+int list_add(list_inst * list, list_node * prev, list_node * data)
 {
-    if (!list || !data) {
-        return (EINVAL);
-    }
+	if (!list || !data) {
+		return (EINVAL);
+	}
 
-    if (!list->counter) {
-        list->head = list->tail = data;
-        list->counter = 1;
-        data->prev = data->next = NULL;
-        return (EOK);
-    }
+	if (!list->counter) {
+		list->head = list->tail = data;
+		list->counter = 1;
+		data->prev = data->next = NULL;
+		return (EOK);
+	}
 
-    data->prev = prev;
-    list->counter++;
+	data->prev = prev;
+	list->counter++;
 
-    /* insert head */
-    if (!prev) {
-        data->next = list->head;
-        list->head->prev = data;
-        list->head = data;
-    } else if (prev == list->tail) {
-        /*insert tail */
-        data->next = NULL;
-        list->tail->next = data;
-        list->tail = data;
-    } else {
-        data->next = prev->next;
-        prev->next = data;
-        data->next->prev = data;
-    }
+	/* insert head */
+	if (!prev) {
+		data->next = list->head;
+		list->head->prev = data;
+		list->head = data;
+	} else if (prev == list->tail) {
+		/*insert tail */
+		data->next = NULL;
+		list->tail->next = data;
+		list->tail = data;
+	} else {
+		data->next = prev->next;
+		prev->next = data;
+		data->next->prev = data;
+	}
 
-    return (EOK);
+	return (EOK);
 }
 
-int list_remove(list_inst *list, list_node *data)
+int list_remove(list_inst * list, list_node * data)
 {
-    if (!list || !list->counter || !data) {
-        return (EINVAL);
-    }
+	if (!list || !list->counter || !data) {
+		return (EINVAL);
+	}
 
-    list->counter--;
+	list->counter--;
 
-    if (list->head == data) {
-        list->head = data->next;
-    }
+	if (list->head == data) {
+		list->head = data->next;
+	}
 
-    if (list->tail == data) {
-        list->tail = data->prev;
-    }
+	if (list->tail == data) {
+		list->tail = data->prev;
+	}
 
-    if (data->prev) {
-        data->prev->next = data->next;
-    }
+	if (data->prev) {
+		data->prev->next = data->next;
+	}
 
-    if (data->next) {
-        data->next->prev = data->prev;
-    }
+	if (data->next) {
+		data->next->prev = data->prev;
+	}
 
-    data->prev = data->next = NULL;
+	data->prev = data->next = NULL;
 
-    return (EOK);
+	return (EOK);
 }
 
-list_node *list_search(list_inst *list,
-                       void *param,
-                       BOOL (*fn)(list_node *, void *))
+list_node *list_search(list_inst * list, void *param, BOOL(*fn) (list_node *, void *))
 {
-    list_node *cursor;
+	list_node *cursor;
 
-    if (!list || !list->counter || !fn) {
-        return (NULL);
-    }
+	if (!list || !list->counter || !fn) {
+		return (NULL);
+	}
 
-    cursor = list->head;
+	cursor = list->head;
 
-    while (cursor) {
-        if (fn(cursor, param)) {
-            return (cursor);
-        }
-        cursor = cursor->next;
-    }
+	while (cursor) {
+		if (fn(cursor, param)) {
+			return (cursor);
+		}
+		cursor = cursor->next;
+	}
 
-    return (NULL);
+	return (NULL);
 }
-

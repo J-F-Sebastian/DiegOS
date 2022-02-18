@@ -19,12 +19,12 @@
 
 #include <ctype.h>
 
-int isspace (int c)
+int isspace(int c)
 {
-    if ((c >= 9) && (c <= 13)) {
-        return (1);
-    } else if (c == 32) {
-        return (1);
-    }
-    return (0);
+	if ((c >= 9) && (c <= 13)) {
+		return (1);
+	} else if (c == 32) {
+		return (1);
+	}
+	return (0);
 }

@@ -22,10 +22,10 @@
 extern const char *strerrorlist[];
 extern const int nstrerror;
 
-char *strerror (int n)
+char *strerror(int n)
 {
-    if ((n > 0) || (-n >= nstrerror)) {
-        return ("unknown error");
-    }
-    return ((char *)strerrorlist[-n]);
+	if ((n > 0) || (-n >= nstrerror)) {
+		return ("unknown error");
+	}
+	return ((char *)strerrorlist[-n]);
 }
