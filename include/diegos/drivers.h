@@ -31,6 +31,7 @@
 
 #include "drivers_common.h"
 #include "char_drivers.h"
+#include "block_drivers.h"
 #include "net_drivers.h"
 #include "ui_drivers.h"
 
