@@ -180,6 +180,8 @@ void resume_on_barriers()
 {
 	struct barrier *cur = (struct barrier *)list_head(&barriers_list);
 
+	lock();
+
 	while (cur) {
 		if (cur->flags & BARRIER_OPEN) {
 			bitmap_for_each_set(cur->thread_ids,
@@ -190,6 +192,8 @@ void resume_on_barriers()
 		}
 		cur = (barrier_t *) cur->header.next;
 	}
+
+	unlock();
 }
 
 static void dump_internal(const barrier_t * barrier)
