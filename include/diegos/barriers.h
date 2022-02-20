@@ -26,10 +26,12 @@
  * Barriers API.
  * This API can be used in interrupt context.
  * Barriers are a form of synchronization among threads.
- * A barrier is a shared boolean where TRUE means open, FALSE mean closed.
- * A closed barrier will set threads in wait state, and an open barrier
- * won't change threads' state.
- * All threads waiting on a barrier will go to ready state once the barrier
+ * A barrier is a shared boolean where TRUE means open, FALSE means closed.
+ * When a running thread encounters a closed barrier, the barrier will set the
+ * thread to wait state.
+ * When a running thread encounters an open barrier, the barrier won't change
+ * the thread's state.
+ * All threads waiting on a barrier will move to ready state once the barrier
  * is opened.
  * This data structure allow threads to line up and wait for a common event
  * or condition.
@@ -50,6 +52,19 @@ typedef struct barrier barrier_t;
  * A pointer to a barrier handle or NULL in case of failure.
  */
 barrier_t *barrier_create(const char *name, BOOL autoclose);
+
+/*
+ * Destroy a barrier. The barrier will be set to open before destruction,
+ * hence moving all waiting threads to READY state.
+ *
+ * PARAMETERS IN
+ * barrier_t *barrier - the barrier to be destroyed
+ *
+ * RETURNS
+ * EOK in case of success
+ * EINVAL if barrier is invalid
+ */
+int barrier_done(barrier_t * barrier);
 
 /*
  * Sets a barrier state to open.
@@ -98,4 +113,4 @@ int wait_for_barrier(barrier_t * barrier);
  */
 void barrier_dump(const barrier_t * barrier);
 
-#endif				// BARRIERS_H_INCLUDED
+#endif

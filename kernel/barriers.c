@@ -83,6 +83,26 @@ barrier_t *barrier_create(const char *name, BOOL autoclose)
 	return (ptr);
 }
 
+int barrier_done(barrier_t * barrier)
+{
+	int retval;
+
+	if (!barrier)
+		return (EINVAL);
+
+	resume_on_barriers();
+
+	lock();
+
+	retval = list_remove(&barriers_list, &barrier->header);
+	if (retval != EOK)
+		kerrprintf("Invalid barrier");
+	else
+		free(barrier);
+
+	return retval;
+}
+
 int barrier_open(barrier_t * barrier)
 {
 	lock();
