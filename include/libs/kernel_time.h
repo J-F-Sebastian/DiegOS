@@ -124,6 +124,20 @@ uint32_t kernel_time_get_value(uint32_t msecs, const struct time_util *tu);
  */
 int kernel_time_get_minmax_msecs(uint32_t msecs[], const struct time_util *tu);
 
+/*
+ * Adjust msecs value according to the range stored in tu.
+ * The returned value might be unchanged if the range is honored, or it can be
+ * saturated to the maximum or minimum values stored in tu.
+ *
+ * PARAMETERS IN
+ * uint32_t msecs             - the milliseconds to be checked
+ * const struct time_util *tu - a pointer to a struct time_util
+ *
+ * RETURNS
+ * The saturated value in milliseconds
+ */
+uint32_t kernel_time_adjust_msecs(uint32_t msecs, const struct time_util *tu);
+
 inline int kernel_time_validate_range(uint32_t value, const struct time_util *tu)
 {
 	if (tu) {

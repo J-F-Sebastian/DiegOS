@@ -98,3 +98,17 @@ int kernel_time_get_minmax_msecs(uint32_t msecs[], const struct time_util *tu)
 
 	return (EOK);
 }
+
+uint32_t kernel_time_adjust_msecs(uint32_t msecs, const struct time_util * tu)
+{
+	uint32_t range[2];
+
+	if (EOK == kernel_time_get_minmax_msecs(range, tu)) {
+		if (msecs < range[0])
+			msecs = range[0];
+		else if (msecs > range[1])
+			msecs = range[1];
+	}
+
+	return msecs;
+}
