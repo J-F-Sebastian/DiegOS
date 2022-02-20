@@ -23,6 +23,20 @@
 #include <types_common.h>
 
 /*
+ * This is an over-simplification, should realistically be
+ * an API used to get IDs.
+ */
+enum clock_client_id {
+	/* The scheduler */
+	CLK_INST_SCHEDULER,
+	/* The alarms subsystem */
+	CLK_INST_ALARMS,
+	/* The timers subsystem */
+	CLK_INST_TIMERS,
+	CLK_INST_MAX
+};
+
+/*
  * kernel clock callback definition.
  * This prototype has to be used with clock_add_cb
  * and clock_del_db.
@@ -53,27 +67,29 @@ BOOL clock_init(void);
  * Ticks can be dynamic, time between two consecutive calls
  * may vary.
  *
- * PARAMS
- * cb - a callback
+ * PARAMETERS IN
+ * kernel_clock_cb cb       - a callback
+ * clock_client_id instance - the clock client instance
  *
  * RETURN VALUES
  * TRUE if the callback was properly registered
  * FALSE in any other case
  */
-BOOL clock_add_cb(kernel_clock_cb cb);
+BOOL clock_add_cb(kernel_clock_cb cb, enum clock_client_id instance);
 
 /*
  * Remove a callback from the clock library.
  * The callback is removed only if cb matches a registered entry.
  *
  * PARAMS
- * cb - a callback
+ * kernel_clock_cb cb       - a callback
+ * clock_client_id instance - the clock client instance
  *
  * RETURN VALUES
  * TRUE if the callback was properly removed
  * FALSE in any other case
  */
-BOOL clock_del_cb(kernel_clock_cb cb);
+BOOL clock_del_cb(kernel_clock_cb cb, enum clock_client_id instance);
 
 /*
  * Set the CLK device to work in periodic mode, i.e. the device
@@ -101,10 +117,14 @@ BOOL clock_set_oneshot(void);
  * Set the CLK device period, a.k.a. the time between two consecutive expirations.
  * This value can be set at runtime.
  *
+ * PARAMETERS IN
+ * unsigned ms     - the period for a specific client instance
+ * clock_client_id - the client instance
+ *
  * RETURN VALUES
  * TRUE if the CLK device has been set in periodic mode
  * FALSE in any other case
  */
-BOOL clock_set_period(unsigned ms);
+BOOL clock_set_period(unsigned ms, enum clock_client_id instance);
 
 #endif

@@ -22,6 +22,7 @@
 #include <diegos/kernel_ticks.h>
 #include <libs/kernel_time.h>
 #include <errno.h>
+#include <string.h>
 #include "clock.h"
 #include "kprintf.h"
 
@@ -31,7 +32,7 @@
 static uint64_t boot_ticks = 0;
 
 /*
- * clock period in clock ticks
+ *  master clock period in clock ticks
  */
 static uint32_t period = 0;
 
@@ -43,7 +44,12 @@ static unsigned mode = 0;
 /*
  * callbacks invoked after ticks accounting
  */
-static kernel_clock_cb callbacks[4] = { };
+static kernel_clock_cb callbacks[CLK_INST_MAX];
+
+/*
+ * periods associated to callback instances
+ */
+static uint32_t inst_period[CLK_INST_MAX];
 
 /*
  * clock instance made global, so runtime calls to change frequency
@@ -81,6 +87,12 @@ static void clock_int_handler(void)
 BOOL clock_init(void)
 {
 	uint32_t params[3] = { 0, 0, 0 };
+	unsigned i;
+
+	for (i = 0; i < NELEMENTS(callbacks); i++) {
+		callbacks[i] = NULL;
+		inst_period[i] = -1U;
+	}
 
 	clock = device_lookup(DEV_CLK, 0);
 
@@ -110,40 +122,38 @@ BOOL clock_init(void)
 	return (TRUE);
 }
 
-BOOL clock_add_cb(kernel_clock_cb cb)
+BOOL clock_add_cb(kernel_clock_cb cb, enum clock_client_id id)
 {
-	unsigned i;
+	if (id < CLK_INST_MAX) {
 
-	lock();
+		lock();
 
-	for (i = 0; i < NELEMENTS(callbacks); i++) {
-		if (!callbacks[i]) {
-			callbacks[i] = cb;
+		if (!callbacks[id]) {
+			callbacks[id] = cb;
 			unlock();
 			return (TRUE);
 		}
-	}
 
-	unlock();
+		unlock();
+	}
 
 	return (FALSE);
 }
 
-BOOL clock_del_cb(kernel_clock_cb cb)
+BOOL clock_del_cb(kernel_clock_cb cb, enum clock_client_id id)
 {
-	unsigned i;
+	if (id < CLK_INST_MAX) {
 
-	lock();
+		lock();
 
-	for (i = 0; i < NELEMENTS(callbacks); i++) {
-		if (cb == callbacks[i]) {
-			callbacks[i] = NULL;
+		if (cb == callbacks[id]) {
+			callbacks[id] = NULL;
 			unlock();
 			return (TRUE);
 		}
-	}
 
-	unlock();
+		unlock();
+	}
 
 	return (FALSE);
 }
@@ -180,17 +190,37 @@ BOOL clock_set_oneshot(void)
 	return clock_set_mode(1);
 }
 
-BOOL clock_set_period(unsigned ms)
+static inline uint32_t get_lowest()
+{
+	uint32_t retval = inst_period[0];
+	unsigned i;
+
+	for (i = 1; i < NELEMENTS(inst_period); i++)
+		if (inst_period[i] < retval)
+			retval = inst_period[i];
+
+	return retval;
+}
+
+BOOL clock_set_period(unsigned ms, enum clock_client_id instance)
 {
 	int retcode = EINVAL;
-	uint32_t temp = kernel_time_get_value(ms, &sys_ticks);
+	uint32_t temp;
+
+	if (!(instance < CLK_INST_MAX))
+		return FALSE;
+
+	/* adjust ms value to be in range */
+	ms = kernel_time_adjust_msecs(ms, &sys_ticks);
+	/* store the new period as a clock value for this specific instance */
+	inst_period[instance] = kernel_time_get_value(ms, &sys_ticks);
+	/* select the lowest value to be configured system-wide */
+	temp = get_lowest();
 
 	if (temp == period)
 		return TRUE;
 
 	if (clock) {
-		temp = kernel_time_adjust_range(temp, &sys_ticks);
-
 		/*
 		 * A reliable method to compensate lost ticks is still required !!!
 		 */
