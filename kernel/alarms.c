@@ -54,9 +54,12 @@ struct alarm {
 
 static list_inst alarms_list;
 
+static uint32_t period = -1U;
+
 static void alarm_cb(uint64_t msecs)
 {
 	struct alarm *cursor;
+	period = -1U;
 
 	if (!list_count(&alarms_list)) {
 		return;
@@ -74,6 +77,9 @@ static void alarm_cb(uint64_t msecs)
 					/* One shot */
 					if (!(cursor->flags & ALM_RECURSIVE)) {
 						cursor->flags &= ~ALM_TRIGGERED;
+					} else {
+						if (cursor->msecs < period)
+							period = cursor->msecs;
 					}
 				}
 			}
@@ -81,11 +87,13 @@ static void alarm_cb(uint64_t msecs)
 
 		cursor = (alarm_t *) cursor->header.next;
 	}
+
+	clock_set_period(period, CLK_INST_ALARMS);
 }
 
 BOOL init_alarms_lib()
 {
-	if (EOK != list_init(&alarms_list) || !clock_add_cb(alarm_cb)) {
+	if (EOK != list_init(&alarms_list)) {
 		kerrprintf("failed initing alarm lib.\n");
 		return (FALSE);
 	}
@@ -110,6 +118,15 @@ alarm_t *alarm_create(const char *name,
 
 	lock();
 
+	if (list_count(&alarms_list) == 0) {
+		if (!clock_add_cb(alarm_cb, CLK_INST_ALARMS)) {
+			unlock();
+			free(ptr);
+			kerrprintf("failed adding alarm callback!\n");
+			return (NULL);
+		}
+	}
+
 	if (EOK != list_add(&alarms_list, NULL, &ptr->header)) {
 		unlock();
 		free(ptr);
@@ -133,6 +150,15 @@ alarm_t *alarm_create(const char *name,
 	ptr->notify = evqueue;
 	ptr->event.classid = CLASS_ALARM;
 	ptr->event.eventid = alarmid;
+
+	/*
+	 * Shorten clock expiration if the required timeout
+	 * is lower than the last computed period.
+	 * Do not update the computed period, that's up to the
+	 * interrupt routine.
+	 */
+	if (millisecs < period)
+		clock_set_period(millisecs, CLK_INST_ALARMS);
 
 	unlock();
 
@@ -191,6 +217,14 @@ STATUS alarm_update(alarm_t * alm, unsigned millisecs, BOOL recursive)
 
 	if (millisecs != alm->msecs) {
 		alm->msecs = millisecs;
+		/*
+		 * Shorten clock expiration if the required timeout
+		 * is lower than the last computed period.
+		 * Do not update the computed period, that's up to the
+		 * interrupt routine.
+		 */
+		if (millisecs < period)
+			clock_set_period(millisecs, CLK_INST_ALARMS);
 	}
 
 	if (recursive && !(alm->flags & ALM_RECURSIVE)) {
@@ -215,6 +249,12 @@ STATUS alarm_done(alarm_t * alm)
 	if (EOK != list_remove(&alarms_list, &alm->header)) {
 		unlock();
 		return (EGENERIC);
+	}
+
+	if (list_count(&alarms_list) == 0) {
+		clock_set_period(-1U, CLK_INST_ALARMS);
+		if (!clock_del_cb(alarm_cb, CLK_INST_ALARMS))
+			kerrprintf("failed removing alarm callback!\n");
 	}
 
 	unlock();
