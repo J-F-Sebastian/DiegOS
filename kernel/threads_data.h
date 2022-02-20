@@ -24,6 +24,7 @@
 #include <queue.h>
 
 #define THREAD_TID_IDLE     (0)
+#define THREAD_TID_TMRS     (1)
 #define THREAD_TID_INVALID  (255)
 #define THREAD_NAME_MAX     (15)
 #define THREAD_PRIORITIES   (4)

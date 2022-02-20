@@ -33,6 +33,7 @@
 #include "clock.h"
 #include "events_private.h"
 #include "alarms_private.h"
+#include "timers_private.h"
 #include "barriers_private.h"
 #include "io_waits_private.h"
 #include "devices_private.h"
@@ -49,6 +50,7 @@ static const char *messages2[] = { "cannot init threads",
 	"cannot init mutexes",
 	"cannot init events",
 	"cannot init alarms",
+	"cannot int timers",
 	"cannot init barriers",
 	"cannot init I/O waits",
 	"cannot init poll",
@@ -67,6 +69,7 @@ static const initlibfn libs_init_array[] = { init_thread_lib,
 	init_mutex_lib,
 	init_events_lib,
 	init_alarms_lib,
+	init_timers_lib,
 	init_barriers_lib,
 	init_io_waits_lib,
 	init_poll_lib,
@@ -124,6 +127,17 @@ void kernel_threads_init()
 
 	if (!scheduler_add_thread(tid)) {
 		kernel_panic("cannot add IDLE to the scheduler.");
+	}
+
+	tid = init_thread("Timers", THREAD_PRIO_REALTIME, timers_thread_entry, NULL, 4 * KBYTE);
+
+	if ((THREAD_TID_INVALID == tid) || (THREAD_TID_TMRS != tid)) {
+		kernel_panic("cannot create the TIMERS thread.");
+		return;
+	}
+
+	if (!scheduler_add_thread(tid)) {
+		kernel_panic("cannot add TIMERS to the scheduler.");
 	}
 
 	kprintf("kernel threads setup complete.\n");
