@@ -186,9 +186,9 @@ void schedule_thread()
 		if (queue_count(&delay_queue)) {
 			new_delay = peek_top_expiration();
 		}
-		if (FALSE == clock_set_period(new_delay)) {
-			kerrprintf("Clock device failed in %s\n", __FUNCTION__);
-		}
+	}
+	if (FALSE == clock_set_period(new_delay, CLK_INST_SCHEDULER)) {
+		kerrprintf("Clock device failed in %s\n", __FUNCTION__);
 	}
 
 	/*
