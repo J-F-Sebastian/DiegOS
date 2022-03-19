@@ -18,20 +18,16 @@
  */
 
 .text
-.globl execute_cpuid
-.type  execute_cpuid, @function
+.globl init_simd
+.type  init_simd, @function
 
 /*
- * void execute_cpuid(void *data, unsigned infotype);
+ * void init_simd ();
  */
-execute_cpuid:
-pushl   %edi
-movl	12(%esp), %eax
-movl	8(%esp), %edi
-cpuid
-movl    %eax, (%edi)
-movl	%ebx, 4(%edi)
-movl	%ecx, 8(%edi)
-movl	%edx, 12(%edi)
-popl    %edi
+init_simd:
+fninit
+#set the OSFXR bit 9 in CR4
+movl    %cr4, %eax
+orl     $0x200, %eax
+movl    %eax, %cr4
 ret
