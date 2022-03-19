@@ -25,6 +25,8 @@ void execute_cpuid(void *data, unsigned infotype);
 extern void set_ts(void);
 extern void init_fp(void);
 extern void init_simd(void);
+extern void read_msr(void *data, unsigned reg);
+extern void write_msr(void *data, unsigned reg);
 
 void idt_init(void);
 
