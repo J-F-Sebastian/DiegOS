@@ -20,7 +20,6 @@
 #ifndef _TIME_H_
 #define _TIME_H_
 
-#include <platform_config.h>
 #include <stddef.h>
 
 #define CLOCKS_PER_SEC (DEFAULT_CLOCK_RES)

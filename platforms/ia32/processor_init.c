@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-#include <platform_config.h>
 #include <diegos/interrupts.h>
 #include "../../kernel/platform_include.h"
 #include "ia32_private.h"

@@ -19,7 +19,6 @@
 
 #include <limits.h>
 #include <stdint.h>
-#include <platform_config.h>
 #include <diegos/delays.h>
 
 #include "kprintf.h"

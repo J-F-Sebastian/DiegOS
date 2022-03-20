@@ -20,7 +20,6 @@
 #ifndef TYPES_COMMON_H_
 #define TYPES_COMMON_H_
 
-#include <platform_config.h>
 #include <stdint.h>
 #include <endian.h>
 
