@@ -1,7 +1,7 @@
 #
 # DiegOS Operating System source code
 #
-# Copyright (C) 2022 - 2022 Diego Gallizioli
+# Copyright (C) 2012 - 2022 Diego Gallizioli
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,15 +17,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-#
-# makefile to configure build options for intel 32 bit architectures.
-# The effective processor achitecture is not configurable right now,
-# it might in future releases.
-#
-export CWARN = -Wall -Wextra -Winline -Wcast-align -Wno-unused-parameter -Werror -Wframe-larger-than=1023
-export CXXWARN = -Wall -Wextra -Wcast-align -Wno-unused-parameter -Werror -Wframe-larger-than=1023
-export COPT = -O2
-export CARCH = -m32 -march=pentium2 -fcall-used-ebx
-export CFLAGS = $(CWARN) $(COPT) $(CARCH)
-export CXXFLAGS = $(CXXWARN) $(COPT) $(CARCH)
-export ASFLAGS = $(CARCH)
+#void on purpose

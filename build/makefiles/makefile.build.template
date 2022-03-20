@@ -17,6 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+# This is a makefile template to build images
+# targeted by CPU and PLATFORM as defined in
+# makefile.config.
+# This template must be copied in a different
+# folder to build the actual binary image.
+# Also, makefile.config must be copied in the same
+# folder and edited to comply with the required
+# configuration.
+
 include makefile.config
 include ../makefiles/makefile.master
 include ../makefiles/makefile.$(CPU)
@@ -37,8 +46,8 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../libs/$(OBJPREFIX)_diegos_lib.a \
 	../../libs/libc/$(OBJPREFIX)_libc.a \
 	../../fat/$(OBJPREFIX)_fat.a
-   
-all: bootsect.bin 
+
+all: bootsect.bin
 	cd ../../platforms/$(CPU) && make all
 	cd ../../platforms/$(PLATFORM) && make all
 	cd ../../kernel && make all

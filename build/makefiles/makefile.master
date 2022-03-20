@@ -1,3 +1,35 @@
+#
+# DiegOS Operating System source code
+#
+# Copyright (C) 2012 - 2022 Diego Gallizioli
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+
+# include dependencies from other makefiles.
+# IMPORTANT: the target makefile, the one inside the platform build
+# folder, MUST include a makefile.config BEFORE including
+# makefile.master.
+# Failing to do so will result in the unavailability of several exported
+# variables and in the impossibility to expand other variables, eventually
+# leading the build to a failure.
+
+#include makefile.$(CPU)
+#include makefile.$(PLATFORM)
+
+# Generic exports to compile, link and store derived objects
+
 export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
 export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g
 export AS = $(CC) -xassembler
@@ -5,9 +37,39 @@ export ASCC = $(CC) -xassembler-with-cpp
 export LN = ld --oformat binary -eDiegOS -static
 export AR = ar cr
 
+# OBJPREFIX is used to identify the derived objects of the selected CPU+PLATFORM
+# combine. Derived objects are stored in folder named after OBJPREFIX.
+
 export OBJPREFIX = $(CPU)_$(PLATFORM)
 
-export CDEFS = -DDIEGOS_CPU=$(CPU) -DDIEGOS_PLAT=$(PLATFORM) -DDBG_MODULE
+# CDEFS is a standard variable used to pass defines to a C compiler.
+# Refer to the makefile.config template for a description of all available
+# variables and their effect on CDEFS.
+
+export CDEFS = -DDIEGOS_CPU=$(CPU)
+CDEFS += -DDIEGOS_PLAT=$(PLATFORM)
+CDEFS += -DDIEGOS_MAX_THREADS=$(MAX_THREADS)
+CDEFS += -D_BYTE_ORDER=$(BYTE_ORDER)
+CDEFS += -DCACHE_ALN=$(CACHE_ALN)
+CDEFS += -DDEFAULT_CLOCK_RES=$(DEFAULT_CLOCK_RES)
+CDEFS += -DDEFAULT_STDIN="\$(DEFAULT_STDIN)\"
+CDEFS += -DDEFAULT_STDOUT="\$(DEFAULT_STDOUT)\"
+CDEFS += -DDEFAULT_STDERR="\$(DEFAULT_STDERR)\"
+CDEFS += -DDEFAULT_DBG_TTY="\$(DEFAULT_DBG_TTY)\"
+
+ifeq ($(SUPPORT_FP),"y")
+CDEFS += -DENABLE_FP
+endif
+
+ifeq ($(SUPPORT_SIMD),"y")
+CDEFS += -DENABLE_SIMD
+endif
+
+ifeq ($(DBG_MODULE),"y")
+CDEFS += -DDBG_MODULE
+endif
+
+# Targets used by rules
 
 default: all
 
@@ -21,22 +83,22 @@ $(OBJPREFIX)/%.o: %.c
 	$(CC) $(CFLAGS) $(CDEFS) -c -o $@ $<
 
 $(OBJPREFIX)/%.o: %.s
-	$(AS) $(ASFLAGS) -c -o $@ $<
+	$(AS) $(ASFLAGS) $(CDEFS) -c -o $@ $<
 
 $(OBJPREFIX)/%.o: %.S
-	$(ASCC) $(ASFLAGS) -c -o $@ $<
+	$(ASCC) $(ASFLAGS) $(CDEFS) -c -o $@ $<
 
 $(OBJPREFIX)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CDEFS) -c -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CDEFS) -c -o $@ $<
 
 %.o: %.s
-	$(AS) $(ASFLAGS) -c -o $@ $<
+	$(AS) $(ASFLAGS) $(CDEFS) -c -o $@ $<
 
 %.o: %.S
-	$(ASCC) $(ASFLAGS) -c -o $@ $<
+	$(ASCC) $(ASFLAGS) $(CDEFS) -c -o $@ $<
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CDEFS) -c -o $@ $<
