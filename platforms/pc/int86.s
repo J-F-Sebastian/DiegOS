@@ -38,7 +38,7 @@
 ;   +-----------------------+
 ;   |       0x00000400      |   BIOS Data Area (256 Bytes)
 ;   +-----------------------+
-;   |       0x00000500      |   UNUSED
+;   |       0x00000500      |   UNUSED (256 Bytes)
 ;   +-----------------------+
 ;   |       0x00000600      |
 ;   |          ....         |
@@ -321,7 +321,7 @@ global real_buffer, _real_buffer
 
 real_buffer:
 _real_buffer:
-        mov eax, 0x1000
+        mov eax, 0x7000
         ret
 
 ; C Prototype:
