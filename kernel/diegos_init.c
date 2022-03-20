@@ -99,7 +99,7 @@ void DiegOS(void)
 		   &_text_start, &_data_start, &_bss_start, bootvars->free_heap_start);
 	kmsgprintf("--------+--------+--------+--------+--------\n");
 	kmsgprintf("End     |%#8x|%#8x|%#8x|%#8x\n",
-		   &_text_end, &_data_end, &_bss_end, bootvars->free_heap_size);
+		   &_text_end, &_data_end, &_bss_end, bootvars->free_heap_start + bootvars->free_heap_size);
 	kmsgprintf("--------+--------+--------+--------+--------\n\n");
 #endif
 	if (proctype) {
