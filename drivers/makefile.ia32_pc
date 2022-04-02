@@ -9,6 +9,7 @@ all:
 	cd VESA && make all
 	cd i82371SB && make all
 	cd lo && make all
+	cd LAPIC && make all
 	$(AR) $(OBJPREFIX)_drivers.a i8253/$(OBJPREFIX)/i8253.o
 	$(AR) $(OBJPREFIX)_drivers.a i8042/$(OBJPREFIX)/i8042.o
 	$(AR) $(OBJPREFIX)_drivers.a ti16550d/$(OBJPREFIX)/16550d.o
@@ -20,6 +21,7 @@ all:
 	$(AR) $(OBJPREFIX)_drivers.a VESA/$(OBJPREFIX)/vesa.o
 	$(AR) $(OBJPREFIX)_drivers.a i82371SB/$(OBJPREFIX)/82371SB.o
 	$(AR) $(OBJPREFIX)_drivers.a lo/$(OBJPREFIX)/local_loop.o
+	$(AR) $(OBJPREFIX)_drivers.a LAPIC/$(OBJPREFIX)/lapic.o
 
 clean:
 	cd i8253 && make clean
@@ -30,4 +32,5 @@ clean:
 	cd VESA && make clean    
 	cd i82371SB && make clean
 	cd lo && make clean
+	cd LAPIC && make clean
 	rm -rf *.a
