@@ -112,6 +112,7 @@ void DiegOS(void)
 	kmsgprintf("Floating Point instructions are supported.\n");
 #endif
 
+	kmsgprintf("%d BogoMIPS\n", loops_per_second());
 	/*
 	 * Init the kernel system libraries.
 	 */
