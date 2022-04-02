@@ -52,8 +52,45 @@
  * GDTR
  */
 
-#define MAX_INT (32)
+#define MAX_INT (64)
 #define MAX_EXC (20)
+
+/*
+ * Mapping of interrupt vectors
+ *
+ * R 	reserved to exceptions and processor interrupts
+ * IRQ	allocated to i8259 interrupts, IRQ0 to IRQ15
+ * SW	configurable for software-generated interrupts
+ * HW	configurable for hardware-generated interrupts
+ *
+ * There are 32 reserved vectors, 16 vectors for i8259 hardware interrupts,
+ * 16 vectors for software interrupts, 32 vectors for additional hardware interrupts,
+ * totalling 96 addressed interrupts, 64 available for the OS.
+ * All other vectors (160 remaining) are available but not configured.
+ * To make use of them you need to increase MAX_INT defines.
+ *
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * |   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | A | B | C | D | E | F |
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 0 | R | R | R | R | R | R | R | R | R | R | R | R | R | R | R | R |
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 1 | R | R | R | R | R | R | R | R | R | R | R | R | R | R | R | R |
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 2 |IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|IRQ|
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 3 |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |SW |
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 4 |HW |HW |HW |HW |HW |HW |HW |HW |SW |HW |HW |HW |HW |HW |HW |HW |
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 5 |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |HW |
+ * +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+ * | 6 | .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+ * +---+
+ * | 7 | .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+ * +---+
+ *  ...
+ *  ...
+ */
 
 const uint16_t FLAGS = 0x8E00;
 
@@ -170,12 +207,13 @@ void idt_init()
 	i = 0;
 
 	/*
-	 * First 32 items are reserved for exceptions and
+	 * First 32 vectors are reserved for exceptions and
 	 * processors interrupts (0 to 31).
-	 * values from 32 to 47 are in use for hardware interrupts,
+	 * Vectors from 32 to 47 are in use for hardware interrupts,
 	 * coming from i8259 or equivalent.
-	 * Values from 48 to 63 are in use for hardware interrupts,
-	 * coming from other sources.
+	 * Vectors from 48 to 63 are in use for software interrupts.
+	 * Vectors from 64 to 95 are in use for hardware interrupts
+	 * from other sources.
 	 */
 
 	/* Exceptions from 0 to 19 */
@@ -279,7 +317,10 @@ void idt_init()
 		idt_table[i++].flags &= ~0x8000;
 	}
 
-	/* IRQ from 0 to 15 matches interrupts from 32 to 47 */
+	/*
+	 * IRQ from 0 to 15 matches vectors from 32 to 47 and are dedicated
+	 * to i8259 hardware
+	 */
 	idt_table[i].offset_low = (uint16_t) ((intptr_t) hwint00);
 	idt_table[i].segment = 8;
 	idt_table[i].flags = FLAGS;
@@ -360,7 +401,7 @@ void idt_init()
 	idt_table[i].flags = FLAGS;
 	idt_table[i].offset_hi = (uint16_t) ((intptr_t) hwint15 >> 16);
 
-	/* Software interrupts matches interrupts from 48 to 63 */
+	/* Software interrupts matches vectors from 48 to 63 */
 	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint00);
 	idt_table[i].segment = 8;
 	idt_table[i].flags = FLAGS;
@@ -371,7 +412,7 @@ void idt_init()
 	idt_table[i].flags = FLAGS;
 	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint01 >> 16);
 
-	idt_table[i].offset_low = (uint16_t) ((intptr_t) hwint02);
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint02);
 	idt_table[i].segment = 8;
 	idt_table[i].flags = FLAGS;
 	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint02 >> 16);
@@ -441,8 +482,169 @@ void idt_init()
 	idt_table[i].flags = FLAGS;
 	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint15 >> 16);
 
+	/* Hardware interrupts matches vectors from 64 to 95 */
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint16);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint16 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint17);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint17 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint18);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint18 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint19);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint19 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint20);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint20 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint21);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint21 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint22);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint22 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint23);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint23 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint24);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint24 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint25);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint25 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint26);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint26 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint27);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint27 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint28);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint28 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint29);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint29 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint30);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint30 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint31);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint31 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint32);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint32 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint33);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint33 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint34);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint34 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint35);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint35 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint36);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint36 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint37);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint37 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint38);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint38 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint39);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint39 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint40);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint40 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint41);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint41 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint42);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint42 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint43);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint43 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint44);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint44 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint45);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint45 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint46);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint46 >> 16);
+
+	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint47);
+	idt_table[i].segment = 8;
+	idt_table[i].flags = FLAGS;
+	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint47 >> 16);
+
 	/*
-	 * set remaining interrupts as unused
+	 * set remaining vectors as unused
 	 */
 	for (; i < 256; i++) {
 		idt_table[i].flags &= ~0x8000;
