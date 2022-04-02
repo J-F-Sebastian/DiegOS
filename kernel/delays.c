@@ -26,6 +26,11 @@
 
 unsigned long loops_mdelay;
 
+unsigned long loops_per_second()
+{
+	return (loops_mdelay * 1000);
+}
+
 void calibrate_delay(volatile unsigned long *ticks)
 {
 	unsigned long oldticks;
