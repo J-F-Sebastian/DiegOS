@@ -103,7 +103,7 @@ static int i8253_done(unsigned unitno)
 	}
 
 	/* Reset the clock to the BIOS rate. (For rebooting) */
-	out_byte(TIMER_MODE, modes[0]);
+	out_byte(TIMER_MODE, modes[1]);
 	out_byte(TIMER0, 0);
 	out_byte(TIMER0, 0);
 
