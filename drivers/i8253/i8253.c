@@ -73,6 +73,9 @@ static int i8253_start(unsigned unitno)
 	flags &= ~DRV_STATUS_STOP;
 	flags |= DRV_STATUS_RUN;
 
+	out_byte(TIMER0, (uint8_t) ctrvalue);	/* load timer low byte */
+	out_byte(TIMER0, (uint8_t) (ctrvalue >> 8));	/* load timer high byte */
+
 	enable_int(CLOCK_IRQ);
 
 	return (EOK);
