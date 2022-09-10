@@ -41,6 +41,16 @@
 #include "../../drivers/i8042/i8042.h"
 
 /*
+ * Hardcoded values for calibration
+ */
+#define TIMER0 0x40
+#define TMRMOD 0x43
+
+#define TVAL   65534
+#define TDELTA 1193
+#define TTHRES (TVAL - TDELTA)
+
+/*
  * WARNING
  * THIS MUST BE KEPT ALIGNED WITH CODE IN THE BOOT SECTOR !!!
  * THE VARIABLES AREA IS AT 0xF000
@@ -59,11 +69,25 @@ static const void *drvlist[] = { &uart16550d_drv,
 	&i8042_mouse_drv
 };
 
-static volatile unsigned long ticks = 0;
-
-static void calib_int_handler(void)
+static unsigned long tickfn(void)
 {
-	++ticks;
+	static unsigned long ticks = 0;
+	unsigned rval = 0;
+	uint8_t *cval = (uint8_t *) & rval;
+
+	/* Latch values */
+	out_byte(TMRMOD, 0);
+	cval[0] = in_byte(TIMER0);
+	cval[1] = in_byte(TIMER0);
+
+	if (rval < TTHRES) {
+		ticks += (TVAL - rval) / TDELTA;
+		/* Start counter value */
+		out_byte(TIMER0, (uint8_t) TVAL);
+		out_byte(TIMER0, (uint8_t) (TVAL >> 8));
+	}
+
+	return ticks;
 }
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
@@ -82,42 +106,21 @@ void platform_init()
 	i8259_init();
 
 	/*
-	 * enable interrupts
+	 * Perform hardcoded initialization of i8253 PIT to calibrate delays
 	 */
-	unlock();
+	/* one shot timer 0 */
+	out_byte(TMRMOD, 0x38);
 
-	/*
-	 * Init the clock to calibrate delay loops.
-	 * MUST be called AFTER malloc_init.
-	 * It will be inited twice when added as a device, not elegant, but....
-	 */
-	if ((EOK != i8253_drv.cmn.init_fn(0)) ||
-	    (EOK != i8253_drv.cmn.ioctrl_fn(params, CLK_GET_PARAMS, 0)) ||
-	    (EOK != i8253_drv.cmn.ioctrl_fn(&params[1], CLK_SET_PERIOD, 0)) ||
-	    (EOK != i8253_drv.cmn.ioctrl_fn(calib_int_handler, CLK_SET_CB, 0)) ||
-	    (EOK != i8253_drv.cmn.start_fn(0))) {
-		abort();
-	}
+	/* Start counter value */
+	out_byte(TIMER0, (uint8_t) TVAL);
+	out_byte(TIMER0, (uint8_t) (TVAL >> 8));
 
 	/*
 	 * Now we are updating ticks !!! Go calibrate.
 	 */
-	calibrate_delay(&ticks);
+	calibrate_delay(tickfn);
 
-	srand(ticks);
-
-	/*
-	 * Stop the driver, it will be inited by driver_init
-	 */
-	i8253_drv.cmn.stop_fn(0);
-	i8253_drv.cmn.done_fn(0);
-
-	/*
-	 * disable interrupts, interrupts MUST BE DISABLED after this function
-	 * has been called.
-	 */
-	lock();
-
+	srand(loops_per_second() / 123);
 }
 
 void tty_init()
