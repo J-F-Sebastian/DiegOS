@@ -24,98 +24,83 @@
 #include "kprintf.h"
 #include "platform_include.h"
 
-unsigned long loops_mdelay;
+#define BASE_VALUE (1UL << 10)
+
+unsigned long loops_per_msec;
 
 unsigned long loops_per_second()
 {
-	return (loops_mdelay * 1000);
+	return (loops_per_msec * 1000);
 }
 
-void calibrate_delay(volatile unsigned long *ticks)
+void calibrate_delay(unsigned long (*tickfn) (void))
 {
 	unsigned long oldticks;
-	unsigned long resolution, finder;
+	unsigned long finder;
 
-	finder = 10000U;
-	resolution = UINT_MAX / 1024;
+	finder = BASE_VALUE;
 
 	while (1) {
-		oldticks = *ticks;
+		oldticks = tickfn();
 
 		/*
 		 * wait for the tick to be updated
 		 */
-		while (oldticks == *ticks) {
+		while (oldticks == tickfn()) {
 		};
-		oldticks = *ticks;
+		oldticks = tickfn();
 		delay_loop(finder);
-		if (oldticks < *ticks) {
+		/*
+		 * If we wasted enough time to make the tickfn() value
+		 * change, then break out.
+		 * Else we need to start over and try a larger time to be wasted.
+		 */
+		if (oldticks < tickfn()) {
 			break;
 		} else {
-			finder += resolution;
+			finder += BASE_VALUE;
 		}
 	}
 
 	/*
 	 * We know finder's value is overestimating the correct value
 	 */
-	resolution /= 2;
-
 	while (1) {
-		oldticks = *ticks;
+		oldticks = tickfn();
 
 		/*
 		 * wait for the tick to be updated
 		 */
-		while (oldticks == *ticks) {
+		while (oldticks == tickfn()) {
 		};
-		oldticks = *ticks;
+		oldticks = tickfn();
 		delay_loop(finder);
-		if (oldticks < *ticks) {
-			if (finder < resolution) {
-				resolution = finder / 2 + 1;
-			}
-			finder -= resolution;
-		} else {
-			finder += resolution;
-			resolution /= 2;
-			if (!resolution) {
-				finder--;
-				break;
-			}
-		}
-	}
-
-	resolution = 8;
-	while (resolution--) {
-		oldticks = *ticks;
-
 		/*
-		 * wait for the tick to be updated
+		 * The goal is to reduce resolution to 0 while
+		 * converging the finder value.
+		 * If we wait too much (finder too big) we reduce it,
+		 * if we wait too few (finder too small) we increase it.
+		 * The resolution is halved at every cycle.
 		 */
-		while (oldticks == *ticks) {
-		};
-		oldticks = *ticks;
-		delay_loop(finder);
-		if (oldticks < *ticks) {
-			finder++;
+		if (oldticks < tickfn()) {
+			finder -= 1;
 		} else {
-			finder--;
+			break;
 		}
 	}
 
-	loops_mdelay = finder;
+	loops_per_msec = finder;
 }
 
 void mdelay(unsigned long msecs)
 {
-	delay_loop(loops_mdelay * msecs);
+	delay_loop(loops_per_msec * msecs);
 }
 
 void udelay(unsigned long usecs)
 {
-	unsigned long temp = loops_mdelay * usecs / 1000;
-	if (((loops_mdelay * usecs) % 1000U) > 499)
+	unsigned long temp = loops_per_msec * usecs / 1000;
+	if (((loops_per_msec * usecs) % 1000U) > 499)
 		temp++;
 
 	delay_loop(temp);
@@ -123,8 +108,8 @@ void udelay(unsigned long usecs)
 
 void ndelay(unsigned long nsecs)
 {
-	unsigned long temp = loops_mdelay * nsecs / 1000000;
-	if (((loops_mdelay * nsecs) % 1000000U) > 499999)
+	unsigned long temp = loops_per_msec * nsecs / 1000000;
+	if (((loops_per_msec * nsecs) % 1000000U) > 499999)
 		temp++;
 
 	delay_loop(temp);

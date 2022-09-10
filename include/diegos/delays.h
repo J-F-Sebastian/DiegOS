@@ -32,16 +32,15 @@ unsigned long loops_per_second(void);
 /*
  * This function should be invoked at boot time (much probably in platform
  * dependent code) to calibrate the internal delay loop.
- * The volatile pointer passed in as a parameter is a variable counting
- * milliseconds.
+ * The function passed in as a parameter must return a value updating every millisecond.
+ * Whenever a millisecond has expired, this function must return a different value.
+ * The returned value must be different from one millisecond to the next one.
+ * The returned value must be monotonic, i.e. it must increase towards positive values.
  *
  * PARAMETERS IN
- * volatile unsigned long *ticks - clock ticks, incrementing 1000
- *                                 units per second. This should be updated
- *                                 in hardware or by clock-driven interrupts.
- *
+ * unsigned long (*tickfn(void)) - function returning an updated value every millisecond.
  */
-void calibrate_delay(volatile unsigned long *ticks);
+void calibrate_delay(unsigned long (*tickfn) (void));
 
 /*
  * Delay execution by at least msecs milliseconds.
