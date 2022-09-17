@@ -114,6 +114,7 @@
 [ORG 0x7C00]
 [BITS 16]
 
+BYTESPERSEC	EQU 512
 RAM_START	EQU 0x0600
 STACK16_START	EQU 0x7000
 STACK32_START	EQU 0x0000F000
@@ -145,19 +146,13 @@ NW_BIT EQU 1<<29
 
 BootLoader:
 CLD
-; save DL, the BIOS disk number
-PUSH	DX
 ; Init DS,SS to have a temporary stack and data access
 ; Increment counters
 XOR	AX, AX
 MOV	DS, AX
-MOV	ES, AX
 MOV	SS, AX
 MOV	SP, STACK16_START
 MOV	BP, SP
-MOV	BX, AX
-MOV	CX, AX
-MOV	DX, AX
 
 MOV	SI, HelloString
 CALL	PrintString
@@ -174,13 +169,7 @@ MbrFound:
 CMP	CX, 0
 JE	MbrError
 
-PUSH	BX
-
-MOV	SI, LoadingString
-CALL	PrintString
-
-POP	BX
-POP	DX
+STI
 
 ;reset first disk drive
 MOV	AH, 0x00
@@ -230,7 +219,11 @@ JC	Error
 SUB 	SI, 1
 JZ  	StartDiegOS
 
-ADD 	BX, 0x0200
+PUSH	BX
+CALL	PrintDot
+POP	BX
+
+ADD 	BX, BYTESPERSEC
 JNC 	NoNewSegment
 
 ADD 	BP, WORD DIEGOS_START>>4
@@ -251,14 +244,20 @@ JMP readOneSector
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 StartDiegOS:
+MOV	SI, StartString
+CALL	PrintString
+CALL	StopMotor
 ;Clear interrupts
 CLI
 
 ;Enable Gate A20
 MOV	AX, 0x2401
 INT	0x15
-JC	Error
+JNC	A20Enabled
 
+CALL	A20Enable
+
+A20Enabled:
 ;Detect free memory
 MOV     AX, 0xE801
 INT     0x15		; request upper memory size
@@ -368,19 +367,19 @@ MOV	SI, ErrorString
 
 StopError:
 CALL	PrintString
+CALL	StopMotor
+HLT
+JMP	$
+
+StopMotor:
 ;stop disk motor
 MOV	AL, 0x00
 MOV 	DX, 0x3F2
 OUT 	DX, AL
-
-HLT
-
-JMP	$
+RET
 
 PrintString:
 MOV	AH, 0x0E
-;MOV	BH, 0x00
-;MOV	BL, 0x07
 MOV	BX, 0x0007
 PrintNext:
 LODSB
@@ -391,11 +390,36 @@ JMP	PrintNext
 PrintQuit:
 RET
 
-HelloString 	db 0xDB,0xDB,0xDD,'DiegOS MBR', 0x0D, 0x0A, 0x00
-MbrString 	db 'No active partition', 0x00
-LoadingString 	db 'Loading ...', 0x0D, 0x0A, 0x00
-ErrorString	db 'Error', 0x00
+PrintDot:
+; Print a dot for every sector read in memory
+MOV	AX, 0x0EFE
+MOV	BX, 0x0007
+INT	0x10
+RET
 
+A20Enable:
+MOV	AL, 0xD1
+OUT	0x64, AL
+call	empty_8042
+MOV	AL, 0xDF
+OUT	0x64, AL
+CALL	empty_8042
+RET
+
+empty_8042:
+MOV	CX, 0x100
+LOOP	$
+IN	AL, 0x64
+TEST	AL, 0x02
+JNZ	empty_8042
+RET
+
+HelloString 	db 0xDB,0xDB,0xDD,'DiegOS MBR', 0x0D, 0x0A, 0x00
+MbrString 	db 'P!', 0x00
+;ErrorString	db 'Error', 0x00
+ErrorString	db 'E!', 0x00
+;StartString     db 0x0D, 0x0A, 'Start', 0x0D, 0x0A, 0x00
+StartString     db 0x0D, 0x0A, 'GO', 0x0D, 0x0A, 0x00
 TIMES	446 - ($ - $$) db 0xdf
 
 MBR:	RESB	64
