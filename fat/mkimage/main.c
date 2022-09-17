@@ -22,44 +22,77 @@
 #include <string.h>
 
 #include "mkimg.h"
+#include "mkimgfd.h"
 
 static void print_help(void)
 {
-	printf("Usage:\n\n\t-b <boot sector>\n\t-s <DiegOS>\n\t-d <image>\n\n");
+	printf("Usage:\n\n\t<-f> -b <boot sector>\n\t-s <DiegOS>\n\t-d <image>\n\n");
+	printf("Optional -f build a boot image for floppies.\n");
 }
 
 int main(int argc, char *argv[])
 {
-	unsigned i = 0;
+	unsigned i = 1;
 	struct MBR_partition_entry table[4];
 	uint32_t first, last;
 	char *bs, *os, *img;
 	FILE *temp;
+	int floppy = 0;
 
-	printf("DiegOS mkimage v1.0\n");
-	if (argc < 4) {
+	printf("DiegOS mkimage v2.0\n");
+	if (argc < 7) {
 		print_help();
 		return 0;
 	}
 
-	if ((argv[1][0] != '-') || (argv[3][0] != '-') || (argv[5][0] != '-')) {
+	if ((argc != 7) && (argc != 8)) {
 		print_help();
 		return 0;
 	}
 
-	if ((argv[1][1] != 'b') || (argv[3][1] != 's') || (argv[5][1] != 'd')) {
+	if (argc == 8) {
+		if ((argv[1][0] != '-') && (argv[1][1] != 'f')) {
+			print_help();
+			return 0;
+		}
+		floppy = 1;
+		i++;
+	}
+
+	if ((argv[i][0] != '-') || (argv[i + 2][0] != '-') || (argv[i + 4][0] != '-')) {
 		print_help();
 		return 0;
 	}
 
-	bs = calloc(1, strlen(&argv[2][0]) + 1);
-	os = calloc(1, strlen(&argv[4][0]) + 1);
-	img = calloc(1, strlen(&argv[6][0]) + 1);
-	strncpy(bs, &argv[2][0], strlen(&argv[2][0]));
-	strncpy(os, &argv[4][0], strlen(&argv[4][0]));
-	strncpy(img, &argv[6][0], strlen(&argv[6][0]));
+	if ((argv[i][1] != 'b') || (argv[i + 2][1] != 's') || (argv[i + 4][1] != 'd')) {
+		print_help();
+		return 0;
+	}
+
+	i++;
+
+	bs = calloc(1, strlen(&argv[i][0]) + 1);
+	os = calloc(1, strlen(&argv[i + 2][0]) + 1);
+	img = calloc(1, strlen(&argv[i + 4][0]) + 1);
+	strncpy(bs, &argv[i][0], strlen(&argv[i][0]));
+	strncpy(os, &argv[i + 2][0], strlen(&argv[i + 2][0]));
+	strncpy(img, &argv[i + 4][0], strlen(&argv[i + 4][0]));
 
 	printf("BOOT SECTOR ... %s\n" "OS IMAGE ...... %s\n" "DISK IMAGE .... %s\n", bs, os, img);
+
+	if (floppy) {
+		printf("FLOPPY IMAGE\n\n");
+		if (mkimgfd(img, bs, os)) {
+			printf("mkimage ERROR\n");
+		}
+
+		free(bs);
+		free(os);
+		free(img);
+
+		return 0;
+	}
+
 	temp = fopen(os, "rb");
 	if (!temp) {
 		printf("Ï/O ERROR: %s not found\n", os);
