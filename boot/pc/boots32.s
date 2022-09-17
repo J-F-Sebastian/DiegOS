@@ -199,9 +199,9 @@ JC	Error
 ; NOTE: the buffer is 64KBytes limited !!!
 MOV	BX, WORD DIEGOS_START>>4
 MOV	ES, BX
-MOV BP, BX
+MOV 	BP, BX
 XOR	BX, BX
-MOV SI, WORD IMG_SIZE
+MOV 	SI, WORD IMG_SIZE
 
 ;1.44 MB Disk Format support 18 sectors per track,
 ; or 0x12. the first sector is used by boot code.
