@@ -32,6 +32,7 @@
 #include "i8259.h"
 #include "../ia32/ints_private.h"
 #include "../ia32/ports.h"
+#include "../ia32/apic.h"
 #include "../../drivers/tty/vga_tty.h"
 #include "../../drivers/ti16550d/16550d.h"
 #include "../../drivers/i8253/i8253.h"
@@ -39,6 +40,7 @@
 #include "../../drivers/lo/local_loop.h"
 #include "../../include/libs/pci_lib.h"
 #include "../../drivers/i8042/i8042.h"
+#include "../../drivers/LAPIC/lapic.h"
 
 /*
  * Hardcoded values for calibration
@@ -119,6 +121,11 @@ void platform_init()
 	 */
 	calibrate_delay(tickfn);
 
+	/*
+	 * Stop the i8253 PIT
+	 */
+	out_byte(TIMER0, 0);
+
 	srand(loops_per_second() / 123);
 }
 
@@ -141,6 +148,13 @@ void drivers_init()
 
 	if (EOK != pci_bus_init()) {
 		return;
+	}
+
+	/*
+	 * Alas, we need to patch the list if we support LAPIC
+	 */
+	if (is_apic_supported()) {
+		drvlist[1] = &lapic_drv;
 	}
 
 	retcode = drivers_list_init(drvlist, NELEMENTS(drvlist));
