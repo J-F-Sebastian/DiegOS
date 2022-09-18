@@ -146,16 +146,16 @@ static int lapic_init(unsigned unitno)
 	apic_configure(mode, 0, LAPIC_IRQ, APIC_DIV_1);
 
 	execute_cpuid(&data, 0);
-	if (data.word[EAX] > 0x14) {
-		execute_cpuid(&data, 0x15);
-		if (data.word[EBX])
-			frequency = data.word[ECX];
+	if (data.word[EAX] > 0x15) {
+		execute_cpuid(&data, 0x16);
+		frequency = (data.word[ECX] & 0xFFFFUL) * 1000000;
 	}
+
 	if (!frequency) {
-		execute_cpuid(&data, 0);
-		if (data.word[EAX] > 0x15) {
-			execute_cpuid(&data, 0x16);
-			frequency = (data.word[ECX] & 0xFFFFUL) * 1000000;
+		if (data.word[EAX] > 0x14) {
+			execute_cpuid(&data, 0x15);
+			if (data.word[EBX])
+				frequency = data.word[ECX];
 		}
 	}
 
@@ -165,7 +165,7 @@ static int lapic_init(unsigned unitno)
 
 	calibrate_divisor();
 
-	if (EOK != add_int_cb(lapic_int_handler, 16)) {
+	if (EOK != add_int_cb(lapic_int_handler, 0)) {
 		return (EPERM);
 	}
 
@@ -218,7 +218,7 @@ static int lapic_done(unsigned unitno)
 	apic_configure(mode, 0, LAPIC_IRQ, divisor);
 	apic_write_counter(0);
 
-	return (del_int_cb(16));
+	return (del_int_cb(0));
 }
 
 static int lapic_ioctrl(void *data, unsigned opcode, unsigned unitno)

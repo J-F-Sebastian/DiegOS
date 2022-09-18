@@ -25,6 +25,6 @@
  */
 #define TIMER_MAX_VAL   (-1UL)
 #define TIMER_MIN_VAL   (1)
-#define LAPIC_IRQ	(64)
+#define LAPIC_IRQ	(32)
 
 #endif
