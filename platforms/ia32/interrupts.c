@@ -401,7 +401,7 @@ void idt_init()
 	idt_table[i].flags = FLAGS;
 	idt_table[i].offset_hi = (uint16_t) ((intptr_t) hwint15 >> 16);
 
-	/* Software interrupts matches vectors from 48 to 63 */
+	/* Software interrupts 16 to 31 matches vectors from 48 to 63 */
 	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint00);
 	idt_table[i].segment = 8;
 	idt_table[i].flags = FLAGS;
@@ -482,7 +482,7 @@ void idt_init()
 	idt_table[i].flags = FLAGS;
 	idt_table[i++].offset_hi = (uint16_t) ((intptr_t) swint15 >> 16);
 
-	/* Hardware interrupts matches vectors from 64 to 95 */
+	/* Hardware interrupts 32 to 63 matches vectors from 64 to 95 */
 	idt_table[i].offset_low = (uint16_t) ((intptr_t) swint16);
 	idt_table[i].segment = 8;
 	idt_table[i].flags = FLAGS;
