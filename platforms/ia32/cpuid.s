@@ -22,7 +22,7 @@
 .type  execute_cpuid, @function
 
 /*
- * void execute_cpuid(void *data, unsigned infotype);
+ * void execute_cpuid(struct cpuid_data *data, unsigned infotype);
  */
 execute_cpuid:
 pushl   %edi
