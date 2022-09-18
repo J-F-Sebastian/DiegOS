@@ -71,9 +71,15 @@ int drivers_list_init(const void *drvlist[], unsigned drvlistsize)
 		for (u = 0; u < DRV_UNIT_MAX; u++) {
 			retcode = cmn->init_fn(u);
 			if (EOK != retcode) {
-				//kerrprintf("Driver %s[%u] failed to init.\n",
-				//          drvlist[d]->name,
-				//        u);
+				if (ENXIO != retcode) {
+					kerrprintf("Driver %s[%u] failed to init.\n", cmn->name, u);
+				} else {
+					/*
+					 * If a driver returns ENXIO it means there can be no more
+					 * units to be driven, skip to the next driver.
+					 */
+					break;
+				}
 			} else {
 				retptr = device_create(u, drvlist[d]);
 				if (!retptr) {
@@ -93,14 +99,22 @@ int net_drivers_list_init(net_driver_t * drvlist[], unsigned drvlistsize)
 	int retcode;
 	int retval = EOK;
 	net_interface_t *retptr;
+	driver_header_t *cmn;
 
 	for (d = 0; d < drvlistsize; d++) {
 		for (u = 0; u < DRV_UNIT_MAX; u++) {
-			retcode = drvlist[d]->cmn.init_fn(u);
+			cmn = (driver_header_t *) drvlist[d];
+			retcode = cmn->init_fn(u);
 			if (EOK != retcode) {
-				//kerrprintf("Driver %s[%u] failed to init.\n",
-				//          drvlist[d]->name,
-				//        u);
+				if (ENXIO != retcode) {
+					kerrprintf("Driver %s[%u] failed to init.\n", cmn->name, u);
+				} else {
+					/*
+					 * If a driver returns ENXIO it means there can be no more
+					 * units to be driven, skip to the next driver.
+					 */
+					break;
+				}
 			} else {
 				retptr = net_interface_create(drvlist[d]);
 				if (!retptr) {
