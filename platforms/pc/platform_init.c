@@ -56,8 +56,8 @@
  * THE VARIABLES AREA IS AT 0xF000
  */
 struct boot_variables {
-	uint32_t free_heap_start;
-	uint32_t free_heap_size;
+	uint32_t free_ram_start;
+	uint32_t free_ram_size;
 };
 
 static const void *ttylist[] = { &vga_tty_drv };
@@ -94,11 +94,10 @@ extern STATUS malloc_init(const void *heapstart, const void *heapend);
 
 void platform_init()
 {
-	uint32_t params[3];
 	struct boot_variables *bootvars = (struct boot_variables *)0xF000;
 
-	(void)malloc_init((const void *)(bootvars->free_heap_start),
-			  (const void *)(bootvars->free_heap_start + bootvars->free_heap_size));
+	(void)malloc_init((const void *)(bootvars->free_ram_start),
+			  (const void *)(bootvars->free_ram_start + bootvars->free_ram_size));
 
 	/*
 	 * Init interrupts, all PIC lines are disabled
