@@ -20,14 +20,10 @@
 #ifndef _IA32_PRIVATE_H_
 #define _IA32_PRIVATE_H_
 
-void execute_cpuid(void *data, unsigned infotype);
-
 extern void set_ts(void);
 extern void init_fp(void);
 extern void init_simd(void);
-extern void read_msr(void *data, unsigned reg);
-extern void write_msr(void *data, unsigned reg);
-
+void init_apic(void);
 void idt_init(void);
 
 void exc_handler_fp(void);
