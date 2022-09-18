@@ -48,6 +48,11 @@ void init_apic(void)
 	 * Store the memory address of the APIC
 	 */
 	apic_base = (unsigned *)(buffer[0] & (0xFFFFFUL << 12));
+
+	/*
+	 * Enable APIC from Software
+	 */
+	apic_base[0x0F0 / sizeof(*apic_base)] = (1 << 8);
 }
 
 BOOL is_apic_supported()
