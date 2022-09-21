@@ -25,63 +25,112 @@
 
 #define MAGIC_ALLOC_NUMBER (0x1A2B3C4DL)
 #define MAGIC_FREE_NUMBER  (0x5E6F8A9BL)
-
-static void *heap_start = NULL;
-static void *heap_end = NULL;
+#define MAGIC_LAST_NUMBER  (0xDEADBEEFL)
 
 /*
  * Structure of the list
  *
- * next == (2)
+ * (1)			<-- heap_start, allocated
+ * MAGIC_ALLOC_NUMBER
  * ....
  * ....
- * MAGIC_NUMBER
- * (ptr value returned)
- *
- *
- *
- * (2) next == (3)
+ * ....
+ * (2)
+ * MAGIC_ALLOC_NUMBER	<-- next item, allocated
  * ....
  * ....
- * MAGIC_NUMBER
- * (ptr value returned)
  * ....
  * ....
+ * (3)
+ * MAGIC_FREE_NUMBER	<-- next item, free'd
+ * ....
+ * ....
+ * ....
+ * (heap_end)
+ * MAGIC_LAST_NUMBER	<-- last item, unusable
  */
 
 /*
- * 16 bytes for 32-bit platforms
- * 32 bytes for 64-bit platforms
+ * 8 bytes for 32-bit platforms
+ * 16 bytes for 64-bit platforms
  */
 
-typedef struct _list_next {
-	struct _list_next *next;
+struct mempart {
+	struct mempart *next;
 	uintptr_t magic;
-} list_next;
+};
 
-static inline int is_free(list_next * p)
+static struct mempart *heap_start = NULL;
+static struct mempart *heap_end = NULL;
+/*
+ * Yes this should definitively be some typecasted variable,
+ * with well known size.
+ * But, we rely on common sense.
+ */
+static unsigned long freebytes = 0;
+static unsigned long allocbytes = 0;
+
+static inline int is_alloc(struct mempart *p)
+{
+	return (MAGIC_ALLOC_NUMBER == p->magic) ? 1 : 0;
+}
+
+static inline int is_free(struct mempart *p)
 {
 	return (MAGIC_FREE_NUMBER == p->magic) ? 1 : 0;
 }
 
+static inline int is_last(struct mempart *p)
+{
+	return (MAGIC_LAST_NUMBER == p->magic) ? 1 : 0;
+}
+
+/*
+ * Available space is equal to the difference between
+ * the next descriptor pointer and the actual (this)
+ * descriptor pointer, less the size of "this".
+ * As it turns out, advancing the "this" pointer by 1 makes
+ * the trick.
+ */
+static inline unsigned long get_size(struct mempart *p)
+{
+	return ((uintptr_t) p->next - (uintptr_t) (p + 1));
+}
+
 static void defrag_mem(void)
 {
-	list_next *this = heap_start;
-	list_next *merge = NULL;
+	struct mempart *this = heap_start;
+	struct mempart *merge = NULL;
+	unsigned long bytes = 0;
 
-	while (this != this->next) {
+	while (!is_last(this)) {
 		if (is_free(this)) {
 			merge = this;
 			this = this->next;
 			while (is_free(this)) {
 				this = this->next;
+				/*
+				 * Account for mempart structures
+				 * becoming part of the free space
+				 */
+				bytes += sizeof(struct mempart);
 			}
+			/*
+			 * We fall here even if this points to the last
+			 * item, as it fails the is_free() test just like
+			 * an allocated item.
+			 */
 			if (merge->next != this) {
 				merge->next = this;
 			}
 		}
+		/*
+		 * This works on the last item as it points to itself.
+		 */
 		this = this->next;
 	}
+	freebytes += bytes;
+	allocbytes -= bytes;
 }
 
 /*
@@ -91,61 +140,88 @@ static void defrag_mem(void)
  */
 STATUS malloc_init(const void *heapstart, const void *heapend)
 {
-	list_next *temp;
-
 	if (heapstart > heapend)
 		return (EINVAL);
 
-	heap_start = (void *)heapstart;
-	heap_end = (void *)heapend;
-	heap_end -= sizeof(list_next);
+	if (((uintptr_t) (heapstart) ^ (uintptr_t) (heapend)) & (sizeof(struct mempart) - 1))
+		return (EINVAL);
 
-	temp = (list_next *) heap_start;
-	temp->next = heap_end;
-	temp->magic = MAGIC_FREE_NUMBER;
+	heap_start = (struct mempart *)heapstart;
+	heap_end = (struct mempart *)heapend;
+	/*
+	 * Step back one structure, as the end of the heap IS
+	 * the end of the heap !!!
+	 */
+	heap_end -= sizeof(*heap_end);
 
-	temp = (list_next *) heap_end;
-	temp->next = temp;
-	temp->magic = MAGIC_ALLOC_NUMBER;
+	/*
+	 * Link start and end of the heap
+	 */
+	heap_start->next = heap_end;
+	heap_start->magic = MAGIC_FREE_NUMBER;
+
+	heap_end->next = heap_end;
+	heap_end->magic = MAGIC_LAST_NUMBER;
+
+	/*
+	 * Account for free and allocated space
+	 */
+	allocbytes = 2 * sizeof(struct mempart);
+	freebytes = (uintptr_t) (heap_end) - (uintptr_t) (heap_start) - allocbytes;
 
 	return (EOK);
 }
 
 static void *malloc_internal(size_t newsize)
 {
-	list_next *this = heap_start;
-	list_next *split;
-	uintptr_t avail;
+	struct mempart *this = heap_start;
+	struct mempart *middle;
+	void *split;
+	unsigned long available;
 
-	while (this != this->next) {
-		while ((this != this->next) && !is_free(this))
+	while (!is_last(this)) {
+		while (is_alloc(this))
 			this = this->next;
-		if (this == this->next)
+		if (is_last(this))
 			break;
-		avail = (uintptr_t) this->next - (uintptr_t) (this + 1);
+
+		available = get_size(this);
 		/* 
-		 * Available space cannot fit the requested size
+		 * Available space cannot fit the requested size, keep on searching
 		 */
-		if (avail < newsize) {
+		if (available < newsize) {
 			this = this->next;
 			continue;
 		}
 		/*
-		 * Available space fits the requested size
+		 * This slot can be allocated.
 		 */
-		if (avail < newsize + sizeof(list_next)) {
-			this->magic = MAGIC_ALLOC_NUMBER;
+		this->magic = MAGIC_ALLOC_NUMBER;
+		/*
+		 * Available space fits the requested size; the slot is considered
+		 * to be a good fit if it offers no more than sizeof(struct mempart)
+		 * bytes in addition to newsize.
+		 * This check is required to understand if we could split the slot
+		 * leaving free space.
+		 * In other words, if we have residual space for a struct mempart and more,
+		 * we can fragment the memory leaving some free space.
+		 */
+		if (available < newsize + sizeof(struct mempart)) {
+			allocbytes += available;
+			freebytes -= available;
 			return (void *)(this + 1);
 		}
 		/*
 		 * Available space fits the requested size and new free space 
-		 * can be carved
+		 * can be carved from this slot.
 		 */
 		split = (void *)(this + 1) + newsize;
-		split->next = this->next;
-		split->magic = MAGIC_FREE_NUMBER;
-		this->next = split;
-		this->magic = MAGIC_ALLOC_NUMBER;
+		middle = (struct mempart *)split;
+		middle->magic = MAGIC_FREE_NUMBER;
+		middle->next = this->next;
+		this->next = middle;
+		allocbytes += newsize + sizeof(struct mempart);
+		freebytes -= newsize + sizeof(struct mempart);
 		return (void *)(this + 1);
 	}
 
@@ -162,16 +238,21 @@ void *malloc(size_t size)
 	}
 
 	/*
-	 * Make size accomodate pointers, magic number and the user data,
-	 * ending on a (void *) boundary.
+	 * Make size a nice multiple of.
 	 */
-	newsize = MULT(size, sizeof(list_next));
+	newsize = MULT(size, sizeof(void *));
 	retval = malloc_internal(newsize);
+	/*
+	 * First run was unsuccessful, try defragmenting the list
+	 */
 	if (!retval) {
 		defrag_mem();
 		retval = malloc_internal(newsize);
 	}
 
+	/*
+	 * Nope, we cannot accomodate this request...
+	 */
 	if (!retval)
 		errno = ENOMEM;
 	return (retval);
@@ -179,27 +260,27 @@ void *malloc(size_t size)
 
 void *realloc(void *p, size_t size)
 {
-	list_next *this = (list_next *) p;
+	struct mempart *this = (struct mempart *)p;
 	void *temp;
-	unsigned oldsize;
+	unsigned long oldsize;
 
 	if (!p)
 		return malloc(size);
+
 	if (!size) {
 		free(p);
 		return (NULL);
 	}
 
 	this--;
-	if ((MAGIC_ALLOC_NUMBER != this->magic) && (MAGIC_FREE_NUMBER != this->magic)) {
+	if (!is_alloc(this)) {
 		errno = ENOMEM;
 		return (NULL);
 	}
 
 	/* Now pointer is valid */
-	oldsize = (uintptr_t) this->next - (uintptr_t) (this + 1);
+	oldsize = get_size(this);
 	if (oldsize >= size) {
-		this->magic = MAGIC_ALLOC_NUMBER;
 		return (p);
 	}
 
@@ -208,18 +289,31 @@ void *realloc(void *p, size_t size)
 	if (temp) {
 		memcpy(temp, p, oldsize);
 		free(p);
+	} else {
+		errno = ENOMEM;
 	}
 	return (temp);
 }
 
 void free(void *p)
 {
-	list_next *this = (list_next *) p;
+	struct mempart *this = (struct mempart *)p;
 
 	if (!p)
 		return;
 
 	this--;
-	assert(MAGIC_ALLOC_NUMBER == this->magic);
+	assert(is_alloc(this) == 1);
 	this->magic = MAGIC_FREE_NUMBER;
+	allocbytes -= get_size(this);
+	freebytes += get_size(this);
+}
+
+/*
+ * This is a custom call for DiegOS
+ */
+void diegos_malloc_stats(unsigned long bytes[2])
+{
+	bytes[0] = freebytes;
+	bytes[1] = allocbytes;
 }
