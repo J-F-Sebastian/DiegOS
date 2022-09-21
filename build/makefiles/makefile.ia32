@@ -25,7 +25,7 @@
 export CWARN = -Wall -Wextra -Winline -Wcast-align -Wno-unused-parameter -Werror -Wframe-larger-than=1023
 export CXXWARN = -Wall -Wextra -Wcast-align -Wno-unused-parameter -Werror -Wframe-larger-than=1023
 export COPT = -O2
-export CARCH = -m32 -march=pentium2 -fcall-used-ebx
+export CARCH = -m32 -march=$(CPU_SPEC) -fcall-used-ebx
 export CFLAGS = $(CWARN) $(COPT) $(CARCH)
 export CXXFLAGS = $(CXXWARN) $(COPT) $(CARCH)
 export ASFLAGS = $(CARCH)
