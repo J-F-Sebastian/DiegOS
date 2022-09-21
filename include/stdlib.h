@@ -74,6 +74,6 @@ void qsort(void *base, size_t nmemb, size_t size, int (*compar) (const void *, c
 
 unsigned long int strtoul(const char *nptr, char **endptr, int base);
 const char *getprogname(void);
-void setprogname(const char *);
+void setprogname(const char *progname);
 
 #endif
