@@ -1,6 +1,6 @@
 include ../../build/makefiles/makefile.master
 
-OBJS = platform_init.o i8259.o 
+OBJS = platform_init.o i8259.o memory.o
 
 #OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
