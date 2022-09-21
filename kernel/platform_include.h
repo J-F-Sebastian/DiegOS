@@ -36,6 +36,7 @@
  * the stack pointer accordingly.
  */
 extern void setup_context(void *stack_ptr, void *fail_safe, void *entry_point, void **ctx);
+
 /*
  * Context switching: save registers and additional data
  * into <from>, load the same data from <to>
@@ -70,12 +71,13 @@ extern void cleanup_context(void *ctx, unsigned tid);
  * DiegOS.
  * Returns a pointer to a null-terminated string describing
  * the processor.
+ * This function MUST NOT make use of libc code.
  */
 extern const char *processor_init(void);
 
 /*
  * Init the platform, i.e. setup all required hw and
- * set the platfrom in ready-state for drivers and kernel
+ * set the platform in ready-state for drivers and kernel
  * init.
  * Init all libraries requiring a platform dependent value
  * to run - malloc, ISA, EISA, PCI, PCIe, etc.
@@ -115,10 +117,26 @@ extern void power_save(void);
 
 /*
  * Loop delay function; this function is a "waste loop" to implement
- * nsleep and/or usleep. It must tune the variable
- * extern unsigned long delay_loops_per_tick
- * declared in delays.h.
+ * nsleep and/or usleep.
+ * The amount of instructions per loop is not mandated,
+ * the routine simply need to "do something" inside a loop.
  */
 extern void delay_loop(unsigned long loops);
+
+/*
+ * Get the base address and size of the RAM available for HEAP.
+ * This memory is supposed to be FULLY CACHED, possibly with
+ * WRITE BACK operations.
+ */
+extern void cacheable_memory(void **base, unsigned long *size);
+
+/*
+ * Get the base address and size of the RAM available for I/O.
+ * This memory is supposed to be used for DMA operations or
+ * to exchange data with peripherals.
+ * Caching is supposed to be OFF or be configured to keep coherency
+ * with DMA operations.
+ */
+extern void io_memory(void **base, unsigned long *size);
 
 #endif
