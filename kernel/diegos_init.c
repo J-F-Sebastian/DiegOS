@@ -27,11 +27,6 @@
 
 static const char DiegOS_banner[] = "DiegOS operating system release 1.0";
 
-struct boot_variables {
-	uint32_t free_heap_start;
-	uint32_t free_heap_size;
-};
-
 extern long _text_start, _text_end, _data_start, _data_end, _bss_start, _bss_end;
 
 /*
@@ -52,8 +47,9 @@ extern long _text_start, _text_end, _data_start, _data_end, _bss_start, _bss_end
 void DiegOS(void)
 {
 	const char *proctype;
-	struct boot_variables *bootvars = (struct boot_variables *)0xF000;
 	long *bss = &_bss_start;
+	void *heap_start;
+	unsigned long heap_size;
 
 	/*
 	 * Complete .BSS initialization
@@ -93,14 +89,15 @@ void DiegOS(void)
 
 	kmsgprintf("%s\n\n", DiegOS_banner);
 #if 1
+	cacheable_memory(&heap_start, &heap_size);
+
 	kmsgprintf("        | Text   | Data   | BSS    | Heap\n");
 	kmsgprintf("--------+--------+--------+--------+--------\n");
 	kmsgprintf("Start   |%#8x|%#8x|%#8x|%#8x\n",
-		   &_text_start, &_data_start, &_bss_start, bootvars->free_heap_start);
+		   &_text_start, &_data_start, &_bss_start, (uintptr_t) (heap_start));
 	kmsgprintf("--------+--------+--------+--------+--------\n");
 	kmsgprintf("End     |%#8x|%#8x|%#8x|%#8x\n",
-		   &_text_end, &_data_end, &_bss_end,
-		   bootvars->free_heap_start + bootvars->free_heap_size);
+		   &_text_end, &_data_end, &_bss_end, (uintptr_t) (heap_start) + heap_size);
 	kmsgprintf("--------+--------+--------+--------+--------\n\n");
 #endif
 	if (proctype) {
