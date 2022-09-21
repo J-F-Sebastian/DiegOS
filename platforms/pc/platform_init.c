@@ -52,16 +52,6 @@
 #define TDELTA 1193
 #define TTHRES (TVAL - TDELTA)
 
-/*
- * WARNING
- * THIS MUST BE KEPT ALIGNED WITH CODE IN THE BOOT SECTOR !!!
- * THE VARIABLES AREA IS AT 0xF000
- */
-struct boot_variables {
-	uint32_t free_ram_start;
-	uint32_t free_ram_size;
-};
-
 static const void *ttylist[] = { &vga_tty_drv };
 
 static const void *drvlist[] = { &uart16550d_drv,
@@ -96,10 +86,12 @@ extern STATUS malloc_init(const void *heapstart, const void *heapend);
 
 void platform_init()
 {
-	struct boot_variables *bootvars = (struct boot_variables *)0xF000;
+	void *heap_base;
+	unsigned long heap_size;
 
-	(void)malloc_init((const void *)(bootvars->free_ram_start),
-			  (const void *)(bootvars->free_ram_start + bootvars->free_ram_size));
+	cacheable_memory(&heap_base, &heap_size);
+
+	(void)malloc_init((const void *)heap_base, (const void *)(heap_base + heap_size));
 
 	/*
 	 * Init interrupts, all PIC lines are disabled
