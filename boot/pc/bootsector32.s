@@ -70,7 +70,7 @@
 ;   |          ....         |
 ;   +-----------------------+
 ;   |       0x0000F000      |   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
-;   |          ....         |   DiegOS BOOT VARIABLES (4096 Bytes)
+;   |          ....         |   UNUSED (4096 Bytes)
 ;   +-----------------------+
 ;   |       0x00010000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;   |          ....         |
@@ -118,7 +118,6 @@ BYTESPERSEC	EQU 512
 RAM_START	EQU 0x0600
 STACK16_START	EQU 0x7000
 STACK32_START	EQU 0x0000F000
-DIEGOS_VARS 	EQU 0x0000F000
 DIEGOS_START	EQU 0x00010000
 
 ; Descriptors at beginning of RAM
@@ -132,8 +131,8 @@ IDTR_START	EQU GDT_DESC + 0x40 + 2
 GDTR_START	EQU IDTR_START + 8
 
 ; equates for building GDT
-LINEAR_CODE_SEL 	    EQU 1*8
-LINEAR_DATA_SEL		    EQU 2*8
+LINEAR_CODE_SEL 	EQU 1*8
+LINEAR_DATA_SEL		EQU 2*8
 LINEAR_PROTO_CODE_LO	EQU 0x000000A0
 LINEAR_PROTO_DATA_LO 	EQU 0x0000FFFF
 LINEAR_PROTO_CODE_HI 	EQU 0x00C09B00
@@ -144,7 +143,8 @@ PE_BIT EQU 1
 CD_BIT EQU 1<<30
 NW_BIT EQU 1<<29
 
-; BPB
+; BPB - BIOS Parameter Block
+; Leave void, other tools must fill in proper data.
 BPB:
 RESB	62
 
@@ -157,8 +157,6 @@ MOV	DS, AX
 MOV	SS, AX
 MOV	SP, STACK16_START
 MOV	BP, SP
-MOV	BX, AX
-MOV	CX, AX
 
 MOV	SI, HelloString
 CALL	PrintString
@@ -242,10 +240,7 @@ JMP readOneSector
 StartDiegOS:
 MOV	SI, StartString
 CALL	PrintString
-;stop disk motor
-MOV	AL, 0x00
-MOV 	DX, 0x3F2
-OUT 	DX, AL
+CALL	StopMotor
 ;Clear interrupts
 CLI
 
@@ -258,24 +253,21 @@ CALL	A20Enable
 
 A20Enabled:
 ;Detect free memory
-MOV     AX, 0xE801
-INT     0x15		; request upper memory size
-JC      Error
-CMP	AX, 0x0
-JNE    	useAX		; was the EAX result invalid?
-MOV     AX, CX
-MOV     BX, DX
-useAX:
+;MOV     AX, 0xE801
+;INT     0x15		; request upper memory size
+;JC      Error
+;CMP	AX, 0x0
+;JNE    	useAX		; was the EAX result invalid?
+;MOV     AX, CX
+;MOV     BX, DX
+;useAX:
 ; AX = number of contiguous Kb, 1M to 16M
 ; BX = contiguous 64Kb pages above 16M
-SHL     EAX, 10
-SHL     EBX, 16
-ADD     EAX, EBX
-;MOV     EBX, DWORD DIEGOS_VARS
-;MOV     DWORD [EBX], 0x00100000
-;MOV     DWORD [EBX + 4], EAX
-MOV     DWORD [DIEGOS_VARS], 0x00100000
-MOV     DWORD [DIEGOS_VARS + 4], EAX
+;SHL     EAX, 10
+;SHL     EBX, 16
+;ADD     EAX, EBX
+;MOV     DWORD [DIEGOS_VARS], 0x00100000
+;MOV     DWORD [DIEGOS_VARS + 4], EAX
 
 ;Assign segments for proper kernel start
 XOR	AX, AX
@@ -283,43 +275,25 @@ MOV	ES, AX
 
 ; IDT is initialized by kernel
 ; Setup GDT
-;MOV 	EBX, DWORD GDT_DESC
-
 ; First GDT entry is NULL
-;MOV 	DWORD [EBX], 0
-;MOV 	DWORD [EBX + 4], 0
 MOV 	DWORD [GDT_DESC], 0
 MOV 	DWORD [GDT_DESC + 4], 0
 
-;ADD	EBX, 8
 ; Second GDT entry is for FLAT MEMORY CODE
-;MOV 	DWORD [EBX + 8], LINEAR_PROTO_CODE_LO
-;MOV 	DWORD [EBX + 12], LINEAR_PROTO_CODE_HI
 MOV 	DWORD [GDT_DESC + 8], LINEAR_PROTO_CODE_LO
 MOV 	DWORD [GDT_DESC + 12], LINEAR_PROTO_CODE_HI
 
-;ADD	EBX, 8
 ; Third GDT entry is for FLAT MEMORY DATA
-;MOV 	DWORD [EBX + 16], DWORD LINEAR_PROTO_DATA_LO
-;MOV 	DWORD [EBX + 20], DWORD LINEAR_PROTO_DATA_HI
 MOV 	DWORD [GDT_DESC + 16], DWORD LINEAR_PROTO_DATA_LO
 MOV 	DWORD [GDT_DESC + 20], DWORD LINEAR_PROTO_DATA_HI
 
 ; Setup IDTR
-;MOV	EAX, DWORD IDT_DESC
-;MOV	EBX, DWORD IDTR_START
-;MOV	WORD [EBX], (256 * 8) - 1
-;MOV 	DWORD [EBX + 2], EAX
-MOV	WORD [IDTR_START], (256 * 8) - 1
+MOV	WORD  [IDTR_START], (256 * 8) - 1
 MOV 	DWORD [IDTR_START + 2], DWORD IDT_DESC
 
 
 ; Setup GDTR
-;MOV	EAX, DWORD GDT_DESC
-;MOV	EBX, DWORD GDTR_START
-;MOV	WORD [EBX], (8 * 8) - 1
-;MOV 	DWORD [EBX + 2], EAX
-MOV	WORD [GDTR_START], (8 * 8) - 1
+MOV	WORD  [GDTR_START], (8 * 8) - 1
 MOV 	DWORD [GDTR_START + 2], DWORD GDT_DESC
 
 ; execute a 32 bit LGDT
@@ -353,25 +327,35 @@ MOV	EBP, EDI
 
 ; execute a 32 bit LIDT
 LIDT 	[IDTR_START]
-
+; START THE SYSTEM!
 JMP	DIEGOS_START
 
 [BITS 16]
 
 Error:
 MOV	SI, ErrorString
-
-StopError:
 CALL	PrintString
-;stop disk motor
-MOV	AL, 0x00
-MOV 	DX, 0x3F2
-OUT 	DX, AL
-
+CALL	StopMotor
 HLT
-
 JMP	$
 
+; StopMotor
+; Stop the boot disk motor
+; This is expected for FLOPPY DISK
+; Registers used (to be saved by the caller)
+; AL
+StopMotor:
+;stop disk motor
+MOV	AL, 0x00
+MOV	DX, 0x3F2
+OUT 	DX, AL
+RET
+
+; PrintString
+; Print a null terminated string to display
+; Registers used (to be saved by the caller)
+; AX
+; BX
 PrintString:
 MOV	AH, 0x0E
 MOV	BX, 0x0007
@@ -384,6 +368,11 @@ JMP	PrintNext
 PrintQuit:
 RET
 
+; PrintDot
+; Print a green dot to display
+; Registers used (to be saved by the caller)
+; AX
+; BX
 PrintDot:
 ; Print a dot for every sector read in memory
 MOV	AX, 0x0EFE
@@ -408,9 +397,9 @@ TEST	AL, 0x02
 JNZ	empty_8042
 RET
 
-HelloString 	db 0xDB,0xDB,0xDD,'DiegOS Boot 2.0', 0x0D, 0x0A, 0x00
+HelloString 	db 0xDB,0xDB,0xDD,'DiegOS Boot Loader 2.0', 0x0D, 0x0A, 0x00
 ErrorString	db 'Error', 0x00
-StartString     db 0x0D, 0x0A, 'Start', 0x0D, 0x0A, 0x00
+StartString     db 0x0D, 0x0A, 'Starting ...', 0x0D, 0x0A, 0x00
 TIMES 510 - ($ - $$) db 0xdf
 
 DW	0xAA55
