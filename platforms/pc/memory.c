@@ -22,11 +22,11 @@
 void cacheable_memory(void **base, unsigned long *size)
 {
 	*base = (void *)(0x100000UL);
-	*size = 0x700000UL;
+	*size = 0x600000UL;
 }
 
 void io_memory(void **base, unsigned long *size)
 {
-	*base = (void *)0;
-	*size = 0;
+	*base = (void *)(0x700000UL);
+	*size = 0x100000UL;
 }
