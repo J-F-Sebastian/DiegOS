@@ -39,6 +39,7 @@
 #include "../../drivers/i82371SB/82371SB.h"
 #include "../../drivers/lo/local_loop.h"
 #include "../../include/libs/pci_lib.h"
+#include "../../include/libs/iomalloc.h"
 #include "../../drivers/i8042/i8042.h"
 #include "../../drivers/LAPIC/lapic.h"
 
@@ -83,15 +84,20 @@ static unsigned long tickfn(void)
 }
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
+extern STATUS iomalloc_init(const void *start, const void *end);
 
 void platform_init()
 {
 	void *heap_base;
 	unsigned long heap_size;
+	void *io_base;
+	unsigned long io_size;
 
 	cacheable_memory(&heap_base, &heap_size);
-
+	io_memory(&io_base, &io_size);
 	(void)malloc_init((const void *)heap_base, (const void *)(heap_base + heap_size));
+	(void)iomalloc_init((const void *)io_base, (const void *)(io_base + io_size));
+
 
 	/*
 	 * Init interrupts, all PIC lines are disabled
