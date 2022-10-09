@@ -26,9 +26,9 @@ static void q3exchange(char *, char *, char *, size_t);
 
 void qsort(void *base, size_t n, size_t size, int (*cmp) (const void *keyval, const void *datum))
 {
-	/* when n is 0, the expression '(n - 1) * width' is wrong */
-	if (!n)
+	if (!base || !n || !size || !cmp)
 		return;
+
 	qcompar = (int (*)(const char *, const char *))cmp;
 	qsort1(base, (char *)base + (n - 1) * size, size);
 }
