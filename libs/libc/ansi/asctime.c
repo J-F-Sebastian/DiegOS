@@ -33,7 +33,7 @@ static const char *days_of_week[] = {
 	"Saturday"
 };
 
-static const const char *months[] = {
+static const char *months[] = {
 	"January",
 	"February",
 	"March",
