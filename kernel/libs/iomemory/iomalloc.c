@@ -24,9 +24,6 @@
 #include <string.h>
 #include <errno.h>
 
-// FIXME: should go to configuration !
-#define MAX_IO_ALLOCS 256
-
 /*
  * 8 bytes for 32-bit platforms
  * 12/16 bytes for 64-bit platforms
