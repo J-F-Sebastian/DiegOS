@@ -30,6 +30,7 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../kernel/libs/time/$(OBJPREFIX)_libkerneltime.a \
 	../../kernel/libs/pci/$(OBJPREFIX)_libpci.a \
 	../../kernel/libs/unistd/$(OBJPREFIX)_libunistd.a \
+	../../kernel/libs/iomemory/$(OBJPREFIX)_libiomemory.a \
 	../../kernel/$(OBJPREFIX)_kernel.a \
 	../../platforms/$(PLATFORM)/$(PLATFORM).a \
 	../../platforms/$(CPU)/$(CPU).a \
