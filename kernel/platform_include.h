@@ -139,4 +139,9 @@ extern void cacheable_memory(void **base, unsigned long *size);
  */
 extern void io_memory(void **base, unsigned long *size);
 
+/*
+ * Get the size of the RAM.
+ */
+extern void total_memory(unsigned long *size);
+
 #endif
