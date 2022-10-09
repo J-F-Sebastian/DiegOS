@@ -70,7 +70,7 @@ extern void vga_tty_bset(uint16_t * dst, uint16_t val, unsigned words);
  * significant byte of the buffer address is explicitely
  * used.
  */
-#define VRAM_BEGIN 		(0xB8000UL)
+#define VRAM_BEGIN 	(0xB8000UL)
 #define VRAM_FRAME_SIZE (0x1000UL)
 #define VRAM_FRAME_NUM  (8)
 
