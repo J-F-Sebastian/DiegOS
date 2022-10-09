@@ -18,15 +18,108 @@
  */
 
 #include "../../kernel/platform_include.h"
+#include "int86.h"
+#include <types_common.h>
+
+#define IOMEMORY_SIZE (1UL*MBYTE)
 
 void cacheable_memory(void **base, unsigned long *size)
 {
-	*base = (void *)(0x100000UL);
-	*size = 0x600000UL;
+	regs16_t regs;
+	unsigned long mem;
+
+	regs.ax = 0xE801;
+	int86(0x15, &regs);
+	//assert on error ?
+	/*
+	 * is carry bit set?
+	 */
+	if (regs.eflags & 1) {
+		*base = NULL;
+		*size = 0;
+		return;
+	}
+
+	if (regs.ax == 0) {
+		regs.ax = regs.cx;
+		regs.bx = regs.dx;
+	}
+
+	/*
+	 * The first MByte is a legacy of shadow memories,
+	 * mapped VGA devices, etc.
+	 * Executable code is running below 1 Mbyte.
+	 * Don't mess with this.
+	 * NOTE: interrupt services report available memory
+	 * above 1Mbyte.
+	 */
+	mem = (regs.ax << 10) + (regs.bx << 16);
+	*base = (void *)(1UL * MBYTE);
+	*size = mem - IOMEMORY_SIZE;
 }
 
 void io_memory(void **base, unsigned long *size)
 {
-	*base = (void *)(0x700000UL);
-	*size = 0x100000UL;
+	regs16_t regs;
+	unsigned long mem;
+
+	regs.ax = 0xE801;
+	int86(0x15, &regs);
+	//assert on error ?
+	/*
+	 * is carry bit set?
+	 */
+	if (regs.eflags & 1) {
+		*base = NULL;
+		*size = 0;
+		return;
+	}
+
+	if (regs.ax == 0) {
+		regs.ax = regs.cx;
+		regs.bx = regs.dx;
+	}
+
+	/*
+	 * The first MByte is a legacy of shadow memories,
+	 * mapped VGA devices, etc.
+	 * Executable code is running below 1 Mbyte.
+	 * Don't mess with this.
+	 * NOTE: interrupt services report available memory
+	 * above 1Mbyte.
+	 */
+	mem = (regs.ax << 10) + (regs.bx << 16);
+	mem = (regs.ax << 10) + (regs.bx << 16);
+	*base = (void *)(mem - IOMEMORY_SIZE);
+	*size = IOMEMORY_SIZE;
+}
+
+void total_memory(unsigned long *size)
+{
+	regs16_t regs;
+	unsigned long mem;
+
+	regs.ax = 0xE801;
+	int86(0x15, &regs);
+	//assert on error ?
+	/*
+	 * is carry bit set?
+	 */
+	if (regs.eflags & 1) {
+		*size = 0;
+		return;
+	}
+
+	if (regs.ax == 0) {
+		regs.ax = regs.cx;
+		regs.bx = regs.dx;
+	}
+
+	/*
+	 * NOTE: interrupt services report available memory
+	 * above 1Mbyte.
+	 */
+	mem = (regs.ax << 10) + (regs.bx << 16);
+	mem = (regs.ax << 10) + (regs.bx << 16);
+	*size = mem + 1UL * MBYTE;
 }
