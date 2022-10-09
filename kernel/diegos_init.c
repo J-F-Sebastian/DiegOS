@@ -52,6 +52,7 @@ void DiegOS(void)
 	unsigned long heap_size;
 	void *iomem_start;
 	unsigned long iomem_size;
+	unsigned long mem_size;
 
 	/*
 	 * Complete .BSS initialization
@@ -91,17 +92,21 @@ void DiegOS(void)
 
 	kmsgprintf("%s\n\n", DiegOS_banner);
 #if 1
+	total_memory(&mem_size);
 	cacheable_memory(&heap_start, &heap_size);
 	io_memory(&iomem_start, &iomem_size);
 
 	kmsgprintf("        | Text   | Data   | BSS    | Heap   | I/O\n");
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n");
 	kmsgprintf("Start   |%#8x|%#8x|%#8x|%#8x|%#8x\n",
-		   &_text_start, &_data_start, &_bss_start, (uintptr_t) (heap_start), (uintptr_t)iomem_start);
+		   &_text_start, &_data_start, &_bss_start, (uintptr_t) (heap_start),
+		   (uintptr_t) iomem_start);
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n");
 	kmsgprintf("End     |%#8x|%#8x|%#8x|%#8x|%#8x\n",
-		   &_text_end, &_data_end, &_bss_end, (uintptr_t) (heap_start) + heap_size, (uintptr_t)(iomem_start) + iomem_size);
+		   &_text_end, &_data_end, &_bss_end, (uintptr_t) (heap_start) + heap_size,
+		   (uintptr_t) (iomem_start) + iomem_size);
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n\n");
+	kmsgprintf("RAM Size: %d MBytes\n", mem_size);
 #endif
 	if (proctype) {
 		kmsgprintf("processor is a %s\n", proctype);
