@@ -21,8 +21,6 @@
 #include "int86.h"
 #include <types_common.h>
 
-#define IOMEMORY_SIZE (1UL*MBYTE)
-
 void cacheable_memory(void **base, unsigned long *size)
 {
 	regs16_t regs;
