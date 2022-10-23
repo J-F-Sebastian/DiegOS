@@ -30,8 +30,8 @@
 
 # Generic exports to compile, link and store derived objects
 
-export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g
-export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g
+export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g3
+export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g3
 export AS = $(CC) -xassembler
 export ASCC = $(CC) -xassembler-with-cpp
 export LN = ld --oformat binary -eDiegOS -static
