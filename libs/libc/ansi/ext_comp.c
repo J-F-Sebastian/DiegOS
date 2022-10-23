@@ -400,6 +400,7 @@ void _str_ext_cvt(const char *s, char **ss, struct EXTEND *e)
 	switch (c) {
 	case '-':
 		e->sign = 1;
+		/* FALLTHRU */
 	case '+':
 		s++;
 	}
@@ -436,6 +437,7 @@ void _str_ext_cvt(const char *s, char **ss, struct EXTEND *e)
 		switch (*s) {
 		case '-':
 			sign = -1;
+			/* FALLTHRU */
 		case '+':
 			s++;
 		}
