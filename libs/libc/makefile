@@ -12,6 +12,7 @@ all: objdirs $(OBJSO)
 	cd quad && make all
 	cd math && make all
 	cd gnu/ieee_float && make all
+	cd gnu/libgcc && make all
 	$(AR) $(OBJPREFIX)_libc.a $(OBJSO)
 	
 clean:
@@ -20,4 +21,5 @@ clean:
 	cd quad && make clean
 	cd math && make clean
 	cd gnu/ieee_float && make clean 
+	cd gnu/libgcc && make clean
 	rm -rf $(OBJSO) *.a
