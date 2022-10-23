@@ -66,7 +66,7 @@ static inline unsigned compute_len(int a, int b)
 static int vesa_init(unsigned unitno)
 {
 	regs16_t regs;
-	uint16_t *ptr;
+	uint16_t *ptr, es, di;
 	unsigned modecount = 0;
 
 	if (unitno) {
@@ -75,7 +75,13 @@ static int vesa_init(unsigned unitno)
 
 	strncpy(vesa_info.signature, "VBE2", sizeof(vesa_info.signature));
 	regs.ax = 0x4F00;
-	prot_to_seg_ofs(&vesa_info, &regs.es, &regs.di);
+	/*
+	 * GCC will complain about unaligned pointers to packed structures.
+	 * Well I do not get the issue here, but the compiler is always right.
+	 */
+	prot_to_seg_ofs(&vesa_info, &es, &di);
+	regs.es = es;
+	regs.di = di;
 	int86(0x10, &regs);
 
 	if (0x004F != regs.ax) {
@@ -327,7 +333,7 @@ static void rect(point_t a, point_t b, unsigned wide, unsigned color)
 
 	/*
 	 * a --------------- c
-	 * |                             | 
+	 * |                 |
 	 * |                 |
 	 * d --------------- b
 	 */
@@ -449,6 +455,7 @@ static void load_palette(unsigned index, uint8_t rgb[])
 static void load_all_palette(uint8_t rgb[])
 {
 	regs16_t regs;
+	uint16_t es, di;
 	uint8_t *ptr = (uint8_t *) real_buffer();
 
 	regs.ax = 0x4F09;
@@ -456,7 +463,13 @@ static void load_all_palette(uint8_t rgb[])
 	regs.cx = 256;
 	regs.dx = 0;
 	memcpy(ptr, rgb, 256 * 3);
-	prot_to_seg_ofs(ptr, &regs.es, &regs.di);
+	/*
+	 * GCC will complain about unaligned pointers to packed structures.
+	 * Well I do not get the issue here, but the compiler is always right.
+	 */
+	prot_to_seg_ofs(ptr, &es, &di);
+	regs.es = es;
+	regs.di = di;
 	int86(0x10, &regs);
 }
 
@@ -534,7 +547,7 @@ static unsigned vesa_status(unsigned unitno)
 static int set_resolution(unsigned W, unsigned H, unsigned depth, int loose)
 {
 	uint16_t *cursor = vesa_mode_list;
-	uint16_t mode;
+	uint16_t mode, es, di;
 	regs16_t regs;
 
 	if (depth != 8)
@@ -546,7 +559,13 @@ static int set_resolution(unsigned W, unsigned H, unsigned depth, int loose)
 		regs.ax = 0x4F01;
 		/* Request for linear frame buffer support */
 		regs.cx = mode;
-		prot_to_seg_ofs(&vesa_gmode, &regs.es, &regs.di);
+		/*
+		 * GCC will complain about unaligned pointers to packed structures.
+		 * Well I do not get the issue here, but the compiler is always right.
+		 */
+		prot_to_seg_ofs(&vesa_gmode, &es, &di);
+		regs.es = es;
+		regs.di = di;
 		int86(0x10, &regs);
 		if (regs.ax != 0x004F)
 			continue;
