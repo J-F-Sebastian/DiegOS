@@ -10,6 +10,7 @@
 \onehalfspacing
 \usepackage{listings}
 \usepackage{tikz}
+\usepackage{graphicx}
 \usetikzlibrary{shapes,arrows}
 
 \begin{document}
@@ -77,22 +78,36 @@ MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
 and from then on I got more and more interested in two aspects of computing:
 transmitting data and having software interact with hardware.
 
-While attending university my curiosity for operating systems became a top interest.
-This interest eventually led me to try to write an operating system by myself.
-Developing a full-blown operating system as a spare time activity proved to be really challenging, besides, there are way too much OS in the world.
-Still, as a professional software developer I approached the embedded systems and found an interesting niche to work on.
-This is why I wrote DiegOS.
+I succeded in replacing my beloved C64 with an i8086-based personal computer
+running MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
+and from then on I got more and more interested in two aspects of computing:
+transmitting data and having software interact with hardware.
+I approached Intel assembler, way more complicated than 6510, and then structured
+procedural programming by learning Pascal.
+Next came the C language, then Delphi, then 3D programming, in a never ending
+spiral of learning, trying, and looking for new challenges.
 
-From my personal standpoint the main goal of an Operating System is to offer a friendly and comfortable environment
-for both programmers, users, and administrators, or in other words, offer an
-effective interface to the underlying hardware; this implies that an operating
-system should be the fastest and most efficient software running on any
-machine.
+While attending university I fell in love with operating systems.
+This interest eventually led me to try to write an operating system by myself.
+Developing a full-blown operating system as a spare time activity proved to be
+really challenging. There are way too much
+OS in the world let's be honest, it is not worth the effort to add a new one
+just for the sake of it.
+As a student I simply put aside this project, and focused on more interesting
+distractions.\footnote{You might guess what could possibly distract a 25 years 
+old man from spending nights in front of a computer.}
+But as a professional software developer I approached the embedded systems
+universe and I found an interesting niche to work on.
+This is why I resumed my late OS project and wrote DiegOS.
+
+From my personal standpoint the main goal of an Operating System is to offer a 
+friendly and comfortable environment for both programmers, users, and administrators,
+or in other words, offer an effective interface to the underlying hardware.
 Scoring this goal is not easy: since the very first Operating System inception, a huge number of engineers 
 and scientists worked to develope concepts, ideas, architectures, interfaces, and documenting 
 their work to produce what we know today as Microsoft Windows, Linux, Unix, or Apple Inc. macOS.
-
-All these people proved to be smarter than the Author of this book.
+All these people proved to be smarter than the Author of this book, no need to
+argue upon it.
 
 Up today I had the chance and the privilege to work on a number of Operating Systems,
 some of them with peculiar features, some of them with legacy constraints, most of
@@ -112,13 +127,16 @@ Michael Abrash's \emph{Graphics Programming Black Book};
 all I have to say about it is, zenning is a very long journey, and you'd better take your time and read it.
 
 Last but not least, writing software requires patience. Resilience to failure. Acceptance of personal limits.
-Acknowledge of success when new code runs the way it should.
+Acknowledge of success when new code runs the way it should. Fighting anger
+and frustration when things just don't go.
 Understanding of the true nature of software: vacuity. Because all software of any kind under any form is
-essentially an abstract algorithm performing elementary actions faster than our mind.
+essentially an abstract algorithm performing elementary actions faster than
+our mind could.
 The creator of all software \textbf{is} our mind, but \textbf{no software can replace} our mind.
 
 Still they both are ephemeral, abstract.
-This is why I leave to the reader an abstract taken from \quote{The Sutra of the Heart}.
+I leave to the reader an abstract taken from \quote{The Sutra of the Heart},
+my favourite lecture when in need of wiseness.
 
 Enjoy my book, I hope you will enjoy my software.
 
@@ -142,64 +160,88 @@ The software is partitioned in layers with defined dependencies between modules;
 DiegOS does not support multiple processors,  multiple cores, or multiple hardware 
 threads of execution; it does not offer memory protection or swappable memory,
 and does not offer preemption.
+This kind of design is not innovative, it resembles most embedded OS available
+online, or what are commonly known as realtime OS.
+
+The hardware abstration is implemented with a well-defined virtual interface
+which is to be implemented for any platform and any processor.
+DiegOS is designed to be configurable, and the first confguration step is
+the definition of a tuple (processor, platform) which instructs the code and
+the compiler on what to do with very specific aspects of the hardware, like
+context switching or interrupt handling.
+
+\subsection{Overview}
+Using a bottom-up perspective the system is split into 3 layers
+
+\begin{enumerate}
+\item kernel layer composed by the kernel and the drivers
+\item libraries layer composed by libraries
+\item application layer composed by user space code
+\end{enumerate}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\columnwidth]{diegos_layers}
+\end{figure}
+
 the \textbf{kernel} is composed of several items like a mutex manager to coordinate
 concurrency between threads, an alarm manager to implement timers, an event manager
 to exchange messages between threads, barriers, spin locks, I/O support for drivers.
 The inner part of the core is all about thread management and is not directly exposed
-to other modules, its components are the scheduler and the idle thread; a kernel API 
-is provided to access these components from threads.
+to other modules, a specific kernel API is provided to access these components
+from applications.
 
-% Define block styles
-\tikzstyle{block} = [rectangle, draw, fill=Cyan, 
-    text width=5em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{block2} = [rectangle, draw, fill=Goldenrod, 
-    text width=5em, text centered, rounded corners, minimum height=5em,
-    minimum width = 20em]
-\tikzstyle{addon} = [rectangle, draw, fill=Cerulean, 
-    text width=5em, text centered, rounded corners, minimum height=5em,
-    minimum width = 20em]
-\tikzstyle{plat} = [rectangle, draw, fill=WildStrawberry,
-    text width=5em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{user} = [rectangle, draw, fill=Gray, 
-    text width=5em, text centered, rounded corners, minimum height=5em]
-\tikzstyle{user2} = [rectangle, draw, fill=Gray, 
-    text width=5em, text centered, rounded corners, minimum height=5em,
-    minimum width = 20em]
-\tikzstyle{line} = [draw, -latex']
-    
-\begin{tikzpicture}[node distance = 2cm, align=center]
-  % Place nodes
-\node [block] (scheduler) {scheduler};
-\node [block, right of=scheduler, node distance=5em] (events) {event manager};
-\node [block, right of=events, node distance=5em] (IO) {I/O manager};
-\node [block, right of=IO, node distance=5em] (alarms) {alarms manager};
-\node [block, right of=alarms, node distance=5em] (mutexes) {mutexes};
-\node [block, right of=mutexes, node distance=5em] (barriers) {barriers};
-\node [plat, right of=barriers, node distance=5em] (plat) {platform components};
-\node [block2, below of=alarms, node distance=15em] (kernel) {kernel};
-\node [addon, below of=kernel, node distance=7em] (drivers) {drivers};
-\node [addon, right of=drivers, node distance=7em] (libs) {libraries};
-\node [user, below of=drivers, node distance=10em] (devices) {devices};
-\node [user, right of=devices] (fs) {file system};
-\node [user, right of=fs] (net) {networking};
-\node [user2, below of=devices] (user) {user applications};
+Along with the \textbf{kernel} come the \textbf{drivers} which --- as the name
+implies --- are modules with a well-defined interface used to drive hardware
+devices. They are sensitive and prone to fatal errors and need to mess with
+interrupts. They are logically next to the kernel as they both belong to the
+first abstraction stage, from hardware to software.
 
-   % Draw edges
- \path [line] (scheduler) -- (kernel);
- \path [line] (events) -- (kernel);
- \path [line] (IO) -- (kernel);
- \path [line] (alarms) -- (kernel);
- \path [line] (mutexes) -- (kernel);
- \path [line] (barriers) -- (kernel);
- \path [line] (plat) -- (kernel);
- %\path [line, dashed] (plat) -- (kernel);
- %\path [line, dashed] (kernel) -- (plat);
- %\path [line, dashed] (drivers) -- (devices);
-\end{tikzpicture}
+The middle layer is occupied by \textbf{libraries}, any kind of API or utility
+which can be used by both the kernel and the applications.
+They are logically above the first layer as they abstract algorithms and data
+structures from raw memory, file access, network connections.
+In a more restrictive design the kernel would never share code or data with
+applications, and this was the starting point also for DiegOS, until it became
+clear that code was bloating and memory footprint was growing due to duplication
+in kernel and library codebases. In order to avoid these situations a compromise
+was decided, share code but not data.
 
-The managers handle shared structures that can be used to synchronize threads in different ways: 
+The top layer is occupied by \textbf{applications} which are the actual
+portion of the code written by developers to do something useful. Although
+\textit{applications} recalls user space processes there is no concept of user and 
+kernel space in DiegOS, applications are just code linked to the OS but using the 
+APIs offered by the kernel and the libraries.
+Applications are not allowed to call the kernel's internals directly.
+
+\subsection{The kernel}
+Going a bit deeper into details, the \textbf{kernel} is composed by 3 specific
+items: the \texttt{scheduler}, the \texttt{system clock manager} and the
+\texttt{kernel interface}.
+
+The \texttt{scheduler} is in charge of selecting a running task among all
+available tasks in the system; the implemented algorithm is a priority list
+without pre-emption or substitution.
+The running task is the highest priority task in ready state, not blocked nor 
+waiting for an I/O operation to complete.
+Task switching \textbf{must not} happen in interrupt context, and no interrupt
+routine is allowed to call any scheduler function; doing so will surely result in
+a memory corruption.
+The \texttt{scheduler} is implemented following the cooperative model: the
+running task will not change until the code in execution \textbf{volutary}
+suspends the task, or put it in a wait state for I/O or waiting for a mutex, a
+semaphore, a barrier or an event.
+The running task will not yeld for lower priority tasks, but it can check for
+higher priority tasks.
+
+Managers handle shared structures that can be used to synchronize threads in different ways: 
 \textbf{mutexes} can be used to grant exclusive access to shared data, \textbf{barriers} can be used 
 to implement step-lock synchronization, \textbf{spin locks} can protect critical sections.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\columnwidth]{kernel_handsketched}
+\end{figure}
 
 The system can be easly extended to support different platforms or devices making use of its driver infrastructure.
 Specific platform dependencies like processor initialization, interrupt support and others are defined as a platform-dependent
