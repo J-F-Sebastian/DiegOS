@@ -12,6 +12,7 @@
 \usepackage{tikz}
 \usepackage{graphicx}
 \usetikzlibrary{shapes,arrows}
+\usepackage{tocbasic}
 
 \begin{document}
 \subject{Documentation}
@@ -212,121 +213,269 @@ portion of the code written by developers to do something useful. Although
 \textit{applications} recalls user space processes there is no concept of user and 
 kernel space in DiegOS, applications are just code linked to the OS but using the 
 APIs offered by the kernel and the libraries.
-Applications are not allowed to call the kernel's internals directly.
+Still, applications are not allowed to call the kernel's internals directly.
 
-\subsection{The kernel}
-Going a bit deeper into details, the \textbf{kernel} is composed by 3 specific
-items: the \texttt{scheduler}, the \texttt{system clock manager} and the
-\texttt{kernel interface}.
+\subsection{Layer 1: The kernel}
+Going a bit deeper into details, the \textbf{kernel} is composed by 4 specific
+items: the \textbf{scheduler}, the \textbf{system clock manager}, the
+\textbf{kernel interface} and the \textbf{threads synchronization APIs}.
 
-The \texttt{scheduler} is in charge of selecting a running task among all
-available tasks in the system; the implemented algorithm is a priority list
+The \textbf{scheduler} is in charge of selecting a running thread among all
+available threads in the system; the implemented algorithm is a priority list
 without pre-emption or substitution.
-The running task is the highest priority task in ready state, not blocked nor 
+The running thread is the highest priority thread in ready state, not blocked nor 
 waiting for an I/O operation to complete.
-Task switching \textbf{must not} happen in interrupt context, and no interrupt
+Task switching \textit{must not} happen in interrupt context, and no interrupt
 routine is allowed to call any scheduler function; doing so will surely result in
 a memory corruption.
-The \texttt{scheduler} is implemented following the cooperative model: the
-running task will not change until the code in execution \textbf{volutary}
-suspends the task, or put it in a wait state for I/O or waiting for a mutex, a
-semaphore, a barrier or an event.
-The running task will not yeld for lower priority tasks, but it can check for
-higher priority tasks.
+The \textbf{scheduler} algorithm is implementing a cooperative model: the
+running thread will not be substituted until the code in execution \textit{voluntary}
+suspends the thread, or put it in a wait state for I/O or waiting for a mutex, a
+semaphore, a barrier or an event; once the running thread has changed state, the
+\textbf{scheduler} will select another thread to become the running one.
 
-Managers handle shared structures that can be used to synchronize threads in different ways: 
-\textbf{mutexes} can be used to grant exclusive access to shared data, \textbf{barriers} can be used 
-to implement step-lock synchronization, \textbf{spin locks} can protect critical sections.
+The scheduler follows a strict priority selection, so the running thread will never
+switch to a \footnote{Not yelding for lower priority threads is a policy.} lower
+priority thread.
+A specific kernel API allows suspension only in case at least one higher
+priority thread is ready.
+
+When no threads are running, the scheduler will fall back to the \textbf{idle
+thread}; this is a special thread used to occupy the processor when there is no
+specific task to be completed.
+The \textbf{idle thread} performs some accounting and --- most important above
+all --- calls a power saving function, part of the Hardware Abstraction Layer
+and to be implemented for each processor; power saving is one of the most
+important functionality of the kernel, as the processor will spare power, save
+batteries, and require less cooling.
+
+The \textbf{system clock manager} is a sensitive piece of code dealing with
+the system clock and the system timings in general.
+It will initialize the clock device\footnote{Version 1.0 of DiegOS supports
+one clock source only \texttt{/dev/clk0}} and perform accounting of system
+ticks\footnote{System ticks are implemented as a monotonic fixed rate counter},
+system wall clock\footnote{The system clock accounts milliseconds since boot time}
+and the clock period.
+The clock period is dynamic, hence \textbf{DiegOS} use a tickless kernel.
+
+The \textbf{kernel interface} is the public interface used by application code
+to interact with the management of threads, with the system startup and
+shutdown, and with system devices.
+This interface allow applications to create and destroy a thread, suspend it
+and make it sleep for a specific amount of time, and access hardware through
+devices.
+The true nature of this interface is not hiding thread management, but rather
+hiding \textit{scheduling} operations, preventing applications from accessing
+any of the \textbf{scheduler} functions.
+As a matter of fact, in \textbf{DiegOS} the scheduler is a hidden layer and is
+accessible  only through the \textbf{kernel interface}.
+Also hardware and drivers are hidden by this layer, they are accessible by
+using the \textit{devices} interface which is an abstraction of the drivers
+interface.
+
+The final item is the collection of \textbf{thread synchronization APIs};
+since the scheduler and the threads management are hidden layers, the applications 
+have no direct access to each other nor can communicate directly with each
+other.
+Applications need to synchronize when they share data, objects, files, or when
+they need to observe a timeline --- so they need to synchronize with the
+system clock.
+\textbf{DiegOS} implement mutexes, barriers, spin locks, timers and alarms.
+Additionally, an API for event management is provided to let threads talk to
+each other without crossing function calls or sharing global data.
+
+\subsection{Layer 1a: The drivers}
+\textbf{Drivers} are a very important part of the kernel, they are allowed to access
+internals of the kernel \textit{not} exposed to applications, and usually
+implement \textit{interrupt routines} which requires access to sensitive
+resources offered by the processor or the platform or the kernel itself.
+Being dedicated to manage hardware it is not possible to implement a single
+common interface for all \textbf{drivers}, at the same time, a lot of functions and
+data and logic are common among all \textbf{drivers}.
+\textbf{DiegOS} interfaces have been conceived to share (to inherit) a common
+set of properties, adding specializations when needed.
+
+\subsection{Layer 2: The libraries}
+\textbf{Libraries} are the core of any software infrastructure.
+Algorithms and data structures are stored in libraries to share knowledge,
+make their implementations common and available to applications, the kernel,
+the drivers, anyone.
+Niklaus Wirth back in 1976 published a book titled \emph{"Algorithms + Data
+Structures = Programs"} creating a milestone for software engineering: data
+structures and algorithms are indipendent yet interlocked, as data structures
+are owned by the running application, but the strategy to use them at best
+is common.
+
+There are two places for \textbf{libraries} in \textbf{DiegOS}, the user
+applications libraries and the kernel libraries. The difference between the
+two can be found in the target they accomplish: applications need general
+purpose data to solve general purpose problems, so they need lists, queues,
+binary trees, and some strategies to use them at best, like sorting or
+searching.
+On the other hand the kernel code need specific data to handle drivers, manage
+hardware, communications busses, interrupt controllers, but again with common
+strategies like enumeration or sorting.
+
+One noticeable detail in \textbf{DiegOS} is the presence of the \texttt{libc}
+library as native source code in place of the several implementations
+available.\footnote{At the time of this writing well-known \texttt{libc}
+implementations are \texttt{glibc}, \texttt{uClibc}, \texttt{musl} and the
+\texttt{C runtime Library (CRT)}.} This singularity needs some explanation.
+As mentioned several times now this Operating System is a hobby not for
+production; porting a library to a new Operating System is a big effort,
+expecially considering the \texttt{libc} contents. Writing a new dedicated
+version proved to be effective and required an effort compatible with spending
+some nights awake --- rather than burning lots of midnight oil.
+
+Kernel libraries offer support for handling the PCI bus, some timing facility,
+and interfaces to the file system.
+Application libraries offer support for red\&black trees, lists, queues, hashed
+lists, memory pools, chunk managers, dynamic vectors, circual buffers, stacks,
+and many other.
+
+\subsection{Layer 3: The applications}
+\textbf{Applications} are the top level layer in \textbf{DiegOS} and they are
+barely noticeable in the code base, users are expected to add whatever they 
+want to this layer, customizing the system experience.
+An \textit{application} is not self-contained as it is supposed to be, as the
+overall system is a single binary; applications are prevented from accessing
+the internals of the kernel and are allowed to use only public APIs as found
+in libraries.
+Applications code run inside threads, at least one must be spawned at the end
+of the kernel initialization by declaring the function \texttt{platform\_run()}
+which is responsible for initializing data and threads.
+While one binary can run several applications, only one
+\texttt{platform\_run()} function can be declared: this means that applications
+can be spread over a number of files, but the entry point is common and is
+inside \texttt{platform\_run()}.
+
+\section{Portability}
+The source code of \textbf{DiegOS} is written in plain C, with a little amount of
+assembler to perform hardware init.
+The C language is a compulsory choice when portability is a priority, and
+along with it the speed of the resulting binary.
+Assembler is not required apart for initializations and to access specific
+instructions not known to the compiler; it can be handful when it is desidered to 
+add hard optimizations to some function or even a whole API, provided that readability
+of the code is kept to a level where any developer could read the code,
+read the comments, understand the algorithm, the pitfalls, and the possible C counterpart.
+\footnote{Assembler is never portable, but can be translated if understandable}
+
+Some drivers and some libraries' API do have a double personality, one implementation
+in plain C and one implementation optimized in assembler; the former is totally portable,
+the latter is welcome when performance gets on stage.
+The system is not designed to run on 64-bit architectures, writing 32- and 64-bit compliant 
+code requires considerable time (and time is a scarce resource!).
+\footnote{Writing code able to compile and run on both 32- and 64-bit processors would break
+the rule of simplicity; still, you will find computations and arrangements to
+support 64-bit systems.}
+The system supports compiling and linking source files written in C++ using
+classes and objects, this makes it possibile to write applications with
+\textit{Object Oriented Programming}. It was not foreseen to add objects to
+the kernel, although possible, it would require a new architecture.
+
+The system can be easily ported to different platforms or can support several
+new devices making use of its driver infrastructure and the minimal
+\textit{HAL} required to support a board.
+
+\section{build system}
+The code base of DiegOS builds using makefiles and the make tool, no ancillary
+tool is required apart for a C-language toolchain.
+Any toolchain can be deployed and used to compile and build \textbf{DiegOS},
+at the time of this writing only GCC has been tested.
+
+Output object files are stored in dedicated directories named after the platform 
+and CPU configured for the specific build.
+Due to this choice it is possible to build several binary images in the same workspace without generating
+conflicts.
+It is also easier to add platform specific optimizations inside general purpose modules as all makefiles
+are aware of the platform and CPU options.
+The makefiles \textit{will not} automatically perform a selection of source
+code using platform and CPU as a key, this excercise is left to the
+developers.
+
+Configuration of the build system is implemented with makefiles again, so
+there is no need to use other tools rather than \textit{make}.
+This choice implies passing the configuration to the compiling toolchain as
+command line strings, and this poses a limit to the size of the configuration as
+the length of the command line is also the length of all declarations and
+strings passed to the compiler.
+Again, while there are smarter solutions, this is a simple one and will not let the
+system become too complex.
+
+\chapter{System}
+The kernel, the libraries, the applications, they are all parts of a whole
+system. A system with a well defined target: start applications and make them
+run in a steady environment.
+To this purpose some additional sections are required in \textbf{DiegOS}, the
+boot code to let the main binary run in a preconfigured hardware environment,
+the file system to store and retrieve data, the networking subsystem to
+connect to the outer world.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\columnwidth]{kernel_handsketched}
 \end{figure}
 
-The system can be easly extended to support different platforms or devices making use of its driver infrastructure.
-Specific platform dependencies like processor initialization, interrupt support and others are defined as a platform-dependent
-API and its implementation is required in order to compile and link the kernel; while this code is not part of the kernel itself, its interface
-is defined in the kernel, in order to implement a virtual interface for all hardware.
-The kernel will access specific hardware features through generic function calls, implemented in a Board Support Package or in 
-platform-dependent modules; this way the core of the system is unique, and can be linked with modules supporting different hardware.
+\section{The boot code}
+The boot code belongs to the booting stage and it's ultimate goal is to
+implement the most straighforward solution to setup the processor, the CPU
+peripherals, and then load and run the \textbf{DiegOS} binary.
+Boot code should be adaptable to any platform and any medium,
+and it should perform using the least amount of interactions with the hardware.
+It is understood that boot code is essentially processor and platform dependent,
+even reducing the assembler parts to the bare minimum there would be a huge
+portion of operations which vary with the machine.
 
-System libraries as well as a \textbf{libc} implementation are part of DiegOS, application code can leverage on these
-APIs to use queues, lists, binary trees, hashed data structures, and to encrypt, encode or compress data.
+There is an elegant and effective solution to the problem of mixing
+dependencies with abstract algorithms, that is the \textit{Hardware
+Abstraction Layer}; in \textbf{DiegOS} most of the booting process is
+implemented into \textit{HAL} functions, so that a very thin layer of
+high-level functions can perform common steps indipendently from the
+underlying hardware.
 
-The system is able to compile and link source code written in C and C++, and supports Object Oriented Programming.
+To satisfy these requirements \textbf{DiegOS} is built as a raw binary, relocated
+to start at a specific memory address --- the same that will be used to 
+load it and then run it.\footnote{At the time of this writing there is no support
+for COFF, ELF or PE formats.}
 
-The native file system that comes with DiegOS is a variant of the Microsoft FAT16 file system; it is not compatible with
-the original FAT16 and at the time of this writing does not support flash memory type devices.
-
-\section{Portability}
-The source code of DiegOS is written in plain C, with a little amount of
-assembler to perform hardware init.
-Some drivers and some libraries' API do have a double personality, one implementation
-in plain C and one implementation optimized in assembler; the former is totally portable,
-the latter is welcome when performance gets on stage.
-The system is not designed to run on 64-bit architectures, writing 32- and 64-bit compliant 
-code requires considerable time (and time is a scarce resource!).
-\footnote{writing code able to compile and run on both 32- and 64-bit processors would break
-the rule of simplicity.}
-The system supports compiling and linking source files written in C++ using classes and objects.
-
-\section{build system}
-The code base of DiegOS builds using makefiles and the make tool; output object code is stored in dedicated directories
-named after the platform/CPU configured for the specific build.
-Due to this choice it is possible to build several binary images in the same workspace without generating
-conflicts.
-It is also easier to add platform specific optimizations inside general purpose modules as all makefiles
-are aware of the platform/CPU options.
-
-\chapter{System}
-\section{Design}
-\subsection{Booting process}
-The rationale behind the booting stage is to have the most straighforward
-solution, adaptable to any platform and any medium, with the least
-interactions with the hardware.
-
-To satisfy this requirement DiegOS has to be built as a binary, relocated
-to start at a specific address, obviously the same that will be used to 
-load it and run it.\\
-There is no support for alternate file formats, so there are no COFF, ELF or PE
-readers.
-The default target will emit an ELF file along with the binary format, 
+It is suggested to always build an ELF file along with the raw binary, 
 to satisfy the needs of having a symbol reference for debugging, along with
 all binutils capabilities.
 In case the target EABI does not support the ELF format, any other object file
-format can be used; just be aware you always need to emit a binary file to
-load and execute the OS.
+format can be used; just be aware you always need to emit a raw binary file to
+load and execute \textbf{DiegOS}.
 
-There is a detailed setup procedure to have consistent booting steps across
-any kind of platform; all platforms should adhere to this procedure to avoid adding
-useless assembly code here and there, bloating the source code and making it less
-portable:
+Coming to procedures, the boot code implements a detailed setup procedure to have consistent 
+booting steps across any platform.
+This procedure is described in the following bullets.
+Please note the recommendations on how to write and document the code: any detail counts in this stage.
+
 \begin{enumerate}
-\item Setup the host processor in order to execute the boot code; since you
-are in charge of writing the boot code, it should be easy. Reserve a register
-or a memory location to store debugging data like return values or failures.
+\item Setup the host processor in order to be able to execute the boot code.
+Reserve a register or a memory location to store debugging data like return 
+values or failures, it can be very handy even if a debugger is available as
+this stage comes so early in the booting process that understanding the
+easiest issue might be really hard.
 Add comments to explain how this data can be used. Do not add debugging
 infrastructures, traces, endless strings for printouts.
-\item Access the medium where you stored the DiegOS binary, and read it into
+\item Access the medium where you stored the \textbf{DiegOS} binary, and read it into
 memory. Document where the binary is put in memory, why it is put there, and
 the memory layout during boot. The medium and the code required to
-access it is up to you. The rationale here is, split your boot code if it grows beyond
+access it are up to you. The rationale here is, split your boot code if it grows beyond
 logic; chain booting is not an option in this case.
-\item Keep your code simple and stupid, do not try to optimize the load time
-or the medium access time: access the hardware in a safe manner, load the OS
-into memory, and run it.
 \item Before jumping to the OS entry point go through this checklist:
 
     \begin{minipage}{0.9\textwidth}
     \begin{enumerate}
-    \item All registers are setup to start DiegOS: scratch registers should be
+    \item All registers must be setup to start \textbf{DiegOS}: scratch registers should be
     set to null, memory registers should be set to access the whole addressing
     space; you could also restrict the range of available addresses, but you 
     must ensure the OS is still able to access all the memory and all the hardware.
     \item A small stack will be used by the system init stage, be sure to set
     it up before jumping or you'll crash the machine.
-    \item All interrupts \textbf{must be disabled} prior to jumping to the
-    DiegOS entry point. 
+    \item All interrupts \textit{must be disabled} prior to jumping to the
+    \textbf{DiegOS} entry point. 
     \end{enumerate}
     \end{minipage}
 
@@ -334,9 +483,10 @@ into memory, and run it.
 Be careful not to perform a function call, but simply jump to the label;
 calling implies using the stack, and setting a return address somewhere, which
 is not expected to happen.\footnote{No Operating System returns to the boot
-code after a shutdown.}
-\end{enumerate} 
-\subsection{System initialization}
+code after shutting down.}
+\end{enumerate}
+
+\section{System initialization}
 Initialization is split into a set of function calls, acting on both hardware and
 software. 
 \begin{itemize}
@@ -360,7 +510,7 @@ at user's will.
 \item Run the kernel, this actually roll the ball and kicks the scheduler.
 \end{itemize}
 
-\subsection{The kernel}
+\section{The kernel}
 The core functionalities of DiegOS are enclosed in this library.
 The kernel is a single instance, single processor component; it does not
 support any kind of memory protection, and it is expecting to be able to access the
@@ -377,7 +527,12 @@ again, if you need the real thing, go get it. A small bare-metal system would re
 of resources to assure a decent level of security if implementing memory protection,
 and this is not a goal for DiegOS.
 
-\subsection{Kernel services}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\columnwidth]{kernel_handsketched}
+\end{figure}
+
+\section{Kernel services}
 The kernel offers the following services: a thread scheduler, a thread management API, 
 an alarm API, events queueing and dispatching, mutexes, barriers, I/O waiting and spin locks.\\
 Alarms, Events and Mutexes are all managed services, meaning that an owning thread
@@ -570,7 +725,7 @@ resume \textbf{all} the waiting threads at once moving them into their respectiv
 Optionally a barrier can automatically close after opening, creating a step-lock software gate.
 \end{description}
 
-\subsection{Drivers}
+\section{Drivers}
 \label{sub:drivers}
 Drivers in DiegOS are interfaces to hardware.
 They enable software to start and stop hardware operations, configure it, and perform input and output.
@@ -669,9 +824,9 @@ typedef struct driver_header {
 
 \end{lstlisting}
 
-\subsection{File system}
+\section{File system}
 
-\subsection{Libraries}
+\section{Libraries}
 
 Every operating  environment offers a set of libraries to be used
 at application level.
@@ -683,7 +838,7 @@ highly orthogonal systems, leveraging on the same libraries for drivers,
 front ends, interfaces, databases, applications.
 
 DiegOS offers a pletora of data structures
-\subsection{Networking}
+\section{Networking}
 
 \section{Drivers interface}
 
