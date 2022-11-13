@@ -30,6 +30,14 @@
 #include "barriers_private.h"
 
 /*
+ * Maximum delay for clock, this will be set and used
+ * if no threads are delayed, so the clock does not need to measure
+ * close ticks.
+ * Value in milliseconds
+ * */
+#define SCHED_DELAY_MAX (10*1000UL)
+
+/*
  * various queues and pointers for thread
  * execution management.
  */
@@ -158,18 +166,20 @@ static inline void schedule_delayed(void)
 	}
 }
 
-static inline uint64_t peek_top_expiration(void)
+static inline uint32_t peek_top_expiration(void)
 {
 	thread_t *ptr = queue_head(&delay_queue);
 	uint64_t now = clock_get_milliseconds();
+	uint64_t retval;
 
-	return (delays[ptr->tid] > now) ? (delays[ptr->tid] - now) : 0;
+	retval = (delays[ptr->tid] > now) ? (delays[ptr->tid] - now) : 0;
+	return (retval < SCHED_DELAY_MAX) ? (uint32_t) retval : SCHED_DELAY_MAX;
 }
 
 void schedule_thread()
 {
 	unsigned i = 0;
-	uint64_t new_delay = UINT_MAX;
+	uint32_t new_delay = SCHED_DELAY_MAX;
 
 	/*
 	 * Dead queue management
