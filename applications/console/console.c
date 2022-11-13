@@ -84,6 +84,12 @@ static void print_login_time(void)
 	printf("Login time: %s\n", ctime(&tmp));
 }
 
+static void print_time(void)
+{
+	time_t tmp = time(NULL);
+	printf("Local time: %s\n", ctime(&tmp));
+}
+
 static void console_main_entry(void)
 {
 	char buffer[128] = { 0 };
@@ -219,6 +225,7 @@ static void login_main_entry(void)
 				} else if (TIMER_STAGE2 == timeout_stage) {
 					puts(timeout_msg[1]);
 				}
+				print_time();
 			}
 		}
 
