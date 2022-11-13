@@ -47,4 +47,6 @@ BOOL apic_write_counter(unsigned count);
 
 unsigned apic_read_counter(void);
 
+void apic_write_eoi(void);
+
 #endif
