@@ -43,6 +43,8 @@ static void (*cbfn) (void) = NULL;
 
 static BOOL lapic_int_handler()
 {
+	apic_write_eoi();
+
 	if (cbfn) {
 		cbfn();
 	}
