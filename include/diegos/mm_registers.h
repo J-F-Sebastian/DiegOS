@@ -57,7 +57,7 @@ inline void writereg64(uintptr_t address, uint64_t data)
 /*
  * Read data from a memory mapped register, 8 bit.
  */
-inline void readreg8(uintptr_t address)
+inline uint8_t readreg8(uintptr_t address)
 {
 	return *(volatile uint8_t *)(address);
 }
@@ -84,6 +84,86 @@ inline uint32_t readreg32(uintptr_t address)
 inline uint64_t readreg64(uintptr_t address)
 {
 	return *(volatile uint64_t *)(address);
+}
+
+/*
+ * Update data in a memory mapped register, 8 bit.
+ * Operations for updating are
+ * Read -> set using OR with data -> Write
+ */
+inline void updatereg8(uintptr_t address, uint8_t data)
+{
+	writereg8(address, readreg8(address) | data);
+}
+
+/*
+ * Update data in a memory mapped register, 16 bit.
+ * Operations for updating are
+ * Read -> set using OR with data -> Write
+ */
+inline void updatereg16(uintptr_t address, uint16_t data)
+{
+	writereg16(address, readreg16(address) | data);
+}
+
+/*
+ * Update data in a memory mapped register, 32 bit.
+ * Operations for updating are
+ * Read -> set using OR with data -> Write
+ */
+inline void updatereg32(uintptr_t address, uint32_t data)
+{
+	writereg32(address, readreg32(address) | data);
+}
+
+/*
+ * Update data in a memory mapped register, 64 bit.
+ * Operations for updating are
+ * Read -> set using OR with data -> Write
+ */
+inline void updatereg64(uintptr_t address, uint64_t data)
+{
+	writereg64(address, readreg64(address) | data);
+}
+
+/*
+ * Clear data in a memory mapped register, 8 bit.
+ * Operations for clearing are
+ * Read -> clear using AND NOT with data -> Write
+ */
+inline void clearreg8(uintptr_t address, uint8_t data)
+{
+	writereg8(address, readreg8(address) & ~data);
+}
+
+/*
+ * Clear data in a memory mapped register, 16 bit.
+ * Operations for clearing are
+ * Read -> clear using AND NOT with data -> Write
+ */
+inline void clearreg16(uintptr_t address, uint16_t data)
+{
+	writereg16(address, readreg16(address) & ~data);
+}
+
+/*
+ * Clear data in a memory mapped register, 32 bit.
+ * Operations for clearing are
+ * Read -> clear using AND NOT with data -> Write
+ */
+inline void clearreg32(uintptr_t address, uint32_t data)
+{
+	writereg32(address, readreg32(address) & ~data);
+}
+
+/*
+ * Clear data in a memory mapped register, 64 bit.
+ * Operations for clearing are
+ * Read -> clear using AND NOT with data -> Write
+ */
+inline void clearreg64(uintptr_t address, uint64_t data)
+{
+	writereg64(address, readreg64(address) & ~data);
 }
 
 #endif
