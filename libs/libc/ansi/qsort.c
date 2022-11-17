@@ -122,19 +122,7 @@ static void qsort1(char *a1, char *a2, size_t width)
 
 static void qexchange(char *p, char *q, size_t n)
 {
-	long c;
-	long *pp = (long *)p;
-	long *qq = (long *)q;
-
-	while (n > sizeof(long)) {
-		c = *pp;
-		*pp++ = *qq;
-		*qq++ = c;
-		n -= sizeof(long);
-	}
-
-	p = (char *)pp;
-	q = (char *)qq;
+	char c;
 
 	while (n--) {
 		c = *p;
@@ -145,22 +133,7 @@ static void qexchange(char *p, char *q, size_t n)
 
 static void q3exchange(char *p, char *q, char *r, size_t n)
 {
-	long c;
-	long *pp = (long *)p;
-	long *qq = (long *)q;
-	long *rr = (long *)r;
-
-	while (n > sizeof(long)) {
-		c = *pp;
-		*pp++ = *rr;
-		*rr++ = *qq;
-		*qq++ = c;
-		n -= sizeof(long);
-	}
-
-	p = (char *)pp;
-	q = (char *)qq;
-	r = (char *)rr;
+	char c;
 
 	while (n--) {
 		c = *p;
