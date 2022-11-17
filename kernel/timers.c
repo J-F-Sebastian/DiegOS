@@ -79,7 +79,7 @@ static void timer_cb(uint64_t msecs)
 				}
 			}
 		}
-		cursor = (timer_t *) cursor->header.next;
+		cursor = (timer_t *)list_node_next(&cursor->header);
 	}
 
 	clock_set_period(period, CLK_INST_ALARMS);
@@ -277,6 +277,8 @@ static void dump_internal(const timer_t * tmr)
 
 void timers_dump(const timer_t * tmr)
 {
+	timer_t *cursor;
+
 	if (!tmr) {
 		fprintf(stderr, "\n--- TIMERS TABLE -------------------------------------\n\n");
 	}
@@ -286,10 +288,10 @@ void timers_dump(const timer_t * tmr)
 	if (tmr) {
 		dump_internal(tmr);
 	} else {
-		tmr = list_head(&timers_list);
-		while (tmr) {
-			dump_internal(tmr);
-			tmr = (timer_t *) tmr->header.next;
+		cursor = list_head(&timers_list);
+		while (cursor) {
+			dump_internal(cursor);
+			cursor = (timer_t *) list_node_next(&cursor->header);
 		}
 	}
 	fprintf(stderr, "------------------------------------------------------\n\n");
@@ -322,7 +324,7 @@ void timers_thread_entry(void)
 					cursor->expiration =
 					    cursor->msecs + clock_get_milliseconds();
 			}
-			cursor = (timer_t *) cursor->header.next;
+			cursor = (timer_t *)list_node_next(&cursor->header);
 		}
 
 		unlock();
