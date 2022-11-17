@@ -103,7 +103,7 @@ int puts(const char *s);
 int ungetc(int _c, FILE * stream);
 
 int vfscanf(FILE * stream, const char *format, va_list arg);
-int vscanf(const char *_format, char *_arg);
+int vscanf(const char *_format, va_list ap);
 int vsscanf(const char *s, const char *format, va_list ap);
 int snprintf(char *_s, size_t _n, const char *_format, ...);
 int vsnprintf(char *s, size_t _n, const char *format, va_list arg);
