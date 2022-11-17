@@ -58,7 +58,7 @@ static uint32_t period = -1U;
 
 static void alarm_cb(uint64_t msecs)
 {
-	struct alarm *cursor;
+	alarm_t *cursor;
 	period = -1U;
 
 	if (!list_count(&alarms_list)) {
@@ -85,7 +85,7 @@ static void alarm_cb(uint64_t msecs)
 			}
 		}
 
-		cursor = (alarm_t *) cursor->header.next;
+		cursor = (alarm_t *)list_node_next(&cursor->header);
 	}
 
 	clock_set_period(period, CLK_INST_ALARMS);
@@ -286,6 +286,8 @@ static void dump_internal(const alarm_t * alm)
 
 void alarm_dump(const alarm_t * alm)
 {
+	alarm_t *cursor;
+
 	if (!alm) {
 		printf("\n--- ALARMS TABLE -----------------------\n\n");
 	}
@@ -294,10 +296,10 @@ void alarm_dump(const alarm_t * alm)
 	if (alm) {
 		dump_internal(alm);
 	} else {
-		alm = list_head(&alarms_list);
-		while (alm) {
-			dump_internal(alm);
-			alm = (alarm_t *) alm->header.next;
+		cursor = list_head(&alarms_list);
+		while (cursor) {
+			dump_internal(cursor);
+			cursor = (alarm_t *)list_node_next(&cursor->header);
 		}
 	}
 	printf("----------------------------------------\n\n");
