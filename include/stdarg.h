@@ -44,7 +44,7 @@
 
 /* The GNU C-compiler uses its own, but similar varargs mechanism. */
 
-typedef char *va_list;
+typedef __builtin_va_list va_list;
 
 /* Amount of space required in an argument list for an arg of type TYPE.
  * TYPE may alternatively be an expression whose type is used.
