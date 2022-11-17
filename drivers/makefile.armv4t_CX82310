@@ -1,0 +1,9 @@
+include ../build/makefiles/makefile.master
+
+all:
+	cd null && make all
+	$(AR) $(OBJPREFIX)_drivers.a null/$(OBJPREFIX)/null.o
+
+clean:
+	cd null && make clean
+	rm -rf *.a
