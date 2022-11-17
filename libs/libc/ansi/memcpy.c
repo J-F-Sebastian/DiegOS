@@ -18,6 +18,7 @@
  */
 
 #include <string.h>
+#include <stdint.h>
 
 void *memcpy(void *s, const void *ct, size_t n)
 {
