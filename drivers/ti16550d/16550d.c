@@ -420,7 +420,7 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 		return (EOK);
 	}
 
-	while (!cbuffer_is_empty(&tx_cbuf)) {
+	while (cbuffer_free_space(&tx_cbuf) < TX_SEQ_MAX) {
 		(void)thread_io_wait(&wq_w);
 	}
 
