@@ -57,20 +57,24 @@ static const uint16_t divisor_latch[] = {
 	1
 };
 
+/*
+ * Speeds are divided by 10 to store a uint16_t
+ * instead of an int.
+ */
 static const unsigned speed_bps[] = {
-	50,
-	110,
-	150,
-	300,
-	600,
-	1200,
-	2400,
-	4800,
-	9600,
-	19200,
-	38400,
-	57600,
-	115200
+	5,
+	11,
+	15,
+	30,
+	60,
+	120,
+	240,
+	480,
+	960,
+	1920,
+	3840,
+	5760,
+	11520
 };
 
 static BOOL fifo_ok = FALSE;
@@ -488,6 +492,7 @@ static int uart_ioctrl(void *data, unsigned opcode, unsigned unitno)
 
 	switch (opcode) {
 	case UART_SET_SPEED:
+		*decode /= 10;
 		if (*decode < speed_bps[0]) {
 			return (EINVAL);
 		}
