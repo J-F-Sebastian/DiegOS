@@ -33,7 +33,7 @@ Diego Gallizioli
 
 \tableofcontents
 
-\chapter{Concepts}
+\chapter{Foreword}
 \section*{Inheritance and other inspirations}
 I approached the world of computing when I was 8 years old.
 Back at the time information technology was seen as the future and was
