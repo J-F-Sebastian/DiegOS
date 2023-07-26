@@ -34,28 +34,64 @@ Diego Gallizioli
 \chapter{Concepts}
 \section*{Inheritance and other inspirations}
 I approached the world of computing when I was 8 years old.
-My father bought a Commodore C64 after an intensive and extensive search throughout most of the electronics shops
-available.
+Back at the time information technology was seen as the future and was
+represented as a kind of magic, something that could not be understood but
+rather revealed or discovered.
+Lots of movies used computer science as a subject to create stunning stories
+where young guys (just like me!) experienced unbelievable adventures after
+discovering new hidden powers while hacking stuff; not to mention the fact
+that most of the offices seen in movies were filled with computers, no matter
+what they could be used for, they were giving answers: finding clues, finding
+people, finding informations.
+Remeber \textit{tron} or \textit{war games} ? Here it goes.
 
-His target --- having me and my brother understand what a computer could do --- was partially met: I went on to become an engineer,
+My father bought a Commodore C64 after an intensive and extensive search throughout most of the electronics shops
+available, probably inspired by the passion I demonstrated for computers.
+
+He had a target --- having me and my brother understand what a computer could
+do --- but it was only partially met: I went on to become an engineer,
 my brother chose a different path.\footnote{He is a doctor now.}
-I still remember when I asked for a more powerful computer: my intense desire was to explore the unknown universe of the then innovative AMIGA
-platform, but when I had to explain this idea to my father, I failed; to his eyes the Commodore machines were merely videogames.
-I succeded in replacing my beloved C64 with an i8086-based personal computer running MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
-and from then on I got more and more interested in two aspects of computing: transmitting data and having software interact with hardware.
+
+I still remember my joy and my interest when I found out there was more than
+a BASIC interpreter in that machine.
+I wondered how developers could code games or applications by using such a
+simple language, so I tried myself writing code for simple programs writing
+text to screen; I was constantly running out of memory, or waiting eons for the data cassette
+to read in data, and getting frustrated as I could not understand "the magic"
+behind the scene.
+But then one day a friend of mine paid a visit to me and lent me a fabulous
+gadget: a cartridge running a Pascal compiler, along with a technical manual
+covering the C64 internals and the assembler for the processor and the sprites
+technology... and lots more.
+Then I turned 15 when I asked for a more powerful computer: my intense desire was
+to explore the unknown universe of the then innovative AMIGA
+platform, but to have access to that machine, I'd had to explain to my father my
+reasons and also provide him with a good reason to spend his money. I failed,
+because to his eyes the Commodore machines were merely gaming machines, not serious
+pieces of hardware, so I had to switch to a backup plan.
+
+I focused on another prominent platform, born in the silicon valley as well
+but looking very different.
+I succeded in replacing my beloved C64 with an i8086-based personal computer running
+MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
+and from then on I got more and more interested in two aspects of computing:
+transmitting data and having software interact with hardware.
 
 While attending university my curiosity for operating systems became a top interest.
 This interest eventually led me to try to write an operating system by myself.
-Developing a full-blown operating system as a spare time activity proved to be really challenging, besides, there are way too much
-OS in the world.
+Developing a full-blown operating system as a spare time activity proved to be really challenging, besides, there are way too much OS in the world.
 Still, as a professional software developer I approached the embedded systems and found an interesting niche to work on.
 This is why I wrote DiegOS.
 
 From my personal standpoint the main goal of an Operating System is to offer a friendly and comfortable environment
-for both programmers, users, and administrators, or in other words, offer an effective interface to the underlying hardware.
+for both programmers, users, and administrators, or in other words, offer an
+effective interface to the underlying hardware; this implies that an operating
+system should be the fastest and most efficient software running on any
+machine.
 Scoring this goal is not easy: since the very first Operating System inception, a huge number of engineers 
 and scientists worked to develope concepts, ideas, architectures, interfaces, and documenting 
 their work to produce what we know today as Microsoft Windows, Linux, Unix, or Apple Inc. macOS.
+
 All these people proved to be smarter than the Author of this book.
 
 Up today I had the chance and the privilege to work on a number of Operating Systems,
