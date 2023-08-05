@@ -23,6 +23,31 @@
 #include <stdint.h>
 
 /*
+ * Compose an address using a base pointer and a register offset,
+ * the offset can be 1, 2, 4 or 8 bytes.
+ * The offset is the size of the registers in bytes.
+ */
+inline uintptr_t regaddr8(uintptr_t base, unsigned offset)
+{
+	return (base + offset);
+}
+
+inline uintptr_t regaddr16(uintptr_t base, unsigned offset)
+{
+	return (base + offset*2);
+}
+
+inline uintptr_t regaddr32(uintptr_t base, unsigned offset)
+{
+	return (base + offset*4);
+}
+
+inline uintptr_t regaddr64(uintptr_t base, unsigned offset)
+{
+	return (base + offset*8);
+}
+
+/*
  * Write data to a memory mapped register, 8 bit.
  */
 inline void writereg8(uintptr_t address, uint8_t data)
