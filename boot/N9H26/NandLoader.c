@@ -144,7 +144,6 @@ _read_:
             volatile int temp;
 
             sys_flush_and_clean_dcache();
-#if defined (__GNUC__) && !(__CC_ARM)
         	__asm volatile
             (
                 /*----- flush I, D cache & write buffer -----*/
@@ -159,23 +158,6 @@ _read_:
                 "MCR p15, 0, %0, c1, c0, #0   \n\t" /* write Control register */
         		: :"r"(temp) : "memory"
             );
-#else
-            __asm
-            {
-                /*----- flush I, D cache & write buffer -----*/
-                MOV temp, 0x0
-                MCR p15, 0, temp, c7, c5, 0 /* flush I cache */
-                MCR p15, 0, temp, c7, c6, 0 /* flush D cache */
-                MCR p15, 0, temp, c7, c10,4 /* drain write buffer */
-
-                /*----- disable Protection Unit -----*/
-                MRC p15, 0, temp, c1, c0, 0     /* read Control register */
-                BIC temp, temp, 0x01
-                BIC temp, temp, 0x1000
-                BIC temp, temp, 0x4
-                MCR p15, 0, temp, c1, c0, 0     /* write Control register */
-            }
-#endif
         }
 
         fw_func = (void(*)(void))(image->executeAddr);
@@ -185,11 +167,7 @@ _read_:
 }
 
 
-#if defined (__GNUC__)
     UINT8 image_buffer[8192] __attribute__((aligned (32)));
-#else
-    __align(32) UINT8 image_buffer[8192];
-#endif
 
 unsigned char *imagebuf;
 unsigned int *pImageList;
