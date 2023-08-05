@@ -1,4 +1,4 @@
-/**************************************************************************//**
+/****************************************************************************
  * @file     NandLoader.c
  * @brief    NandLoader source code.
  *
@@ -56,9 +56,11 @@ VOID RTC_Check(void)
 }
 
 
-// 2014/4/11, NVTLoader will write a 16 bytes signature pattern in image file offset
-//      between 0x40 to 0x9F. (0x55AA55AA, 0xAA55AA55, 0x4F56554E, 0x2E4E4F54)
-// NandLoader believe the image is NVTLoader if it found one pattern within this range.
+/*
+ *  2014/4/11, NVTLoader will write a 16 bytes signature pattern in image file offset
+ *             between 0x40 to 0x9F. (0x55AA55AA, 0xAA55AA55, 0x4F56554E, 0x2E4E4F54)
+ *             NandLoader believe the image is NVTLoader if it found one pattern within this range.
+ */
 INT isNVTLoader(NVT_NAND_INFO_T *image)
 {
     int i;
@@ -219,9 +221,11 @@ void initClock(void)
     }
 
 #ifdef __UPLL_NOT_SET__
-    // 2012/3/7 Don't change anything that include
-    //      System clock, clock skew, REG_DQSODS and REG_SDTIME.
-    //      System clock will follow IBR setting.
+    /*
+     * 2012/3/7 Don't change anything that include
+     *          System clock, clock skew, REG_DQSODS and REG_SDTIME.
+     *          System clock will follow IBR setting.
+     */
     sysprintf("NAND Loader DONOT set anything and follow IBR setting !!\n");
 #endif  // __UPLL_NOT_SET__
 
@@ -358,8 +362,9 @@ int main()
     sysprintf("Enable RTC power off feature to %d seconds.\n", (inp32(PWRON) & PCLR_TIME) >> 16);
     outp32(REG_APBCLK, inp32(REG_APBCLK) & ~RTC_CKE);   // disable RTC clock to save power
 
-    // 2013/9/26, 2014/3/26, enable External RESET Debounce feature
-    //      with debounce counter 0x0FFF (4096 * 83.3ns = 341.1968us)
+    /* 2013/9/26, 2014/3/26, enable External RESET Debounce feature
+     *                       with debounce counter 0x0FFF (4096 * 83.3ns = 341.1968us)
+     */
     outp32(REG_EXTRST_DEBOUNCE, inp32(REG_EXTRST_DEBOUNCE) & (~EXTRST_DEBOUNCE));   // MUST disable debounce before set counter to 0
     outp32(REG_DEBOUNCE_CNTR, inp32(REG_DEBOUNCE_CNTR) & (~DEBOUNCE_CNTR));
     outp32(REG_DEBOUNCE_CNTR, inp32(REG_DEBOUNCE_CNTR) | 0x0FFF);
@@ -372,7 +377,7 @@ int main()
     for (i=0; i<2000; i++);     // MUST wait suspend be completed before disable USB Host clock.
     outp32(REG_AHBCLK2, inp32(REG_AHBCLK2) & (~(OHCI_CKE | H20PHY_CKE)));   // disable USB Host clock
 
-    // 2013/10/1, suspend USBD to save power. MUST enable clock first, and then suspend it.
+    /* 2013/10/1, suspend USBD to save power. MUST enable clock first, and then suspend it. */
     outp32(REG_AHBCLK, inp32(REG_AHBCLK) | HCLK3_CKE | USBD_CKE);   // enable USB Device clock
     outp32(PHY_CTL, inp32(PHY_CTL) & (~Phy_suspend));           // suspend USB Device PHY
     for (i=0; i<2000; i++);     // wait suspend be completed before disable USB Device clock.
