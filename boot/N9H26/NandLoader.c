@@ -212,38 +212,6 @@ void initClock(void)
         outp32(REG_SDREF, 0x80C0);
     }
 
-#ifdef __UPLL_NOT_SET__
-    /*
-     * 2012/3/7 Don't change anything that include
-     *          System clock, clock skew, REG_DQSODS and REG_SDTIME.
-     *          System clock will follow IBR setting.
-     */
-    sysprintf("NAND Loader DONOT set anything and follow IBR setting !!\n");
-#endif  // __UPLL_NOT_SET__
-
-#ifdef __UPLL_192__
-    //--- support UPLL 192MHz, MPLL 288MHz, APLL 432MHz
-    outp32(REG_CKDQSDS, E_CLKSKEW);
-    #ifdef __DDR2__
-        outp32(REG_SDTIME, 0x2A38F726);     // REG_SDTIME for 288MHz SDRAM clock
-        outp32(REG_SDMR, 0x00000432);
-        outp32(REG_MISC_SSEL, 0x00000155);  // set MISC_SSEL to Reduced Strength to improve EMI
-    #endif
-
-    // initial DRAM clock BEFORE initial system clock since we change it from low (216MHz by IBR) to high (288MHz)
-    sysSetDramClock(eSYS_MPLL, 288000000, 288000000);   // change from 216MHz (IBR) to 288MHz
-
-    // initial system clock
-    sysSetSystemClock(eSYS_UPLL,
-                    192000000,      // Specified the APLL/UPLL clock, unit Hz
-                    192000000);     // Specified the system clock, unit Hz
-    sysSetCPUClock (192000000);     // Unit Hz
-    sysSetAPBClock ( 48000000);     // Unit Hz
-
-    // set APLL to 432MHz to support TVout (need 27MHz)
-    sysSetPllClock(eSYS_APLL, 432000000);
-#endif  // __UPLL_192__
-
 #ifdef __UPLL_240__
     //--- support UPLL 240MHz, MPLL 360MHz, APLL 432MHz
     outp32(REG_CKDQSDS, E_CLKSKEW);
@@ -267,29 +235,6 @@ void initClock(void)
     sysSetPllClock(eSYS_APLL, 432000000);
 #endif  // __UPLL_240__
 
-#ifdef __UPLL_264__
-    //--- support UPLL 264MHz, MPLL 396MHz, APLL 432MHz
-    outp32(REG_CKDQSDS, E_CLKSKEW);
-    #ifdef __DDR2__
-        outp32(REG_SDTIME, 0x332F5A4B);     // REG_SDTIME for N9H26 396MHz SDRAM clock
-        outp32(REG_SDMR, 0x00000432);
-        outp32(REG_MISC_SSEL, 0x00000155);  // set MISC_SSEL to Reduced Strength to improve EMI
-    #endif
-
-    // initial DRAM clock BEFORE initial system clock since we change it from low (216MHz by IBR) to high (396MHz)
-    sysSetDramClock(eSYS_MPLL, 396000000, 396000000);   // change from 216MHz (IBR) to 396MHz,
-
-    // initial system clock
-    sysSetSystemClock(eSYS_UPLL,
-                    264000000,      // Specified the APLL/UPLL clock, unit Hz
-                    264000000);     // Specified the system clock, unit Hz
-    sysSetCPUClock (264000000);     // Unit Hz
-    sysSetAPBClock ( 66000000);     // Unit Hz
-
-    // set APLL to 432MHz to support TVout (need 27MHz)
-    sysSetPllClock(eSYS_APLL, 432000000);
-#endif  // __UPLL_264__
-
     // always set HCLK234 to 0
     reg_tmp = inp32(REG_CLKDIV4) | CHG_APB;     // MUST set CHG_APB to HIGH when configure CLKDIV4
     outp32(REG_CLKDIV4, reg_tmp & (~HCLK234_N));
@@ -300,9 +245,6 @@ int main()
 {
     NVT_NAND_INFO_T image;
     int volatile count, i;
-#ifdef __UPLL_NOT_SET__
-    UINT32 u32PllHz, u32SysHz, u32CpuHz, u32Hclk1Hz, u32ApbHz, /*u32APllHz,*/ u32DramHz;
-#endif
 
     /* Clear Boot Code Header in SRAM to avoid booting fail issue */
     outp32(0xFF000000, 0);
@@ -325,23 +267,6 @@ int main()
 
     sysprintf("System clock = %dHz\nDRAM clock = %dHz\nREG_SDTIME = 0x%08X\n",
                sysGetSystemClock(), sysGetDramClock(), inp32(REG_SDTIME));
-
-#ifdef __UPLL_NOT_SET__
-    //u32APllHz = sysGetPLLOutputHz(eSYS_APLL, sysGetExternalClock());
-    u32PllHz = sysGetPLLOutputHz(eSYS_UPLL, sysGetExternalClock());
-    u32SysHz = sysGetSystemClock();
-    u32CpuHz = sysGetCPUClock();
-    u32Hclk1Hz = sysGetHCLK1Clock();
-    u32ApbHz = sysGetAPBClock();
-    u32DramHz = sysGetDramClock();
-    sysprintf("UPLL Clock = %d\n", u32PllHz);
-    sysprintf("System Clock = %d\n", u32SysHz);
-    sysprintf("CPU Clock = %d\n", u32CpuHz);
-    sysprintf("DRAM Clock = %d\n", u32DramHz);
-    sysprintf("HCLK1 Clock = %d\n", u32Hclk1Hz);
-    sysprintf("APB Clock = %d\n", u32ApbHz);
-    sysprintf("REG_CLKDIV4=0x%08X, HCLK234=0x%X\n", inp32(REG_CLKDIV4), (inp32(REG_CLKDIV4) & HCLK234_N)>>4);
-#endif
 
     outp32(REG_APBCLK, inp32(REG_APBCLK) | RTC_CKE);     // enable RTC clock since IBR disable it.
     RTC_Check();    // waiting for RTC registers ready for access
