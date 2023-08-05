@@ -11,11 +11,7 @@
 #include "turbowriter.h"
 
 // define DATE CODE and show it when running to make maintaining easy.
-#ifdef __USER_DEFINE_FUNC
-#define DATE_CODE   "20220805_Logo"
-#else
 #define DATE_CODE   "20220805"
-#endif
 
 /* global variable */
 typedef struct nand_info
@@ -29,10 +25,6 @@ typedef struct nand_info
 extern ERRCODE DrvSPU_Open(void);
 extern VOID spuDacPLLEnable (void);
 extern VOID spuDacPrechargeEnable (void);
-
-#ifdef __USER_DEFINE_FUNC
-    extern VOID user_define_func(void);
-#endif
 
 /*-----------------------------------------------------------------------------
  * For RTC feature
@@ -427,11 +419,6 @@ int main()
 
         pImageList = ((unsigned int*)(((unsigned int)image_buffer)|0x80000000));
         memset((char *)&image, 0, sizeof(NVT_NAND_INFO_T));
-
-#ifdef __USER_DEFINE_FUNC
-        //--- call user define function before jump to next application.
-        user_define_func();
-#endif
 
         /* load execution file */
         pImageList = pImageList+4;
