@@ -10,9 +10,6 @@
 #include "wblib.h"
 #include "turbowriter.h"
 
-// define DATE CODE and show it when running to make maintaining easy.
-#define DATE_CODE   "20220805"
-
 /* global variable */
 typedef struct nand_info
 {
@@ -21,32 +18,6 @@ typedef struct nand_info
     unsigned int fileLen;
     unsigned int executeAddr;
 } NVT_NAND_INFO_T;
-
-extern ERRCODE DrvSPU_Open(void);
-extern VOID spuDacPLLEnable (void);
-extern VOID spuDacPrechargeEnable (void);
-
-/*-----------------------------------------------------------------------------
- * For RTC feature
- *---------------------------------------------------------------------------*/
-#define RTC_DELAY       500000
-
-VOID RTC_Check(void)
-{
-    UINT32 volatile i;
-
-    i =0;
-    while((inp32(REG_FLAG) & RTC_REG_FLAG) != RTC_REG_FLAG)
-    {
-        i++;
-        if(i > RTC_DELAY)
-        {
-            //sysprintf("Time out\n");
-            break;
-        }
-    }
-}
-
 
 /*
  *  2014/4/11, NVTLoader will write a 16 bytes signature pattern in image file offset
@@ -232,30 +203,13 @@ int main()
     sysFlushCache(I_D_CACHE);
     sysEnableCache(CACHE_WRITE_BACK);
 
-    sysprintf("N9H26 Nand Boot Loader entry (%s).\n", DATE_CODE);
-
-    //--- initial SPU
-    DrvSPU_Open();
-    spuDacPLLEnable();
+    sysprintf("DiegOS N9H26 Nand Boot Loader\n");
 
     /* PLL clock setting */
     initClock();
 
-    spuDacPrechargeEnable();
-
     sysprintf("System clock = %dHz\nDRAM clock = %dHz\nREG_SDTIME = 0x%08X\n",
                sysGetSystemClock(), sysGetDramClock(), inp32(REG_SDTIME));
-
-    outp32(REG_APBCLK, inp32(REG_APBCLK) | RTC_CKE);     // enable RTC clock since IBR disable it.
-    RTC_Check();    // waiting for RTC registers ready for access
-
-    // RTC H/W Power Off Function Configuration
-    outp32(PWRON, (inp32(PWRON) & ~PCLR_TIME) | 0x00060005);   // Press Power Key during 6 sec to Power off (0x'6'0005)
-    RTC_Check();
-    outp32(RIIR, 0x4);
-    RTC_Check();
-    sysprintf("Enable RTC power off feature to %d seconds.\n", (inp32(PWRON) & PCLR_TIME) >> 16);
-    outp32(REG_APBCLK, inp32(REG_APBCLK) & ~RTC_CKE);   // disable RTC clock to save power
 
     /* 2013/9/26, 2014/3/26, enable External RESET Debounce feature
      *                       with debounce counter 0x0FFF (4096 * 83.3ns = 341.1968us)
