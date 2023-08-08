@@ -22,6 +22,8 @@ include ../makefiles/makefile.prepare
 include ../makefiles/makefile.exports
 include ../makefiles/makefile.master
 
+.PHONY: all clean boot
+
 STATICLIST=../../kernel/$(OBJPREFIX)_diegos.a
 
 ARLIST=../../applications/console/$(OBJPREFIX)_app.a \

@@ -23,6 +23,8 @@ include ../makefiles/makefile.arm
 include ../makefiles/makefile.$(CPU)
 #include ../makefiles/makefile.$(PLATFORM)
 
+.PHONY: all clean boot
+
 STATICLIST=../../kernel/$(OBJPREFIX)_diegos.a
 
 ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
