@@ -6,17 +6,18 @@
  * @copyright (C) 2020 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 
+#include <stdint.h>
 #include <string.h>
-#include "wblib.h"
-#include "turbowriter.h"
+//#include "wblib.h"
+//#include "turbowriter.h"
 
 /* global variable */
 typedef struct nand_info
 {
-    unsigned int startBlock;
-    unsigned int endBlock;
-    unsigned int fileLen;
-    unsigned int executeAddr;
+    uint32_t  startBlock;
+    uint32_t  endBlock;
+    uint32_t  fileLen;
+    uintptr_t executeAddr;
 } NVT_NAND_INFO_T;
 
 /*
@@ -24,32 +25,35 @@ typedef struct nand_info
  *             between 0x40 to 0x9F. (0x55AA55AA, 0xAA55AA55, 0x4F56554E, 0x2E4E4F54)
  *             NandLoader believe the image is NVTLoader if it found one pattern within this range.
  */
-INT isNVTLoader(NVT_NAND_INFO_T *image)
+int isNVTLoader(NVT_NAND_INFO_T *image)
 {
-    int i;
+    unsigned int i;
+    uint32_t *check = (uint32_t *)(image->executeAddr + 64);
 
-    for (i=0x40; i<=0x90; i+=0x10)
+    for (i=0; i<6; i++)
     {
         //sysprintf("--> check NVTLoader signature = 0x%08X, 0x%08X, 0x%08X, 0x%08X\n",
         //    *(unsigned int *)(image->executeAddr+i),   *(unsigned int *)(image->executeAddr+i+4),
         //    *(unsigned int *)(image->executeAddr+i+8), *(unsigned int *)(image->executeAddr+i+12));
-        if ((*(unsigned int *)(image->executeAddr+i)    == 0x55AA55AA) &&
-            (*(unsigned int *)(image->executeAddr+i+4)  == 0xAA55AA55) &&
-            (*(unsigned int *)(image->executeAddr+i+8)  == 0x4F56554E) &&
-            (*(unsigned int *)(image->executeAddr+i+12) == 0x2E4E4F54))
+        if ((check[0] == 0x55AA55AA) &&
+            (check[1] == 0xAA55AA55) &&
+            (check[2] == 0x4F56554E) &&
+            (check[3] == 0x2E4E4F54))
         {
             return 1;   // image is NVTLoader
         }
+
+	check += 4;
     }
     return 0;   // image is not NVTLoader
 }
 
 
-INT MoveData(NVT_NAND_INFO_T *image, BOOL IsExecute)
+int MoveData(NVT_NAND_INFO_T *image, BOOL IsExecute)
 {
     unsigned int page_count, block_count, curBlock, addr;
-    int volatile i, j;
-    void    (*fw_func)(void);
+    int i, j;
+    void (*fw_func)(void);
 
     sysprintf("Load file length %d, execute address 0x%x\n", image->fileLen, image->executeAddr);
 
@@ -71,7 +75,7 @@ INT MoveData(NVT_NAND_INFO_T *image, BOOL IsExecute)
         {
             for (i=0; i<pSM0->uPagePerBlock; i++)
             {
-                sicSMpread(0, curBlock, i, (UINT8 *)addr);
+                sicSMpread(0, curBlock, i, (uint8_t *)addr);
                 addr += pSM0->nPageSize;
             }
             j++;
@@ -87,7 +91,7 @@ _read_:
         {
             for (i=0; i<page_count; i++)
             {
-                sicSMpread(0, curBlock, i, (UINT8 *)addr);
+                sicSMpread(0, curBlock, i, (uint8_t *)addr);
                 addr += pSM0->nPageSize;
             }
         }
@@ -98,7 +102,7 @@ _read_:
         }
     }
 
-    if (IsExecute == TRUE)
+    if (IsExecute)
     {
         // disable NAND control pin used
         outpw(REG_GPDFUN0, inpw(REG_GPDFUN0) & (~0xFFF00000));   // disable NRE/RB0/RB1 pins
@@ -138,7 +142,7 @@ _read_:
 }
 
 
-    UINT8 image_buffer[8192] __attribute__((aligned (32)));
+unsigned char image_buffer[8192] __attribute__((aligned (32)));
 
 unsigned char *imagebuf;
 unsigned int *pImageList;
@@ -148,11 +152,11 @@ unsigned int *pImageList;
 
 void initClock(void)
 {
-    UINT32 u32ExtFreq;
-    UINT32 reg_tmp;
+    uint32_t u32ExtFreq;
+    uint32_t reg_tmp;
 
     u32ExtFreq = sysGetExternalClock();     // Hz unit
-    if(u32ExtFreq==12000000)
+    if(u32ExtFreq==12000000UL)
     {
         outp32(REG_SDREF, 0x802D);
     }
@@ -193,7 +197,7 @@ void initClock(void)
 int main()
 {
     NVT_NAND_INFO_T image;
-    int volatile count, i;
+    int count, i;
 
     /* Clear Boot Code Header in SRAM to avoid booting fail issue */
     outp32(0xFF000000, 0);
@@ -211,7 +215,8 @@ int main()
     sysprintf("System clock = %dHz\nDRAM clock = %dHz\nREG_SDTIME = 0x%08X\n",
                sysGetSystemClock(), sysGetDramClock(), inp32(REG_SDTIME));
 
-    pImageList=((unsigned int *)(((unsigned int)image_buffer)|0x80000000));
+    imagebuf = (unsigned char *)((uintptr_t)image_buffer | 0x80000000UL);
+    pImageList=(unsigned int *)(imagebuf);
 
     /* Initial DMAC and NAND interface */
     fmiInitDevice();
@@ -223,7 +228,7 @@ int main()
     {
         if (!sicSMpread(0, i, pSM0->uPagePerBlock-2, imagebuf))
         {
-            if (((*(pImageList+0)) == 0x574255aa) && ((*(pImageList+3)) == 0x57425963))
+            if ((pImageList[0] == 0x574255aa) && (pImageList[3] == 0x57425963))
             {
                 sysprintf("Get image information from block 0x%x ..\n", i);
                 break;
@@ -231,9 +236,9 @@ int main()
         }
     }
 
-    if (((*(pImageList+0)) == 0x574255aa) && ((*(pImageList+3)) == 0x57425963))
+    if (i < 4)
     {
-        count = *(pImageList+1);
+        count = pImageList[1];
 
         /* load logo first */
         pImageList = pImageList+4;
