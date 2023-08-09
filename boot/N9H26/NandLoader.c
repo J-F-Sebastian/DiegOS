@@ -211,28 +211,6 @@ int main()
     sysprintf("System clock = %dHz\nDRAM clock = %dHz\nREG_SDTIME = 0x%08X\n",
                sysGetSystemClock(), sysGetDramClock(), inp32(REG_SDTIME));
 
-    /* 2013/9/26, 2014/3/26, enable External RESET Debounce feature
-     *                       with debounce counter 0x0FFF (4096 * 83.3ns = 341.1968us)
-     */
-    outp32(REG_EXTRST_DEBOUNCE, inp32(REG_EXTRST_DEBOUNCE) & (~EXTRST_DEBOUNCE));   // MUST disable debounce before set counter to 0
-    outp32(REG_DEBOUNCE_CNTR, inp32(REG_DEBOUNCE_CNTR) & (~DEBOUNCE_CNTR));
-    outp32(REG_DEBOUNCE_CNTR, inp32(REG_DEBOUNCE_CNTR) | 0x0FFF);
-    outp32(REG_EXTRST_DEBOUNCE, inp32(REG_EXTRST_DEBOUNCE) | EXTRST_DEBOUNCE);      // enable debounce after set counter
-
-    // 2013/9/26, suspend USBH to save power. MUST enable clock first, and then suspend it.
-    outp32(REG_AHBCLK, inp32(REG_AHBCLK) | HCLK3_CKE);
-    outp32(REG_AHBCLK2, inp32(REG_AHBCLK2) | OHCI_CKE | H20PHY_CKE);        // enable USB Host clock
-    outp32(REG_USBPCR0, inp32(REG_USBPCR0) & (~BIT8));                      // suspend USB Host PHY 0
-    for (i=0; i<2000; i++);     // MUST wait suspend be completed before disable USB Host clock.
-    outp32(REG_AHBCLK2, inp32(REG_AHBCLK2) & (~(OHCI_CKE | H20PHY_CKE)));   // disable USB Host clock
-
-    /* 2013/10/1, suspend USBD to save power. MUST enable clock first, and then suspend it. */
-    outp32(REG_AHBCLK, inp32(REG_AHBCLK) | HCLK3_CKE | USBD_CKE);   // enable USB Device clock
-    outp32(PHY_CTL, inp32(PHY_CTL) & (~Phy_suspend));           // suspend USB Device PHY
-    for (i=0; i<2000; i++);     // wait suspend be completed before disable USB Device clock.
-    outp32(REG_AHBCLK, inp32(REG_AHBCLK) & (~USBD_CKE));        // disable USB Device clock
-
-    imagebuf = (UINT8 *)((UINT32)image_buffer | 0x80000000);
     pImageList=((unsigned int *)(((unsigned int)image_buffer)|0x80000000));
 
     /* Initial DMAC and NAND interface */
