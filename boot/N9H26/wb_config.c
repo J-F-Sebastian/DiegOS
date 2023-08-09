@@ -33,7 +33,6 @@
  ****************************************************************************/
 #include <string.h>
 #include "wblib.h"
-#define REAL_CHIP
 
 //static UINT32 g_u32SysClkSrc;
 static UINT32 g_u32UpllHz = 240000000; // g_u32ApllHz=240000000; //g_u32SysHz = 120000000, g_u32CpuHz = 60000000, g_u32HclkHz = 60000000;
@@ -102,12 +101,7 @@ UINT32 sysGetPLLOutputHz(
     NO = u32NOArray[((u32PllCntlReg&0x1800)>>11)];
 
     u32Fout = u32FinHz/NO/NR*NF;
-#ifdef REAL_CHIP
     return u32Fout;
-#else
-    return u32FinHz;
-#endif
-
 }
 /*-----------------------------------------------------------------------------------------------------------
  *
@@ -784,11 +778,7 @@ UINT32 sysGetCPUClock()
     UINT32 u32SysClock = sysGetSystemClock();
     UINT32 CPUClock;
     CPUClock = u32SysClock/((inp32(REG_CLKDIV4) & CPU_N)+1);
-#ifdef REAL_CHIP
     return (UINT32)CPUClock;
-#else
-    return(sysGetExternalClock());
-#endif
 }
 /*
     Get HCLK1 clcok
@@ -799,14 +789,10 @@ UINT32 sysGetHCLK1Clock()
     UINT32 u32CPUDiv;
     u32CPUClock = sysGetCPUClock();
     u32CPUDiv = inp32(REG_CLKDIV4) & CPU_N;
-#ifdef REAL_CHIP
     if(u32CPUDiv == 0)
         return u32CPUClock/2;
     else
         return u32CPUClock;
-#else
-    return(sysGetExternalClock());
-#endif
 }
 /*
     Get HCLK234 clcok
@@ -818,11 +804,7 @@ UINT32 sysGetHCLK234Clock(void)
 
     u32HCLK1Clock = sysGetHCLK1Clock();
     u32HCLK234Div = (inp32(REG_CLKDIV4) & HCLK234_N)>>4;
-#ifdef REAL_CHIP
     return (u32HCLK1Clock/(u32HCLK234Div+1));
-#else
-    return(sysGetExternalClock());
-#endif
 }
 /*
     Get APB clcok
@@ -831,12 +813,7 @@ UINT32 sysGetAPBClock()
 {
     UINT32 u32APBDiv;
     u32APBDiv = ((inp32(REG_CLKDIV4) & APB_N)>>8) +1;
-#ifdef REAL_CHIP
     return (sysGetHCLK1Clock()/u32APBDiv);
-#else
-    return(sysGetExternalClock());
-#endif
-
 }
 
 
