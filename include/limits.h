@@ -30,15 +30,15 @@
 
 #define SHRT_MIN  (-32767-1)	/* minimum value of a short */
 #define SHRT_MAX       32767	/* maximum value of a short */
-#define USHRT_MAX     0xFFFF	/* maximum value of unsigned short */
+#define USHRT_MAX     0xFFFFU	/* maximum value of unsigned short */
 
 #define INT_MIN (-2147483647-1)	/* minimum value of a 32-bit int */
 #define INT_MAX   2147483647	/* maximum value of a 32-bit int */
-#define UINT_MAX  0xFFFFFFFF	/* maximum value of an unsigned 32-bit int */
+#define UINT_MAX  0xFFFFFFFFU	/* maximum value of an unsigned 32-bit int */
 
 #define LONG_MIN (-2147483647L-1)	/* minimum value of a long */
 #define LONG_MAX  2147483647L	/* maximum value of a long */
-#define ULONG_MAX 0xFFFFFFFFL	/* maximum value of an unsigned long */
+#define ULONG_MAX 0xFFFFFFFFUL	/* maximum value of an unsigned long */
 
 #define LLONG_MIN  (-0x7FFFFFFFFFFFFFFFLL-1)
 /* minimum value of a long long */
