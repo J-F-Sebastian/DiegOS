@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <endian.h>
+#include <limits.h>
 
 typedef unsigned BOOL;
 typedef int STATUS;
@@ -84,8 +85,6 @@ typedef uint64_t u_quad_t;
 #define TBYTE (1024*GBYTE)
 #endif
 
-#define NBYTES(x)   (1<<x)
-
 #ifndef GNUPACKED
 #define GNUPACKED __attribute__ ((packed))
 #endif
@@ -99,6 +98,25 @@ typedef uint64_t u_quad_t;
 #endif
 #ifndef FALSE
 #define FALSE 0
+#endif
+
+#ifndef BIT32
+#define BIT32(x) (1U << x)
+#endif
+#ifndef BIT64
+#define BIT64(x) (1ULL << x)
+#endif
+
+/*
+ * Most Significant Bit, Least Significant Bit
+ * MSB cannot be lower than LSB
+ */
+
+#ifndef BITMASK32
+#define BITMASK32(msb, lsb) ((UINT_MAX >> (31 - msb)) & (UINT_MAX << lsb))
+#endif
+#ifndef BITMASK64
+#define BITMASK64(msb, lsb) ((ULLONG_MAX >> (63 - msb)) & (ULLONG_MAX << lsb))
 #endif
 
 #endif
