@@ -25,35 +25,38 @@
  **************************************************************************/
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <types_common.h>
 #include "wblib.h"
 
 PFN_SYS_UART_CALLBACK (pfnUartIntHandlerTable)[2][2]= {0};
 
-#define vaStart(list, param) list = (INT8*)((INT)&param + sizeof(param))
-#define vaArg(list, type) ((type *)(list += sizeof(type)))[-1]
+//#define vaStart(list, param) list = (char *)((int)&param + sizeof(param))
+//#define vaArg(list, type) ((type *)(list += sizeof(type)))[-1]
 
 /* Global variables */
 BOOL volatile _sys_bIsUARTInitial = FALSE;
 BOOL volatile _sys_bIsUseUARTInt = TRUE;
-UINT32 _sys_uUARTClockRate = EXTERNAL_CRYSTAL_CLOCK;
-//UINT32 UART_BA = UART0_BA;
+uint32_t _sys_uUARTClockRate = EXTERNAL_CRYSTAL_CLOCK;
+//uint32_t
+// UART_BA = UART0_BA;
 
 #define RX_ARRAY_NUM 100
-UINT8 uart_rx[RX_ARRAY_NUM] = {0};
+uint8_t uart_rx[RX_ARRAY_NUM] = {0};
 
-VOID _PutChar_f(UINT8 ucCh);
-UINT32 volatile rx_cnt = 0;
+void _PutChar_f(uint8_t ucCh);
+uint32_t volatile rx_cnt = 0;
 
-#define sysTxBufReadNextOne()   (((_sys_uUartTxHead+1)==UART_BUFFSIZE)? (UINT32)NULL: _sys_uUartTxHead+1)
-#define sysTxBufWriteNextOne()  (((_sys_uUartTxTail+1)==UART_BUFFSIZE)? (UINT32)NULL: _sys_uUartTxTail+1)
+#define sysTxBufReadNextOne()   (((_sys_uUartTxHead+1)==UART_BUFFSIZE)? (uint32_t)NULL: _sys_uUartTxHead+1)
+#define sysTxBufWriteNextOne()  (((_sys_uUartTxTail+1)==UART_BUFFSIZE)? (uint32_t)NULL: _sys_uUartTxTail+1)
 #define UART_BUFFSIZE   256
-UINT8 _sys_ucUartTxBuf[UART_BUFFSIZE];
-UINT32 volatile _sys_uUartTxHead, _sys_uUartTxTail;
-PVOID  _sys_pvOldUartVect;
-UINT32 u32UartPort =0x100;
+uint8_t _sys_ucUartTxBuf[UART_BUFFSIZE];
+uint32_t volatile _sys_uUartTxHead, _sys_uUartTxTail;
+void * _sys_pvOldUartVect;
+uint32_t u32UartPort =0x100;
 
-INT32 i32UsedPort = 0;
-void sysUartPort(UINT32 u32Port)
+int32_t i32UsedPort = 0;
+void sysUartPort(uint32_t u32Port)
 {
     u32UartPort = (u32Port & 0x1)*0x100;
         //Nornal Speed UART
@@ -64,7 +67,7 @@ void sysUartPort(UINT32 u32Port)
     i32UsedPort = u32Port;
 }
 
-void sysUartInstallcallback(UINT32 u32IntType,
+void sysUartInstallcallback(uint32_t u32IntType,
                             PFN_SYS_UART_CALLBACK pfnCallback)
 {
     if(u32IntType>1)
@@ -79,11 +82,11 @@ void sysUartInstallcallback(UINT32 u32IntType,
     }
 }
 
-VOID sysUartISR()
+void sysUartISR()
 {
 
-    UINT32 volatile regIIR,i;
-    UINT32 volatile regIER, u32EnableInt;
+    uint32_t volatile regIIR,i;
+    uint32_t volatile regIER, u32EnableInt;
     //sysprintf("UART ISR\n");
     regIIR = inpb(REG_UART_ISR + u32UartPort);
     regIER =  inpb(REG_UART_IER + u32UartPort);
@@ -110,7 +113,7 @@ VOID sysUartISR()
     }
     if(u32EnableInt & RDA_IF)
     {
-        UINT32 u32Count;
+        uint32_t u32Count;
         u32Count = (inpw(REG_UART_FSR+u32UartPort) & Rx_Pointer) >> 8;
 #if 0
         sysprintf("\nRx data available %d bytes\n",u32Count);
@@ -140,7 +143,7 @@ VOID sysUartISR()
     }
     if(u32EnableInt & Tout_IF)//½ÓÊÕ×´Ì¬·ÖÎö
     {
-        UINT32 u32Count;
+        uint32_t u32Count;
         u32Count = (inpw(REG_UART_FSR+u32UartPort) & Rx_Pointer) >> 8;
 #if 0
         sysprintf("\nRx data time out %d bytes\n",u32Count);
@@ -170,9 +173,9 @@ VOID sysUartISR()
     //sysprintf("\n");
 }
 
-static VOID sysSetBaudRate(UINT32 uBaudRate)
+static void sysSetBaudRate(uint32_t uBaudRate)
 {
-    UINT32 _mBaudValue;
+    uint32_t _mBaudValue;
 
     /* First, compute the baudrate divisor. */
     // mode 3
@@ -180,7 +183,7 @@ static VOID sysSetBaudRate(UINT32 uBaudRate)
     outpw(REG_UART_BAUD+u32UartPort,  ((0x30<<24)| _mBaudValue));
 }
 
-void sysUartEnableInt(INT32 eIntType)
+void sysUartEnableInt(int32_t eIntType)
 {
     if(eIntType==UART_INT_RDA)
         outp32(REG_UART_IER+u32UartPort, inp32(REG_UART_IER+u32UartPort) |RDA_IEN);
@@ -190,13 +193,13 @@ void sysUartEnableInt(INT32 eIntType)
         outp32(REG_UART_IER+u32UartPort, 0x0);
 }
 
-INT32 sysInitializeUART(WB_UART_T *uart)
+int32_t sysInitializeUART(WB_UART_T *uart)
 {
     /* Enable UART multi-function pins*/
     //outpw(REG_PINFUN, inpw(REG_PINFUN) | 0x80);
     //outpw(REG_GPAFUN, inpw(REG_GPAFUN) | 0x00F00000); //Normal UART pin function
     static BOOL bIsResetFIFO = FALSE;
-    INT32 i32Ret = 0;
+    int32_t i32Ret = 0;
 
     UART_MUTEX_INIT();
 
@@ -239,15 +242,15 @@ INT32 sysInitializeUART(WB_UART_T *uart)
 //    if (u32UartPort)
     {
         //==1 NORMAL UART
-        _sys_uUartTxHead = _sys_uUartTxTail = (UINT32)NULL;
-        _sys_pvOldUartVect = sysInstallISR(IRQ_LEVEL_1, IRQ_UART, (PVOID)sysUartISR);
+        _sys_uUartTxHead = _sys_uUartTxTail = (uint32_t)NULL;
+        _sys_pvOldUartVect = sysInstallISR(IRQ_LEVEL_1, IRQ_UART, (void *)sysUartISR);
         sysEnableInterrupt(IRQ_UART);
     }
 /*
     else
     {
         //==0 High SPEED
-        _sys_uUartTxHead = _sys_uUartTxTail = (UINT32)NULL;
+        _sys_uUartTxHead = _sys_uUartTxTail = (uint32_t)NULL;
         _sys_pvOldUartVect = sysInstallISR(IRQ_LEVEL_1, IRQ_HUART, (PVOID)sysUartISR);
         sysEnableInterrupt(IRQ_HUART);
     }
@@ -263,7 +266,7 @@ INT32 sysInitializeUART(WB_UART_T *uart)
 }
 
 
-VOID _PutChar_f(UINT8 ucCh)
+void _PutChar_f(uint8_t ucCh)
 {
     if (_sys_bIsUseUARTInt == TRUE)
     {
@@ -300,7 +303,7 @@ VOID _PutChar_f(UINT8 ucCh)
 }
 
 
-VOID sysPutString(INT8 *string)
+void sysPutString(char *string)
 {
     while (*string != '\0')
     {
@@ -310,28 +313,28 @@ VOID sysPutString(INT8 *string)
 }
 
 
-static VOID sysPutRepChar(INT8 c, INT count)
+static void sysPutRepChar(char c, int count)
 {
     while (count--)
         _PutChar_f(c);
 }
 
 
-static VOID sysPutStringReverse(INT8 *s, INT index)
+static void sysPutStringReverse(char *s, int index)
 {
     while ((index--) > 0)
         _PutChar_f(s[index]);
 }
 
 
-static VOID sysPutNumber(INT value, INT radix, INT width, INT8 fill)
+static void sysPutNumber(int value, int radix, int width, char fill)
 {
-    INT8    buffer[40];
-    INT     bi = 0;
-    UINT32  uvalue;
-    UINT16  digit;
-    UINT16  left = FALSE;
-    UINT16  negative = FALSE;
+    char    buffer[40];
+    int     bi = 0;
+    uint32_t  uvalue;
+    uint16_t  digit;
+    uint16_t  left = FALSE;
+    uint16_t  negative = FALSE;
 
     if (fill == 0)
         fill = ' ';
@@ -403,13 +406,13 @@ static VOID sysPutNumber(INT value, INT radix, INT width, INT8 fill)
 }
 
 
-static INT8 *FormatItem(INT8 *f, INT a)
+static char *FormatItem(char *f, int a)
 {
-    INT8   c;
-    INT    fieldwidth = 0;
-    INT    leftjust = FALSE;
-    INT    radix = 0;
-    INT8   fill = ' ';
+    char   c;
+    unsigned fieldwidth = 0;
+    int    leftjust = FALSE;
+    int    radix = 0;
+    char   fill = ' ';
 
     if (*f == '0')
         fill = '0';
@@ -446,13 +449,13 @@ static INT8 *FormatItem(INT8 *f, INT a)
             case 's':
             {
                 if (leftjust)
-                    sysPutString((PINT8)a);
+                    sysPutString((char *)a);
 
-                if (fieldwidth > strlen((PINT8)a))
-                    sysPutRepChar(fill, fieldwidth - strlen((PINT8)a));
+                if (fieldwidth > strlen((char *)a))
+                    sysPutRepChar(fill, fieldwidth - strlen((char *)a));
 
                 if (!leftjust)
-                    sysPutString((PINT8)a);
+                    sysPutString((char *)a);
                 return (f);
             }
             case 'd':
@@ -488,10 +491,10 @@ static INT8 *FormatItem(INT8 *f, INT a)
 }
 
 
-VOID sysPrintf(PINT8 pcStr,...)
+void sysPrintf(char * pcStr,...)
 {
     WB_UART_T uart;
-    INT8  *argP;
+    va_list argP;
 
     UART_MUTEX_LOCK();
 
@@ -509,12 +512,12 @@ VOID sysPrintf(PINT8 pcStr,...)
         sysInitializeUART(&uart);
     }
 
-    vaStart(argP, pcStr);       /* point at the end of the format string */
+    va_start(argP, pcStr);       /* point at the end of the format string */
     while (*pcStr)
     {
         /* this works because args are all ints */
         if (*pcStr == '%')
-            pcStr = FormatItem(pcStr + 1, vaArg(argP, INT));
+            pcStr = FormatItem(pcStr + 1, va_arg(argP, int));
         else
             _PutChar_f(*pcStr++);
     }
@@ -522,10 +525,10 @@ VOID sysPrintf(PINT8 pcStr,...)
 }
 
 
-VOID sysprintf(PINT8 pcStr,...)
+void sysprintf(char *pcStr,...)
 {
     WB_UART_T uart;
-    INT8  *argP;
+    va_list argP;
 
 
     UART_MUTEX_LOCK();
@@ -544,12 +547,12 @@ VOID sysprintf(PINT8 pcStr,...)
         sysInitializeUART(&uart);
     }
 
-    vaStart(argP, pcStr);       /* point at the end of the format string */
+    va_start(argP, pcStr);       /* point at the end of the format string */
     while (*pcStr)
     {
         /* this works because args are all ints */
         if (*pcStr == '%')
-            pcStr = FormatItem(pcStr + 1, vaArg(argP, INT));
+            pcStr = FormatItem(pcStr + 1, va_arg(argP, int));
         else
             _PutChar_f(*pcStr++);
     }
@@ -557,7 +560,7 @@ VOID sysprintf(PINT8 pcStr,...)
 }
 
 
-INT8 sysGetChar()
+char sysGetChar()
 {
     while (1)
     {
@@ -566,7 +569,7 @@ INT8 sysGetChar()
     }
 }
 
-VOID sysPutChar(UINT8 ucCh)
+void sysPutChar(char ucCh)
 {
     /* Wait until the transmitter buffer is empty */
     while (!(inpw(REG_UART_FSR+u32UartPort) & 0x400000));
@@ -574,7 +577,7 @@ VOID sysPutChar(UINT8 ucCh)
     outpb(REG_UART_THR+u32UartPort, ucCh);
 }
 
-void sysUartTransfer(char* pu8buf, UINT32 u32Len)
+void sysUartTransfer(int8_t *pu8buf, uint32_t u32Len)
 {
     do
     {
