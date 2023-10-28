@@ -861,13 +861,13 @@ int fmiSM_Read_move_data_ecc_check(FMI_SM_INFO_T *pSM, uint32_t uDAddr)
             uLoop = 1;
             break;
         case PSIZE_4K:
-            if (inpw(REG_SMCSR) & SMCR_BCH_TSEL == BCH_T24)
+            if ((inpw(REG_SMCSR) & SMCR_BCH_TSEL) == BCH_T24)
                 uLoop = 1;
             else
                 uLoop = 2;
             break;
         case PSIZE_8K:
-            if (inpw(REG_SMCSR) & SMCR_BCH_TSEL == BCH_T24)
+            if ((inpw(REG_SMCSR) & SMCR_BCH_TSEL) == BCH_T24)
                 uLoop = 2;
             else
                 uLoop = 4;
@@ -1206,8 +1206,9 @@ int sicSMpread(int chipSel, unsigned PBA, int page, uint8_t *buff)
 
 void fmiInitDevice()
 {
+    uint32_t temp = inp32(REG_AHBCLK) | SIC_CKE | NAND_CKE;
     // Enable NAND Card Host Controller operation and driving clock.
-    outpw(REG_AHBCLK, inp32(REG_AHBCLK) | SIC_CKE | NAND_CKE & (~SD_CKE));  // enable NAND engine clock
+    outpw(REG_AHBCLK, (temp & (~SD_CKE)));  // enable NAND engine clock
     //outpw(REG_AHBCLK, inp32(REG_AHBCLK) & ~SD_CKE);             // disable SD engine clock
 
     // DMAC Initial

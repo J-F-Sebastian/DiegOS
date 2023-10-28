@@ -115,9 +115,9 @@ int32_t sysEnableCache(uint32_t uCacheOpMode)
 void sys_flush_and_clean_dcache(void)
 {
     __asm volatile(
-        " tci_loop100:                              \n"
+        " tci_loop100%=:                              \n"
         "     MRC p15, #0, r15, c7, c14, #3         \n"     /* test clean and invalidate */
-        "     BNE tci_loop100                       \n"
+        "     BNE tci_loop100%=                       \n"
         : : : "memory");
 }
 
