@@ -1,4 +1,4 @@
-/**************************************************************************//**
+/****************************************************************************
  * @file     wblib.h
  * @version  V3.00
  * @brief    N9H26 series SYS driver header file
@@ -278,34 +278,6 @@ typedef struct UART_INIT_STRUCT
 #define WB_PM_IDLE          1
 #define WB_PM_PD            2
 #define WB_PM_MIDLE         5
-
-
-#ifdef __FreeRTOS__
-#include <FreeRTOS.h>
-#include <semphr.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "wbtypes.h"
-#include "wbio.h"
-extern SemaphoreHandle_t            _uart_mutex;
-extern int                          _uart_refcnt;
-//#define UART_MUTEX_INIT()     _uart_mutex=xSemaphoreCreateRecursiveMutex()
-//#define UART_MUTEX_FINI()     vSemaphoreDelete(_uart_mutex)
-//#define UART_MUTEX_LOCK()       xSemaphoreTakeRecursive(_uart_mutex, portMAX_DELAY)
-//#define UART_MUTEX_UNLOCK()     xSemaphoreGiveRecursive(_uart_mutex)
-#define UART_MUTEX_INIT()
-#define UART_MUTEX_FINI()
-#define UART_MUTEX_LOCK()
-#define UART_MUTEX_UNLOCK()
-#else
-#define UART_MUTEX_INIT()
-#define UART_MUTEX_FINI()
-#define UART_MUTEX_LOCK()
-#define UART_MUTEX_UNLOCK()
-#endif /* __FreeRTOS__ */
-
-
 
 
 /* Define system library Timer functions */
