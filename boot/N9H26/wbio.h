@@ -1,4 +1,4 @@
-/**************************************************************************//**
+/****************************************************************************
  * @file     wbio.h
  * @version  V3.00
  * @brief    N9H26 series SYS driver header file
@@ -36,10 +36,6 @@
 
 #ifndef _WBTYPES_H_
 #include "wbtypes.h"
-#endif
-
-#ifndef  LITTLE_ENDIAN
-#define LITTLE_ENDIAN
 #endif
 
 #define outpb(port,value)     (*((UINT8 volatile *) (port))=value)
@@ -83,46 +79,26 @@ static __inline UINT32 Swap32(UINT32 val)
 
 static __inline UINT16 Get16(PUINT8 addr)
 {
-#ifdef LITTLE_ENDIAN
     return ((addr[1]<<8) | addr[0]);
-#else
-    return ((addr[0]<<8) | addr[1]);
-#endif
 }
 
 static __inline UINT32 Get32(PUINT8 addr)
 {
-#ifdef LITTLE_ENDIAN
     return (addr[3]<<24) | (addr[2]<<16) | (addr[1]<<8) | addr[0];
-#else
-    return (addr[0]<<24) | (addr[1]<<16) | (addr[2]<<8) | addr[3];
-#endif
 }
 
 static __inline void Set16(UINT16 val, PUINT8 addr)
 {
-#ifdef LITTLE_ENDIAN
     addr[0] = (UINT8) val;
     addr[1] = (UINT8)(val >> 8);
-#else
-    addr[0] = (UINT8)(val >> 8);
-    addr[1] = (UINT8) val;
-#endif
 }
 
 static __inline void Set32(UINT32 val, PUINT8 addr)
 {
-#ifdef LITTLE_ENDIAN
     addr[0] = (UINT8) val;
     addr[1] = (UINT8)(val >> 8);
     addr[2] = (UINT8)(val >> 16);
     addr[3] = (UINT8)(val >> 24);
-#else
-    addr[0] = (UINT8)(val >> 24);
-    addr[1] = (UINT8)(val >> 16);
-    addr[2] = (UINT8)(val >> 8);
-    addr[3] = (UINT8) val & 0xff;
-#endif
 }
 
 #endif /* _WBIO_H */
