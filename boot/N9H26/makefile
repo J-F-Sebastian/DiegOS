@@ -1,6 +1,7 @@
 include ../../build/makefiles/makefile.master
 
-OBJS = NandDrv.o NandLoader.o wb_uart.o wb_config.o wb_cache.o Startup_GCC.o
+OBJS = NandLoader.o NandDrv.o wb_uart.o wb_config.o wb_cache.o Startup_GCC.o \
+       strlen.o memcpy.o memset.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
 
