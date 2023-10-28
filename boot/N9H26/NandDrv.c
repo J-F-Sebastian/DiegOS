@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <types_common.h>
 
 #include "wblib.h"
 #include "turbowriter.h"
@@ -35,7 +37,7 @@
 
 // return 0 for R/B timeout
 // return 1 for Ready
-INT fmiSMCheckRB()
+int fmiSMCheckRB()
 {
     int timeout;
 
@@ -55,9 +57,9 @@ INT fmiSMCheckRB()
 
 
 // SM functions
-INT fmiSM_Reset(void)
+int fmiSM_Reset(void)
 {
-    UINT32 volatile i;
+    uint32_t volatile i;
 
     outpw(REG_SMISR, SMISR_RB0_IF);
     outpw(REG_SMCMD, 0xff);
@@ -88,8 +90,8 @@ INT fmiSM_Reset(void)
  *---------------------------------------------------------------------------*/
 void sicSMsetBCH(FMI_SM_INFO_T *pSM, int inIBR)
 {
-    volatile UINT32 u32PowerOn, powerOnPageSize, powerOnEcc;
-    volatile UINT32 bch, oob;
+    volatile uint32_t u32PowerOn, powerOnPageSize, powerOnEcc;
+    volatile uint32_t bch, oob;
 
     u32PowerOn = inp32(REG_CHIPCFG);
     // CHIPCFG[9:8]  : 0=2KB,   1=4KB,   2=8KB,   3=Ignore power-on setting
@@ -269,15 +271,15 @@ void sicSMsetBCH(FMI_SM_INFO_T *pSM, int inIBR)
 }
 
 
-VOID fmiSM_Initial(FMI_SM_INFO_T *pSM)
+void fmiSM_Initial(FMI_SM_INFO_T *pSM)
 {
     sicSMsetBCH(pSM, FALSE);
 }
 
 
-INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
+int fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 {
-    UINT32 tempID[5];
+    uint32_t tempID[5];
 
     fmiSM_Reset();
     outpw(REG_SMCMD, 0x90);     // read ID command
@@ -656,7 +658,7 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 }
 
 
-INT fmiSM2BufferM(FMI_SM_INFO_T *pSM, UINT32 uSector, UINT8 ucColAddr)
+int fmiSM2BufferM(FMI_SM_INFO_T *pSM, uint32_t uSector, uint8_t ucColAddr)
 {
     /* clear R/B flag */
     while(!(inpw(REG_SMISR) & SMISR_RB0));
@@ -687,7 +689,7 @@ INT fmiSM2BufferM(FMI_SM_INFO_T *pSM, UINT32 uSector, UINT8 ucColAddr)
  *  INPUT: ucColAddr = 0 means prepare data from begin of page;
  *                   = <page size> means prepare RA data from begin of spare area.
  *---------------------------------------------------------------------------*/
-INT fmiSM2BufferM_large_page(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 ucColAddr)
+int fmiSM2BufferM_large_page(FMI_SM_INFO_T *pSM, uint32_t uPage, uint32_t ucColAddr)
 {
     /* clear R/B flag */
     while(!(inpw(REG_SMISR) & SMISR_RB0));
@@ -713,14 +715,14 @@ INT fmiSM2BufferM_large_page(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 ucColAddr)
 }
 
 
-static VOID fmiSM_CorrectData_BCH(UINT8 ucFieidIndex, UINT8 ucErrorCnt, UINT8* pDAddr)
+static void fmiSM_CorrectData_BCH(uint8_t ucFieidIndex, uint8_t ucErrorCnt, uint8_t* pDAddr)
 {
-    UINT32 uaData[24], uaAddr[24];
-    UINT32 uaErrorData[4];
-    UINT8  ii, jj;
-    UINT32 field_len, padding_len, parity_len;
-    UINT32 total_field_num;
-    UINT8  *smra_index;
+    uint32_t uaData[24], uaAddr[24];
+    uint32_t uaErrorData[4];
+    uint8_t  ii, jj;
+    uint32_t field_len, padding_len, parity_len;
+    uint32_t total_field_num;
+    uint8_t  *smra_index;
 
     //--- assign some parameters for different BCH and page size
     switch (inpw(REG_SMCSR) & SMCR_BCH_TSEL)
@@ -751,7 +753,7 @@ static VOID fmiSM_CorrectData_BCH(UINT8 ucFieidIndex, UINT8 ucErrorCnt, UINT8* p
             parity_len  = BCH_PARITY_LEN_T4;
             break;
         default:
-            DBG_PRINTF("ERROR: fmiSM_CorrectData_BCH(): invalid SMCR_BCH_TSEL = 0x%08X\n", (UINT32)(inpw(REG_SMCSR) & SMCR_BCH_TSEL));
+            DBG_PRINTF("ERROR: fmiSM_CorrectData_BCH(): invalid SMCR_BCH_TSEL = 0x%08X\n", (uint32_t)(inpw(REG_SMCSR) & SMCR_BCH_TSEL));
             return;
     }
 
@@ -806,7 +808,7 @@ static VOID fmiSM_CorrectData_BCH(UINT8 ucFieidIndex, UINT8 ucErrorCnt, UINT8* p
         {
             uaAddr[ii] -= field_len;
             uaAddr[ii] += (parity_len*(ucFieidIndex-1));    // field offset
-            *((UINT8 *)REG_SMRA_0+uaAddr[ii]) ^= uaData[ii];
+            *((uint8_t *)REG_SMRA_0+uaAddr[ii]) ^= uaData[ii];
         }
         // for wrong parity code in redundancy area
         else
@@ -820,7 +822,7 @@ static VOID fmiSM_CorrectData_BCH(UINT8 ucFieidIndex, UINT8 ucErrorCnt, UINT8* p
             uaAddr[ii] = uaAddr[ii] - (field_len + padding_len - parity_len);
 
             // smra_index point to the first parity code of first field in register SMRA0~n
-            smra_index = (UINT8 *)
+            smra_index = (uint8_t *)
                          (REG_SMRA_0 + (inpw(REG_SMREAREA_CTL) & SMRE_REA128_EXT) - // bottom of all parity code -
                           (parity_len * total_field_num)                            // byte count of all parity code
                          );
@@ -830,8 +832,8 @@ static VOID fmiSM_CorrectData_BCH(UINT8 ucFieidIndex, UINT8 ucErrorCnt, UINT8* p
             //                 offset within field
             //DBG_PRINTF("BCH error corrected for parity: address 0x%08X, data [0x%02X] --> ",
             //    smra_index + (parity_len * (ucFieidIndex-1)) + uaAddr[ii],
-            //    *((UINT8 *)smra_index + (parity_len * (ucFieidIndex-1)) + uaAddr[ii]));
-            *((UINT8 *)smra_index + (parity_len * (ucFieidIndex-1)) + uaAddr[ii]) ^= uaData[ii];
+            //    *((uint8_t *)smra_index + (parity_len * (ucFieidIndex-1)) + uaAddr[ii]));
+            *((uint8_t *)smra_index + (parity_len * (ucFieidIndex-1)) + uaAddr[ii]) ^= uaData[ii];
         }
     }   // end of for (ii<ucErrorCnt)
 }
@@ -842,12 +844,12 @@ static VOID fmiSM_CorrectData_BCH(UINT8 ucFieidIndex, UINT8 ucErrorCnt, UINT8* p
  *  and then check the ECC error.
  *  Support page size 2K / 4K / 8K.
  *---------------------------------------------------------------------------*/
-INT fmiSM_Read_move_data_ecc_check(FMI_SM_INFO_T *pSM, UINT32 uDAddr)
+int fmiSM_Read_move_data_ecc_check(FMI_SM_INFO_T *pSM, uint32_t uDAddr)
 {
-    UINT32 uStatus;
-    UINT32 uErrorCnt, ii, jj;
-    volatile UINT32 uError = 0;
-    UINT32 uLoop;
+    uint32_t uStatus;
+    uint32_t uErrorCnt, ii, jj;
+    volatile uint32_t uError = 0;
+    uint32_t uLoop;
 
     //--- uLoop is the number of SM_ECC_STx should be check.
     //      One SM_ECC_STx include ECC status for 4 fields.
@@ -913,7 +915,7 @@ INT fmiSM_Read_move_data_ecc_check(FMI_SM_INFO_T *pSM, UINT32 uDAddr)
                         {
                             // 2011/8/17, mask uErrorCnt since Fx_ECNT just has 5 valid bits
                             uErrorCnt = (uStatus >> 2) & 0x1F;
-                            fmiSM_CorrectData_BCH(jj*4+ii, uErrorCnt, (UINT8*)uDAddr);
+                            fmiSM_CorrectData_BCH(jj*4+ii, uErrorCnt, (uint8_t*)uDAddr);
                             DBG_PRINTF("Warning: Field %d have %d BCH error. Corrected!!\n", jj*4+ii, uErrorCnt);
                             break;
                         }
@@ -958,11 +960,11 @@ INT fmiSM_Read_move_data_ecc_check(FMI_SM_INFO_T *pSM, UINT32 uDAddr)
 }
 
 
-INT fmiSM_Read_512(FMI_SM_INFO_T *pSM, UINT32 uSector, UINT32 uDAddr)
+int fmiSM_Read_512(FMI_SM_INFO_T *pSM, uint32_t uSector, uint32_t uDAddr)
 {
     int volatile ret=0;
-    volatile UINT32 uStatus, uError;
-    UINT32 uErrorCnt;
+    volatile uint32_t uStatus, uError;
+    uint32_t uErrorCnt;
 
     outpw(REG_DMACSAR, uDAddr);
     ret = fmiSM2BufferM(pSM, uSector, 0);
@@ -994,7 +996,7 @@ INT fmiSM_Read_512(FMI_SM_INFO_T *pSM, UINT32 uSector, UINT32 uDAddr)
                     if ((uStatus & 0x03)==0x01)         // correctable error in 1st field
                     {
                         uErrorCnt = uStatus >> 2;
-                        fmiSM_CorrectData_BCH(1, uErrorCnt, (UINT8*)uDAddr);
+                        fmiSM_CorrectData_BCH(1, uErrorCnt, (uint8_t*)uDAddr);
                         DBG_PRINTF("Field 1 have %d error!!\n", uErrorCnt);
                     }
                     else if (((uStatus & 0x03)==0x02)
@@ -1029,13 +1031,13 @@ INT fmiSM_Read_512(FMI_SM_INFO_T *pSM, UINT32 uSector, UINT32 uDAddr)
 }
 
 
-INT fmiSM_Read_RA(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 ucColAddr)
+int fmiSM_Read_RA(FMI_SM_INFO_T *pSM, uint32_t uPage, uint32_t ucColAddr)
 {
     return fmiSM2BufferM_large_page(pSM, uPage, ucColAddr);
 }
 
 
-INT fmiSM_Read_RA_512(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 uColumm)
+int fmiSM_Read_RA_512(FMI_SM_INFO_T *pSM, uint32_t uPage, uint32_t uColumm)
 {
     /* clear R/B flag */
     while(!(inpw(REG_SMISR) & SMISR_RB0));
@@ -1063,12 +1065,12 @@ INT fmiSM_Read_RA_512(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 uColumm)
 BOOL volatile bIsNandInit = FALSE;
 FMI_SM_INFO_T SMInfo, *pSM0, *pSM1;
 
-volatile UINT32 systemAreaSize = 0;     // the system area size that IBR regarded as.
-volatile UINT8  u8PowerOn;
-volatile UINT32 gu_fmiSM_PagePerBlock;
-volatile UINT32 gu_fmiSM_PageSize;
+volatile uint32_t systemAreaSize = 0;     // the system area size that IBR regarded as.
+volatile uint8_t  u8PowerOn;
+volatile uint32_t gu_fmiSM_PagePerBlock;
+volatile uint32_t gu_fmiSM_PageSize;
 
-INT sicSMInit()
+int sicSMInit()
 {
     if (!bIsNandInit)
     {
@@ -1135,9 +1137,9 @@ INT sicSMInit()
  * 2011/7/28, To support large page NAND flash read function.
  *  support 2K / 4K / 8K page.
  *---------------------------------------------------------------------------*/
-INT fmiSM_Read_large_page(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 uDAddr)
+int fmiSM_Read_large_page(FMI_SM_INFO_T *pSM, uint32_t uPage, uint32_t uDAddr)
 {
-    INT result;
+    int result;
 
     result = fmiSM2BufferM_large_page(pSM, uPage, 0);
     if (result != 0)
@@ -1147,7 +1149,7 @@ INT fmiSM_Read_large_page(FMI_SM_INFO_T *pSM, UINT32 uPage, UINT32 uDAddr)
 }
 
 
-INT sicSMpread(INT chipSel, INT PBA, INT page, UINT8 *buff)
+int sicSMpread(int chipSel, unsigned PBA, int page, uint8_t *buff)
 {
     FMI_SM_INFO_T *pSM;
     int pageNo;
@@ -1178,7 +1180,7 @@ INT sicSMpread(INT chipSel, INT PBA, INT page, UINT8 *buff)
         fmiSM_Read_RA_512(pSM, pageNo, 0);
         for (i=0; i<spareSize; i++)
             *ptr++ = inpw(REG_SMDATA) & 0xff;
-        status = fmiSM_Read_512(pSM, pageNo, (UINT32)buff);
+        status = fmiSM_Read_512(pSM, pageNo, (uint32_t)buff);
     }
     else    // for non-512B page, 2K/4K/8K page
     {
@@ -1186,7 +1188,7 @@ INT sicSMpread(INT chipSel, INT PBA, INT page, UINT8 *buff)
         for (i=0; i<spareSize; i++)
             *ptr++ = inpw(REG_SMDATA) & 0xff;                   // copy RA data from NAND to SMRA by SW
         // 2011/8/1, the new API fmiSM_Read_large_page() support 2K/4K/8K page.
-        status = fmiSM_Read_large_page(pSM, pageNo, (UINT32)buff);
+        status = fmiSM_Read_large_page(pSM, pageNo, (uint32_t)buff);
     }
 
     if (status)
@@ -1202,7 +1204,7 @@ INT sicSMpread(INT chipSel, INT PBA, INT page, UINT8 *buff)
 }
 
 
-VOID fmiInitDevice()
+void fmiInitDevice()
 {
     // Enable NAND Card Host Controller operation and driving clock.
     outpw(REG_AHBCLK, inp32(REG_AHBCLK) | SIC_CKE | NAND_CKE & (~SD_CKE));  // enable NAND engine clock
@@ -1228,7 +1230,7 @@ VOID fmiInitDevice()
  *      0: valid block
  *      1: invalid block
  *---------------------------------------------------------------------------*/
-INT CheckBadBlockMark(UINT32 BlockNo)
+int CheckBadBlockMark(uint32_t BlockNo)
 {
     int volatile status=0;
     unsigned int volatile sector;
