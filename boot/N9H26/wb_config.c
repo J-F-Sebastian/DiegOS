@@ -236,7 +236,7 @@ void _sysClockSwitch(register E_SYS_SRC_CLK eSrcClk,
                      register uint32_t u32PllReg,
                      register uint32_t u32SysDiv)
 {
-    register int reg2, reg1, reg0;
+    register int reg2 = 100, reg1 = 0 , reg0 = 1;
     uint32_t u32IntTmp;
     /* disable interrupt (I will recovery it after clock changed) */
     u32IntTmp = inp32(REG_AIC_IMR);
@@ -665,12 +665,12 @@ void _dramClockSwitch(register E_SYS_SRC_CLK eSrcClk,
                       register uint32_t u32DramClkDiv)
 {
 
-    register int reg2, reg1, reg0;
+    register int reg2 = 0x200, reg1 = 0, reg0 = 1;
     uint32_t u32mem_1aaaa8;
     uint32_t u32mem_1fffff0;
     //uint32_t u32REG_CLKDIV0, High_Freq;
 
-    uint32_t dly;
+    //uint32_t dly;
     //register uint32_t u32LocalUartVar = u32UartPort;
 
 
@@ -1087,7 +1087,7 @@ void _dramClockSwitch(register E_SYS_SRC_CLK eSrcClk,
             }
         }
         if( inp32(SRAM_MEMTYPE)  ==2)//DDR
-            outp32(REG_SDMR, inp32(REG_SDMR) & (~0xF0) | 0x30);     //CL = 3;
+            outp32(REG_SDMR, (inp32(REG_SDMR) & (~0xF0)) | 0x30);     //CL = 3;
 
     }
     else  //Low freq. mode setting
@@ -1116,7 +1116,7 @@ void _dramClockSwitch(register E_SYS_SRC_CLK eSrcClk,
         {
             //DDR type
             outp32(REG_SDOPM,   0x00078456);                    //bit[24]=0, bit[18]&[15]=1  and bit[4]=0 (SEL_USE_DLL)
-            outp32(REG_SDMR, inp32(REG_SDMR) & (~0xF0) | 0x20); //CL=2
+            outp32(REG_SDMR, (inp32(REG_SDMR) & (~0xF0)) | 0x20); //CL=2
         }
         else if(inp32(SRAM_MEMTYPE) == 0)
         {
@@ -1246,7 +1246,7 @@ uint32_t sysSetDramClock(E_SYS_SRC_CLK eSrcClk, uint32_t u32PLLClockHz, uint32_t
     uint32_t u32DivN1, u32DivN0, u32DramClockReg;
 //  uint32_t u32CpuFreq, u32Hclk1Frq, u32Hclk234;
 //  uint32_t u32DramClock = u32DdrClock/2;
-    uint32_t u32sysSrc = (inp32(REG_CLKDIV0)&SYSTEM_S)>>3;
+    //uint32_t u32sysSrc = (inp32(REG_CLKDIV0)&SYSTEM_S)>>3;
     /* Judge MCLK > HCLK1 */
     u32DramDiv = u32PLLClockHz/u32DdrClock;
     for(u32DivN1 = 1; u32DivN1<=8; u32DivN1=u32DivN1+1)
