@@ -8,8 +8,9 @@
 
 #include <stdint.h>
 #include <string.h>
-//#include "wblib.h"
-//#include "turbowriter.h"
+#include <types_common.h>
+#include "wblib.h"
+#include "turbowriter.h"
 
 /* global variable */
 typedef struct nand_info
@@ -52,7 +53,7 @@ int isNVTLoader(NVT_NAND_INFO_T *image)
 int MoveData(NVT_NAND_INFO_T *image, BOOL IsExecute)
 {
     unsigned int page_count, block_count, curBlock, addr;
-    int i, j;
+    unsigned int i, j;
     void (*fw_func)(void);
 
     sysprintf("Load file length %d, execute address 0x%x\n", image->fileLen, image->executeAddr);
@@ -142,9 +143,9 @@ _read_:
 }
 
 
-unsigned char image_buffer[8192] __attribute__((aligned (32)));
+static unsigned char image_buffer[8192] __attribute__((aligned (32)));
 
-unsigned char *imagebuf;
+unsigned int *imagebuf;
 unsigned int *pImageList;
 
 #define __DDR2__
@@ -215,7 +216,7 @@ int main()
     sysprintf("System clock = %dHz\nDRAM clock = %dHz\nREG_SDTIME = 0x%08X\n",
                sysGetSystemClock(), sysGetDramClock(), inp32(REG_SDTIME));
 
-    imagebuf = (unsigned char *)((uintptr_t)image_buffer | 0x80000000UL);
+    imagebuf = (unsigned int *)((uintptr_t)image_buffer | 0x80000000UL);
     pImageList=(unsigned int *)(imagebuf);
 
     /* Initial DMAC and NAND interface */
@@ -226,7 +227,7 @@ int main()
     /* read physical block 0~3 - image information */
     for (i=0; i<4; i++)
     {
-        if (!sicSMpread(0, i, pSM0->uPagePerBlock-2, imagebuf))
+        if (!sicSMpread(0, i, pSM0->uPagePerBlock-2, (uint8_t *)imagebuf))
         {
             if ((pImageList[0] == 0x574255aa) && (pImageList[3] == 0x57425963))
             {
