@@ -34,10 +34,6 @@
 #ifndef _WBIO_H
 #define _WBIO_H
 
-#ifndef _WBTYPES_H_
-#include "wbtypes.h"
-#endif
-
 #define outpb(port,value)     (*((uint8_t volatile *) (port))=value)
 #define inpb(port)            (*((uint8_t volatile *) (port)))
 #define outphw(port,value)    (*((uint16_t volatile *) (port))=value)
