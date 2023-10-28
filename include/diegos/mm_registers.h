@@ -191,4 +191,44 @@ inline void clearreg64(uintptr_t address, uint64_t data)
 	writereg64(address, readreg64(address) & ~data);
 }
 
+/*
+ * Clear and update data in a memory mapped register, 8 bit.
+ * Operations for clearing and updating are
+ * Read -> clear using AND NOT with clear data -> Update using OR with update data -> Write
+ */
+inline void clupreg8(uintptr_t address, uint8_t clrdata, uint8_t upddata)
+{
+	writereg8(address, (readreg8(address) & ~clrdata) | upddata);
+}
+
+/*
+ * Clear and update data in a memory mapped register, 16 bit.
+ * Operations for clearing and updating are
+ * Read -> clear using AND NOT with clear data -> Update using OR with update data -> Write
+ */
+inline void clupreg16(uintptr_t address, uint16_t clrdata, uint16_t upddata)
+{
+	writereg16(address, (readreg16(address) & ~clrdata) | upddata);
+}
+
+/*
+ * Clear and update data in a memory mapped register, 32 bit.
+ * Operations for clearing and updating are
+ * Read -> clear using AND NOT with clear data -> Update using OR with update data -> Write
+ */
+inline void clupreg32(uintptr_t address, uint32_t clrdata, uint32_t upddata)
+{
+	writereg32(address, (readreg32(address) & ~clrdata) | upddata);
+}
+
+/*
+ * Clear and update data in a memory mapped register, 64 bit.
+ * Operations for clearing and updating are
+ * Read -> clear using AND NOT with clear data -> Update using OR with update data -> Write
+ */
+inline void clupreg64(uintptr_t address, uint64_t clrdata, uint64_t upddata)
+{
+	writereg64(address, (readreg64(address) & ~clrdata) | upddata);
+}
+
 #endif
