@@ -201,9 +201,6 @@ int32_t sysInitializeUART(WB_UART_T *uart)
     static BOOL bIsResetFIFO = FALSE;
     int32_t i32Ret = 0;
 
-    UART_MUTEX_INIT();
-
-    //UART_MUTEX_LOCK();
 //    if(uart->uart_no == 0)
         sysUartPort(uart->uart_no);
 //  else
@@ -260,7 +257,6 @@ int32_t sysInitializeUART(WB_UART_T *uart)
     i32Ret = Successful;
 
 //exit_sysInitializeUART:
-    //UART_MUTEX_UNLOCK();
 
     return i32Ret;
 }
@@ -496,8 +492,6 @@ void sysPrintf(char * pcStr,...)
     WB_UART_T uart;
     va_list argP;
 
-    UART_MUTEX_LOCK();
-
     _sys_bIsUseUARTInt = TRUE;
     if (!_sys_bIsUARTInitial)
     {
@@ -521,7 +515,6 @@ void sysPrintf(char * pcStr,...)
         else
             _PutChar_f(*pcStr++);
     }
-    UART_MUTEX_UNLOCK();
 }
 
 
@@ -531,7 +524,6 @@ void sysprintf(char *pcStr,...)
     va_list argP;
 
 
-    UART_MUTEX_LOCK();
     _sys_bIsUseUARTInt = FALSE;
     if (!_sys_bIsUARTInitial)
     {
@@ -556,7 +548,6 @@ void sysprintf(char *pcStr,...)
         else
             _PutChar_f(*pcStr++);
     }
-    UART_MUTEX_UNLOCK();
 }
 
 
