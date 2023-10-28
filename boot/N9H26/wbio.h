@@ -38,26 +38,26 @@
 #include "wbtypes.h"
 #endif
 
-#define outpb(port,value)     (*((UINT8 volatile *) (port))=value)
-#define inpb(port)            (*((UINT8 volatile *) (port)))
-#define outphw(port,value)    (*((UINT16 volatile *) (port))=value)
-#define inphw(port)           (*((UINT16 volatile *) (port)))
-#define outpw(port,value)     (*((UINT32 volatile *) (port))=value)
-#define inpw(port)            (*((UINT32 volatile *) (port)))
+#define outpb(port,value)     (*((uint8_t volatile *) (port))=value)
+#define inpb(port)            (*((uint8_t volatile *) (port)))
+#define outphw(port,value)    (*((uint16_t volatile *) (port))=value)
+#define inphw(port)           (*((uint16_t volatile *) (port)))
+#define outpw(port,value)     (*((uint32_t volatile *) (port))=value)
+#define inpw(port)            (*((uint32_t volatile *) (port)))
 
-#define readb(addr)           (*(UINT8 volatile *)(addr))
-#define writeb(addr,x)        ((*(UINT8 volatile *)(addr)) = (UINT8 volatile)x)
-#define readhw(addr)          (*(UINT16 volatile *)(addr))
-#define writehw(addr,x)       ((*(UINT16 volatile *)(addr)) = (UINT16 volatile)x)
-#define readw(addr)           (*(UINT32 volatile *)(addr))
-#define writew(addr,x)        ((*(UINT32 volatile *)(addr)) = (UINT32 volatile)x)
+#define readb(addr)           (*(uint8_t volatile *)(addr))
+#define writeb(addr,x)        ((*(uint8_t volatile *)(addr)) = (uint8_t volatile)x)
+#define readhw(addr)          (*(uint16_t volatile *)(addr))
+#define writehw(addr,x)       ((*(uint16_t volatile *)(addr)) = (uint16_t volatile)x)
+#define readw(addr)           (*(uint32_t volatile *)(addr))
+#define writew(addr,x)        ((*(uint32_t volatile *)(addr)) = (uint32_t volatile)x)
 
-#define outp8(port,value)     (*((UINT8 volatile *) (port))=value)
-#define inp8(port)            (*((UINT8 volatile *) (port)))
-#define outp16(port,value)    (*((UINT16 volatile *) (port))=value)
-#define inp16(port)           (*((UINT16 volatile *) (port)))
-#define outp32(port,value)     (*((UINT32 volatile *) (port))=value)
-#define inp32(port)            (*((UINT32 volatile *) (port)))
+#define outp8(port,value)     (*((uint8_t volatile *) (port))=value)
+#define inp8(port)            (*((uint8_t volatile *) (port)))
+#define outp16(port,value)    (*((uint16_t volatile *) (port))=value)
+#define inp16(port)           (*((uint16_t volatile *) (port)))
+#define outp32(port,value)     (*((uint32_t volatile *) (port))=value)
+#define inp32(port)            (*((uint32_t volatile *) (port)))
 
 #define Maximum(a,b)          (a>b ? a : b)
 #define Minimum(a,b)          (a<b ? a : b)
@@ -67,39 +67,38 @@
 #define GreaterEqual(a,b)     (a>=b ? 1 : 0)
 #define LittleEqual(a,b)      (a<=b ? 1 : 0)
 
-static __inline UINT16 Swap16(UINT16 val)
+inline uint16_t Swap16(uint16_t val)
 {
-    return (val<<8) | (val>>8);
+	return (val << 8) | (val >> 8);
 }
 
-static __inline UINT32 Swap32(UINT32 val)
+inline uint32_t Swap32(uint32_t val)
 {
-    return (val<<24) | ((val<<8)&0xff0000) | ((val>>8)&0xff00) | (val>>24);
+	return (val << 24) | ((val << 8) & 0xff0000) | ((val >> 8) & 0xff00) | (val >> 24);
 }
 
-static __inline UINT16 Get16(PUINT8 addr)
+inline uint16_t Get16(uint8_t * addr)
 {
-    return ((addr[1]<<8) | addr[0]);
+	return ((addr[1] << 8) | addr[0]);
 }
 
-static __inline UINT32 Get32(PUINT8 addr)
+inline uint32_t Get32(uint8_t * addr)
 {
-    return (addr[3]<<24) | (addr[2]<<16) | (addr[1]<<8) | addr[0];
+	return (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
 }
 
-static __inline void Set16(UINT16 val, PUINT8 addr)
+inline void Set16(uint16_t val, uint8_t * addr)
 {
-    addr[0] = (UINT8) val;
-    addr[1] = (UINT8)(val >> 8);
+	addr[0] = (uint8_t) val;
+	addr[1] = (uint8_t) (val >> 8);
 }
 
-static __inline void Set32(UINT32 val, PUINT8 addr)
+inline void Set32(uint32_t val, uint8_t * addr)
 {
-    addr[0] = (UINT8) val;
-    addr[1] = (UINT8)(val >> 8);
-    addr[2] = (UINT8)(val >> 16);
-    addr[3] = (UINT8)(val >> 24);
+	addr[0] = (uint8_t) val;
+	addr[1] = (uint8_t) (val >> 8);
+	addr[2] = (uint8_t) (val >> 16);
+	addr[3] = (uint8_t) (val >> 24);
 }
 
-#endif /* _WBIO_H */
-
+#endif				/* _WBIO_H */
