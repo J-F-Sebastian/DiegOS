@@ -1,4 +1,4 @@
-/**************************************************************************//**
+/****************************************************************************
  * @file     turbowriter.h
  * @version  V3.00
  * @brief    NandLoader header file for TurboWriter.
@@ -7,154 +7,147 @@
  * @copyright (C) 2020 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 
+#include <types_common.h>
+
 #define NAND_PAGE_512B		512
 #define NAND_PAGE_2KB		2048
 #define NAND_PAGE_4KB		4096
 #define NAND_PAGE_8KB		8192
 
 /* F/W update information */
-typedef struct fw_update_info_t
-{
-	UINT16	imageNo;
-	UINT16	imageFlag;
-	UINT16	startBlock;
-	UINT16	endBlock;
-	UINT32	executeAddr;
-	UINT32	fileLen;
-	CHAR	imageName[16];
+typedef struct fw_update_info_t {
+	uint16_t imageNo;
+	uint16_t imageFlag;
+	uint16_t startBlock;
+	uint16_t endBlock;
+	uint32_t executeAddr;
+	uint32_t fileLen;
+	char imageName[16];
 } FW_UPDATE_INFO_T;
 
-typedef struct fw_nand_image_t
-{
-	UINT32	actionFlag;
-	UINT32	fileLength;
-	UINT32	imageNo;
-	CHAR	imageName[16];
-	UINT32	imageType;
-	UINT32	executeAddr;	// endblock
-	UINT32	blockNo;		// startblock
-	UINT32	dummy;
+typedef struct fw_nand_image_t {
+	uint32_t actionFlag;
+	uint32_t fileLength;
+	uint32_t imageNo;
+	char imageName[16];
+	uint32_t imageType;
+	uint32_t executeAddr;	// endblock
+	uint32_t blockNo;	// startblock
+	uint32_t dummy;
 } FW_NAND_IMAGE_T;
 
-typedef struct fw_nor_image_t
-{
-	UINT32	actionFlag;
-	UINT32	fileLength;
-	UINT32	imageNo;
-	CHAR	imageName[16];
-	UINT32	imageType;
-	UINT32	executeAddr;
-	UINT32	flashOffset;
-	UINT32	endAddr;
+typedef struct fw_nor_image_t {
+	uint32_t actionFlag;
+	uint32_t fileLength;
+	uint32_t imageNo;
+	char imageName[16];
+	uint32_t imageType;
+	uint32_t executeAddr;
+	uint32_t flashOffset;
+	uint32_t endAddr;
 } FW_NOR_IMAGE_T;
 
-typedef struct fw_normal_t
-{
-	UINT32	actionFlag;
-	UINT32	length;
-	UINT32	address;
+typedef struct fw_normal_t {
+	uint32_t actionFlag;
+	uint32_t length;
+	uint32_t address;
 } FW_NORMAL_T;
 
-typedef struct fmi_sm_info_t
-{
-	UINT32	uSectorPerFlash;
-	UINT32	uBlockPerFlash;
-	UINT32	uPagePerBlock;
-	UINT32	uSectorPerBlock;
-	UINT32	uLibStartBlock;
-	UINT32	nPageSize;
-	UINT32	uBadBlockCount;
-	BOOL	bIsMulticycle;
-	BOOL	bIsMLCNand;
-	BOOL	bIsNandECC4;
-	BOOL	bIsNandECC8;
-	BOOL	bIsNandECC12;
-	BOOL	bIsNandECC15;
-	BOOL	bIsNandECC24;
-	BOOL	bIsCheckECC;
+typedef struct fmi_sm_info_t {
+	uint32_t uSectorPerFlash;
+	uint32_t uBlockPerFlash;
+	uint32_t uPagePerBlock;
+	uint32_t uSectorPerBlock;
+	uint32_t uLibStartBlock;
+	uint32_t nPageSize;
+	uint32_t uBadBlockCount;
+	BOOL bIsMulticycle;
+	BOOL bIsMLCNand;
+	BOOL bIsNandECC4;
+	BOOL bIsNandECC8;
+	BOOL bIsNandECC12;
+	BOOL bIsNandECC15;
+	BOOL bIsNandECC24;
+	BOOL bIsCheckECC;
 } FMI_SM_INFO_T;
 
-typedef struct fmi_sd_info_t
-{
-	UINT32	totalSectorN;
-	UINT32	uCardType;		// sd2.0, sd1.1, or mmc
-	UINT32	uRCA;			// relative card address
-	BOOL	bIsCardInsert;
+typedef struct fmi_sd_info_t {
+	uint32_t totalSectorN;
+	uint32_t uCardType;	// sd2.0, sd1.1, or mmc
+	uint32_t uRCA;		// relative card address
+	BOOL bIsCardInsert;
 } FMI_SD_INFO_T;
 
-typedef struct nvt_pt_rec		/* partition record */
-{
-	UINT8       ucState;			/* Current state of partition */
-	UINT8       uStartHead;			/* Beginning of partition head */
-	UINT8       ucStartSector;		/* Beginning of partition sector */
-	UINT8       ucStartCylinder;	/* Beginning of partition cylinder */
-	UINT8       ucPartitionType;	/* Partition type, refer to the subsequent definitions */
-	UINT8       ucEndHead;			/* End of partition - head */
-	UINT8       ucEndSector;		/* End of partition - sector */
-	UINT8       ucEndCylinder;		/* End of partition - cylinder */
-	UINT32      uFirstSec;			/* Number of Sectors Between the MBR and the First Sector in the Partition */
-	UINT32		uNumOfSecs;			/* Number of Sectors in the Partition */
-}	NVT_PT_REC_T;
+typedef struct nvt_pt_rec {	/* partition record */
+	uint8_t ucState;	/* Current state of partition */
+	uint8_t uStartHead;	/* Beginning of partition head */
+	uint8_t ucStartSector;	/* Beginning of partition sector */
+	uint8_t ucStartCylinder;	/* Beginning of partition cylinder */
+	uint8_t ucPartitionType;	/* Partition type, refer to the subsequent definitions */
+	uint8_t ucEndHead;	/* End of partition - head */
+	uint8_t ucEndSector;	/* End of partition - sector */
+	uint8_t ucEndCylinder;	/* End of partition - cylinder */
+	uint32_t uFirstSec;	/* Number of Sectors Between the MBR and the First Sector in the Partition */
+	uint32_t uNumOfSecs;	/* Number of Sectors in the Partition */
+} NVT_PT_REC_T;
 
 /*****************************/
 extern FMI_SD_INFO_T *pSD;
 extern FMI_SM_INFO_T *pSM0, *pSM1;
 
 extern BOOL bIsMatch;
-extern UINT32 *pUpdateImage;
-extern UINT8 *pInfo;
-extern UINT32 infoBuf;
-extern INT8 nIsSysImage;
-extern UINT32 volatile gRxLen;
-extern UINT8 *gRxPtr;
-extern INT8 gCurType;
-extern INT32 gCurBlock, gCurPage;
-extern UINT32 NandBlockSize;
+extern uint32_t *pUpdateImage;
+extern uint8_t *pInfo;
+extern uint32_t infoBuf;
+extern int8_t nIsSysImage;
+extern uint32_t volatile gRxLen;
+extern uint8_t *gRxPtr;
+extern int8_t gCurType;
+extern int32_t gCurBlock, gCurPage;
+extern uint32_t NandBlockSize;
 
 /* extern flags */
-extern UINT8 g_u8BulkState;
+extern uint8_t g_u8BulkState;
 extern BOOL udcOnLine;
 extern BOOL g_bIsFirstRead;
-extern UINT32 usbDataReady;
-extern UINT8 g_u8UsbState;
-extern UINT8 g_u8Address;
-extern UINT8 g_u8Config;
-extern UINT8 g_u8Flag;
-extern UINT8 g_au8SenseKey[];
-extern UINT32 g_u32Address;
-extern UINT32 g_u32Length;
-extern UINT32 g_u32OutToggle;	// for Error Detection
-extern UINT8 g_u8Size;
+extern uint32_t usbDataReady;
+extern uint8_t g_u8UsbState;
+extern uint8_t g_u8Address;
+extern uint8_t g_u8Config;
+extern uint8_t g_u8Flag;
+extern uint8_t g_au8SenseKey[];
+extern uint32_t g_u32Address;
+extern uint32_t g_u32Length;
+extern uint32_t g_u32OutToggle;	// for Error Detection
+extern uint8_t g_u8Size;
 extern BOOL g_bCBWInvalid;
 extern struct CBW g_sCBW;
 extern struct CSW g_sCSW;
 extern BOOL volatile bIsSdInit;
 
-
-
 /*****************************/
-INT		sicSMpread(INT chipSel, INT PBA, INT page, UINT8 *buff);
-INT		sicSMpwrite(INT PBA, INT page, UINT8 *buff);
-INT		sicSMblock_erase(INT PBA);
-INT		fmiMarkBadBlock(UINT32 block);
-INT		ChangeNandImageType(UINT32 imageNo, UINT32 imageType);
-INT		sicSMchip_erase(UINT32 startBlcok, UINT32 endBlock);
-INT		DelNandImage(UINT32 imageNo);
-VOID	fmiInitDevice(void);
-INT		sicSMInit(void);
-INT		nvtSetNandImageInfo(FW_UPDATE_INFO_T *pFW);
-INT		searchImageInfo(FW_UPDATE_INFO_T *pFW, UINT32 *ptr);
-INT		nvtGetNandImageInfo(unsigned int *image);
-INT		CheckBadBlockMark(UINT32 block);
-INT		CheckBadBlockMark_512(UINT32 block);
-INT		fmiInitSDDevice(int);
-INT		SdChipErase(void);
-INT		ChangeSdImageType(UINT32 imageNo, UINT32 imageType);
-INT		DelSdImage(UINT32 imageNo);
-INT		nvtGetSdImageInfo(unsigned int *image);
-INT		fmiSD_Write(UINT32 uSector, UINT32 uBufcnt, UINT32 uSAddr);
-INT		fmiSD_Read(UINT32 uSector, UINT32 uBufcnt, UINT32 uDAddr);
-INT		nvtSetSdImageInfo(FW_UPDATE_INFO_T *pFW);
-void	nvtSdFormat(UINT32 firstSector, UINT32 totalSector);
+int sicSMpread(int chipSel, unsigned PBA, int page, uint8_t * buff);
+int sicSMpwrite(int PBA, int page, uint8_t * buff);
+int sicSMblock_erase(int PBA);
+int fmiMarkBadBlock(uint32_t block);
+int ChangeNandImageType(uint32_t imageNo, uint32_t imageType);
+int sicSMchip_erase(uint32_t startBlcok, uint32_t endBlock);
+int DelNandImage(uint32_t imageNo);
+void fmiInitDevice(void);
+int sicSMInit(void);
+int nvtSetNandImageInfo(FW_UPDATE_INFO_T * pFW);
+int searchImageInfo(FW_UPDATE_INFO_T * pFW, uint32_t * ptr);
+int nvtGetNandImageInfo(unsigned int *image);
+int CheckBadBlockMark(uint32_t block);
+int CheckBadBlockMark_512(uint32_t block);
+int fmiInitSDDevice(int);
+int SdChipErase(void);
+int ChangeSdImageType(uint32_t imageNo, uint32_t imageType);
+int DelSdImage(uint32_t imageNo);
+int nvtGetSdImageInfo(unsigned int *image);
+int fmiSD_Write(uint32_t uSector, uint32_t uBufcnt, uint32_t uSAddr);
+int fmiSD_Read(uint32_t uSector, uint32_t uBufcnt, uint32_t uDAddr);
+int nvtSetSdImageInfo(FW_UPDATE_INFO_T * pFW);
+void nvtSdFormat(uint32_t firstSector, uint32_t totalSector);
 /*****************************/
-void 		apuDacOn(UINT8 level);
+void apuDacOn(uint8_t level);
