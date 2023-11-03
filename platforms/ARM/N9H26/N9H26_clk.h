@@ -204,7 +204,7 @@ enum N9H26CLK {
 #define EDMA6_CKE	BIT32(1)	// EDMA Controller Channel 6 Clock Enable Control
 #define EDMA5_CKE	BIT32(0)	// EDMA Controller Channel 5 Clock Enable Control
 
-// REG_CLKDIV5	(CLK_BA+0x38)	// R/W¡@AHB Clock Enable Control Register2
+// REG_CLKDIV5  (CLK_BA+0x38)   // R/W¡@AHB Clock Enable Control Register2
 #define TOUCH_N1	BITMASK32(31, 27)	// TOUCH Engine Clock Divider Bits [4:0]
 #define TOUCH_S		BITMASK32(26, 25)	// TOUCH Engine Clock Source Selectione Control
 #define TOUCH_N0	BITMASK32(24, 22)	// TOUCH Engine Clock Divider If PLL
@@ -215,7 +215,7 @@ enum N9H26CLK {
 #define PWM_S		BITMASK32(4, 3)	// PWM Clock Source Selectione Control
 #define PWM_N0		BITMASK32(2, 0)	// PWM Clock Divider If PLL
 
-// REG_CLKDIV6	(CLK_BA+0x3C)	// R/W¡@AHB Clock Enable Control Register2
+// REG_CLKDIV6  (CLK_BA+0x3C)   // R/W¡@AHB Clock Enable Control Register2
 #define H20PHY_N1	BITMASK32(27, 24)	// USB2.0 Host PHY Clock Divider 1
 #define H20PHY_S	BITMASK32(20, 19)	// H20PHY Clock Source Divide Selection
 #define H20PHY_N0	BITMASK32(18, 16)	// USB2.0 Host PHY Clock Divider 0
@@ -223,7 +223,7 @@ enum N9H26CLK {
 #define OHCI_S		BITMASK32(4, 3)	// OHCI Clock Source Selection
 #define OHCI_N0		BITMASK32(2, 0)	// OHCI Clock Divider 0
 
-// REG_CLKDIV7 (CLK_BA+0x40)	// R/W¡@Clock Divider Register7
+// REG_CLKDIV7 (CLK_BA+0x40)    // R/W¡@Clock Divider Register7
 #define I2S_N1		BITMASK32(23, 16)	// I2S engine clock divide number 1
 #define I2S_S		BITMASK32(12, 11)	// I2S engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define I2S_N0		BITMASK32(10, 8)	// I2S engine clock pre-divide number
@@ -231,7 +231,7 @@ enum N9H26CLK {
 #define DRAM_S		BITMASK32(4, 3)	// DRAM Clock
 #define DRAM_N0		BITMASK32(2, 0)	// DRAM Clock Divider 0
 
-// REG_CLKDIV8 (CLK_BA+0x44)	// R/W¡@Clock Divider Register8
+// REG_CLKDIV8 (CLK_BA+0x44)    // R/W¡@Clock Divider Register8
 #define SDIO_N1		BITMASK32(12, 5)	// SD engine clock divide number from SD engine clock source
 #define SDIO_S		BITMASK32(4, 3)	// SD engine clock source select  00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define SDIO_N0		BITMASK32(2, 0)	// SD engine clock pre-divide number
