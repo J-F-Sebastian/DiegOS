@@ -297,8 +297,8 @@ extern "C" {
 	void sysUartPort(uint32_t u32Port);
 	char sysGetChar(void);
 	int32_t sysInitializeUART(WB_UART_T * uart);
-	void sysPrintf(char * pcStr, ...);
-	void sysprintf(char * pcStr, ...);
+	void sysPrintf(char *pcStr, ...);
+	void sysprintf(char *pcStr, ...);
 	void sysPutChar(char ucCh);
 	void sysUartInstallcallback(uint32_t u32IntType, PFN_SYS_UART_CALLBACK pfnCallback);
 	void sysUartEnableInt(int32_t eIntType);
