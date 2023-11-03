@@ -44,7 +44,8 @@ static uint32_t g_u32ExtClk = 12000000UL;
 
 uint32_t sysGetHCLK234Clock(void);
 
-extern uint8_t _tmp_buf[];
+//extern uint8_t _tmp_buf[];
+static uint8_t _tmp_buf[PD_RAM_SIZE] __attribute__((aligned (32)));
 
 //#define N9H26K_A_VERSION
 #ifdef N9H26K_A_VERSION
