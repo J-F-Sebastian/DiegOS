@@ -24,6 +24,8 @@
  * REMARK
  *     None
  **************************************************************************/
+#include <stdint.h>
+#include <types_common.h>
 #include "wblib.h"
 
 #define  _CoarsePageSize    64  //MB
@@ -42,7 +44,7 @@ extern void sysSetupCP15(unsigned int);
 
 void sysSetupCP15(unsigned int addr)
 {
-    register int reg1, reg0;
+    register int reg1 = 1, reg0 = 0x40000000;
     reg0 = addr;
     __asm volatile(
         "MOV     %0, %1                \n" // _mmuSectionTable
