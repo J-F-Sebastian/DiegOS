@@ -164,7 +164,7 @@ and does not offer preemption.
 This kind of design is not innovative, it resembles most embedded OS available
 online, or what are commonly known as realtime OS.
 
-The hardware abstration is implemented with a well-defined virtual interface
+The hardware abstration is implemented with a well defined virtual interface
 which is to be implemented for any platform and any processor.
 DiegOS is designed to be configurable, and the first confguration step is
 the definition of a tuple (processor, platform) which instructs the code and
@@ -466,7 +466,6 @@ access it are up to you. The rationale here is, split your boot code if it grows
 logic; chain booting is not an option in this case.
 \item Before jumping to the OS entry point go through this checklist:
 
-    \begin{minipage}{0.9\textwidth}
     \begin{enumerate}
     \item All registers must be setup to start \textbf{DiegOS}: scratch registers should be
     set to null, memory registers should be set to access the whole addressing
@@ -477,7 +476,6 @@ logic; chain booting is not an option in this case.
     \item All interrupts \textit{must be disabled} prior to jumping to the
     \textbf{DiegOS} entry point. 
     \end{enumerate}
-    \end{minipage}
 
 \item Jump to the system entry point, which is labelled as \texttt{DiegOS}.
 Be careful not to perform a function call, but simply jump to the label;
@@ -490,8 +488,8 @@ code after shutting down.}
 Initialization is split into a set of function calls, acting on both hardware and
 software. 
 \begin{itemize}
-\item Initialize the uninitialized data memory space (i.e. the .BSS section in
-ELF format terminology).
+\item Initialize the uninitialized data memory space, the .BSS section in
+ELF format terminology.
 \item Initialize the processor, including power save features, interrupts,
 cache memory.
 \item Initialize the platform hardware and software; usually you would init
