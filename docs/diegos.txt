@@ -11,9 +11,11 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
 \usetikzlibrary{shapes,arrows}
 \usepackage{tocbasic}
 
+\frontmatter
 \begin{document}
 \subject{Documentation}
 \title{DiegOS}
@@ -23,22 +25,33 @@
 \uppertitleback{
 DiegOS\\
 Design and Implementation of a minimalistic Operating System\\
+by Diego Gallizioli
+
 Copyright \textcopyright \today \\
-Diego Gallizioli
 }
-\lowertitleback{This document was set with the help of {\KOMAScript} and
-{\LaTeX}}
-\dedication{To my wife Monica and my children Davide Matteo and Anna, for letting me sit in front of my computer late at night.}
+\lowertitleback{This work was created with the {\LaTeX} typesetting system.\\
+the layout was set with the scripts provided by {\KOMAScript}.\\
+
+All applications and tools ran under Slackware Linux.\\
+The {\color{Cerulean}\textbf{DiegOS}} source code and tools were coded under Slackware Linux.\\
+The {\color{Cerulean}\textbf{DiegOS}} simulations ran under Slackware Linux.\\
+
+While every precaution has been taken in the preparation of this book, the author
+assume no responsibility for errors or omissions, or for damages resulting from the use of the
+information contained herein.}
+
+\dedication{This work is dedicated to my family Monica, Davide, Matteo and Anna, for letting me sit in front of my computer late at night.}
 \maketitle
 
 \tableofcontents
 
+\mainmatter
 \chapter{Foreword}
 \section*{Inheritance and other inspirations}
 I approached the world of computing when I was 8 years old.
 Back at the time information technology was seen as the future and was
-represented as a kind of magic, something that could not be understood but
-rather revealed or discovered.
+represented as a kind of magic, something that could not be easily understood 
+ot raught but rather was to be discovered.
 Lots of movies used computer science as a subject to create stunning stories
 where young guys (just like me!) experienced unbelievable adventures after
 discovering new hidden powers while hacking stuff; not to mention the fact
@@ -72,14 +85,7 @@ reasons and also provide him with a good reason to spend his money. I failed,
 because to his eyes the Commodore machines were merely gaming machines, not serious
 pieces of hardware, so I had to switch to a backup plan.
 
-I focused on another prominent platform, born in the silicon valley as well
-but looking very different.
-I succeded in replacing my beloved C64 with an i8086-based personal computer running
-MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
-and from then on I got more and more interested in two aspects of computing:
-transmitting data and having software interact with hardware.
-
-I succeded in replacing my beloved C64 with an i8086-based personal computer
+I succeded in replacing my beloved C64 with an Intel 8086-based personal computer
 running MS-DOS version 3.3 (\textbf{yes}, version 3.3 !)
 and from then on I got more and more interested in two aspects of computing:
 transmitting data and having software interact with hardware.
@@ -97,9 +103,9 @@ just for the sake of it.
 As a student I simply put aside this project, and focused on more interesting
 distractions.\footnote{You might guess what could possibly distract a 25 years 
 old man from spending nights in front of a computer.}
-But as a professional software developer I approached the embedded systems
-universe and I found an interesting niche to work on.
-This is why I resumed my late OS project and wrote DiegOS.
+But, as a professional software developer I approached embedded systems and I found 
+an interesting echosystem to work on.
+This is why I resumed my late OS project and wrote {\color{Cerulean}\textbf{DiegOS}}.
 
 From my personal standpoint the main goal of an Operating System is to offer a 
 friendly and comfortable environment for both programmers, users, and administrators,
@@ -113,12 +119,13 @@ argue upon it.
 Up today I had the chance and the privilege to work on a number of Operating Systems,
 some of them with peculiar features, some of them with legacy constraints, most of
 them with a clear design.
-DiegOS was born after years of careful and intensive meditation; it has no peculiarities,
+{\color{Cerulean}\textbf{DiegOS}} was born after years of careful and intensive meditation; it has no peculiarities,
 a KISS \footnote{The acronim stands for Keep It Simple, Stupid.} approach, no legacy constraints, and above all a humble
 target: do the right thing, the easy way, the fastest way, avoiding common errors and nuisances.
 
-Development of DiegOS took a lot of my spare time, still I did not conceive all the contents of this book by myself;
-the most inspiring source of wisdom at the heart of DiegOS is Minix. 
+Development of {\color{Cerulean}\textbf{DiegOS}} took a lot of my spare time, still I did not conceive all the contents of this book by myself;
+the most inspiring source of wisdom at the heart of
+{\color{Cerulean}\textbf{DiegOS}} is \textbf{Minix}.
 Minix is definitively a fitness room, furnished with all the whistles and bells and tools you could ever dream of.
 This \textbf{\emph{does not imply}} that Minix is the best Operating System out there, 
 it simply means I consider it a delightful piece of code.
@@ -128,18 +135,19 @@ Michael Abrash's \emph{Graphics Programming Black Book};
 all I have to say about it is, zenning is a very long journey, and you'd better take your time and read it.
 
 Last but not least, writing software requires patience. Resilience to failure. Acceptance of personal limits.
-Acknowledge of success when new code runs the way it should. Fighting anger
-and frustration when things just don't go.
-Understanding of the true nature of software: vacuity. Because all software of any kind under any form is
+Acknowledge of success when new code runs the way it should.
+Fighting anger and frustration when things just don't go.
+Tolerance with the "Muggles" not willing to see the magic running under the hood.
+And finally understanding of the true nature of software: vacuity. Because all software of any kind under any form is
 essentially an abstract algorithm performing elementary actions faster than
 our mind could.
 The creator of all software \textbf{is} our mind, but \textbf{no software can replace} our mind.
 
 Still they both are ephemeral, abstract.
-I leave to the reader an abstract taken from \quote{The Sutra of the Heart},
+I leave to the reader an abstract taken from \quote{The Heart Sutra},
 my favourite lecture when in need of wiseness.
 
-Enjoy my book, I hope you will enjoy my software.
+I hope you will enjoy my software.
 
 \newpage
 
@@ -152,21 +160,24 @@ Likewise, sensation, discrimination, conditioning, and awareness are empty.}
 \vfill
 
 \mainmatter
+\setchapterpreamble[u]{%
+\dictum[C.A.R. Hoare, The 1980 ACM Turing Award Lecture]{
+There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies and the other way is to make it so complicated that there are no obvious deficiencies.
+}}
 \chapter{Architecture}
 \section{Design}
-DiegOS has been designed to be a simple application running on top of bare metal.
+{\color{Cerulean}\textbf{DiegOS}} has been designed to be a simple application running on top of bare metal.
 It is compiled and linked as a single binary image, a single process application able to run 
 concurrent threads of execution by means of a co-operative scheduler.
 The software is partitioned in layers with defined dependencies between modules;
-DiegOS does not support multiple processors,  multiple cores, or multiple hardware 
+{\color{Cerulean}\textbf{DiegOS}} does not support multiple processors,  multiple cores, or multiple hardware 
 threads of execution; it does not offer memory protection or swappable memory,
-and does not offer preemption.
+and does not offer pre-emption.
 This kind of design is not innovative, it resembles most embedded OS available
 online, or what are commonly known as realtime OS.
 
 The hardware abstration is implemented with a well defined virtual interface
-which is to be implemented for any platform and any processor.
-DiegOS is designed to be configurable, and the first confguration step is
+{\color{Cerulean}\textbf{DiegOS}} is designed to be configurable, and the first confguration step is
 the definition of a tuple (processor, platform) which instructs the code and
 the compiler on what to do with very specific aspects of the hardware, like
 context switching or interrupt handling.
@@ -203,7 +214,7 @@ which can be used by both the kernel and the applications.
 They are logically above the first layer as they abstract algorithms and data
 structures from raw memory, file access, network connections.
 In a more restrictive design the kernel would never share code or data with
-applications, and this was the starting point also for DiegOS, until it became
+applications, and this was the starting point also for {\color{Cerulean}\textbf{DiegOS}}, until it became
 clear that code was bloating and memory footprint was growing due to duplication
 in kernel and library codebases. In order to avoid these situations a compromise
 was decided, share code but not data.
@@ -211,7 +222,7 @@ was decided, share code but not data.
 The top layer is occupied by \textbf{applications} which are the actual
 portion of the code written by developers to do something useful. Although
 \textit{applications} recalls user space processes there is no concept of user and 
-kernel space in DiegOS, applications are just code linked to the OS but using the 
+kernel space in {\color{Cerulean}\textbf{DiegOS}}, applications are just code linked to the OS but using the 
 APIs offered by the kernel and the libraries.
 Still, applications are not allowed to call the kernel's internals directly.
 
@@ -236,11 +247,11 @@ semaphore, a barrier or an event; once the running thread has changed state, the
 
 The scheduler follows a strict priority selection, so the running thread will never
 switch to a \footnote{Not yelding for lower priority threads is a policy.} lower
-priority thread.
+priority thread unless the highest priority class has no ready threads.
 A specific kernel API allows suspension only in case at least one higher
 priority thread is ready.
 
-When no threads are running, the scheduler will fall back to the \textbf{idle
+When no user threads are running, the scheduler will fall back to the \textbf{idle
 thread}; this is a special thread used to occupy the processor when there is no
 specific task to be completed.
 The \textbf{idle thread} performs some accounting and --- most important above
@@ -251,12 +262,13 @@ batteries, and require less cooling.
 
 The \textbf{system clock manager} is a sensitive piece of code dealing with
 the system clock and the system timings in general.
-It will initialize the clock device\footnote{Version 1.0 of DiegOS supports
+It will initialize the clock device\footnote{Version 1.0 of {\color{Cerulean}\textbf{DiegOS}} supports
 one clock source only \texttt{/dev/clk0}} and perform accounting of system
 ticks\footnote{System ticks are implemented as a monotonic fixed rate counter},
 system wall clock\footnote{The system clock accounts milliseconds since boot time}
 and the clock period.
-The clock period is dynamic, hence \textbf{DiegOS} use a tickless kernel.
+The clock period is dynamic and changes accordingly to the delay of the
+threads waiting or sleeping, hence {\color{Cerulean}\textbf{DiegOS}} use a tickless kernel.
 
 The \textbf{kernel interface} is the public interface used by application code
 to interact with the management of threads, with the system startup and
@@ -267,7 +279,7 @@ devices.
 The true nature of this interface is not hiding thread management, but rather
 hiding \textit{scheduling} operations, preventing applications from accessing
 any of the \textbf{scheduler} functions.
-As a matter of fact, in \textbf{DiegOS} the scheduler is a hidden layer and is
+As a matter of fact, in {\color{Cerulean}\textbf{DiegOS}} the scheduler is a hidden layer and is
 accessible  only through the \textbf{kernel interface}.
 Also hardware and drivers are hidden by this layer, they are accessible by
 using the \textit{devices} interface which is an abstraction of the drivers
@@ -280,9 +292,15 @@ other.
 Applications need to synchronize when they share data, objects, files, or when
 they need to observe a timeline --- so they need to synchronize with the
 system clock.
-\textbf{DiegOS} implement mutexes, barriers, spin locks, timers and alarms.
+{\color{Cerulean}\textbf{DiegOS}} implement mutexes, barriers, spin locks, timers and alarms.
 Additionally, an API for event management is provided to let threads talk to
 each other without crossing function calls or sharing global data.
+This last set of functions \textbf{must} be protected by interruptions;
+interrupt routines \textbf{must not} interrupt or alter the threads state or
+stack while the thread is suspending or waking up, as this might change the
+readiness state of a thread: this could result in an erroneous condition for
+one or more threads leaving the scheduler in an inconsistent state, or even
+corrupting a thread's stack.
 
 \subsection{Layer 1a: The drivers}
 \textbf{Drivers} are a very important part of the kernel, they are allowed to access
@@ -292,23 +310,23 @@ resources offered by the processor or the platform or the kernel itself.
 Being dedicated to manage hardware it is not possible to implement a single
 common interface for all \textbf{drivers}, at the same time, a lot of functions and
 data and logic are common among all \textbf{drivers}.
-\textbf{DiegOS} interfaces have been conceived to share (to inherit) a common
+{\color{Cerulean}\textbf{DiegOS}} interfaces have been conceived to share (inherit) a common
 set of properties, adding specializations when needed.
 
 \subsection{Layer 2: The libraries}
 \textbf{Libraries} are the core of any software infrastructure.
 Algorithms and data structures are stored in libraries to share knowledge,
 make their implementations common and available to applications, the kernel,
-the drivers, anyone.
-Niklaus Wirth back in 1976 published a book titled \emph{"Algorithms + Data
+the drivers.
+Back in 1976 Niklaus Wirth published a book titled \emph{"Algorithms + Data
 Structures = Programs"} creating a milestone for software engineering: data
 structures and algorithms are indipendent yet interlocked, as data structures
 are owned by the running application, but the strategy to use them at best
 is common.
 
-There are two places for \textbf{libraries} in \textbf{DiegOS}, the user
+There are two places for \textbf{libraries} in {\color{Cerulean}\textbf{DiegOS}}, the user
 applications libraries and the kernel libraries. The difference between the
-two can be found in the target they accomplish: applications need general
+two is the target they want to accomplish: applications need general
 purpose data to solve general purpose problems, so they need lists, queues,
 binary trees, and some strategies to use them at best, like sorting or
 searching.
@@ -316,13 +334,13 @@ On the other hand the kernel code need specific data to handle drivers, manage
 hardware, communications busses, interrupt controllers, but again with common
 strategies like enumeration or sorting.
 
-One noticeable detail in \textbf{DiegOS} is the presence of the \texttt{libc}
-library as native source code in place of the several implementations
-available.\footnote{At the time of this writing well-known \texttt{libc}
+One noticeable detail in {\color{Cerulean}\textbf{DiegOS}} is the presence of a native \texttt{libc}
+library available as original source code in place of one of the several
+well-knowsn implementations available in the world.\footnote{At the time of this writing well-known \texttt{libc}
 implementations are \texttt{glibc}, \texttt{uClibc}, \texttt{musl} and the
 \texttt{C runtime Library (CRT)}.} This singularity needs some explanation.
-As mentioned several times now this Operating System is a hobby not for
-production; porting a library to a new Operating System is a big effort,
+This Operating System is a recreational hobby not for production;
+porting a library to a new Operating System is a big effort,
 expecially considering the \texttt{libc} contents. Writing a new dedicated
 version proved to be effective and required an effort compatible with spending
 some nights awake --- rather than burning lots of midnight oil.
@@ -334,7 +352,7 @@ lists, memory pools, chunk managers, dynamic vectors, circual buffers, stacks,
 and many other.
 
 \subsection{Layer 3: The applications}
-\textbf{Applications} are the top level layer in \textbf{DiegOS} and they are
+\textbf{Applications} are the top level layer in {\color{Cerulean}\textbf{DiegOS}} and they are
 barely noticeable in the code base, users are expected to add whatever they 
 want to this layer, customizing the system experience.
 An \textit{application} is not self-contained as it is supposed to be, as the
@@ -350,7 +368,7 @@ can be spread over a number of files, but the entry point is common and is
 inside \texttt{platform\_run()}.
 
 \section{Portability}
-The source code of \textbf{DiegOS} is written in plain C, with a little amount of
+The source code of {\color{Cerulean}\textbf{DiegOS}} is written in plain C, with a little amount of
 assembler to perform hardware init.
 The C language is a compulsory choice when portability is a priority, and
 along with it the speed of the resulting binary.
@@ -358,17 +376,17 @@ Assembler is not required apart for initializations and to access specific
 instructions not known to the compiler; it can be handful when it is desidered to 
 add hard optimizations to some function or even a whole API, provided that readability
 of the code is kept to a level where any developer could read the code,
-read the comments, understand the algorithm, the pitfalls, and the possible C counterpart.
-\footnote{Assembler is never portable, but can be translated if understandable}
+read the comments, understand the algorithm, the pitfalls,
+and the possible C counterpart.\footnote{Assembler is never portable, but can be translated if understandable}
 
-Some drivers and some libraries' API do have a double personality, one implementation
-in plain C and one implementation optimized in assembler; the former is totally portable,
-the latter is welcome when performance gets on stage.
+Some drivers and some libraries' API have a double implementation, one in plain C and 
+one optimized written in assembler; the former is totally portable,
+the latter is welcome when performance gets on stage.\\
 The system is not designed to run on 64-bit architectures, writing 32- and 64-bit compliant 
-code requires considerable time (and time is a scarce resource!).
-\footnote{Writing code able to compile and run on both 32- and 64-bit processors would break
+code requires considerable time (and time is a scarce resource!).\footnote{
+Writing code able to compile and run on both 32- and 64-bit processors would break
 the rule of simplicity; still, you will find computations and arrangements to
-support 64-bit systems.}
+support 64-bit systems.}\\
 The system supports compiling and linking source files written in C++ using
 classes and objects, this makes it possibile to write applications with
 \textit{Object Oriented Programming}. It was not foreseen to add objects to
@@ -376,12 +394,72 @@ the kernel, although possible, it would require a new architecture.
 
 The system can be easily ported to different platforms or can support several
 new devices making use of its driver infrastructure and the minimal
-\textit{HAL} required to support a board.
+\textit{HAL} required to support a board.\\
+The \textit{HAL} layer is described in subsection~\ref{subsec:hal} at
+page~\pageref{subsec:hal}.
+
+\subsection{The Hardware Abstraction Layer (HAL)}
+\label{subsec:hal}
+Software need hardware to run; a lot of software components need to interact 
+with some piece of hardware which is able to offer features not achievable in
+other ways.
+For instance, a software alarm need a timer to measure time and understand when
+the alarm is expired; a timer need to count seconds, or better milli- micro-
+or nanoseconds, and the reference source of this "ticking" is usually a
+crystal oscillator.
+Measuring the crystal signal can be performed only in hardware for obvious
+reasons.\\
+Still, the output of the hardware is a measure of time, and the software will
+use it to track time passing by: from a logical point of view, the
+functionality of time accounting \textbf{does not} depend on hardware, while
+the source of the information used to account time \textbf{is} hardware
+dependent.\footnote{Hardware timers may have different resolutions and different
+clock sources, nevertheless they perform the same task with the same logic and
+the same unit of time.}\\
+Software need to be informed when a peripheral (hardware) change state, or
+fails, or has data to be handled.
+This is achieved by interrupting the processor --- hence interrupting software
+--- and putting both hardware and software in the condition of handling the
+incoming data or the error if any.\\
+In order to understand which is the source
+of the interruption the hardware provides an \textit{interrupt} system,
+offering informations on the origin of the interruption, the type of
+interruption and its actual priority.\\
+Even for interrupts the hardware implementation and the interface toward
+software can be different on different platforms, but from a logical point of
+view the operation to be performed is the same: software need to know which
+device asked for attention.
+
+The \textbf{HAL} layer can be used to have a common interface between
+\textit{software} and \textit{hardware functionality}; the abstraction created
+by this layer has to be generic enough to cover most hardware features, while
+the same should be invisible to the caller.\\
+In few words, the software invoking the Hardware Abstraction Layer expects an
+output from the API which is consistent and identical on different platforms;
+the same software calling the same \textbf{HAL} interface callback will output the same
+results independently from the underlying hardware.
+
+A good example of what an \textbf{HAL} layer is capable of is interrupt handling;
+interrupts generated by external devices can be processed by
+dedicated peripherals\\footnote{Devices managing multiple interrupt sources
+are devised as PIC Programmable Interrupt Controllers} and sorted in priority
+before being forwarded to the processor. Many processors embed a PIC device so
+that they do not need additional devices and can offer a wider set of features
+as the interrupt controller is actually on-board and can interact with other
+parts of the processor.\\
+From the \textbf{HAL} point of view there is no difference in having an
+embedded PIC or an external PIC: the software interface will accept the
+correct amount of interrupts, the correct amount of priorities, and will let
+the software map the hardware interrupt lines to their logical counterpart in
+software. When an interrupt is triggered, the \textbf{HAL} layer will call a
+specific routine in charge of servicing the interrupt.\\
+The operating system or any driver will then just need to map interrupts,
+register callbacks, and run.
 
 \section{build system}
-The code base of DiegOS builds using makefiles and the make tool, no ancillary
-tool is required apart for a C-language toolchain.
-Any toolchain can be deployed and used to compile and build \textbf{DiegOS},
+The code base of {\color{Cerulean}\textbf{DiegOS}} builds using makefiles and the make tool, no ancillary
+tool is required apart for a C-language toolchain.\\
+Any toolchain can be deployed and used to compile and build {\color{Cerulean}\textbf{DiegOS}},
 at the time of this writing only GCC has been tested.
 
 Output object files are stored in dedicated directories named after the platform 
@@ -407,7 +485,7 @@ system become too complex.
 The kernel, the libraries, the applications, they are all parts of a whole
 system. A system with a well defined target: start applications and make them
 run in a steady environment.
-To this purpose some additional sections are required in \textbf{DiegOS}, the
+To this purpose some additional sections are required in {\color{Cerulean}\textbf{DiegOS}}, the
 boot code to let the main binary run in a preconfigured hardware environment,
 the file system to store and retrieve data, the networking subsystem to
 connect to the outer world.
@@ -420,7 +498,7 @@ connect to the outer world.
 \section{The boot code}
 The boot code belongs to the booting stage and it's ultimate goal is to
 implement the most straighforward solution to setup the processor, the CPU
-peripherals, and then load and run the \textbf{DiegOS} binary.
+peripherals, and then load and run the {\color{Cerulean}\textbf{DiegOS}} binary.
 Boot code should be adaptable to any platform and any medium,
 and it should perform using the least amount of interactions with the hardware.
 It is understood that boot code is essentially processor and platform dependent,
@@ -429,12 +507,12 @@ portion of operations which vary with the machine.
 
 There is an elegant and effective solution to the problem of mixing
 dependencies with abstract algorithms, that is the \textit{Hardware
-Abstraction Layer}; in \textbf{DiegOS} most of the booting process is
+Abstraction Layer}; in {\color{Cerulean}\textbf{DiegOS}} most of the booting process is
 implemented into \textit{HAL} functions, so that a very thin layer of
 high-level functions can perform common steps indipendently from the
 underlying hardware.
 
-To satisfy these requirements \textbf{DiegOS} is built as a raw binary, relocated
+To satisfy these requirements {\color{Cerulean}\textbf{DiegOS}} is built as a raw binary, relocated
 to start at a specific memory address --- the same that will be used to 
 load it and then run it.\footnote{At the time of this writing there is no support
 for COFF, ELF or PE formats.}
@@ -444,7 +522,7 @@ to satisfy the needs of having a symbol reference for debugging, along with
 all binutils capabilities.
 In case the target EABI does not support the ELF format, any other object file
 format can be used; just be aware you always need to emit a raw binary file to
-load and execute \textbf{DiegOS}.
+load and execute {\color{Cerulean}\textbf{DiegOS}}.
 
 Coming to procedures, the boot code implements a detailed setup procedure to have consistent 
 booting steps across any platform.
@@ -459,7 +537,7 @@ this stage comes so early in the booting process that understanding the
 easiest issue might be really hard.
 Add comments to explain how this data can be used. Do not add debugging
 infrastructures, traces, endless strings for printouts.
-\item Access the medium where you stored the \textbf{DiegOS} binary, and read it into
+\item Access the medium where you stored the {\color{Cerulean}\textbf{DiegOS}} binary, and read it into
 memory. Document where the binary is put in memory, why it is put there, and
 the memory layout during boot. The medium and the code required to
 access it are up to you. The rationale here is, split your boot code if it grows beyond
@@ -467,14 +545,14 @@ logic; chain booting is not an option in this case.
 \item Before jumping to the OS entry point go through this checklist:
 
     \begin{enumerate}
-    \item All registers must be setup to start \textbf{DiegOS}: scratch registers should be
+    \item All registers must be setup to start {\color{Cerulean}\textbf{DiegOS}}: scratch registers should be
     set to null, memory registers should be set to access the whole addressing
     space; you could also restrict the range of available addresses, but you 
     must ensure the OS is still able to access all the memory and all the hardware.
     \item A small stack will be used by the system init stage, be sure to set
     it up before jumping or you'll crash the machine.
     \item All interrupts \textit{must be disabled} prior to jumping to the
-    \textbf{DiegOS} entry point. 
+    {\color{Cerulean}\textbf{DiegOS}} entry point. 
     \end{enumerate}
 
 \item Jump to the system entry point, which is labelled as \texttt{DiegOS}.
@@ -509,7 +587,7 @@ at user's will.
 \end{itemize}
 
 \section{The kernel}
-The core functionalities of DiegOS are enclosed in this library.
+The core functionalities of {\color{Cerulean}\textbf{DiegOS}} are enclosed in this library.
 The kernel is a single instance, single processor component; it does not
 support any kind of memory protection, and it is expecting to be able to access the
 whole address space with no restrictions. As mentioned before, there could be restrictions
@@ -523,7 +601,7 @@ heaven for \\footnote{you can guess where the citation comes from ...}.
 All in all, a general purpose OS would not even mention memory protection as an option; 
 again, if you need the real thing, go get it. A small bare-metal system would require lots
 of resources to assure a decent level of security if implementing memory protection,
-and this is not a goal for DiegOS.
+and this is not a goal for {\color{Cerulean}\textbf{DiegOS}}.
 
 \begin{figure}
     \centering
@@ -537,7 +615,7 @@ Alarms, Events and Mutexes are all managed services, meaning that an owning thre
 can create, destroy, or reconfigure them at any time.
 
 \begin{description}
-\item[The Scheduler] the DiegOS scheduler is as simple as possible, and is implemented as a FIFO
+\item[The Scheduler] the {\color{Cerulean}\textbf{DiegOS}} scheduler is as simple as possible, and is implemented as a FIFO
 queue with several priority levels. Pre-emption is not supported, and threads must co-operate in
  order to give up CPU time when computing is not required.
 
@@ -604,7 +682,7 @@ thread will be killed.} but at least one thread must be ready to run at any time
 
 The scheduler is designed to manage the threads' finite state machine and select 
 the running thread by using a priority queue schema. There are four
-priorities in DiegOS, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
+priorities in {\color{Cerulean}\textbf{DiegOS}}, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
 \texttt{High Priority} and \texttt{Realtime Priority}.
 
 When a thread is in the ready queue, it will not substitute the running
@@ -725,11 +803,11 @@ Optionally a barrier can automatically close after opening, creating a step-lock
 
 \section{Drivers}
 \label{sub:drivers}
-Drivers in DiegOS are interfaces to hardware.
+Drivers in {\color{Cerulean}\textbf{DiegOS}} are interfaces to hardware.
 They enable software to start and stop hardware operations, configure it, and perform input and output.
 Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
 be carefully designed to avoid conflicts with the system-wide interrupt handling.
-DiegOS protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
+{\color{Cerulean}\textbf{DiegOS}} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
 designed to be reentrant.
 The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
 and will enable the interrupt back again once the servicing routine returns.
@@ -835,7 +913,7 @@ level threads, the availability of such APIs enable developers to code
 highly orthogonal systems, leveraging on the same libraries for drivers,
 front ends, interfaces, databases, applications.
 
-DiegOS offers a pletora of data structures
+{\color{Cerulean}\textbf{DiegOS}} offers a pletora of data structures
 \section{Networking}
 
 \section{Drivers interface}
