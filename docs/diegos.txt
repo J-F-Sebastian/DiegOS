@@ -505,15 +505,36 @@ boot code to let the main binary run in a preconfigured hardware environment,
 the file system to store and retrieve data, the networking subsystem to
 connect to the outer world.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\columnwidth]{kernel_handsketched}
-\end{figure}
+\section{The system loader}
+All operating systems need to perform a common, early stage operation: load a binary --- the operating system ! --- from storage
+into memory and then execute it.
+
+This early stage application is commonly known as \textit{loader} or \textit{boot loader}.
+
+A \textit{boot loader} is a very minimal application with limited access to hardware and limited performances,
+but its solely purpose is to let the hardware run the operating system, which is in charge of perform a full initialization
+of the hardware.
+
+Seldom the \textit{boot loader} will not load the operating system, but rather a \textit{second-stage loader} which will load
+and execute the operating system; this latter kind of executable is also known as \textit{monitor} and is capable
+of breaking and resuming the boot process, perform diagnostics, support early stage debugging
+for the purpose of debugging the initialization of the kernel, and allow selecting the binary to be loaded and run.
+
+In {\color{Cerulean}\textbf{DiegOS}} the system loader is usually integrated into the OS binary, so that the OS will init
+the bare minimum hardware, read the content of the remaining binary into memory, and then continue with the execution.
+This implies that the hardware platform should be able to execute from a storage device\footnote{An internal or external ROM,
+a flash memory device, a hard disk.} and then jump to RAM.
+This also implies that the processor should be able to bootstrap from storage, or in other words, it should be able to access
+storage in hardware with no software intervention.
+
+Some platforms follow a more structured approach where the \textit{boot loader} is an indipendent executable running alone as
+a bare metal application.
+
 
 \section{The boot code}
 The boot code belongs to the booting stage and it's ultimate goal is to
 implement the most straighforward solution to setup the processor, the CPU
-peripherals, and then load and run the {\color{Cerulean}\textbf{DiegOS}} binary.
+peripherals, then load and run the {\color{Cerulean}\textbf{DiegOS}} binary.
 Boot code should be adaptable to any platform and any medium,
 and it should perform using the least amount of interactions with the hardware.
 It is understood that boot code is essentially processor and platform dependent,
