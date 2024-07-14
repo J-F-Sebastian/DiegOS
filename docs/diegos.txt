@@ -680,6 +680,8 @@ thread will be killed.} but at least one thread must be ready to run at any time
 \tikzstyle{run} = [circle, draw, fill=BurntOrange, 
     text width=5em, text centered, node distance=4cm,  minimum height=5em]
 
+\begin{figure}
+\centering
 \begin{tikzpicture}[node distance = 3cm, outer sep=auto, inner sep=1em, thick]
   % Place nodes
 \node [run] (run) {Running Thread};
@@ -714,7 +716,9 @@ thread will be killed.} but at least one thread must be ready to run at any time
  \path [line] (high) -- (high1);
  \path [line] (high1) -- (highn);
  \path [line] (rt) -- (rt1);
-\end{tikzpicture}
+ \end{tikzpicture}
+ \caption{The scheduler}
+ \end{figure}
 
 The scheduler is designed to manage the threads' finite state machine and select 
 the running thread by using a priority queue schema. There are four
