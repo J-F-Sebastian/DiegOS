@@ -163,17 +163,23 @@ I hope you will enjoy my software.
 \emph{" Form is empty, emptiness is form, Emptiness is not other than form, form is also not other than emptiness.
 Likewise, sensation, discrimination, conditioning, and awareness are empty.}
 
-\emph{In this way, Sariputra, all things are emptiness; they are without defining characteristics; they are not born, they do not cease, they are not defiled, they are not undefiled. They have no increase, they have no decrease.}
+\emph{In this way, Sariputra, all things are emptiness; they are without defining characteristics;
+they are not born, they do not cease, they are not defiled, they are not undefiled.
+They have no increase, they have no decrease.}
 
-\emph{Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness. There is no eye, no ear, no nose, no tongue, no body, no mind. There is no form, no sound, no smell, no taste, no texture, no phenomenon. There is no eye-element and so on up to no mind-element and also up to no element of mental awareness. There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death. Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
+\emph{Therefore, Sariputra, in emptiness there is no form, no sensation, no discrimination, no conditioning, and no awareness.
+There is no eye, no ear, no nose, no tongue, no body, no mind.
+There is no form, no sound, no smell, no taste, no texture, no phenomenon.
+There is no eye-element and so on up to no mind-element and also up to no element of mental awareness.
+There is no ignorance and no elimination of ignorance and so on up to no aging and death and no elimination of aging and death.
+Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
 \vfill
 
 \mainmatter
-\setchapterpreamble[u]{%
+\chapter{Architecture}
 \dictum[C.A.R. Hoare, The 1980 ACM Turing Award Lecture]{
 There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies and the other way is to make it so complicated that there are no obvious deficiencies.
-}}
-\chapter{Architecture}
+}
 \section{Design}
 {\color{Cerulean}\textbf{DiegOS}} has been designed to be a simple application running on top of bare metal.
 It is compiled and linked as a single binary image, a single process application able to run 
