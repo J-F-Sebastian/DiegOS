@@ -1,9 +1,16 @@
-\documentclass[a4paper, fontsize=12, parskip=half-]{scrbook}
+\documentclass[a4paper]{scrbook}
+\usepackage{scrlayer-scrpage}
+
+\KOMAoption{chapterprefix}{true}
+\KOMAoption{fontsize}{12pt}
+\KOMAoption{paper}{a4}
+\KOMAoption{parskip}{half}
+
 \usepackage[dvipsnames]{xcolor}
 \usepackage[english]{babel}
 \usepackage{textcomp}
 \usepackage{chapterthumb}
-\usepackage{scrlayer-scrpage}
+
 \AddLayersToPageStyle{@everystyle@}{chapterthumb}
 \addtokomafont{chapterthumb}{\bfseries}
 \usepackage{setspace}
@@ -14,6 +21,8 @@
 \usepackage[dvipsnames]{xcolor}
 \usetikzlibrary{shapes,arrows}
 \usepackage{tocbasic}
+\usepackage[avantgarde]{quotchap}
+\usepackage{lipsum}
 
 \frontmatter
 \begin{document}
