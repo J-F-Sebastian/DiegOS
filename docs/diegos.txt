@@ -36,10 +36,10 @@ DiegOS\\
 Design and Implementation of a minimalistic Operating System\\
 by Diego Gallizioli
 
-Copyright \textcopyright \today \\
+Copyright \textcopyright \today \\{\KOMAScriptVersion}\\
 }
 \lowertitleback{This work was created with the {\LaTeX} typesetting system.\\
-the layout was set with the scripts provided by {\KOMAScript}.\\
+The layout was set with {\KOMAScript}.
 
 All applications and tools ran under Slackware Linux.\\
 The {\color{Cerulean}\textbf{DiegOS}} source code and tools were coded under Slackware Linux.\\
