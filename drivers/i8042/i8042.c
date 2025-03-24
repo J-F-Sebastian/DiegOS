@@ -103,7 +103,7 @@ static int kbd_init(unsigned unitno)
 		return (EGENERIC);
 	}
 
-	cbuffer_init(&kbd_rx_cbuf, KBD_BUF_SIZE, 1);
+	cbuffer_init(&kbd_rx_cbuf, KBD_BUF_SIZE);
 
 	return (EOK);
 }
@@ -262,7 +262,7 @@ static int mse_init(unsigned unitno)
 		return (EGENERIC);
 	}
 
-	cbuffer_init(&mse_rx_cbuf, MSE_BUF_SIZE, 1);
+	cbuffer_init(&mse_rx_cbuf, MSE_BUF_SIZE);
 
 	return (EOK);
 }
