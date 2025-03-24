@@ -319,8 +319,8 @@ static int uart_init(unsigned unitno)
 		return (EGENERIC);
 	}
 
-	cbuffer_init(&tx_cbuf, BUF_SIZE, 1);
-	cbuffer_init(&rx_cbuf, BUF_SIZE, 1);
+	cbuffer_init(&tx_cbuf, BUF_SIZE);
+	cbuffer_init(&rx_cbuf, BUF_SIZE);
 
 	return (EOK);
 }
