@@ -53,15 +53,6 @@
 #define TDELTA 1193
 #define TTHRES (TVAL - TDELTA)
 
-static const void *ttylist[] = { &vga_tty_drv };
-
-static const void *drvlist[] = { &uart16550d_drv,
-	&i8253_drv,
-	&i82371sb_drv,
-	&i8042_kbd_drv,
-	&i8042_mouse_drv
-};
-
 static unsigned long tickfn(void)
 {
 	static unsigned long ticks = 0;
@@ -82,6 +73,33 @@ static unsigned long tickfn(void)
 
 	return ticks;
 }
+
+static int drivers_list_init(void)
+{
+	device_t *dev;
+
+	dev = device_create(&uart16550d_drv, 0);
+	if (!dev) return (ENODEV);
+
+	if (is_apic_supported()) {
+		dev = device_create(&lapic_drv, 0);
+	} else {
+		dev = device_create(&i8253_drv, 0);
+	}
+	if (!dev) return (ENODEV);
+
+	dev = device_create(&i82371sb_drv, 0);
+	if (!dev) return (ENODEV);
+
+	dev = device_create(&i8042_kbd_drv, 0);
+	if (!dev) return (ENODEV);
+
+	dev = device_create(&i8042_mouse_drv, 0);
+	if (!dev) return (ENODEV);
+
+	return (EOK);
+}
+
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
 extern STATUS iomalloc_init(const void *start, const void *end);
@@ -129,12 +147,13 @@ void platform_init()
 
 void tty_init()
 {
-	int retcode;
+	device_t *dev;
 
-	retcode = drivers_list_init(ttylist, NELEMENTS(ttylist));
-	if (EOK != retcode) {
+	dev = device_create(&vga_tty_drv, 0);
+	if (!dev) {
 		abort();
 	}
+
 	vga_tty_drv.cmn.start_fn(0);
 }
 
@@ -148,14 +167,7 @@ void drivers_init()
 		return;
 	}
 
-	/*
-	 * Alas, we need to patch the list if we support LAPIC
-	 */
-	if (is_apic_supported()) {
-		drvlist[1] = &lapic_drv;
-	}
-
-	retcode = drivers_list_init(drvlist, NELEMENTS(drvlist));
+	retcode = drivers_list_init();
 
 	if (EOK != retcode) {
 		abort();
