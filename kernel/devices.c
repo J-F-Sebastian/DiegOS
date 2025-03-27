@@ -140,19 +140,30 @@ void start_devices_lib()
 /*
  * Public section
  */
-device_t *device_create(unsigned unit, const void *inst)
+device_t *device_create(const void *inst, unsigned unitno)
 {
 	device_int_t *tmp;
 	driver_header_t *cmn = (driver_header_t *) inst;
 	char temp[DEV_NAME_LEN + 1];
 	unsigned type;
 	unsigned drvtype;
+	int retcode;
 
 	if (!inst) {
 		return (NULL);
 	}
 
-	drvtype = cmn->status_fn(unit);
+	retcode = cmn->init_fn(unitno);
+	if (EOK != retcode) {
+		if (ENXIO != retcode) {
+			kerrprintf("Driver %s[%u] failed to init with error %d\n", cmn->name, unitno, retcode);
+		} else {
+			kerrprintf("Driver %s does not support unit %u.\n", cmn->name, unitno);
+		}
+		return (NULL);
+	}
+
+	drvtype = cmn->status_fn(unitno);
 	drvtype &= (DRV_IS_CHAR | DRV_IS_BLOCK | DRV_IS_NET | DRV_IS_TXT_UI | DRV_IS_GFX_UI);
 
 	switch (drvtype) {
@@ -180,26 +191,29 @@ device_t *device_create(unsigned unit, const void *inst)
 		return (NULL);
 	}
 
-	snprintf(temp, sizeof(temp), "%.5s%1u", cmn->name, unit);
+	snprintf(temp, sizeof(temp), "%.5s%1u", cmn->name, unitno);
 	tmp = lookup_name(temp);
 
 	if (tmp) {
+		kerrprintf("Device %s already in list, skipping ...\n", temp);
 		return (NULL);
 	}
 
 	tmp = malloc(sizeof(*tmp));
 
 	if (!tmp) {
+		kerrprintf("Out of memory for device %s\n", temp);
 		return (NULL);
 	}
 
 	memset(tmp->dv.name, 0, sizeof(tmp->dv.name));
 	memcpy(tmp->dv.name, temp, sizeof(tmp->dv.name));
-	tmp->dv.unit = unit;
+	tmp->dv.unit = unitno;
 	tmp->dv.type = type;
 	tmp->dv.drv = (void *)inst;
 
 	if (EOK != insert_device(tmp)) {
+		kerrprintf("Device %s failed list insertion\n", temp);
 		free(tmp);
 		return (NULL);
 	}
@@ -209,7 +223,7 @@ device_t *device_create(unsigned unit, const void *inst)
 	return (&tmp->dv);
 }
 
-device_t *device_lookup(const char *drvname, unsigned unit)
+device_t *device_lookup(const char *drvname, unsigned unitno)
 {
 	char temp[DEV_NAME_LEN + 1];
 	device_int_t *retval;
@@ -219,7 +233,7 @@ device_t *device_lookup(const char *drvname, unsigned unit)
 		return (NULL);
 	}
 
-	snprintf(temp, sizeof(temp), "%.5s%1u", drvname, unit);
+	snprintf(temp, sizeof(temp), "%.5s%1u", drvname, unitno);
 
 	retval = lookup_name(temp);
 

@@ -65,17 +65,17 @@ typedef struct device {
  * Devices are linked in a doubly-linked list.
  *
  * PARAMETERS IN
- * unsigned unit - the device unit, it must match a valid, supported unit
- *                 as supported by inst. 
- * const void *inst - a pointer to a driver interface; the driver must be 
- *					  capable of handling the unit number found 
+ * const void *inst - a pointer to a driver interface; the driver must be
+ *		      capable of handling the unit number found
  *                    in the parameter unit.
+ * unsigned unitno  - the device unit, it must match a valid, supported unit
+ *                    as supported by inst.
  *
  * RETURNS
  * A valid pointer to a new device object in case of success, NULL in any other
  * case.
  */
-device_t *device_create(unsigned unit, const void *inst);
+device_t *device_create(const void *inst, unsigned unitno);
 
 /*
  * device_lookup() retrieves a pointer to a device.
@@ -83,13 +83,13 @@ device_t *device_create(unsigned unit, const void *inst);
  *
  * PARAMETERS IN
  * const char *drvname - the driver name.
- * unsigned unit - the device unit.
+ * unsigned unitno - the device unit.
  *
  * RETURNS
  * A valid pointer to an existing device object in case of success,
  * NULL in any other case.
  */
-device_t *device_lookup(const char *drvname, unsigned unit);
+device_t *device_lookup(const char *drvname, unsigned unitno);
 
 /*
  * device_lookup_name() retrieves a pointer to a device.
