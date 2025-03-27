@@ -80,6 +80,4 @@ typedef struct net_driver {
 
 } net_driver_t;
 
-int net_drivers_list_init(net_driver_t * drvlist[], unsigned drvlistsize);
-
 #endif				// NET_DRIVERS_H_INCLUDED

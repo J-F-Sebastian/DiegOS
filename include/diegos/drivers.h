@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _DRIVER_H_
-#define _DRIVER_H_
+#ifndef _DRIVERS_H_
+#define _DRIVERS_H_
 
 #include <diegos/poll.h>
 #include <diegos/if.h>
@@ -97,12 +97,6 @@ enum uart_ioctrl {
 	/* set uart bit format, see uart docs for values */
 	UART_SET_BITS
 };
-
-/*
- * Init driver list and init data structures. To be called BEFORE
- * driver_lib_init()
- */
-int drivers_list_init(const void *drvlist[], unsigned drvlistsize);
 
 int driver_def_ok(unsigned unitno);
 
