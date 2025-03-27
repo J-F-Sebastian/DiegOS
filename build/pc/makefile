@@ -48,7 +48,7 @@ all: mbr.bin bootsect.bin
 	cd ../../fat && make all
 	cd ../../applications/console && make all
 	cd ../../applications/demo && make all
-	$(LD) -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
+	$(LD) --gc-sections -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
 	objcopy -S DiegOS.elf DiegOS.stripped.elf
 	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
 	./mkimage -b mbr.bin -s DiegOS.bin -d bootimage.img
