@@ -45,10 +45,63 @@ enum DEVICE_TYPE {
 	DEV_TYPE_TXT_UI
 };
 
-typedef struct device {
+/*
+ * Read and write function prototypes.
+ * Declare these and set them into a device by calling device_set_access()
+ * to specialize the devices behavior.
+ *
+ * PARAMETERS IN
+ * const void *buf - the source buffer
+ * size_t bytes - the amount of data in bytes to be transferred to the driver
+ * void *drv - a driver instance
+ * unsinged unitno - the unit number of the driver
+ *
+ * RETURNS
+ * EINVAL if buf or drv are NULL
+ * The number of transferred bytes in case of success; zero is a valid amount of transferred bytes.
+ * Any error code returned from the driver function call
+ */
+typedef int (*device_write_fn)(const void *buf, size_t bytes, void *drv, unsigned unitno);
+/*
+ * PARAMETERS IN
+ * void *buf - the destination buffer
+ * size_t bytes - the amount of data in bytes to be transferred from the driver
+ * void *drv - a driver instance
+ * unsinged unitno - the unit number of the driver
+ *
+ * RETURNS
+ * EINVAL if buf or drv are NULL
+ * The number of transferred bytes in case of success; zero is a valid amount of transferred bytes.
+ * Any error code returned from the driver function call
+ */
+typedef int (*device_read_fn)(void *buf, size_t bytes, void *drv, unsigned unitno);
+
+typedef struct device_header {
+	/*
+	 * Name of the device, to be filled at creation time.
+	 */
 	char name[DEV_NAME_LEN + 1];
-	unsigned unit;
+	/*
+	 * The driver's unit number used by this device
+	 */
+	unsigned unitno;
+	/*
+	 * Device type, from enum DEVICE_TYPE
+	 */
 	unsigned type;
+	/*
+	 * Write function, if set, is invoked in place of raw driver write access
+	 */
+	device_write_fn write_fn;
+	/*
+	 * Read function, if set, is invoked in place of raw driver read access
+	 */
+	device_read_fn read_fn;
+
+} device_header_t;
+
+typedef struct device {
+	device_header_t header;
 	union {
 		void *drv;
 		driver_header_t *cmn;
@@ -60,16 +113,13 @@ typedef struct device {
 } device_t;
 
 /*
- * Called by drivers' init routines, device_create() return a pointer to
+ * Called by platform init routines, device_create() return a pointer to
  * the newly created device.
  * Devices are linked in a doubly-linked list.
  *
  * PARAMETERS IN
- * const void *inst - a pointer to a driver interface; the driver must be
- *		      capable of handling the unit number found
- *                    in the parameter unit.
- * unsigned unitno  - the device unit, it must match a valid, supported unit
- *                    as supported by inst.
+ * const void *inst - a pointer to a driver interface.
+ * unsigned unitno  - the device unit.
  *
  * RETURNS
  * A valid pointer to a new device object in case of success, NULL in any other

@@ -41,7 +41,7 @@ static device_int_t *lookup_name(const char *name)
 	int retval;
 
 	while (nn) {
-		retval = strncmp(nn->dv.name, name, sizeof(nn->dv.name));
+		retval = strncmp(nn->dv.header.name, name, sizeof(nn->dv.header.name));
 
 		/*
 		 * Device list is sorted.
@@ -67,7 +67,8 @@ static STATUS insert_device(device_int_t * dev)
 	int retval;
 
 	while (prev) {
-		retval = strncmp(prev->dv.name, dev->dv.name, sizeof(prev->dv.name));
+		retval = strncmp(prev->dv.header.name,
+				 dev->dv.header.name, sizeof(prev->dv.header.name));
 
 		if (retval < 0) {
 			prev = (device_int_t *) prev->header.next;
@@ -97,10 +98,10 @@ void start_devices_lib()
 	 * Now loop and start drivers.
 	 */
 	while (ptr) {
-		switch (ptr->dv.type) {
+		switch (ptr->dv.header.type) {
 		case DEV_TYPE_CHAR:
-			if (ptr->dv.cmn->start_fn(ptr->dv.unit)) {
-				kerrprintf("Failed starting %s\n", ptr->dv.name);
+			if (ptr->dv.cmn->start_fn(ptr->dv.header.unitno)) {
+				kerrprintf("Failed starting %s\n", ptr->dv.header.name);
 			} else {
 				counter++;
 			}
@@ -108,18 +109,19 @@ void start_devices_lib()
 
 		case DEV_TYPE_BLOCK:
 			kerrprintf("BLOCK devices not supported yet.\n");
-			kerrprintf("Skipped starting %s\n", ptr->dv.name);
+			kerrprintf("Skipped starting %s\n", ptr->dv.header.name);
 			break;
 
 		case DEV_TYPE_TXT_UI:
 			/* FALLTHRU */
 		case DEV_TYPE_GFX_UI:
 			if (ui) {
-				kerrprintf("Multiple UI not supported for %s\n", ptr->dv.name);
-				kerrprintf("Skipped starting %s\n", ptr->dv.name);
+				kerrprintf("Multiple UI not supported for %s\n",
+					   ptr->dv.header.name);
+				kerrprintf("Skipped starting %s\n", ptr->dv.header.name);
 			} else {
-				if (ptr->dv.cmn->start_fn(ptr->dv.unit)) {
-					kerrprintf("Failed starting %s\n", ptr->dv.name);
+				if (ptr->dv.cmn->start_fn(ptr->dv.header.unitno)) {
+					kerrprintf("Failed starting %s\n", ptr->dv.header.name);
 				} else {
 					ui = TRUE;
 					counter++;
@@ -128,7 +130,7 @@ void start_devices_lib()
 			break;
 
 		default:
-			kerrprintf("Unknown device type for %s\n", ptr->dv.name);
+			kerrprintf("Unknown device type for %s\n", ptr->dv.header.name);
 			break;
 		}
 		ptr = (device_int_t *) ptr->header.next;
@@ -156,7 +158,8 @@ device_t *device_create(const void *inst, unsigned unitno)
 	retcode = cmn->init_fn(unitno);
 	if (EOK != retcode) {
 		if (ENXIO != retcode) {
-			kerrprintf("Driver %s[%u] failed to init with error %d\n", cmn->name, unitno, retcode);
+			kerrprintf("Driver %s[%u] failed to init with error %d\n", cmn->name,
+				   unitno, retcode);
 		} else {
 			kerrprintf("Driver %s does not support unit %u.\n", cmn->name, unitno);
 		}
@@ -199,17 +202,16 @@ device_t *device_create(const void *inst, unsigned unitno)
 		return (NULL);
 	}
 
-	tmp = malloc(sizeof(*tmp));
+	tmp = calloc(sizeof(*tmp), 1);
 
 	if (!tmp) {
 		kerrprintf("Out of memory for device %s\n", temp);
 		return (NULL);
 	}
 
-	memset(tmp->dv.name, 0, sizeof(tmp->dv.name));
-	memcpy(tmp->dv.name, temp, sizeof(tmp->dv.name));
-	tmp->dv.unit = unitno;
-	tmp->dv.type = type;
+	memcpy(tmp->dv.header.name, temp, sizeof(tmp->dv.header.name));
+	tmp->dv.header.unitno = unitno;
+	tmp->dv.header.type = type;
 	tmp->dv.drv = (void *)inst;
 
 	if (EOK != insert_device(tmp)) {
@@ -263,18 +265,36 @@ int device_io_tx(device_t * dev, const char *buf, size_t bytes)
 		return (EINVAL);
 	}
 
-	if (dev->type != DEV_TYPE_CHAR) {
+	if (dev->header.type != DEV_TYPE_CHAR) {
 		return (EPERM);
 	}
 
-	while (bytes > 0) {
-		retcode = dev->cdrv->write_fn(buf, bytes, dev->unit);
-		if (retcode > 0) {
-			buf += retcode;
-			bytes -= retcode;
-			cbytes += retcode;
-		} else {
-			return (EIO);
+	/*
+	 * The two loops are identical except for the function call
+	 * servicing the write operation.
+	 * They are split - though redundant - for performance reasons.
+	 */
+	if (dev->header.write_fn) {
+		while (bytes > 0) {
+			retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
+			if (retcode > 0) {
+				buf += retcode;
+				bytes -= retcode;
+				cbytes += retcode;
+			} else {
+				return (EIO);
+			}
+		}
+	} else {
+		while (bytes > 0) {
+			retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
+			if (retcode > 0) {
+				buf += retcode;
+				bytes -= retcode;
+				cbytes += retcode;
+			} else {
+				return (EIO);
+			}
 		}
 	}
 
@@ -289,11 +309,15 @@ int device_io_rx(device_t * dev, char *buf, size_t bytes)
 		return (EINVAL);
 	}
 
-	if (dev->type != DEV_TYPE_CHAR) {
+	if (dev->header.type != DEV_TYPE_CHAR) {
 		return (EPERM);
 	}
 
-	retcode = dev->cdrv->read_fn(buf, bytes, dev->unit);
+	if (dev->header.read_fn) {
+		retcode = dev->header.read_fn(buf, bytes, dev->cdrv, dev->header.unitno);
+	} else {
+		retcode = dev->cdrv->read_fn(buf, bytes, dev->header.unitno);
+	}
 
 	return ((retcode >= 0) ? (retcode) : (EIO));
 }
