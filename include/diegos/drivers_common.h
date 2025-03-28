@@ -70,17 +70,29 @@ typedef struct driver_header {
 	int (*init_fn) (unsigned unitno);
 	/*
 	 * Start the device's operations. This include interrupt handlers, DMA, I/O activities.
+	 * Return values:
+	 * EOK in case of success (device unit inited)
+	 * ENXIO in case the unitno is not supported or inited
+	 * other errnos for failures
 	 */
 	int (*start_fn) (unsigned unitno);
 	/*
 	 * Stop the device's operations. This include I/O activities as well as events, but the
 	 * device should not fail or be reset. Calling start_fn again the device should recover
 	 * gracefully and start working.
+	 * Return values:
+	 * EOK in case of success (device unit inited)
+	 * ENXIO in case the unitno is not supported or inited
+	 * other errnos for failures
 	 */
 	int (*stop_fn) (unsigned unitno);
 	/*
 	 * This function should shut down the device. It will be invoked on shutdown/reboot
 	 * of the kernel.
+	 * Return values:
+	 * EOK in case of success (device unit inited)
+	 * ENXIO in case the unitno is not supported or inited
+	 * other errnos for failures
 	 */
 	int (*done_fn) (unsigned unitno);
 	/*
@@ -89,10 +101,16 @@ typedef struct driver_header {
 	unsigned (*status_fn) (unsigned unitno);
 	/*
 	 * I/O control, driver specific
+	 * Return values:
+	 * EOK in case of success (device unit inited)
+	 * ENXIO in case the unitno is not supported or inited
+	 * EINVAL in case the opcode is invalid or data is NULL
+	 * other errnos for failures
 	 */
 	int (*ioctrl_fn) (void *data, unsigned opcode, unsigned unitno);
 	/*
-	 * Implement poll
+	 * Implement poll.
+	 * Return the poll status.
 	 */
 	short (*poll_fn) (poll_table_t * table);
 } driver_header_t;
