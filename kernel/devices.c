@@ -225,6 +225,26 @@ device_t *device_create(const void *inst, unsigned unitno)
 	return (&tmp->dv);
 }
 
+int device_set_access(device_t * dev, device_write_fn wfn, device_read_fn rfn)
+{
+	if (!dev) {
+		return (EINVAL);
+	}
+
+	if (wfn && dev->header.write_fn) {
+		return (EINVAL);
+	}
+
+	if (rfn && dev->header.read_fn) {
+		return (EINVAL);
+	}
+
+	dev->header.write_fn = wfn;
+	dev->header.read_fn = rfn;
+
+	return (EOK);
+}
+
 device_t *device_lookup(const char *drvname, unsigned unitno)
 {
 	char temp[DEV_NAME_LEN + 1];

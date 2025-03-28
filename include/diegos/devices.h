@@ -128,6 +128,55 @@ typedef struct device {
 device_t *device_create(const void *inst, unsigned unitno);
 
 /*
+ * Called after device_create(), used to set custom read and write function
+ * replacing raw read and write calls to the underlaying driver.
+ * The function calls will access the driver for I/O, but will have a chance to
+ * modify/work on the data before transferring to/from the driver.
+ * This is expecially useful for those devices offering raw data to be elaborated
+ * or translated, i.e. input devices (keyboards) or GPS or sensors.
+ * A device is properly initialized without these calls, with one of them or with both.
+ * If the function calls are NULL in the device they can be set.
+ * If the function calls are valorized in the device they can be set to NULL.
+ * To update any function call the same must be set to NULL first, then to a proper
+ * function pointer value.
+ *
+ * PARAMETERS IN
+ * device_t *dev - a pointer to a device
+ * device_write_fn wfn - a pointer to a custom write function or NULL
+ * device_read_fn rfn - a pointer to a custom read function or NULL
+ *
+ * RETURNS
+ * EINVAL if dev is NULL or
+ *
+ *        +-------+-------+-----------------+----------------+
+ *        |  wfn  |  rfn  | write fn in dev | read fn in dev |
+ *        +-------+-------+-----------------+----------------+
+ *        |  ptr1 |  ptr2 |     ptrx        |     ptry       |
+ *        +-------+-------+-----------------+----------------+
+ *        |  NULL |  ptr2 |     NULL        |     ptry       |
+ *        +-------+-------+-----------------+----------------+
+ *        |  ptr1 |  NULL |     ptrx        |     NULL       |
+ *        +-------+-------+-----------------+----------------+
+ *
+ *  EOK if
+ *
+ *        +-------+-------+-----------------+----------------+
+ *        |  wfn  |  rfn  | write fn in dev | read fn in dev |
+ *        +-------+-------+-----------------+----------------+
+ *        |  ptr1 |  ptr2 |     NULL        |     NULL       |
+ *        +-------+-------+-----------------+----------------+
+ *        |  NULL |  ptr2 |     ptrx        |     NULL       |
+ *        +-------+-------+-----------------+----------------+
+ *        |  ptr1 |  NULL |     NULL        |     ptry       |
+ *        +-------+-------+-----------------+----------------+
+ *        |  NULL |  NULL |     ptrx        |     ptry       |
+ *        +-------+-------+-----------------+----------------+
+ *        |  NULL |  NULL |     NULL        |     NULL       |
+ *        +-------+-------+-----------------+----------------+
+ */
+int device_set_access(device_t * dev, device_write_fn wfn, device_read_fn rfn);
+
+/*
  * device_lookup() retrieves a pointer to a device.
  * The search key is the driver's name and the unit number.
  *
