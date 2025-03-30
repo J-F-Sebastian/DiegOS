@@ -306,6 +306,10 @@ static int tty_write(const void *buf, unsigned bytes, unsigned unitno)
 		 */
 		if (*localbuf < first_char_visible) {
 			switch (*localbuf) {
+				/* backspace */
+			case 0x8:
+				buffer[--cur_pos] = (DEFAULT_COLOR << 8) | fill_char;
+				break;
 				/* horizontal tab, 4 chars per tab */
 			case 0x9:
 				fill_blanks(4);
