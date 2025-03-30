@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <diegos/kernel.h>
 #include <diegos/poll.h>
+#include <diegos/delays.h>
 #include <diegos/interrupts.h>
 #include <string.h>
 #include <stdio.h>
@@ -46,38 +47,57 @@ static wait_queue_t wq_mse;
 
 static uint8_t readmask = OBF;
 
-static inline void kbd_wait(unsigned loops)
+static inline void kbd_w_wait(unsigned loops)
 {
 	while (loops--) {
 		if ((in_byte(i8042_CMD_PORT) & IBF) == 0) {
 			break;
 		}
+		udelay(100);
+	}
+}
+
+static inline void kbd_r_wait(unsigned loops)
+{
+	while (loops--) {
+		if ((in_byte(i8042_CMD_PORT) & OBF) == 1) {
+			break;
+		}
+		udelay(100);
 	}
 }
 
 static inline void send_command(uint8_t cmd)
 {
-	kbd_wait(1000);
+	kbd_w_wait(1000);
 	out_byte(i8042_CMD_PORT, cmd);
+}
+
+static inline void read_command(uint8_t * cmd)
+{
+	kbd_r_wait(1000);
+	*cmd = in_byte(i8042_CMD_PORT);
+}
+
+static inline void send_data(uint8_t data)
+{
+	kbd_w_wait(1000);
+	out_byte(i8042_DATA_PORT, data);
+}
+
+static inline void read_data(uint8_t * data)
+{
+	kbd_r_wait(1000);
+	*data = in_byte(i8042_DATA_PORT);
 }
 
 static BOOL kbd_interrupt(void)
 {
-	uint8_t readval;
-
-	send_command(DISABLE_PORT1);
-	kbd_wait(1000);
-
-	/* check if we are waiting for keyboard or mouse data */
-	readval = in_byte(i8042_CMD_PORT);
-	if ((readval & readmask) != OBF) {
-		send_command(ENABLE_PORT1);
-		return (TRUE);
-	}
+	uint8_t readval = in_byte(i8042_DATA_PORT);
 
 	/* If the queue is full, drop it !!! */
 	if (cbuffer_free_space(&kbd_rx_cbuf)) {
-		kbd_rx_buf[kbd_rx_cbuf.tail] = in_byte(i8042_DATA_PORT);
+		kbd_rx_buf[kbd_rx_cbuf.tail] = readval;
 		cbuffer_add(&kbd_rx_cbuf);
 	}
 
@@ -88,6 +108,7 @@ static BOOL kbd_interrupt(void)
 
 static int kbd_init(unsigned unitno)
 {
+	uint8_t data;
 	/*
 	 * There can't be more than one instance !!!
 	 */
@@ -95,7 +116,20 @@ static int kbd_init(unsigned unitno)
 		return (ENXIO);
 	}
 
-	/* Start detecting the devices */
+	/* Start disabling the device */
+	send_command(DISABLE_PORT1);
+	/* Flush the Output Buffer */
+	read_data(&data);
+	/* Read and Set the configuration byte */
+	send_command(READ_CFG_BYTE);
+	read_data(&data);
+	/* Clear interrupt and Translation bits (0 and 6) */
+	data &= ~0x41;
+	/* Enable clock */
+	data |= 0x10;
+	send_data(data);
+	/* Enable the device */
+	send_command(ENABLE_PORT1);
 
 	flags_kbd |= (DRV_READ_BLOCK);
 
@@ -110,6 +144,7 @@ static int kbd_init(unsigned unitno)
 
 static int kbd_start(unsigned unitno)
 {
+	uint8_t data;
 	/*
 	 * Enable interrupts
 	 */
@@ -128,6 +163,15 @@ static int kbd_start(unsigned unitno)
 	flags_kbd &= ~DRV_STATUS_STOP;
 	flags_kbd |= DRV_STATUS_RUN;
 
+	/* Flush the Output Buffer */
+	read_data(&data);
+	/* Read and Set the configuration byte */
+	send_command(READ_CFG_BYTE);
+	read_data(&data);
+	/* Set interrupt bits 0 */
+	data |= 1;
+	send_data(data);
+
 	enable_int(KEYBOARD_IRQ);
 
 	return (EOK);
@@ -135,6 +179,8 @@ static int kbd_start(unsigned unitno)
 
 static int kbd_stop(unsigned unitno)
 {
+	uint8_t data;
+
 	/*
 	 * Disable all interrupts
 	 */
@@ -151,6 +197,15 @@ static int kbd_stop(unsigned unitno)
 
 	disable_int(KEYBOARD_IRQ);
 
+	/* Flush the Output Buffer */
+	read_data(&data);
+	/* Read and Set the configuration byte */
+	send_command(READ_CFG_BYTE);
+	read_data(&data);
+	/* Clear interrupt bits 0 */
+	data &= ~1;
+	send_data(data);
+
 	return (EOK);
 }
 
@@ -166,7 +221,33 @@ static int kbd_done(unsigned unitno)
 
 static int kbd_read(void *buf, unsigned bytes, unsigned unitno)
 {
-	return (ENXIO);
+	char *dest = buf;
+	unsigned count;
+
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!buf) {
+		return (EINVAL);
+	}
+
+	if (!bytes) {
+		return (EOK);
+	}
+
+	while (cbuffer_is_empty(&kbd_rx_cbuf)) {
+		thread_io_wait(&wq_kbd);
+	}
+
+	count = bytes;
+	while (!cbuffer_is_empty(&kbd_rx_cbuf) && count) {
+		*dest++ = kbd_rx_buf[kbd_rx_cbuf.head];
+		cbuffer_remove(&kbd_rx_cbuf);
+		--count;
+	}
+
+	return (bytes - count);
 }
 
 static unsigned kbd_status(unsigned unitno)
@@ -254,7 +335,7 @@ static int mse_init(unsigned unitno)
 		return (ENXIO);
 	}
 
-	readmask |= TO;
+	readmask |= RTO;
 
 	flags_mse |= (DRV_READ_BLOCK);
 

@@ -23,28 +23,50 @@
 #define i8042_DATA_PORT  (0x60)
 #define i8042_CMD_PORT   (0x64)
 
-enum i8042_status_flags {
-/* Must be set before reading data, must be clear before writing data */
+enum i8042_status_register {
+	/*
+	 * Output Buffer Status, must be set before reading data from DATA_PORT
+	 * 0 Output Buffer Empty
+	 * 1 Output Buffer Full
+	 */
 	OBF = (1 << 0),
-/* If set a new data byte can be read */
+	/*
+	 * Input Buffer Status, must be clear before writing to DATA_PORT or CMD_PORT
+	 * 0 Input Buffer Empty
+	 * 1 Input Buffer Full
+	 */
 	IBF = (1 << 1),
-/* Cleared on reset, set if POST is successful */
+	/* System flag, cleared on reset, set if POST is successful */
 	SYS = (1 << 2),
-/*
- * 0 = data written to 0x60
- * 1 = data written to 0x64
- */
+	/*
+	 * Command or Data
+	 * 0 = data written is data for PS/2 device (data byte)
+	 * 1 = data written is data for PS/2 controller command (command byte)
+	 */
 	A2 = (1 << 3),
-/*
- * 0 = Keyboard Clock OFF, keyboard is inhibited
- * 1 = Keyboard Clock ON, keyboard is not inhibited
- */
+	/*
+	 * Inhibit Switch
+	 * 0 = keyboard is inhibited
+	 * 1 = keyboard is not inhibited
+	 */
 	INH = (1 << 4),
-/* Mouse output buffer empty or full */
-	MOBF = (1 << 5),
-/* General Timeout */
-	TO = (1 << 6),
-/* Communication error with the keyboard */
+	/*
+	 * Transmit Time Out
+	 * 0 No Transmit Time Out Error
+	 * 1 Transmit Time Out Error
+	 */
+	TTO = (1 << 5),
+	/*
+	 * Receive Time Out
+	 * 0 No Receive Time Out Error
+	 * 1 Receive Time Out Error
+	 */
+	RTO = (1 << 6),
+	/*
+	 * Parity Error
+	 * 0 Odd Parity (No Error)
+	 * 1 Even Parity (Error)
+	 */
 	PERR = (1 << 7)
 };
 
