@@ -295,26 +295,18 @@ int device_io_tx(device_t * dev, const char *buf, size_t bytes)
 	 * They are split - though redundant - for performance reasons.
 	 */
 	if (dev->header.write_fn) {
-		while (bytes > 0) {
-			retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
-			if (retcode > 0) {
-				buf += retcode;
-				bytes -= retcode;
-				cbytes += retcode;
-			} else {
-				return (EIO);
-			}
+		retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
+		if (retcode > 0) {
+			return (retcode);
+		} else {
+			return (EIO);
 		}
 	} else {
-		while (bytes > 0) {
-			retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
-			if (retcode > 0) {
-				buf += retcode;
-				bytes -= retcode;
-				cbytes += retcode;
-			} else {
-				return (EIO);
-			}
+		retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
+		if (retcode > 0) {
+			return (retcode);
+		} else {
+			return (EIO);
 		}
 	}
 
