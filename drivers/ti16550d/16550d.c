@@ -1,7 +1,7 @@
 /*
  * DiegOS Operating System source code
  *
- * Copyright (C) 2012 - 2015 Diego Gallizioli
+ * Copyright (C) 2012 - 2025 Diego Gallizioli
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ static const uint16_t divisor_latch[] = {
  * Speeds are divided by 10 to store a uint16_t
  * instead of an int.
  */
-static const unsigned speed_bps[] = {
+static const uint16_t speed_bps[] = {
 	5,
 	11,
 	15,
@@ -411,6 +411,7 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 {
 	unsigned copy_bytes;
 	unsigned buffer_space;
+	int retval = 0;
 
 	if (!buf || unitno) {
 		return (EINVAL);
@@ -420,29 +421,68 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 		return (EOK);
 	}
 
+	/*
+	 * Wait for some room in the buffer, avoid copying
+	 * few bytes at a time.
+	 */
 	while (cbuffer_free_space(&tx_cbuf) < TX_SEQ_MAX) {
 		(void)thread_io_wait(&wq_w);
 	}
 
 	buffer_space = cbuffer_free_space(&tx_cbuf);
 
+	/*
+	 * Trim the amount of bytes to be copied into the buffer.
+	 * If the buffer cannot accomodate a single run length, either
+	 * for the size or because of the buffer roll-over, the while
+	 * loop will continue to the end.
+	 */
 	if (bytes > buffer_space) {
-		bytes = buffer_space;
+		copy_bytes = buffer_space;
+	} else {
+		copy_bytes = bytes;
 	}
 
-	copy_bytes = bytes;
 	if (tx_cbuf.tail + copy_bytes >= BUF_SIZE) {
-		memcpy(tx_buf + tx_cbuf.tail, buf, BUF_SIZE - tx_cbuf.tail);
-		copy_bytes -= BUF_SIZE - tx_cbuf.tail;
-		buf += BUF_SIZE - tx_cbuf.tail;
-		cbuffer_add_n(&tx_cbuf, BUF_SIZE - tx_cbuf.tail);
+		copy_bytes = BUF_SIZE - tx_cbuf.tail;
 	}
+
 	memcpy(tx_buf + tx_cbuf.tail, buf, copy_bytes);
 	cbuffer_add_n(&tx_cbuf, copy_bytes);
+	retval += copy_bytes;
+	buf += copy_bytes;
+	bytes -= copy_bytes;
 
 	enable_uart_tx();
 
-	return (bytes);
+	while (bytes) {
+
+		while (cbuffer_free_space(&tx_cbuf) < TX_SEQ_MAX) {
+			(void)thread_io_wait(&wq_w);
+		}
+
+		buffer_space = cbuffer_free_space(&tx_cbuf);
+
+		if (bytes > buffer_space) {
+			copy_bytes = buffer_space;
+		} else {
+			copy_bytes = bytes;
+		}
+
+		if (tx_cbuf.tail + copy_bytes >= BUF_SIZE) {
+			copy_bytes = BUF_SIZE - tx_cbuf.tail;
+		}
+
+		memcpy(tx_buf + tx_cbuf.tail, buf, copy_bytes);
+		cbuffer_add_n(&tx_cbuf, copy_bytes);
+		retval += copy_bytes;
+		buf += copy_bytes;
+		bytes -= copy_bytes;
+
+		enable_uart_tx();
+	}
+
+	return (retval);
 }
 
 static int uart_read(void *buf, unsigned bytes, unsigned unitno)
@@ -489,6 +529,10 @@ static int uart_ioctrl(void *data, unsigned opcode, unsigned unitno)
 	uint8_t temp;
 	unsigned *decode = (unsigned *)data;
 	unsigned i;
+
+	if (!data) {
+		return (EINVAL);
+	}
 
 	switch (opcode) {
 	case UART_SET_SPEED:
