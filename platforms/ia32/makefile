@@ -9,8 +9,8 @@ OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
 CFLAGS+= -I../../include -I../../libs -I../pc
 
-all: $(OBJS)
-	$(AR) $(CPU).a $(OBJS)
+all: objdirs $(OBJSO)
+	$(AR) $(CPU).a $(OBJSO)
 	
-clean:
-	rm -rf $(OBJS) *.a
+clean: objclean
+	rm -rf $(OBJSO) *.a
