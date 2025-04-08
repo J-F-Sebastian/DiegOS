@@ -30,6 +30,7 @@
 
 #include "../../kernel/platform_include.h"
 #include "i8259.h"
+#include "../devices/keyboard.h"
 #include "../ia32/ints_private.h"
 #include "../ia32/ports.h"
 #include "../ia32/apic.h"
@@ -93,6 +94,8 @@ static int drivers_list_init(void)
 
 	dev = device_create(&i8042_kbd_drv, 0);
 	if (!dev) return (ENODEV);
+
+	if (device_set_access(dev, NULL, keyboard_read_fn) != EOK)  return (ENODEV);
 
 	dev = device_create(&i8042_mouse_drv, 0);
 	if (!dev) return (ENODEV);
