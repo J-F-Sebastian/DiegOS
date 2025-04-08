@@ -57,10 +57,10 @@ all: mbr.bin bootsect.bin
 	./mkimage -f -b bootsect.bin -s DiegOS.bin -d bootfloppy.img
 
 clean:
-	cd ../../kernel && make clean
-	cd ../../libs && make clean
 	cd ../../platforms/$(CPU) && make clean
 	cd ../../platforms/$(PLATFORM) && make clean
+	cd ../../kernel && make clean
+	cd ../../libs && make clean
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) clean
 	cd ../../devices && make -f makefile.$(OBJPREFIX) clean
 	cd ../../fat && make clean
