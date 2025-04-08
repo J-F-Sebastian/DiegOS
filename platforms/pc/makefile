@@ -11,4 +11,4 @@ all: objdirs $(OBJSO)
 	$(AR) $(PLATFORM).a $(OBJSO) $(OBJPREFIX)/int86.o
 	
 clean: objclean
-	rm -rf $(OBJPREFIX)/int86.o
+	rm -rf $(OBJSO) $(OBJPREFIX)/int86.o *.a
