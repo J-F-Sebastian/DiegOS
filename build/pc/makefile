@@ -35,6 +35,7 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../platforms/$(PLATFORM)/$(PLATFORM).a \
 	../../platforms/$(CPU)/$(CPU).a \
 	../../drivers/$(OBJPREFIX)_drivers.a \
+	../../devices/$(OBJPREFIX)_devices.a \
 	../../libs/$(OBJPREFIX)_diegos_lib.a \
 	../../libs/libc/$(OBJPREFIX)_libc.a \
 	../../fat/$(OBJPREFIX)_fat.a
@@ -45,6 +46,7 @@ all: mbr.bin bootsect.bin
 	cd ../../kernel && make all
 	cd ../../libs && make all
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) all
+	cd ../../devices && make -f makefile.$(OBJPREFIX) all
 	cd ../../fat && make all
 	cd ../../applications/console && make all
 	cd ../../applications/demo && make all
@@ -60,6 +62,7 @@ clean:
 	cd ../../platforms/$(CPU) && make clean
 	cd ../../platforms/$(PLATFORM) && make clean
 	cd ../../drivers && make -f makefile.$(OBJPREFIX) clean
+	cd ../../devices && make -f makefile.$(OBJPREFIX) clean
 	cd ../../fat && make clean
 	cd ../../applications/console && make clean
 	cd ../../applications/demo && make clean
