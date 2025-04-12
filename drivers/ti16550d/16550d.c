@@ -586,20 +586,22 @@ static unsigned uart_status(unsigned unitno)
 	return (0);
 }
 
-static short uart_poll(poll_table_t * table)
+static short uart_poll(unsigned unitno, poll_table_t * table)
 {
 	short ret = 0;
 
-	if (!cbuffer_is_empty(&rx_cbuf)) {
-		ret |= (POLLIN | POLLRDNORM);
-	}
+	if (!unitno) {
+		if (!cbuffer_is_empty(&rx_cbuf)) {
+			ret |= (POLLIN | POLLRDNORM);
+		}
 
-	if (!cbuffer_is_empty(&tx_cbuf)) {
-		ret |= (POLLOUT | POLLWRNORM);
-	}
+		if (!cbuffer_is_empty(&tx_cbuf)) {
+			ret |= (POLLOUT | POLLWRNORM);
+		}
 
-	poll_wait(&wq_r, table);
-	poll_wait(&wq_w, table);
+		poll_wait(&wq_r, table);
+		poll_wait(&wq_w, table);
+	}
 
 	return (ret);
 }

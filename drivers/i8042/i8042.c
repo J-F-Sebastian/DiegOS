@@ -259,15 +259,17 @@ static unsigned kbd_status(unsigned unitno)
 	return (0);
 }
 
-static short kbd_poll(poll_table_t * table)
+static short kbd_poll(unsigned unitno, poll_table_t * table)
 {
 	short ret = 0;
 
-	if (!cbuffer_is_empty(&kbd_rx_cbuf)) {
-		ret |= (POLLIN | POLLRDNORM);
-	}
+	if (!unitno) {
+		if (!cbuffer_is_empty(&kbd_rx_cbuf)) {
+			ret |= (POLLIN | POLLRDNORM);
+		}
 
-	poll_wait(&wq_kbd, table);
+		poll_wait(&wq_kbd, table);
+	}
 
 	return (ret);
 }
@@ -418,15 +420,17 @@ static unsigned mse_status(unsigned unitno)
 	return (0);
 }
 
-static short mse_poll(poll_table_t * table)
+static short mse_poll(unsigned unitno, poll_table_t * table)
 {
 	short ret = 0;
 
-	if (!cbuffer_is_empty(&mse_rx_cbuf)) {
-		ret |= (POLLIN | POLLRDNORM);
-	}
+	if (!unitno) {
+		if (!cbuffer_is_empty(&mse_rx_cbuf)) {
+			ret |= (POLLIN | POLLRDNORM);
+		}
 
-	poll_wait(&wq_mse, table);
+		poll_wait(&wq_mse, table);
+	}
 
 	return (ret);
 }
