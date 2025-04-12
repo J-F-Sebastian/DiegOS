@@ -174,7 +174,7 @@ device_t *device_create(const void *inst, unsigned unitno);
  *        |  NULL |  NULL |     NULL        |     NULL       |
  *        +-------+-------+-----------------+----------------+
  */
-int device_set_access(device_t * dev, device_write_fn wfn, device_read_fn rfn);
+int device_set_access(device_t *dev, device_write_fn wfn, device_read_fn rfn);
 
 /*
  * device_lookup() retrieves a pointer to a device.
@@ -223,7 +223,7 @@ device_t *device_lookup_name(const char *devname);
  * returned value is the amount of bytes transmitted (it might not match the
  * value passed in with the parameter bytes).
  */
-int device_io_tx(device_t * dev, const char *buf, size_t bytes);
+int device_io_tx(device_t *dev, const char *buf, size_t bytes);
 
 /*
  * Perform reading from devices. If the driver support suspending (blocking)
@@ -245,6 +245,24 @@ int device_io_tx(device_t * dev, const char *buf, size_t bytes);
  * returned value is the amount of bytes read in the buffer (it might not match
  * the value passed in with the parameter bytes).
  */
-int device_io_rx(device_t * dev, char *buf, size_t bytes);
+int device_io_rx(device_t *dev, char *buf, size_t bytes);
+
+/*
+ * Perform polling. If the driver support polling the corresponding
+ * function is invoked and the reported events stored into events paramenter.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device we are performing the poll on
+ * poll_table_t *table - the poll table, an internal structure managed by the poll APO
+ *
+ * PARAMETERS OUT
+ * short *events - the events reported by the underlying driver poll call.
+ *
+ * RETURNS
+ * EINVAL if dev or events are NULL
+ * EOK in case of success
+ */
+int device_poll(device_t *dev, poll_table_t *table, short *events);
+
 
 #endif

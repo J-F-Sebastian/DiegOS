@@ -333,3 +333,18 @@ int device_io_rx(device_t * dev, char *buf, size_t bytes)
 
 	return ((retcode >= 0) ? (retcode) : (EIO));
 }
+
+int device_poll(device_t *dev, poll_table_t *table, short *events)
+{
+	if (!dev || !dev->drv || !events) {
+		return (EINVAL);
+	}
+
+	if (dev->cmn->poll_fn) {
+		*events = dev->cmn->poll_fn(dev->header.unitno, table);
+	} else {
+		*events = 0;
+	}
+
+	return (EOK);
+}
