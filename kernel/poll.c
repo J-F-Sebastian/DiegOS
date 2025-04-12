@@ -89,6 +89,7 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 	unsigned i;
 	fd_data_t *cursor;
 	thread_t *prev, *next;
+	short events;
 
 	if (!ufds || !nfds || (nfds > OPEN_MAX)) {
 		return EINVAL;
@@ -112,7 +113,12 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 	for (i = 0; i < nfds; i++) {
 		cursor = fdget(ufds[i].fd);
 		if (cursor) {
-			ufds[i].events = cursor->rawdev->cmn->poll_fn(newtable);
+			if (EOK != device_poll(cursor->rawdev, newtable, &events)) {
+				kerrprintf("Device %s failed polling 1\n", cursor->rawdev->header.name);
+				cleanup(newtable);
+				return ENOSYS;
+			}
+			ufds[i].events = events;
 			ufds[i].events &= ufds[i].revents;
 			if (ufds[i].events) {
 				newtable->signalled = 1;
@@ -137,7 +143,12 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 	for (i = 0; i < nfds; i++) {
 		cursor = fdget(ufds[i].fd);
 		if (cursor) {
-			ufds[i].events = cursor->rawdev->cmn->poll_fn(NULL);
+			if (EOK != device_poll(cursor->rawdev, NULL, &events)) {
+				kerrprintf("Device %s failed polling 2\n", cursor->rawdev->header.name);
+				cleanup(newtable);
+				return ENOSYS;
+			}
+			ufds[i].events = events;
 			ufds[i].events &= ufds[i].revents;
 		}
 	}
@@ -149,10 +160,12 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 
 int poll_network(struct pollfd ufds[], unsigned nfds, int timeout)
 {
+#if 0
 	poll_table_t *newtable;
 	unsigned i;
 	net_interface_t *cursor;
 	thread_t *prev, *next;
+	short events;
 
 	if (!ufds || !nfds || (nfds > OPEN_MAX)) {
 		return EINVAL;
@@ -176,7 +189,12 @@ int poll_network(struct pollfd ufds[], unsigned nfds, int timeout)
 	for (i = 0; i < nfds; i++) {
 		cursor = net_interface_lookup_index(ufds[i].fd);
 		if (cursor) {
-			ufds[i].events = cursor->drv->cmn.poll_fn(newtable);
+			if (EOK != device_poll(cursor->drv, newtable, &events)) {
+				kerrprintf("Interface %s failed polling 1\n", cursor->drv->ifname);
+				cleanup(newtable);
+				return ENOSYS;
+			}
+			ufds[i].events = events;
 			ufds[i].events &= ufds[i].revents;
 			if (ufds[i].events) {
 				newtable->signalled = 1;
@@ -201,13 +219,18 @@ int poll_network(struct pollfd ufds[], unsigned nfds, int timeout)
 	for (i = 0; i < nfds; i++) {
 		cursor = net_interface_lookup_index(ufds[i].fd);
 		if (cursor) {
-			ufds[i].events = cursor->drv->cmn.poll_fn(NULL);
+			if (EOK != device_poll(cursor->drv, newtable, &events)) {
+				kerrprintf("Interface %s failed polling 2\n", cursor->drv->ifname);
+				cleanup(newtable);
+				return ENOSYS;
+			}
+			ufds[i].events = events;
 			ufds[i].events &= ufds[i].revents;
 		}
 	}
 
 	cleanup(newtable);
-
+#endif
 	return EOK;
 }
 
