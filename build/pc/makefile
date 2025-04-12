@@ -41,15 +41,15 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../fat/$(OBJPREFIX)_fat.a
    
 all: mbr.bin bootsect.bin
-	cd ../../platforms/$(CPU) && make all
-	cd ../../platforms/$(PLATFORM) && make all
-	cd ../../kernel && make all
-	cd ../../libs && make all
-	cd ../../drivers && make -f makefile.$(OBJPREFIX) all
-	cd ../../devices && make -f makefile.$(OBJPREFIX) all
-	cd ../../fat && make all
-	cd ../../applications/console && make all
-	cd ../../applications/demo && make all
+	cd ../../platforms/$(CPU) && $(MAKE) all
+	cd ../../platforms/$(PLATFORM) && $(MAKE) all
+	cd ../../kernel && $(MAKE) all
+	cd ../../libs && $(MAKE) all
+	cd ../../drivers && $(MAKE) -f makefile.$(OBJPREFIX) all
+	cd ../../devices && $(MAKE) -f makefile.$(OBJPREFIX) all
+	cd ../../fat && $(MAKE) all
+	cd ../../applications/console && $(MAKE) all
+	cd ../../applications/demo && $(MAKE) all
 	$(LD) --gc-sections -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
 	objcopy -S DiegOS.elf DiegOS.stripped.elf
 	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
@@ -57,15 +57,15 @@ all: mbr.bin bootsect.bin
 	./mkimage -f -b bootsect.bin -s DiegOS.bin -d bootfloppy.img
 
 clean:
-	cd ../../platforms/$(CPU) && make clean
-	cd ../../platforms/$(PLATFORM) && make clean
-	cd ../../kernel && make clean
-	cd ../../libs && make clean
-	cd ../../drivers && make -f makefile.$(OBJPREFIX) clean
-	cd ../../devices && make -f makefile.$(OBJPREFIX) clean
-	cd ../../fat && make clean
-	cd ../../applications/console && make clean
-	cd ../../applications/demo && make clean
+	cd ../../platforms/$(CPU) && $(MAKE) clean
+	cd ../../platforms/$(PLATFORM) && $(MAKE) clean
+	cd ../../kernel && $(MAKE) clean
+	cd ../../libs && $(MAKE) clean
+	cd ../../drivers && $(MAKE) -f makefile.$(OBJPREFIX) clean
+	cd ../../devices && $(MAKE) -f makefile.$(OBJPREFIX) clean
+	cd ../../fat && $(MAKE) clean
+	cd ../../applications/console && $(MAKE) clean
+	cd ../../applications/demo && $(MAKE) clean
 	rm -f *.o *.bin *.img *.elf
 
 mbr.bin:
