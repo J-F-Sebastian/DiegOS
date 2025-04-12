@@ -71,7 +71,6 @@ static void cleanup(poll_table_t * table)
 {
 	struct poll_item *cursor;
 
-	lock();
 	while (queue_count(&table->table)) {
 		if (EOK == queue_dequeue(&table->table, (queue_node **) & cursor)) {
 			io_wait_remove(cursor->item, cursor->wq);
@@ -79,7 +78,6 @@ static void cleanup(poll_table_t * table)
 			chunks_pool_free(poll_items, cursor);
 		}
 	}
-	unlock();
 
 	list_remove(&poll_table_list, &table->header);
 	chunks_pool_free(poll_tables, table);
