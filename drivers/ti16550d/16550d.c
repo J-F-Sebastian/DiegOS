@@ -125,26 +125,6 @@ static inline void disable_uart_tx(void)
 	flags &= ~DRV_WRITING;
 }
 
-static inline void enable_uart_rx(void)
-{
-	uint8_t retval;
-
-	retval = read_register(COM1, IER);
-	/* Enable Received Data Available Interrupt, this will start rx */
-	retval |= IER_ERBFI;
-	write_register(COM1, IER, retval);
-}
-
-static inline void disable_uart_rx(void)
-{
-	uint8_t retval;
-
-	retval = read_register(COM1, IER);
-	/* Disable Received Data Available Interrupt, no more rx */
-	retval &= ~IER_ERBFI;
-	write_register(COM1, IER, retval);
-}
-
 static void uart_handle_recv_line_status(void)
 {
 	/*
@@ -167,28 +147,67 @@ static void uart_handle_recv_line_status(void)
 
 static void uart_handle_recv_data_fifo(void)
 {
+	uint8_t retval;
 	unsigned rx_count;
 	unsigned buffer_left = cbuffer_free_space(&rx_cbuf);
 
 	flags |= DRV_READING;
 
 	/*
-	 * The FIFO is filling up so transfer up to RX_SEQ_MAX bytes (14)
-	 * in memory. Do not transfer 16 bytes, as it is not guaranteed
-	 * the FIFO is really full AND to speed up the read loop we are
-	 * not checking for FIFO void status AND this would prevent the assertion
-	 * of the timed out interrupt, which is closing the RX process in case
-	 * the local buffer does not fill up.
+	 * Negative case: we are flooded with data and cannot
+	 * service the FIFO RX buffer; we need to drop data.
+	 * Well the correct action would be to stop the sender
+	 * but I do not want to implement XON/XOFF or check for
+	 * hardware flow control.
 	 */
-	if (RX_SEQ_MAX < buffer_left) {
-		rx_count = RX_SEQ_MAX;
-	} else {
-		rx_count = buffer_left;
-	}
+	if (!buffer_left) {
 
-	while (rx_count--) {
-		rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
-		cbuffer_add(&rx_cbuf);
+		rx_count = RX_SEQ_MAX;
+		while (rx_count--) {
+			(void)read_register(COM1, RBR);
+		}
+
+		while (read_register(COM1, LSR) & LSR_DR) {
+			(void)read_register(COM1, RBR);
+		}
+
+	} else {
+
+		/*
+		 * Make the FIFO RX buffer empty with a strategy:
+		 * first run will retrieve data present in the buffer,
+		 * as RX_SEQ_MAX is the threshold to trigger this interrupt.
+		 * Second run will poll for data available in the FIFO RX buffer,
+		 * slowing down a bit the loop.
+		 */
+		if (RX_SEQ_MAX < buffer_left) {
+			rx_count = RX_SEQ_MAX;
+		} else {
+			rx_count = buffer_left;
+		}
+
+		/*
+		 * Read up to RX_SEQ_MAX bytes; if less space is left in rx_cbuf,
+		 * then the second half of the algorithm will not be performed.
+		 */
+		while (rx_count--) {
+			rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
+			cbuffer_add(&rx_cbuf);
+		}
+
+		/*
+		 * If we have space in rx_cbuf, empty the FIFO RX buffer.
+		 */
+		buffer_left = cbuffer_free_space(&rx_cbuf);
+		if (buffer_left) {
+			rx_count = buffer_left;
+			retval = read_register(COM1, LSR);
+			while (rx_count-- && (retval & LSR_DR)) {
+				rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
+				cbuffer_add(&rx_cbuf);
+				retval = read_register(COM1, LSR);
+			}
+		}
 	}
 
 	(void)thread_io_resume(&wq_r);
@@ -199,12 +218,9 @@ static void uart_handle_recv_data_timeout(void)
 	uint8_t retval = 0;
 	unsigned buffer_left = cbuffer_free_space(&rx_cbuf);
 
-	if (!buffer_left) {
-		disable_uart_rx();
-		(void)thread_io_resume(&wq_r);
-		return;
-	}
-
+	/*
+	 * Empty the FIFO RX buffer.
+	 */
 	retval = read_register(COM1, LSR);
 	while (buffer_left-- && (retval & LSR_DR)) {
 		rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
@@ -518,8 +534,6 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 	}
 	memcpy(buf, rx_buf + rx_cbuf.head, copy_bytes);
 	cbuffer_remove_n(&rx_cbuf, copy_bytes);
-
-	enable_uart_rx();
 
 	return (ret_copy_bytes);
 }
