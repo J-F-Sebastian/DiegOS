@@ -27,13 +27,6 @@
  .align 16
 delay_loop:
     movl    4(%esp), %eax
-    jmp 1f
-
-.align 16
-1:
-    jmp 2f
-
-.align 16
 2:  decl    %eax
     jnz     2b
     ret
