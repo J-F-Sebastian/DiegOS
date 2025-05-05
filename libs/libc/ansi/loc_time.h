@@ -1,7 +1,7 @@
 /*
  * DiegOS Operating System source code
  *
- * Copyright (C) 2012 - 2015 Diego Gallizioli
+ * Copyright (C) 2012 - 2025 Diego Gallizioli
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define	YEAR0		2000	/* the first year */
+#define	YEAR0		2000	/* the first year in struct tm */
 #define	EPOCH_YR	2015	/* EPOCH = Jan 1 2015 00:00:00 */
 #define	SECS_DAY	(24L * 60L * 60L)
 #define	LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
