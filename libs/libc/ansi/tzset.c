@@ -49,8 +49,8 @@ char *tzname[2];
 
 void tzset(void)
 {
-	tzname[0] = tzlist[1].nt;
-	tzname[1] = tzlist[1].dst;
-	timezone = tzlist[1].tz;
-	dst_off = tzlist[1].dstofs;
+	tzname[0] = tzlist[timezone].nt;
+	tzname[1] = tzlist[timezone].dst;
+	timezone = tzlist[timezone].tz;
+	dst_off = tzlist[timezone].dstofs;
 }
