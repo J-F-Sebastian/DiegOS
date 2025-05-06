@@ -31,18 +31,18 @@ static struct timezones {
 	long int tz, dstofs;
 } tzlist[] = {
 	{
-	"UTC", "BST", 0, +60},
-	    /* British Summer Time              UTC +1:00 */
+	 "UTC", "BST", 0, +60},
+	/* British Summer Time              UTC +1:00 */
 	{
-	"CET", "CEST", -60, +60},
-	    /* Central European Summer Time UTC +2:00 */
-	    /* Central European Time UTC +1:00 */
+	 "CET", "CEST", -60, +60},
+	/* Central European Summer Time UTC +2:00 */
+	/* Central European Time UTC +1:00 */
 	{
-	"EET", "EEST", -120, +60},
-	    /* EEST     Eastern European Summer Time UTC +3:00 */
-	    /* EET      Eastern European Time UTC +2:00 */
+	 "EET", "EEST", -120, +60},
+	/* EEST     Eastern European Summer Time UTC +3:00 */
+	/* EET      Eastern European Time UTC +2:00 */
 	{
-	"WET", "WEST", 0, +60}
+	 "WET", "WEST", 0, +60}
 };
 
 char *tzname[2];
