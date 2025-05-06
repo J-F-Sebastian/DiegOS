@@ -17,9 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define	YEAR0		2000	/* the first year in struct tm */
-#define	EPOCH_YR	2015	/* EPOCH = Jan 1 2015 00:00:00 */
-#define	SECS_DAY	(24L * 60L * 60L)
+/* The starting year in struct tm */
+#define	YEAR0		(2000)
+/* The EPOCH is January 1st 2015 00:00:00 AM */
+#define	EPOCH_YR	(2015)
+/* The EPOCH in seconds since YEAR0 */
+#define	EPOCH_SECS      (473385600L)
+#define	SECS_HOUR	(60L * 60L)
+#define	SECS_DAY	(24L * SECS_HOUR)
 #define	LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
 #define	YEARSIZE(year)	(LEAPYEAR(year) ? 366 : 365)
 
