@@ -65,8 +65,6 @@ char *asctime(const struct tm *timeptr)
 			 timeptr->tm_mday,
 			 timeptr->tm_hour,
 			 timeptr->tm_min, timeptr->tm_sec, timeptr->tm_year + YEAR0);
-	} else {
-		buf[0] = '\n';
 	}
 
 	return buf;
