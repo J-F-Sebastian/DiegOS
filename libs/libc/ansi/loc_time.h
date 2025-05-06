@@ -33,3 +33,21 @@ extern long int dst_off;
 extern int daylight;
 extern char *tzname[2];
 extern const int days_per_month[2][12];
+
+/*
+ * Convert seconds since YEAR0 to a struct tm
+ * and returns a pointer to an internal static memory area.
+ * epoch is considered correct w.r.t. the timezone, the
+ * daylight saving time, or any other seasonal adjustment.
+ * The function will convert epoch making
+ * no assumptions on timezone, daylight saving time, or any
+ * other seasonal adjustment.
+ * the field tm_isdst is set to -1.
+ *
+ * PARAMETERS IN
+ * const time_t *epoch - seconds since YEAR0 to be converted
+ *
+ * RETURNS
+ * A pointer to an internal struct tm filled with the converted values.
+ */
+struct tm *convtime(const time_t *epoch);
