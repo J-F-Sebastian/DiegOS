@@ -51,6 +51,6 @@ void tzset(void)
 {
 	tzname[0] = tzlist[timezone].nt;
 	tzname[1] = tzlist[timezone].dst;
-	timezone = tzlist[timezone].tz;
-	dst_off = tzlist[timezone].dstofs;
+	timezone = tzlist[timezone].tz * 60;
+	dst_off = tzlist[timezone].dstofs * 60;
 }
