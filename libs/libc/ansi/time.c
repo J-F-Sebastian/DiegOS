@@ -22,7 +22,7 @@
 
 time_t time(time_t * timer)
 {
-	time_t tmp = (time_t) (clock_get_seconds());
+	time_t tmp = (time_t) (clock_get_boot_seconds() + clock_get_seconds());
 
 	if (timer) {
 		*timer = tmp;
