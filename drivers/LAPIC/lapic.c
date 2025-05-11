@@ -29,9 +29,9 @@
 #include "lapic_private.h"
 
 /*
- * Reference frequency is 10 MHz
+ * Reference frequency is 100 MHz
  */
-#define REF_FREQ 10000000
+#define REF_FREQ 100000000
 
 /* Defaults to periodic */
 static uint8_t mode = 0;
@@ -131,6 +131,7 @@ static void calibrate_divisor()
 static int lapic_init(unsigned unitno)
 {
 	struct cpuid_data data;
+	unsigned temp;
 
 	if (unitno) {
 		return (ENXIO);
@@ -170,6 +171,14 @@ static int lapic_init(unsigned unitno)
 	if (EOK != add_int_cb(lapic_int_handler, 0)) {
 		return (EPERM);
 	}
+
+	temp = apic_read_version();
+	kdrvprintf("LAPIC frequency %u divisor %#x - version %#x (%s), %u LVT\n",
+		frequency,
+		divisor,
+		temp & 0xff,
+		(temp & 0xff) < 0x10 ? "82489DX" : "Integrated",
+		1 + ((temp >> 16) & 0xff));
 
 	return (EOK);
 }

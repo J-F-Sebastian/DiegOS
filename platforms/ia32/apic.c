@@ -74,19 +74,21 @@ BOOL apic_configure(char oneshot, char enableint, char vector, char divisor)
 	if (!apic_base)
 		return (FALSE);
 
-	temp = (unsigned)vector;
+	if (divisor & ~APIC_DIV_1)
+		return FALSE;
+
+	temp = apic_base[0x320 / sizeof(*apic_base)];
+	temp &= ~((3UL << 16) | 0xFF);
+	temp |= (unsigned)vector & 0xFF;
 	if (!enableint)
 		temp |= (1UL << 16);
 	if (!oneshot)
 		temp |= (1UL << 17);
-
 	apic_base[0x320 / sizeof(*apic_base)] = temp;
 
-	temp = 0;
+	temp = apic_base[0x3E0 / sizeof(*apic_base)];
+	temp &= ~APIC_DIV_1;
 	temp |= divisor;
-	if (temp & ~APIC_DIV_1)
-		return FALSE;
-
 	apic_base[0x3E0 / sizeof(*apic_base)] = temp;
 
 	return (TRUE);
