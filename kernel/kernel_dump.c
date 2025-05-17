@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <diegos/kernel_dump.h>
+#include <diegos/barriers.h>
 
 #include "threads.h"
 #include "mutex_private.h"
@@ -45,6 +46,11 @@ void threads_dump()
 void mutexes_dump()
 {
 	dump_mutex(NULL);
+}
+
+void barriers_dump()
+{
+	barrier_dump(NULL);
 }
 
 void threads_check()

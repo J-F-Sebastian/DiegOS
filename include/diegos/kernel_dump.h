@@ -24,6 +24,8 @@ void threads_dump(void);
 
 void mutexes_dump(void);
 
+void barriers_dump(void);
+
 void threads_check(void);
 
 #endif
