@@ -17,304 +17,303 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.file	"sw_interrupts.s"
+.file "sw_interrupts.s"
 .text
 /* SW INT */
-.globl swint00
-.globl swint01
-.globl swint02
-.globl swint03
-.globl swint04
-.globl swint05
-.globl swint06
-.globl swint07
-.globl swint08
-.globl swint09
-.globl swint10
-.globl swint11
-.globl swint12
-.globl swint13
-.globl swint14
-.globl swint15
+.globl swint48
+.globl swint49
+.globl swint50
+.globl swint51
+.globl swint52
+.globl swint53
+.globl swint54
+.globl swint55
+.globl swint56
+.globl swint57
+.globl swint58
+.globl swint59
+.globl swint60
+.globl swint61
+.globl swint62
+.globl swint63
 /* HW INT */
-.globl swint16
-.globl swint17
-.globl swint18
-.globl swint19
-.globl swint20
-.globl swint21
-.globl swint22
-.globl swint23
-.globl swint24
-.globl swint25
-.globl swint26
-.globl swint27
-.globl swint28
-.globl swint29
-.globl swint30
-.globl swint31
-.globl swint32
-.globl swint33
-.globl swint34
-.globl swint35
-.globl swint36
-.globl swint37
-.globl swint38
-.globl swint39
-.globl swint40
-.globl swint41
-.globl swint42
-.globl swint43
-.globl swint44
-.globl swint45
-.globl swint46
-.globl swint47
+.globl swint64
+.globl swint65
+.globl swint66
+.globl swint67
+.globl swint68
+.globl swint69
+.globl swint70
+.globl swint71
+.globl swint72
+.globl swint73
+.globl swint74
+.globl swint75
+.globl swint76
+.globl swint77
+.globl swint78
+.globl swint79
+.globl swint80
+.globl swint81
+.globl swint82
+.globl swint83
+.globl swint84
+.globl swint85
+.globl swint86
+.globl swint87
+.globl swint88
+.globl swint89
+.globl swint90
+.globl swint91
+.globl swint92
+.globl swint93
+.globl swint94
+.globl swint95
 
-.type  swint00, @function
-.type  swint01, @function
-.type  swint02, @function
-.type  swint03, @function
-.type  swint04, @function
-.type  swint05, @function
-.type  swint06, @function
-.type  swint07, @function
-.type  swint08, @function
-.type  swint09, @function
-.type  swint10, @function
-.type  swint11, @function
-.type  swint12, @function
-.type  swint13, @function
-.type  swint14, @function
-.type  swint15, @function
-.type  swint16, @function
-.type  swint17, @function
-.type  swint18, @function
-.type  swint19, @function
-.type  swint20, @function
-.type  swint21, @function
-.type  swint22, @function
-.type  swint23, @function
-.type  swint24, @function
-.type  swint25, @function
-.type  swint26, @function
-.type  swint27, @function
-.type  swint28, @function
-.type  swint29, @function
-.type  swint30, @function
-.type  swint31, @function
-.type  swint32, @function
-.type  swint33, @function
-.type  swint34, @function
-.type  swint35, @function
-.type  swint36, @function
-.type  swint37, @function
-.type  swint38, @function
-.type  swint39, @function
-.type  swint40, @function
-.type  swint41, @function
-.type  swint42, @function
-.type  swint43, @function
-.type  swint44, @function
-.type  swint45, @function
-.type  swint46, @function
-.type  swint47, @function
+.type swint48, @function
+.type swint49, @function
+.type swint50, @function
+.type swint51, @function
+.type swint52, @function
+.type swint53, @function
+.type swint54, @function
+.type swint55, @function
+.type swint56, @function
+.type swint57, @function
+.type swint58, @function
+.type swint59, @function
+.type swint60, @function
+.type swint61, @function
+.type swint62, @function
+.type swint63, @function
+.type swint64, @function
+.type swint65, @function
+.type swint66, @function
+.type swint67, @function
+.type swint68, @function
+.type swint69, @function
+.type swint70, @function
+.type swint71, @function
+.type swint72, @function
+.type swint73, @function
+.type swint74, @function
+.type swint75, @function
+.type swint76, @function
+.type swint77, @function
+.type swint78, @function
+.type swint79, @function
+.type swint80, @function
+.type swint81, @function
+.type swint82, @function
+.type swint83, @function
+.type swint84, @function
+.type swint85, @function
+.type swint86, @function
+.type swint87, @function
+.type swint88, @function
+.type swint89, @function
+.type swint90, @function
+.type swint91, @function
+.type swint92, @function
+.type swint93, @function
+.type swint94, @function
+.type swint95, @function
 
 .macro swint int
-cld				/* save interrupted process state */
-pusha				/* stack pointer is not changed   */
-call	*int_table + 4*\int	/* eax = (*irq_table[int])()      */
-popa
-iret				/* restart the process            */
+ pusha                          /* stack pointer is not changed   */
+ call *int_table + 4*\int(,1)   /* eax = (*int_table[int])()      */
+ popa
+ iret                           /* restart the process            */
 .endm
 
 .align 16
-swint00:
+swint48:
 swint 16
 
 .align 16
-swint01:
+swint49:
 swint 17
 
 .align 16
-swint02:
+swint50:
 swint 18
 
 .align 16
-swint03:
+swint51:
 swint 19
 
 .align 16
-swint04:
+swint52:
 swint 20
 
 .align 16
-swint05:
+swint53:
 swint 21
 
 .align 16
-swint06:
+swint54:
 swint 22
 
 .align 16
-swint07:
+swint55:
 swint 23
 
 .align 16
-swint08:
+swint56:
 swint 24
 
 .align 16
-swint09:
+swint57:
 swint 25
 
 .align 16
-swint10:
+swint58:
 swint 26
 
 .align 16
-swint11:
+swint59:
 swint 27
 
 .align 16
-swint12:
+swint60:
 swint 28
 
 .align 16
-swint13:
+swint61:
 swint 29
 
 .align 16
-swint14:
+swint62:
 swint 30
 
 .align 16
-swint15:
+swint63:
 swint 31
 
 .align 16
-swint16:
+swint64:
 swint 32
 
 .align 16
-swint17:
+swint65:
 swint 33
 
 .align 16
-swint18:
+swint66:
 swint 34
 
 .align 16
-swint19:
+swint67:
 swint 35
 
 .align 16
-swint20:
+swint68:
 swint 36
 
 .align 16
-swint21:
+swint69:
 swint 37
 
 .align 16
-swint22:
+swint70:
 swint 38
 
 .align 16
-swint23:
+swint71:
 swint 39
 
 .align 16
-swint24:
+swint72:
 swint 40
 
 .align 16
-swint25:
+swint73:
 swint 41
 
 .align 16
-swint26:
+swint74:
 swint 42
 
 .align 16
-swint27:
+swint75:
 swint 43
 
 .align 16
-swint28:
+swint76:
 swint 44
 
 .align 16
-swint29:
+swint77:
 swint 45
 
 .align 16
-swint30:
+swint78:
 swint 46
 
 .align 16
-swint31:
+swint79:
 swint 47
 
 .align 16
-swint32:
+swint80:
 swint 48
 
 .align 16
-swint33:
+swint81:
 swint 49
 
 .align 16
-swint34:
+swint82:
 swint 50
 
 .align 16
-swint35:
+swint83:
 swint 51
 
 .align 16
-swint36:
+swint84:
 swint 52
 
 .align 16
-swint37:
+swint85:
 swint 53
 
 .align 16
-swint38:
+swint86:
 swint 54
 
 .align 16
-swint39:
+swint87:
 swint 55
 
 .align 16
-swint40:
+swint88:
 swint 56
 
 .align 16
-swint41:
+swint89:
 swint 57
 
 .align 16
-swint42:
+swint90:
 swint 58
 
 .align 16
-swint43:
+swint91:
 swint 59
 
 .align 16
-swint44:
+swint92:
 swint 60
 
 .align 16
-swint45:
+swint93:
 swint 61
 
 .align 16
-swint46:
+swint94:
 swint 62
 
 .align 16
-swint47:
+swint95:
 swint 63

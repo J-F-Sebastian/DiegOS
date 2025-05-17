@@ -21,38 +21,38 @@
 .include "ints_equ.s"
 
 .text
-.globl hwint00
-.globl hwint01
-.globl hwint02
-.globl hwint03
-.globl hwint04
-.globl hwint05
-.globl hwint06
-.globl hwint07
-.globl hwint08
-.globl hwint09
-.globl hwint10
-.globl hwint11
-.globl hwint12
-.globl hwint13
-.globl hwint14
-.globl hwint15
-.type  hwint00, @function
-.type  hwint01, @function
-.type  hwint02, @function
-.type  hwint03, @function
-.type  hwint04, @function
-.type  hwint05, @function
-.type  hwint06, @function
-.type  hwint07, @function
-.type  hwint08, @function
-.type  hwint09, @function
-.type  hwint10, @function
-.type  hwint11, @function
-.type  hwint12, @function
-.type  hwint13, @function
-.type  hwint14, @function
-.type  hwint15, @function
+.globl hwint32
+.globl hwint33
+.globl hwint34
+.globl hwint35
+.globl hwint36
+.globl hwint37
+.globl hwint38
+.globl hwint39
+.globl hwint40
+.globl hwint41
+.globl hwint42
+.globl hwint43
+.globl hwint44
+.globl hwint45
+.globl hwint46
+.globl hwint47
+.type  hwint32, @function
+.type  hwint33, @function
+.type  hwint34, @function
+.type  hwint35, @function
+.type  hwint36, @function
+.type  hwint37, @function
+.type  hwint38, @function
+.type  hwint39, @function
+.type  hwint40, @function
+.type  hwint41, @function
+.type  hwint42, @function
+.type  hwint43, @function
+.type  hwint44, @function
+.type  hwint45, @function
+.type  hwint46, @function
+.type  hwint47, @function
 
 /*
  * Interrupts are serviced with interrupt gates, running at CPL 0, the same
@@ -82,7 +82,7 @@
  */
 /*
  *===========================================================================*
- *                               hwint00 - 07                                *
+ *                               hwint32 - 39                                *
  *===========================================================================*
  * Note this is a macro, it looks like a subroutine.
  */
@@ -113,40 +113,40 @@ iretl
 
 /* Each of these entry points is an expansion of the hwint_master macro */
 .align 64
-hwint00: /* Interrupt routine for irq 0 (the clock).*/
+hwint32: /* Interrupt routine for irq 0 (the clock).*/
 hwint_master 0
 
 .align 16
-hwint01: /* Interrupt routine for irq 1 (keyboard) */
+hwint33: /* Interrupt routine for irq 1 (keyboard) */
 hwint_master 1
 
 .align 16
-hwint02: /* Interrupt routine for irq 2 (cascade!) */
+hwint34: /* Interrupt routine for irq 2 (cascade!) */
 hwint_master 2
 
 .align 16
-hwint03: /* Interrupt routine for irq 3 (second serial) */
+hwint35: /* Interrupt routine for irq 3 (second serial) */
 hwint_master 3
 
 .align 16
-hwint04: /* Interrupt routine for irq 4 (first serial) */
+hwint36: /* Interrupt routine for irq 4 (first serial) */
 hwint_master 4
 
 .align 16
-hwint05: /* Interrupt routine for irq 5 (XT winchester) */
+hwint37: /* Interrupt routine for irq 5 (XT winchester) */
 hwint_master 5
 
 .align 16
-hwint06: /* Interrupt routine for irq 6 (floppy) */
+hwint38: /* Interrupt routine for irq 6 (floppy) */
 hwint_master 6
 
 .align 16
-hwint07: /* Interrupt routine for irq 7 (printer) */
+hwint39: /* Interrupt routine for irq 7 (printer) */
 hwint_master 7
 
 /*
  *===========================================================================*
- *                            hwint08 - 15                                   *
+ *                            hwint40 - 47                                   *
  *===========================================================================*
  *
  *Note this is a macro, it looks like a subroutine.
@@ -181,34 +181,34 @@ iretl
 
 /* Each of these entry points is an expansion of the hwint_slave macro */
 .align  16
-hwint08: /* Interrupt routine for irq 8 (realtime clock) */
+hwint40: /* Interrupt routine for irq 8 (realtime clock) */
 hwint_slave 8
 
 .align  16
-hwint09: /* Interrupt routine for irq 9 (irq 2 redirected) */
+hwint41: /* Interrupt routine for irq 9 (irq 2 redirected) */
 hwint_slave 9
 
 .align  16
-hwint10: /* Interrupt routine for irq 10 */
+hwint42: /* Interrupt routine for irq 10 */
 hwint_slave 10
 
 .align  16
-hwint11: /* Interrupt routine for irq 11 */
+hwint43: /* Interrupt routine for irq 11 */
 hwint_slave 11
 
 .align  16
-hwint12: /* Interrupt routine for irq 12 */
+hwint44: /* Interrupt routine for irq 12 */
 hwint_slave 12
 
 .align  16
-hwint13: /* Interrupt routine for irq 13 (FPU exception) */
+hwint45: /* Interrupt routine for irq 13 (FPU exception) */
 hwint_slave 13
 
 .align  16
-hwint14: /* Interrupt routine for irq 14 (AT winchester) */
+hwint46: /* Interrupt routine for irq 14 (AT winchester) */
 hwint_slave 14
 
 .align  16
-hwint15: /* Interrupt routine for irq 15 */
+hwint47: /* Interrupt routine for irq 15 */
 hwint_slave 15
 
