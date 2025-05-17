@@ -115,3 +115,11 @@ void apic_write_eoi()
 	if (apic_base)
 		apic_base[0xB0 / sizeof(*apic_base)] = 0;
 }
+
+unsigned apic_read_version()
+{
+	if (!apic_base)
+		return (0);
+
+	return apic_base[0x30 / sizeof(*apic_base)];
+}

@@ -49,4 +49,6 @@ unsigned apic_read_counter(void);
 
 void apic_write_eoi(void);
 
+unsigned apic_read_version();
+
 #endif
