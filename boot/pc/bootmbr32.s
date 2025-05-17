@@ -361,7 +361,6 @@ RET
 ; Registers used (to be saved by the caller)
 ; AX
 ; BX
-
 PrintString:
 MOV	AH, 0x0E
 MOV	BX, 0x0007
@@ -378,6 +377,7 @@ RET
 ; Print a green dot to display
 ; Registers used (to be saved by the caller)
 ; AX
+; BX
 PrintDot:
 ; Print a dot for every sector read in memory
 MOV	AX, 0x0EFE
@@ -408,5 +408,6 @@ ErrorString	db 'Error', 0x00
 StartString     db 0x0D, 0x0A, 'Starting ...', 0x0D, 0x0A, 0x00
 TIMES	446 - ($ - $$) db 0xdf
 
-MBR:	RESB	64
+MBR:
+TIMES 64 DB 0
 DW	0xAA55
