@@ -133,7 +133,7 @@ static int kbd_init(unsigned unitno)
 
 	flags_kbd |= (DRV_READ_BLOCK);
 
-	if (EOK != add_int_cb(kbd_interrupt, KEYBOARD_IRQ)) {
+	if (EOK != add_int_cb(kbd_interrupt, KEYBOARD_IVT)) {
 		return (EGENERIC);
 	}
 
@@ -172,7 +172,7 @@ static int kbd_start(unsigned unitno)
 	data |= 1;
 	send_data(data);
 
-	enable_int(KEYBOARD_IRQ);
+	enable_int(KEYBOARD_IVT);
 
 	return (EOK);
 }
@@ -195,7 +195,7 @@ static int kbd_stop(unsigned unitno)
 	flags_kbd &= ~DRV_STATUS_RUN;
 	flags_kbd |= DRV_STATUS_STOP;
 
-	disable_int(KEYBOARD_IRQ);
+	disable_int(KEYBOARD_IVT);
 
 	/* Flush the Output Buffer */
 	read_data(&data);
@@ -216,7 +216,8 @@ static int kbd_done(unsigned unitno)
 	}
 
 	flags_kbd = DRV_STATUS_DONE;
-	return (EOK);
+
+	return (del_int_cb(KEYBOARD_IVT));
 }
 
 static int kbd_read(void *buf, unsigned bytes, unsigned unitno)
@@ -341,7 +342,7 @@ static int mse_init(unsigned unitno)
 
 	flags_mse |= (DRV_READ_BLOCK);
 
-	if (EOK != add_int_cb(mse_interrupt, PS2MOUSE_IRQ)) {
+	if (EOK != add_int_cb(mse_interrupt, PS2MOUSE_IVT)) {
 		return (EGENERIC);
 	}
 
@@ -370,7 +371,7 @@ static int mse_start(unsigned unitno)
 	flags_mse &= ~DRV_STATUS_STOP;
 	flags_mse |= DRV_STATUS_RUN;
 
-	enable_int(PS2MOUSE_IRQ);
+	enable_int(PS2MOUSE_IVT);
 
 	return (EOK);
 }
@@ -391,7 +392,7 @@ static int mse_stop(unsigned unitno)
 	flags_mse &= ~DRV_STATUS_RUN;
 	flags_mse |= DRV_STATUS_STOP;
 
-	disable_int(PS2MOUSE_IRQ);
+	disable_int(PS2MOUSE_IVT);
 
 	return (EOK);
 }
@@ -403,7 +404,8 @@ static int mse_done(unsigned unitno)
 	}
 
 	flags_mse = DRV_STATUS_DONE;
-	return (EOK);
+
+	return (del_int_cb(PS2MOUSE_IVT));
 }
 
 static int mse_read(void *buf, unsigned bytes, unsigned unitno)

@@ -88,4 +88,7 @@ enum i8042_ctrl_config {
 #define DISABLE_PORT1   (0xAD)
 #define ENABLE_PORT1    (0xAE)
 
+#define KEYBOARD_IVT    (32 + KEYBOARD_IRQ)
+#define PS2MOUSE_IVT    (32 + PS2MOUSE_IRQ)
+
 #endif

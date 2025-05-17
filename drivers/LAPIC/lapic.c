@@ -39,7 +39,7 @@ static uint8_t divisor = 0;
 static unsigned ctrvalue = TIMER_MAX_VAL;
 static unsigned frequency = 0;
 static unsigned flags = DRV_IS_CHAR;
-static void (*cbfn) (void) = NULL;
+static void (*cbfn)(void) = NULL;
 
 static BOOL lapic_int_handler()
 {
@@ -146,7 +146,7 @@ static int lapic_init(unsigned unitno)
 	 * CHECK INT MAPPINGS Intel has differences
 	 * with 8253 hardware exceptions etc. etc.
 	 */
-	apic_configure(mode, 0, LAPIC_IRQ, APIC_DIV_1);
+	apic_configure(mode, 0, LAPIC_IVT, APIC_DIV_1);
 
 	execute_cpuid(&data, 0);
 	if (data.word[EAX] > 0x15) {
@@ -168,17 +168,16 @@ static int lapic_init(unsigned unitno)
 
 	calibrate_divisor();
 
-	if (EOK != add_int_cb(lapic_int_handler, 0)) {
+	if (EOK != add_int_cb(lapic_int_handler, LAPIC_IVT)) {
 		return (EPERM);
 	}
 
 	temp = apic_read_version();
 	kdrvprintf("LAPIC frequency %u divisor %#x - version %#x (%s), %u LVT\n",
-		frequency,
-		divisor,
-		temp & 0xff,
-		(temp & 0xff) < 0x10 ? "82489DX" : "Integrated",
-		1 + ((temp >> 16) & 0xff));
+		   frequency,
+		   divisor,
+		   temp & 0xff,
+		   (temp & 0xff) < 0x10 ? "82489DX" : "Integrated", 1 + ((temp >> 16) & 0xff));
 
 	return (EOK);
 }
@@ -196,7 +195,7 @@ static int lapic_start(unsigned unitno)
 	flags &= ~DRV_STATUS_STOP;
 	flags |= DRV_STATUS_RUN;
 
-	apic_configure(mode, 1, LAPIC_IRQ, divisor);
+	apic_configure(mode, 1, LAPIC_IVT, divisor);
 	apic_write_counter(ctrvalue);
 
 	return (EOK);
@@ -226,10 +225,10 @@ static int lapic_done(unsigned unitno)
 		return (EINVAL);
 	}
 
-	apic_configure(mode, 0, LAPIC_IRQ, divisor);
+	apic_configure(mode, 0, LAPIC_IVT, divisor);
 	apic_write_counter(0);
 
-	return (del_int_cb(0));
+	return (del_int_cb(LAPIC_IVT));
 }
 
 static int lapic_ioctrl(void *data, unsigned opcode, unsigned unitno)
@@ -267,7 +266,7 @@ static int lapic_ioctrl(void *data, unsigned opcode, unsigned unitno)
 		}
 
 		mode = (uint8_t) udata[0];
-		apic_configure(mode, 1, LAPIC_IRQ, divisor);
+		apic_configure(mode, 1, LAPIC_IVT, divisor);
 		return (EOK);
 
 	case CLK_SET_CB:

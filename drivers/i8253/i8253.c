@@ -33,7 +33,7 @@ static const uint8_t modes[] = { (COUNTER0 | RW_LSB_MSB | MODE3), (COUNTER0 | RW
 static uint8_t mode = 0;
 static unsigned ctrvalue = TIMER_MAX_VAL;
 static unsigned flags = DRV_IS_CHAR;
-static void (*cbfn) (void) = NULL;
+static void (*cbfn)(void) = NULL;
 
 static BOOL i8253_int_handler()
 {
@@ -53,7 +53,7 @@ static int i8253_init(unsigned unitno)
 		return (ENXIO);
 	}
 
-	if (EOK != add_int_cb(i8253_int_handler, CLOCK_IRQ)) {
+	if (EOK != add_int_cb(i8253_int_handler, CLOCK_IVT)) {
 		return (EPERM);
 	}
 
@@ -76,7 +76,7 @@ static int i8253_start(unsigned unitno)
 	out_byte(TIMER0, (uint8_t) ctrvalue);	/* load timer low byte */
 	out_byte(TIMER0, (uint8_t) (ctrvalue >> 8));	/* load timer high byte */
 
-	enable_int(CLOCK_IRQ);
+	enable_int(CLOCK_IVT);
 
 	return (EOK);
 }
@@ -94,7 +94,7 @@ static int i8253_stop(unsigned unitno)
 	flags &= ~DRV_STATUS_RUN;
 	flags |= DRV_STATUS_STOP;
 
-	disable_int(CLOCK_IRQ);
+	disable_int(CLOCK_IVT);
 
 	return (EOK);
 }
@@ -110,7 +110,7 @@ static int i8253_done(unsigned unitno)
 	out_byte(TIMER0, 0);
 	out_byte(TIMER0, 0);
 
-	return (del_int_cb(CLOCK_IRQ));
+	return (del_int_cb(CLOCK_IVT));
 }
 
 static int i8253_ioctrl(void *data, unsigned opcode, unsigned unitno)

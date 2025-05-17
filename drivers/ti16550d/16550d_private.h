@@ -149,4 +149,6 @@ enum uart_msr {
 	MSR_DCD = (1 << 7)
 };
 
+#define UART_IVT (32 + RS232_IRQ)
+
 #endif

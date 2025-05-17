@@ -331,7 +331,7 @@ static int uart_init(unsigned unitno)
 		flags |= (DRV_READ_BLOCK | DRV_WRITE_BLOCK);
 	}
 
-	if (EOK != add_int_cb(uart_interrupt, RS232_IRQ)) {
+	if (EOK != add_int_cb(uart_interrupt, UART_IVT)) {
 		return (EGENERIC);
 	}
 
@@ -381,7 +381,7 @@ static int uart_start(unsigned unitno)
 	write_register(COM1, FCR, FCR_VAL);
 	write_register(COM1, IER, IER_VAL);
 
-	enable_int(RS232_IRQ);
+	enable_int(UART_IVT);
 
 	return (EOK);
 }
@@ -406,7 +406,7 @@ static int uart_stop(unsigned unitno)
 
 	write_register(COM1, IER, IER_VAL);
 
-	disable_int(RS232_IRQ);
+	disable_int(UART_IVT);
 
 	return (EOK);
 }
@@ -420,7 +420,8 @@ static int uart_done(unsigned unitno)
 	free(tx_buf);
 	free(rx_buf);
 	flags = DRV_STATUS_DONE;
-	return (EOK);
+
+	return (del_int_cb(UART_IVT));
 }
 
 static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
