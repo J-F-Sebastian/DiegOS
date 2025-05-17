@@ -111,7 +111,7 @@ void kernel_libs_init()
 		}
 	}
 
-	kprintf("kernel setup complete.\n");
+	kprintf("kernel libraries setup complete.\n");
 }
 
 void kernel_threads_init()
