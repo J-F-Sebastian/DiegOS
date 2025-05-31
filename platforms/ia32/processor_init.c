@@ -132,10 +132,10 @@ const char *processor_init()
 		strcat(cpu_signature, " ) ");
 	}
 
-	execute_cpuid(&info, 0x80000000);
+	execute_cpuid(&info, 0x80000000UL);
 	excpuid_level = info.word[EAX];
 
-	if (excpuid_level & 0x80000000) {
+	if (excpuid_level > 0x80000003UL) {
 		/*
 		 * Extended CPU Info are supported!
 		 */
