@@ -24,6 +24,7 @@ extern void set_ts(void);
 extern void init_fp(void);
 extern void init_simd(void);
 void init_apic(void);
+void init_mtrr(void);
 void idt_init(void);
 
 void exc_handler_fp(void);

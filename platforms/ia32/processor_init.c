@@ -42,61 +42,6 @@ static char cpu_signature[768];
  */
 static unsigned cpu_caps[2] = { 0, 0 };
 
-static void init_mtrr(void)
-{
-	unsigned long long buffer[2];
-	unsigned char count;
-	const unsigned freg[] =
-	    { 0x250, 0x258, 0x259, 0x268, 0x269, 0x26A, 0x26B, 0x26C, 0x26D, 0x26E, 0x26F, 0 };
-	unsigned reg = 0x200;
-	char *ptr = cpu_signature + strlen(cpu_signature);
-
-	*ptr++ = '\n';
-
-	/*
-	 * Check IA32_MTRR_DEF_TYPE
-	 */
-	read_msr(buffer, 0x2FF);
-	sprintf(ptr, "MTRR DefType %d, E %c, Fix %c\n", (int)(buffer[0] & 7ULL),
-		(buffer[0] & (1ULL << 11)) ? 'Y' : 'N', (buffer[0] & (1ULL << 10)) ? 'Y' : 'N');
-	ptr += strlen(ptr);
-
-	/*
-	 * IA32_MTRR_FIX*
-	 */
-	count = 0;
-	while (freg[count]) {
-		read_msr(buffer, freg[count]);
-		sprintf(ptr, "MTRR FIX %X -> %llX (%d)\n", freg[count], buffer[0], count);
-		ptr += strlen(ptr);
-		count++;
-	}
-	/*
-	 * IA32_MTRRCAP (MTRRcap), MTRRCapability (RO)
-	 */
-	read_msr(buffer, 0xFE);
-	count = (buffer[0] & 0xFF);
-	while (count--) {
-		/*
-		 * IA32_MTRR_PHYSBASE0
-		 */
-		read_msr(buffer, reg++);
-		/*
-		 *  IA32_MTRR_PHYSMASK0
-		 */
-		read_msr(buffer + 1, reg++);
-		/*
-		 * If bit V (11) is set the entry is Valid
-		 */
-		if (buffer[1] & (1ULL << 11)) {
-			sprintf(ptr, "MTRR %X -> %X (%d)\n",
-				(int)(buffer[0] & 0x00000000FFFFF000ULL),
-				~(int)(buffer[1] & 0x00000000FFFFF000ULL), buffer[0] & 0xFF);
-			ptr += strlen(ptr);
-		}
-	}
-}
-
 const char *processor_init()
 {
 	struct cpuid_data info;
