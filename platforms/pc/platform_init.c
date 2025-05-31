@@ -78,31 +78,42 @@ static unsigned long tickfn(void)
 static int drivers_list_init(void)
 {
 	device_t *dev;
+	device_t *dev1, *dev2, *dev3;
 
 	dev = device_create(&uart16550d_drv, 0);
-	if (!dev) return (ENODEV);
+	if (!dev)
+		return (ENODEV);
 
 	if (is_apic_supported()) {
 		dev = device_create(&lapic_drv, 0);
 	} else {
 		dev = device_create(&i8253_drv, 0);
 	}
-	if (!dev) return (ENODEV);
+	if (!dev)
+		return (ENODEV);
 
 	dev = device_create(&i82371sb_drv, 0);
-	if (!dev) return (ENODEV);
+	dev1 = device_create(&i82371sb_drv, 1);
+	dev2 = device_create(&i82371sb_drv, 2);
+	dev3 = device_create(&i82371sb_drv, 3);
+
+	if ((dev || dev1 || dev2 || dev3) == 0) {
+		return (ENODEV);
+	}
 
 	dev = device_create(&i8042_kbd_drv, 0);
-	if (!dev) return (ENODEV);
+	if (!dev)
+		return (ENODEV);
 
-	if (device_set_access(dev, NULL, keyboard_read_fn) != EOK)  return (ENODEV);
+	if (device_set_access(dev, NULL, keyboard_read_fn) != EOK)
+		return (ENODEV);
 
 	dev = device_create(&i8042_mouse_drv, 0);
-	if (!dev) return (ENODEV);
+	if (!dev)
+		return (ENODEV);
 
 	return (EOK);
 }
-
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
 extern STATUS iomalloc_init(const void *start, const void *end);
