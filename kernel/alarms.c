@@ -281,16 +281,16 @@ static void dump_internal(const alarm_t * alm)
 	if (!alm->flags) {
 		strcat(tempbuf, "DISABLED");
 	}
-	fprintf(stderr, "%-15s | %6u | %s\n", alm->name, alm->msecs, tempbuf);
+	printf("%-15s | %6u | %s\n", alm->name, alm->msecs, tempbuf);
 }
 
 void alarm_dump(const alarm_t * alm)
 {
 	if (!alm) {
-		fprintf(stderr, "\n--- ALARMS TABLE -----------------------\n\n");
+		printf("\n--- ALARMS TABLE -----------------------\n\n");
 	}
-	fprintf(stderr, "%-15s   %6s   %s\n", "ALARM NAME", "PERIOD", "FLAGS");
-	fprintf(stderr, "________________________________________\n");
+	printf("%-15s   %6s   %s\n", "ALARM NAME", "PERIOD", "FLAGS");
+	printf("________________________________________\n");
 	if (alm) {
 		dump_internal(alm);
 	} else {
@@ -300,5 +300,5 @@ void alarm_dump(const alarm_t * alm)
 			alm = (alarm_t *) alm->header.next;
 		}
 	}
-	fprintf(stderr, "----------------------------------------\n\n");
+	printf("----------------------------------------\n\n");
 }

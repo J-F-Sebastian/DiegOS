@@ -155,19 +155,17 @@ BOOL mutex_is_locked(struct mutex * mtx)
 
 static void dump_internal(struct mutex *mtx)
 {
-	fprintf(stderr,
-		"%-15s | %11u | %8s | %s\n",
+	printf("%-15s | %11u | %8s | %s\n",
 		mtx->name, mtx->locker_tid, mutex_is_locked(mtx) ? "LOCKED" : "UNLOCKED", "N/A");
 }
 
 void dump_mutex(struct mutex *mtx)
 {
 	if (!mtx) {
-		fprintf(stderr, "\n--- MUTEXES TABLE ----------------------\n\n");
+		printf("\n--- MUTEXES TABLE ----------------------\n\n");
 	}
-	fprintf(stderr,
-		"%-15s   %11s   %8s   %s\n", "MUTEX NAME", "LOCKER TID", "STATE", "WAITING TIDs");
-	fprintf(stderr, "______________________________________________\n");
+	printf("%-15s   %11s   %8s   %s\n", "MUTEX NAME", "LOCKER TID", "STATE", "WAITING TIDs");
+	printf("______________________________________________\n");
 	if (mtx) {
 		dump_internal(mtx);
 	} else {
@@ -178,5 +176,5 @@ void dump_mutex(struct mutex *mtx)
 			mtx = (struct mutex *)mtx->header.next;
 		}
 	}
-	fprintf(stderr, "----------------------------------------------\n\n");
+	printf("----------------------------------------------\n\n");
 }

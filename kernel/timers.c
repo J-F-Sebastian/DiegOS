@@ -271,18 +271,18 @@ static void dump_internal(const timer_t * tmr)
 	if (!tmr->flags) {
 		strcat(tempbuf, "DISABLED");
 	}
-	fprintf(stderr, "%-15s | %6u | %10llu | %s\n", tmr->name, tmr->msecs, tmr->expiration,
+	printf("%-15s | %6u | %10llu | %s\n", tmr->name, tmr->msecs, tmr->expiration,
 		tempbuf);
 }
 
 void timers_dump(const timer_t * tmr)
 {
 	if (!tmr) {
-		fprintf(stderr, "\n--- TIMERS TABLE -------------------------------------\n\n");
+		printf("\n--- TIMERS TABLE -------------------------------------\n\n");
 	}
-	fprintf(stderr, "%-15s   %6s   %10s    %s\n", "TIMER NAME", "PERIOD", "EXPIRATION",
+	printf("%-15s   %6s   %10s    %s\n", "TIMER NAME", "PERIOD", "EXPIRATION",
 		"FLAGS");
-	fprintf(stderr, "______________________________________________________\n");
+	printf("______________________________________________________\n");
 	if (tmr) {
 		dump_internal(tmr);
 	} else {
@@ -292,7 +292,7 @@ void timers_dump(const timer_t * tmr)
 			tmr = (timer_t *) tmr->header.next;
 		}
 	}
-	fprintf(stderr, "------------------------------------------------------\n\n");
+	printf("------------------------------------------------------\n\n");
 }
 
 void timers_thread_entry(void)

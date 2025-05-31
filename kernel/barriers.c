@@ -198,8 +198,7 @@ void resume_on_barriers()
 
 static void dump_internal(const barrier_t * barrier)
 {
-	fprintf(stderr,
-		"%-15s | %5s | %4s | %s\n",
+	printf("%-15s | %5s | %4s | %s\n",
 		barrier->name,
 		(barrier->flags & BARRIER_OPEN) ? "OPEN" : "CLOSED",
 		(barrier->flags & BARRIER_AUTOCLOSE) ? "YES" : "NO", "N/A");
@@ -208,11 +207,11 @@ static void dump_internal(const barrier_t * barrier)
 void barrier_dump(const barrier_t * barrier)
 {
 	if (!barrier) {
-		fprintf(stderr, "\n--- BARRIERS TABLE ----------------------\n\n");
+		printf("\n--- BARRIERS TABLE ----------------------\n\n");
 	}
-	fprintf(stderr, "%-15s   %5s   %4s   %s\n",
+	printf("%-15s   %5s   %4s   %s\n",
 		"BARRIER NAME", "STATE", "AUTO", "WAITING THREADS");
-	fprintf(stderr, "________________________________________\n");
+	printf("________________________________________\n");
 	if (barrier) {
 		dump_internal(barrier);
 	} else {
@@ -222,5 +221,5 @@ void barrier_dump(const barrier_t * barrier)
 			barrier = (barrier_t *) barrier->header.next;
 		}
 	}
-	fprintf(stderr, "----------------------------------------\n\n");
+	printf("----------------------------------------\n\n");
 }
