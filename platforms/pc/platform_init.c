@@ -34,6 +34,7 @@
 #include "../ia32/ints_private.h"
 #include "../ia32/ports.h"
 #include "../ia32/apic.h"
+#include "../ia32/mtrr.h"
 #include "../../drivers/tty/vga_tty.h"
 #include "../../drivers/ti16550d/16550d.h"
 #include "../../drivers/i8253/i8253.h"
@@ -127,9 +128,11 @@ void platform_init()
 
 	cacheable_memory(&heap_base, &heap_size);
 	io_memory(&io_base, &io_size);
+	mtrr_configure((uintptr_t) heap_base, heap_size, MTRR_TYPE_WB);
+	mtrr_configure((uintptr_t) io_base, io_size, MTRR_TYPE_WC);
+
 	(void)malloc_init((const void *)heap_base, (const void *)(heap_base + heap_size));
 	(void)iomalloc_init((const void *)io_base, (const void *)(io_base + io_size));
-
 
 	/*
 	 * Init interrupts, all PIC lines are disabled
@@ -195,4 +198,6 @@ void drivers_init()
 	    (STDERR_FILENO != open(DEFAULT_STDERR, O_WRONLY, 0))) {
 		abort();
 	}
+
+	mtrr_dump();
 }
