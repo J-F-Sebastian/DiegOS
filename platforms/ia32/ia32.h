@@ -61,6 +61,16 @@
  */
 int cpu_check_capability(int capset, int capability);
 
+/*
+ * Read or write MSR registers.
+ * The buffer parameter points to an array of 2 doubleword variables,
+ * register EAX is read into the first item,
+ * register EDX is read into the second item.
+ * register EAX is written from the first item,
+ * register EDX is written from the second item.
+ * register EAX carries the low-order bits.
+ * register EDX carries the high-order bits.
+ */
 void read_msr(void *buffer, unsigned msrreg);
 void write_msr(void *buffer, unsigned msrreg);
 
