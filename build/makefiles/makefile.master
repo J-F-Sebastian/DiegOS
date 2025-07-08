@@ -73,8 +73,15 @@ CDEFS += -DDBG_MODULE
 endif
 
 # Targets used by rules
+.PHONY: default prepare
 
-default: all
+default: prepare all
+
+prepare:
+	rm -f ../../processor
+	rm -f ../../platform
+	ln -s ./platforms/$(CPU)/include ../../processor
+	ln -s ./platforms/$(PLATFORM)/include ../../platform
 
 objdirs:
 	mkdir -p $(OBJPREFIX)
