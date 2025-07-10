@@ -17,71 +17,39 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-# include dependencies from other makefiles.
-# IMPORTANT: the target makefile, the one inside the platform build
-# folder, MUST include a makefile.config BEFORE including
-# makefile.master.
-# Failing to do so will result in the unavailability of several exported
-# variables and in the impossibility to expand other variables, eventually
-# leading the build to a failure.
-
-#include makefile.$(CPU)
-#include makefile.$(PLATFORM)
-
-# Generic exports to compile, link and store derived objects
-
-export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g3
-export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g3
-export AS = $(CC) -xassembler
-export ASCC = $(CC) -xassembler-with-cpp
-export LN = ld --oformat binary -eDiegOS -static
-export AR = ar cr
-
-# OBJPREFIX is used to identify the derived objects of the selected CPU+PLATFORM
-# combine. Derived objects are stored in folder named after OBJPREFIX.
-
-export OBJPREFIX = $(CPU)_$(PLATFORM)
-
-# CDEFS is a standard variable used to pass defines to a C compiler.
-# Refer to the makefile.config template for a description of all available
-# variables and their effect on CDEFS.
-
-export CDEFS = -DDIEGOS_CPU=$(CPU)
-CDEFS += -DDIEGOS_CPU_SPEC=$(CPU_SPEC)
-CDEFS += -DDIEGOS_PLAT=$(PLATFORM)
-CDEFS += -DDIEGOS_MAX_THREADS=$(MAX_THREADS)
-CDEFS += -D_BYTE_ORDER=$(BYTE_ORDER)
-CDEFS += -DCACHE_ALN=$(CACHE_ALN)
-CDEFS += -DDEFAULT_CLOCK_RES=$(DEFAULT_CLOCK_RES)
-CDEFS += -DDEFAULT_STDIN="\$(DEFAULT_STDIN)\"
-CDEFS += -DDEFAULT_STDOUT="\$(DEFAULT_STDOUT)\"
-CDEFS += -DDEFAULT_STDERR="\$(DEFAULT_STDERR)\"
-CDEFS += -DDEFAULT_DBG_TTY="\$(DEFAULT_DBG_TTY)\"
-CDEFS += -DIOMEMORY_SIZE=$(IOMEMORY_SIZE)
-CDEFS += -DMAX_IO_ALLOCS=$(MAX_IO_ALLOCS)
-
-ifeq ($(SUPPORT_FP),"y")
-CDEFS += -DENABLE_FP
-endif
-
-ifeq ($(SUPPORT_SIMD),"y")
-CDEFS += -DENABLE_SIMD
-endif
-
-ifeq ($(DBG_MODULE),"y")
-CDEFS += -DDBG_MODULE
-endif
+# IMPORTANT:
+#
+# +---------------------------------------------------------------+
+# | the target makefile, the one inside the platform build folder,|
+# | MUST include a makefile.config BEFORE including the master    |
+# | makefile.                                                     |
+# | the target makefile, the one inside the platform build folder,|
+# | MUST include makefile.prepare and makefile.exports BEFORE     |
+# | including the master makefile.                                |
+# | Makefiles for components, libraries, the kernel and others    |
+# | can include the master makefile alone, provded that they are  |
+# | invoked from a makefile inside the platform build folder.     |
+# +---------------------------------------------------------------+
+#
+# This makefile purpose is to declare the targets of any makefile
+# in the DiegOS tree.
+# You need to include this file anytime as the targets and implicit
+# rules are not pre-defined.
+#
 
 # Targets used by rules
-.PHONY: default prepare
+
+.PHONY: default prepare prepclean
 
 default: prepare all
 
-prepare:
-	rm -f ../../processor
-	rm -f ../../platform
-	ln -s ./platforms/$(CPU)/include ../../processor
-	ln -s ./platforms/$(PLATFORM)/include ../../platform
+prepare: prepclean
+	ln -s $(WSROOT)/platforms/$(CPU)/include $(WSROOT)/include/processor
+	ln -s $(WSROOT)/platforms/$(PLATFORM)/include $(WSROOT)/include/platform
+
+prepclean:
+	rm -f $(WSROOT)/include/processor
+	rm -f $(WSROOT)/include/platform
 
 objdirs:
 	mkdir -p $(OBJPREFIX)

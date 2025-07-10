@@ -27,9 +27,9 @@
 # configuration.
 
 include makefile.config
+include ../makefiles/makefile.prepare
+include ../makefiles/makefile.exports
 include ../makefiles/makefile.master
-include ../makefiles/makefile.$(CPU)
-include ../makefiles/makefile.$(PLATFORM)
 
 STATICLIST=../../kernel/$(OBJPREFIX)_diegos.a
 
