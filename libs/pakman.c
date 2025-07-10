@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pakman.h>
+#include <libs/pakman.h>
 #include <errno.h>
 
 struct packet_int {

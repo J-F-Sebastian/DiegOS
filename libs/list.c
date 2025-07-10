@@ -19,7 +19,7 @@
 
 #include <errno.h>
 
-#include "list.h"
+#include <libs/list.h>
 
 int list_init(list_inst * list)
 {

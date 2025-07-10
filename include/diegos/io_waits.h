@@ -21,7 +21,7 @@
 #define IO_WAITS_H_INCLUDED
 
 #include <stdint.h>
-#include <list.h>
+#include <libs/list.h>
 
 typedef list_inst wait_queue_t;
 

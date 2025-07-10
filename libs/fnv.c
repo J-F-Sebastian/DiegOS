@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "fnv.h"
+#include <libs/fnv.h>
 
 static const uint64_t FNV_PRIME_64 = 1099511628211ULL;
 static const uint64_t FNV_OFS_64 = 14695981039346656037ULL;

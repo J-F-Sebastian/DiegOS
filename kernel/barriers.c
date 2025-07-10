@@ -20,10 +20,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <list.h>
+#include <libs/list.h>
 #include <diegos/barriers.h>
 #include <diegos/interrupts.h>
-#include <bitmaps.h>
+#include <libs/bitmaps.h>
 #include <string.h>
 
 #include "barriers_private.h"

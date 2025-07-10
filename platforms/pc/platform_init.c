@@ -29,19 +29,19 @@
 #include <diegos/drivers.h>
 
 #include "../../kernel/platform_include.h"
-#include "i8259.h"
+#include <platform/i8259.h>
 #include "../devices/keyboard.h"
-#include "../ia32/ints_private.h"
-#include "../ia32/ports.h"
-#include "../ia32/apic.h"
-#include "../ia32/mtrr.h"
+//#include <../ia32/ints_private.h"
+#include <processor/ports.h>
+#include <processor/apic.h>
+#include <processor/mtrr.h>
 #include "../../drivers/tty/vga_tty.h"
 #include "../../drivers/ti16550d/16550d.h"
 #include "../../drivers/i8253/i8253.h"
 #include "../../drivers/i82371SB/82371SB.h"
 #include "../../drivers/lo/local_loop.h"
-#include "../../include/libs/pci_lib.h"
-#include "../../include/libs/iomalloc.h"
+#include <libs/pci_lib.h>
+#include <libs/iomalloc.h>
 #include "../../drivers/i8042/i8042.h"
 #include "../../drivers/LAPIC/lapic.h"
 

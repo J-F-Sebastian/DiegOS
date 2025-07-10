@@ -22,8 +22,8 @@
 #include <limits.h>
 #include <string.h>
 #include <assert.h>
-#include <ia32/ports.h>
-#include <pc/int86.h>
+#include <processor/ports.h>
+#include <platform/int86.h>
 #include <diegos/devices.h>
 #include <errno.h>
 #include <endian.h>

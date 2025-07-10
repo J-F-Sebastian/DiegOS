@@ -20,10 +20,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <diegos/interrupts.h>
+#include <processor/ia32.h>
+#include <processor/apic.h>
 #include "../../kernel/platform_include.h"
 #include "ia32_private.h"
-#include "ia32.h"
-#include "apic.h"
 
 #define MASK1   (FPU | MMX | FXSR | SSE | SSE2)
 #define MASK2   (SSE3 | SSSE3 | SSE4_1 | SSE4_2)

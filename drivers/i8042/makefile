@@ -1,10 +1,8 @@
-include ../../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 OBJS = i8042.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
-
-CFLAGS+= -I../../include -I../../include/libs -I../../platforms
 
 all: objdirs $(OBJSO)
 

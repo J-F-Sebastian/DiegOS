@@ -20,7 +20,7 @@
 #ifndef _EVENTS_H_
 #define _EVENTS_H_
 
-#include <queue_type.h>
+#include <libs/queue_type.h>
 
 typedef void (*event_freefn) (void *ptr);
 

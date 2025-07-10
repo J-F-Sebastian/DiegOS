@@ -18,7 +18,7 @@
  */
 
 #include "../../kernel/platform_include.h"
-#include "int86.h"
+#include <platform/int86.h>
 #include <types_common.h>
 
 void cacheable_memory(void **base, unsigned long *size)

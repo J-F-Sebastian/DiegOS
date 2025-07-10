@@ -20,7 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <chunks.h>
+#include <libs/chunks.h>
 #include <diegos/io_waits.h>
 #include <diegos/interrupts.h>
 

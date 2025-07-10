@@ -1,4 +1,4 @@
-include ../../../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 OBJS = strcpy.o strncpy.o strcat.o strncat.o strcmp.o strncmp.o\
 	strchr.o strrchr.o strspn.o strcspn.o strpbrk.o strstr.o\
@@ -15,8 +15,6 @@ OBJS = strcpy.o strncpy.o strcat.o strncat.o strcmp.o strncmp.o\
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
-CFLAGS+= -I../../../include 
-
 all: objdirs $(OBJSO)
 	$(AR) ../$(OBJPREFIX)_libc.a $(OBJSO)
 	

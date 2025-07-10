@@ -22,8 +22,8 @@
 #include <diegos/devices.h>
 #include <diegos/net_interfaces.h>
 #include <errno.h>
-#include <list.h>
-#include <chunks.h>
+#include <libs/list.h>
+#include <libs/chunks.h>
 
 #include "scheduler.h"
 #include "threads.h"

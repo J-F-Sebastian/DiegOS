@@ -22,9 +22,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "list.h"
-#include "chunks.h"
-#include "bitmaps.h"
+#include <libs/list.h>
+#include <libs/chunks.h>
+#include <libs/bitmaps.h>
 
 typedef struct chunks_pool {
 	unsigned aln;

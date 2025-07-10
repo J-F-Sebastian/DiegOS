@@ -1,4 +1,4 @@
-include ../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 OBJS = threads.o scheduler.o mutex.o kernel.o idle_thread.o \
 	kprintf.o clock.o fail_safe.o kernel_dump.o \
@@ -11,8 +11,6 @@ OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
 OBJSTART = diegos_init.o
 
 OBJSTARTO = $(addprefix $(OBJPREFIX)/, $(OBJSTART))
-
-CFLAGS+= -I../include -I../include/libs
 
 all: objdirs $(OBJSO) $(OBJSTARTO)
 	cd libs && make all

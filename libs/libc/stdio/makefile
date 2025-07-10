@@ -1,4 +1,4 @@
-include ../../../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 OBJS = sprintf.o snprintf.o vsnprintf.o printf.o fprintf.o\
 	vprintf.o vsprintf.o vfprintf.o\
@@ -15,8 +15,6 @@ OBJS = sprintf.o snprintf.o vsnprintf.o printf.o fprintf.o\
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
-CFLAGS+= -I../../../include 
-
 all: objdirs $(OBJSO)
 	$(AR) ../$(OBJPREFIX)_libc.a $(OBJSO)
 	

@@ -18,9 +18,9 @@
 #
 
 include makefile.config
+include ../makefiles/makefile.prepare
+include ../makefiles/makefile.exports
 include ../makefiles/makefile.master
-include ../makefiles/makefile.$(CPU)
-include ../makefiles/makefile.$(PLATFORM)
 
 STATICLIST=../../kernel/$(OBJPREFIX)_diegos.a
 
@@ -56,7 +56,7 @@ all: mbr.bin bootsect.bin
 	./mkimage -b mbr.bin -s DiegOS.bin -d bootimage.img
 	./mkimage -f -b bootsect.bin -s DiegOS.bin -d bootfloppy.img
 
-clean:
+clean: prepclean
 	cd ../../platforms/$(CPU) && $(MAKE) clean
 	cd ../../platforms/$(PLATFORM) && $(MAKE) clean
 	cd ../../kernel && $(MAKE) clean
