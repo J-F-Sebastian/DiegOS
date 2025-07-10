@@ -21,7 +21,7 @@
 #define _PAKMAN_H_
 
 #include <types_common.h>
-#include <pakman_packet.h>
+#include <libs/pakman_packet.h>
 
 typedef struct packet_buffer pakman;
 

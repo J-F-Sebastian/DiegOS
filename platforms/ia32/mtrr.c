@@ -20,9 +20,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "ia32.h"
+#include <processor/ia32.h>
+#include <processor/mtrr.h>
 #include "ia32_private.h"
-#include "mtrr.h"
 
 /*
  * Defaults to mask for 32 physical address bits

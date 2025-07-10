@@ -21,7 +21,7 @@
 #define THREADS_DATA_H_INCLUDED
 
 #include <types_common.h>
-#include <queue.h>
+#include <libs/queue.h>
 
 #define THREAD_TID_IDLE     (0)
 #define THREAD_TID_TMRS     (1)

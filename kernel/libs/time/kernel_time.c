@@ -18,7 +18,7 @@
  */
 
 #include <errno.h>
-#include <kernel_time.h>
+#include <libs/kernel_time.h>
 
 int kernel_time_init(uint32_t base_val, uint32_t min_val, uint32_t max_val, struct time_util *tu)
 {

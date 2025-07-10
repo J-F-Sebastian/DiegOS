@@ -22,8 +22,8 @@
 #include <diegos/devices.h>
 #include <diegos/delays.h>
 #include <errno.h>
-#include <ia32/ia32.h>
-#include <ia32/apic.h>
+#include <processor/ia32.h>
+#include <processor/apic.h>
 
 #include "lapic.h"
 #include "lapic_private.h"

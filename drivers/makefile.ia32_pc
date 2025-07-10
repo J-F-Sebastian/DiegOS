@@ -1,4 +1,4 @@
-include ../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 all:
 	cd i8253 && make all

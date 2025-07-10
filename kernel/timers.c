@@ -26,7 +26,7 @@
 #include <diegos/interrupts.h>
 #include <diegos/barriers.h>
 #include <diegos/timers.h>
-#include <list.h>
+#include <libs/list.h>
 
 #include "timers_private.h"
 #include "clock.h"

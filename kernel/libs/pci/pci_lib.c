@@ -20,10 +20,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
-#include <chunks.h>
-#include <list.h>
-#include <pci.h>
-#include <pci_lib.h>
+#include <libs/chunks.h>
+#include <libs/list.h>
+#include <libs/pci.h>
+#include <libs/pci_lib.h>
 #include <kprintf.h>
 #include <diegos/kernel.h>
 

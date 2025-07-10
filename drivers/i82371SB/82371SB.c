@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <libs/pci.h>
 #include <libs/pci_lib.h>
-#include <ia32/ports.h>
+#include <processor/ports.h>
 
 #include "82371SB.h"
 

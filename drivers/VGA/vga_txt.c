@@ -18,7 +18,7 @@
  */
 
 #include <stdint.h>
-#include <ia32/ports.h>
+#include <processor/ports.h>
 #include <diegos/devices.h>
 #include <errno.h>
 

@@ -20,8 +20,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <list.h>
-#include <queue.h>
+#include <libs/list.h>
+#include <libs/queue.h>
 #include <diegos/events.h>
 #include <diegos/interrupts.h>
 

@@ -20,8 +20,8 @@
 #include <types_common.h>
 #include <diegos/interrupts.h>
 #include <diegos/devices.h>
-#include <ia32/ports.h>
-#include <pc/i8259.h>
+#include <processor/ports.h>
+#include <platform/i8259.h>
 #include <errno.h>
 
 #include "i8253_private.h"

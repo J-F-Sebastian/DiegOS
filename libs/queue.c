@@ -19,7 +19,7 @@
 
 #include <errno.h>
 
-#include "queue.h"
+#include <libs/queue.h>
 
 STATUS queue_init(queue_inst * queue)
 {

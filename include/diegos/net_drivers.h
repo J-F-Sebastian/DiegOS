@@ -20,7 +20,7 @@
 #ifndef NET_DRIVERS_H_INCLUDED
 #define NET_DRIVERS_H_INCLUDED
 
-#include <pakman_packet.h>
+#include <libs/pakman_packet.h>
 
 typedef struct net_driver {
 	/*

@@ -20,8 +20,8 @@
 #include <types_common.h>
 #include <stdio.h>
 
-#include "ports.h"
-#include "i8259.h"
+#include <processor/ports.h>
+#include <platform/i8259.h>
 
 #define ICW1_AT         0x11	/* edge triggered, cascade, need ICW4 */
 #define ICW4_AT         0x01	/* not SFNM, not buffered, normal EOI, 8086 */

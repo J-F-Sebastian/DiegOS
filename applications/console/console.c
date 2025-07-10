@@ -24,7 +24,7 @@
 #include <diegos/alarms.h>
 #include <diegos/barriers.h>
 #include <diegos/poll.h>
-#include <chunks.h>
+#include <libs/chunks.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

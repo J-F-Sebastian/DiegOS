@@ -20,9 +20,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <types_common.h>
-#include "apic.h"
+#include <processor/apic.h>
+#include <processor/ia32.h>
 #include "ia32_private.h"
-#include "ia32.h"
 
 static volatile unsigned *apic_base = NULL;
 

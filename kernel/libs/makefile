@@ -1,11 +1,9 @@
-include ../../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 OBJS =  
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
-CFLAGS+= -I../../include 
-
 all: objdirs $(OBJSO)
 	cd pci && make all
 	cd unistd && make all

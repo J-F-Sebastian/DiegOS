@@ -21,8 +21,8 @@
 #define MUTEX_H_INCLUDED
 
 #include <types_common.h>
-#include <queue_type.h>
-#include <list_type.h>
+#include <libs/queue_type.h>
+#include <libs/list_type.h>
 
 #include "mutex_data.h"
 

@@ -20,9 +20,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <ia32/ports.h>
+#include <processor/ports.h>
 
-#include "pci.h"
+#include <libs/pci.h>
 
 #define PCI_CONFIG_ADDRESS  (0xCF8)
 #define PCI_CONFIG_DATA     (0xCFC)

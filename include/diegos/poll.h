@@ -20,7 +20,7 @@
 #ifndef _POLL_H_
 #define _POLL_H_
 
-#include <queue.h>
+#include <libs/queue.h>
 #include <diegos/io_waits.h>
 
 enum {

@@ -19,7 +19,7 @@
 
 #include <errno.h>
 
-#include "stack.h"
+#include <libs/stack.h>
 
 STATUS stack_init(queue_inst * queue)
 {

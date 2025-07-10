@@ -1,10 +1,10 @@
-include ../../build/makefiles/makefile.master
+include $(WSROOT)/build/makefiles/makefile.master
 
 OBJS = demo_console.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
-CFLAGS+= -I../../include -I../../include/libs -I../../networking/include
+CFLAGS+= -I$(WSROOT)/networking/include
 
 all: objdirs $(OBJSO)
 	$(AR) $(OBJPREFIX)_app.a $(OBJSO)

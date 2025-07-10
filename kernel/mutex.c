@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <list.h>
+#include <libs/list.h>
 
 #include "threads.h"
 #include "mutex_private.h"

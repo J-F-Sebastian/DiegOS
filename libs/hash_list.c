@@ -21,8 +21,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <errno.h>
-
-#include "hash_list.h"
+#include <libs/hash_list.h>
 
 int hash_list_init(hash_list_inst_t * inst, unsigned hash_size)
 {
