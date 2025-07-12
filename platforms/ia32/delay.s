@@ -24,9 +24,15 @@
 /*
  * void delay_loop(unsigned long loops);
  */
- .align 16
 delay_loop:
     movl    4(%esp), %eax
+    test    %eax, %eax
+    jz      3f
+    jmp     1f
+.align 16
+1:
+.align 16
 2:  decl    %eax
     jnz     2b
+3:
     ret
