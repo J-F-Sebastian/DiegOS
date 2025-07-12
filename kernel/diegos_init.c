@@ -118,7 +118,11 @@ void DiegOS(void)
 	kmsgprintf("Floating Point instructions are supported.\n");
 #endif
 
-	kmsgprintf("%d BogoMIPS\n", loops_per_second() / 1000000);
+	/*
+	 * delay loop is reasonably a 2-instructions loop - a decrease
+	 * and a jump - on any processor.
+	 */
+	kmsgprintf("%d BogoMIPS\n", loops_per_second() / 500000);
 	/*
 	 * Init the kernel system libraries.
 	 */
