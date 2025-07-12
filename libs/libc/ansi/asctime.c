@@ -48,7 +48,7 @@ static const char *months[] = {
 	"December"
 };
 
-static const char datefrmt1[] = "%.3s %.3s%3d %.2d:%.2d:%.2d %d\n";
+static const char datefrmt1[] = "%.3s %.3s%3d %.2d:%.2d:%.2d %d";
 
 char *asctime(const struct tm *timeptr)
 {
