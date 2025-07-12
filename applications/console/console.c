@@ -21,12 +21,14 @@
 #include <diegos/debug_traces.h>
 #include <diegos/kernel.h>
 #include <diegos/kernel_dump.h>
+#include <diegos/kernel_ticks.h>
 #include <diegos/alarms.h>
 #include <diegos/barriers.h>
 #include <diegos/poll.h>
 #include <libs/chunks.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
@@ -36,31 +38,48 @@
 #include "system_parser.h"
 #include "system_parser_macros.h"
 
+/*
+ * Forward declaration
+ */
+static void console_logout(void);
+static void print_time(void);
+
 BEGIN_ALT_COMMAND(show)
     ALT_COMMAND(interfaces, "network interfaces")
     ALT_COMMAND_FUNC0(threads, "system threads", threads_dump)
     ALT_COMMAND_FUNC0(mutexes, "system mutexes", mutexes_dump)
-    ALT_COMMAND(barriers, "barriers")
-    END_ALT_COMMAND()
+    ALT_COMMAND_FUNC0(barriers, "system barriers", barriers_dump)
+    ALT_COMMAND_FUNC0(date, "date and time", print_time)
+END_ALT_COMMAND()
 
-    CREATE_ALTERNATE(show)
+CREATE_ALTERNATE(show)
 
-    BEGIN_ALT_COMMAND(root)
+BEGIN_ALT_COMMAND(root)
     ALT_COMMAND_NEXT(show, "show system informations", show)
     ALT_COMMAND(help, "help !!!")
-    END_ALT_COMMAND()
+    ALT_COMMAND_FUNC0(logout, "Exit this session", console_logout)
+END_ALT_COMMAND()
 
-    CREATE_ALTERNATE(root)
-#define TIMER_POLL      (30*1000)
-#define TIMER_STAGE1    (2)
-#define TIMER_STAGE2    (TIMER_STAGE1 + 1)
+CREATE_ALTERNATE(root)
+#define TIMER_POLL      (1000)
+#define TIMER_STAGE1    (30)
+#define TIMER_STAGE2    (TIMER_STAGE1 + 30)
+#define TIMER_STAGE3    (TIMER_STAGE2 + 30)
 static const char *timeout_msg[] = {
-	"\n *** Login session has been idle for 1 minute  ***",
-	"\n *** Login session will time out in 30 seconds ***",
-	"\n *** Time out ***"
+	"\n *** [%s] Login session has been idle for 30 seconds\n",
+	"\n *** [%s] Login session has been idle for 1 minute"
+	" and will time out in 30 seconds\n",
+	"\n *** [%s] Login session timed out\n"
 };
 
-static unsigned volatile timeout_stage = 0;
+static BOOL console_is_on = FALSE;
+static unsigned volatile timeout = 0;
+static ev_queue_t *events = NULL;
+
+static void console_logout()
+{
+	console_is_on = FALSE;
+}
 
 /*
 static void print_input_help (void)
@@ -71,17 +90,14 @@ static void print_input_help (void)
 
 static void print_banner(void)
 {
-	puts("\nDiegOS  Copyright (C) 2012-2021  Diego Gallizioli\n");
+	puts("\n==================\n");
+	puts("\n\nDiegOS version 1.0\n");
+	puts("==================\n");
+        puts("Copyright (C) 2012-2025  Diego Gallizioli\n");
 	puts("This program comes with ABSOLUTELY NO WARRANTY.");
 	puts("This is free software, and you are welcome to redistribute it");
 	puts("under certain conditions.");
 	puts("\n");
-}
-
-static void print_login_time(void)
-{
-	time_t tmp = time(NULL);
-	printf("Login time: %s\n", ctime(&tmp));
 }
 
 static void print_time(void)
@@ -97,18 +113,19 @@ static void console_main_entry(void)
 	int retval;
 	BOOL cmd_typein = TRUE;
 	struct pollfd waitinp = {.fd = 0,.events = 0,.revents = POLLIN };
+	time_t tmptime;
 
 	print_banner();
-	print_login_time();
+	print_time();
 
-	while (TRUE) {
+	while (console_is_on) {
 		printf("# ");
 		fflush(stdout);
 		buffer_head = 0;
 		while (cmd_typein && (buffer_head < sizeof(buffer))) {
 			retval = poll(&waitinp, 1, 0);
 			retval = getchar();
-			timeout_stage = 0;
+			timeout = 0;
 			if (isprint(retval)) {
 				buffer[buffer_head++] = (char)retval;
 				putchar(retval);
@@ -121,6 +138,8 @@ static void console_main_entry(void)
 					}
 					break;
 				case '\t':
+					if (buffer_head && (buffer[buffer_head - 1] != ' '))
+						buffer[buffer_head++] = ' ';
 					buffer[buffer_head++] = (char)retval;
 					/* FALLTHRU */
 					/* no break */
@@ -142,6 +161,15 @@ static void console_main_entry(void)
 
 		cmd_typein = TRUE;
 	}
+
+	event_t *ev = (event_t *)malloc(sizeof(*ev));
+	ev->classid = CLASS_THREAD;
+	ev->eventid = 0xdead;
+	event_put(events, ev, free);
+
+	tmptime = time(NULL);
+	printf("\n *** [%s] Session terminated\n", ctime(&tmptime));
+	thread_terminate();
 }
 
 static BOOL perform_login(void)
@@ -175,11 +203,11 @@ static BOOL perform_login(void)
 static void login_main_entry(void)
 {
 	alarm_t *timer;
-	ev_queue_t *events;
-	event_t *timeout;
+	event_t *event;
 	STATUS retcode;
 	BOOL retlogin;
 	uint8_t tid;
+	time_t tmptime;
 
 	events = event_init_queue("Login");
 	timer = alarm_create("Login", 0xdead, TIMER_POLL, TRUE, events);
@@ -192,48 +220,74 @@ static void login_main_entry(void)
 	sleep(1);
 
 	while (TRUE) {
+
+		console_is_on = FALSE;
+
 		do {
 			sleep(1);
-			printf("\n\n\n\n\t press Enter to start...\n");
+			printf("\n\n\n\n\tpress Enter to start...\n");
 			while (EOF == getchar()) {
 				clearerr(stdin);
 			}
 			retlogin = perform_login();
 		} while (FALSE == retlogin);
 
+		console_is_on = TRUE;
+
 		retlogin = thread_create("Console",
-					 THREAD_PRIO_NORMAL, console_main_entry, 0, 8192, &tid);
+					 THREAD_PRIO_NORMAL,
+					 console_main_entry,
+					 0,
+					 8192,
+					 &tid);
 		if (!retlogin) {
 			TRACE_PRINT("Failed spawning thread Console")
-			    continue;
+			continue;
 		}
 
-		timeout_stage = 0;
+		timeout = 0;
 		alarm_set(timer, TRUE);
 
-		while (timeout_stage < TIMER_STAGE2 + 1) {
+		while (timeout < TIMER_STAGE3) {
 			wait_for_events(events);
-			timeout = event_get(events);
-			alarm_dump(NULL);
-			threads_dump();
+			event = event_get(events);
 
-			if ((CLASS_ALARM == timeout->classid) && (0xdead == timeout->eventid)) {
+			/* timer event */
+			if ((CLASS_ALARM == event->classid) && (0xdead == event->eventid)) {
 				alarm_acknowledge(timer);
-				++timeout_stage;
-				if (TIMER_STAGE1 == timeout_stage) {
-					puts(timeout_msg[0]);
-				} else if (TIMER_STAGE2 == timeout_stage) {
-					puts(timeout_msg[1]);
+				++timeout;
+				if (TIMER_STAGE1 == timeout) {
+					alarm_dump(NULL);
+					threads_dump();
+					tmptime = time(NULL);
+					printf(timeout_msg[0], ctime(&tmptime));
+					print_time();
+				} else if (TIMER_STAGE2 == timeout) {
+					alarm_dump(NULL);
+					threads_dump();
+					tmptime = time(NULL);
+					printf(timeout_msg[1], ctime(&tmptime));
+					print_time();
 				}
-				print_time();
+			}
+
+			/*
+			 * thread event signalling a thread state, in this case, termination
+			 */
+			if ((CLASS_THREAD == event->classid) && (0xdead == event->eventid)) {
+				break;
 			}
 		}
 
-		puts(timeout_msg[2]);
 		alarm_set(timer, FALSE);
-		alarm_done(timer);
-		thread_kill(tid);
+
+		if (timeout == TIMER_STAGE3) {
+			tmptime = time(NULL);
+			printf(timeout_msg[2], ctime(&tmptime));
+			thread_kill(tid);
+		}
 	}
+	alarm_done(timer);
 }
 
 void console_run(void)
