@@ -24,7 +24,7 @@
 #include "kprintf.h"
 #include "platform_include.h"
 
-#define BASE_VALUE (1UL << 10)
+#define BASE_VALUE (1UL << 6)
 
 unsigned long loops_per_msec;
 
@@ -36,11 +36,10 @@ unsigned long loops_per_second()
 void calibrate_delay(unsigned long (*tickfn) (void))
 {
 	unsigned long oldticks;
-	unsigned long finder;
+	unsigned long finder = BASE_VALUE;
+	unsigned long delta;
 
-	finder = BASE_VALUE;
-
-	while (1) {
+	while (finder) {
 		oldticks = tickfn();
 
 		/*
@@ -55,17 +54,25 @@ void calibrate_delay(unsigned long (*tickfn) (void))
 		 * change, then break out.
 		 * Else we need to start over and try a larger time to be wasted.
 		 */
-		if (oldticks < tickfn()) {
+		if (oldticks != tickfn()) {
 			break;
 		} else {
-			finder += BASE_VALUE;
+			finder <<= 1;
 		}
 	}
 
+	if (!finder) {
+		loops_per_msec = -1UL;
+		return;
+	}
+
 	/*
-	 * We know finder's value is overestimating the correct value
+	 * Finder triggered a tick at least, so we need to halve it
 	 */
-	while (1) {
+	finder >>= 1;
+	delta = finder >> 1;
+	while (delta) {
+		finder += delta;
 		oldticks = tickfn();
 
 		/*
@@ -82,11 +89,11 @@ void calibrate_delay(unsigned long (*tickfn) (void))
 		 * if we wait too few (finder too small) we increase it.
 		 * The resolution is halved at every cycle.
 		 */
-		if (oldticks < tickfn()) {
-			finder -= 1;
-		} else {
-			break;
+		if (oldticks != tickfn()) {
+			finder -= delta;
 		}
+
+		delta >>= 1;
 	}
 
 	loops_per_msec = finder;
