@@ -7,8 +7,6 @@ OBJS = processor_init.o cpuid.o switch_context.o setup_context.o\
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
-CFLAGS+= -I../../libs
-
 all: objdirs $(OBJSO)
 	$(AR) $(CPU).a $(OBJSO)
 	
