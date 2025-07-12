@@ -51,9 +51,16 @@
 #define TIMER0 0x40
 #define TMRMOD 0x43
 
-#define TVAL   65534
-#define TDELTA 1193
-#define TTHRES (TVAL - TDELTA)
+/*
+ * 1 Delta tick is aprox. 999.8474 msecs
+ */
+#define TDELTA 1193UL
+/*
+ * While the clock runs at 1193182 Hz the
+ * i8253 can load only 16-bit counters...
+ * so we load 64422 or 0xFBA6.
+ */
+#define TVAL   (TDELTA*54)
 
 static unsigned long tickfn(void)
 {
@@ -66,12 +73,17 @@ static unsigned long tickfn(void)
 	cval[0] = in_byte(TIMER0);
 	cval[1] = in_byte(TIMER0);
 
-	if (rval < TTHRES) {
-		ticks += (TVAL - rval) / TDELTA;
-		/* Start counter value */
-		out_byte(TIMER0, (uint8_t) TVAL);
-		out_byte(TIMER0, (uint8_t) (TVAL >> 8));
-	}
+	ticks += (TVAL - rval) / TDELTA;
+
+	/*
+	 * Hardware timer need no update right now
+	 */
+	if (rval > TDELTA*53)
+		return ticks;
+
+	/* Start counter value */
+	out_byte(TIMER0, (uint8_t) TVAL);
+	out_byte(TIMER0, (uint8_t) (TVAL >> 8));
 
 	return ticks;
 }
