@@ -148,6 +148,15 @@ BOOL mtrr_configure(uintptr_t base, uintptr_t size, int cache_type)
 
 void mtrr_dump()
 {
+	static const char descr[] = {
+		'U','C','\0',
+		'W','C','\0',
+		'\0','\0','\0',
+		'\0','\0','\0',
+		'W','T','\0',
+		'W','P','\0',
+		'W','B','\0'};
+
 	uint32_t buffer[2];
 	unsigned count;
 	const unsigned freg[] =
@@ -178,7 +187,7 @@ void mtrr_dump()
 		count = 0;
 		while (freg[count]) {
 			read_msr(&buffer, freg[count]);
-			printf("Fixed range %X -> %X (%d)\n", freg[count], buffer, count);
+			printf("Fixed range %X -> %X (%d)\n", freg[count], buffer[0], count);
 			count++;
 		}
 	}
@@ -190,7 +199,7 @@ void mtrr_dump()
 			 * IA32_MTRR_PHYSBASE0
 			 */
 			read_msr(buffer, reg++);
-			printf("(%d)\ttype %d\t%X:%X ", count, buffer[0] & 0xFFUL, buffer[1],
+			printf("(%d)\ttype %d(%s)\t%X:%X ", count, buffer[0] & 0xFFUL, &descr[(buffer[0] & 0xFFUL)*3], buffer[1],
 			       buffer[0]);
 
 			/*
