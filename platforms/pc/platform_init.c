@@ -141,7 +141,7 @@ void platform_init()
 	cacheable_memory(&heap_base, &heap_size);
 	io_memory(&io_base, &io_size);
 	mtrr_configure((uintptr_t) heap_base, heap_size, MTRR_TYPE_WB);
-	mtrr_configure((uintptr_t) io_base, io_size, MTRR_TYPE_WC);
+	mtrr_configure((uintptr_t) io_base, io_size, MTRR_TYPE_UC);
 
 	(void)malloc_init((const void *)heap_base, (const void *)(heap_base + heap_size));
 	(void)iomalloc_init((const void *)io_base, (const void *)(io_base + io_size));
