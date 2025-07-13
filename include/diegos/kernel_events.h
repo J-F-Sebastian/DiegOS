@@ -40,7 +40,11 @@ enum kernel_classes {
 	 * Packet events as implemented in the kernel.
 	 * Events are listed in network_events.h
 	 */
-	CLASS_NET = 3
+	CLASS_NET = 3,
+	/*
+	 * Thread events
+	 */
+	CLASS_THREAD = 4
 };
 
 #endif
