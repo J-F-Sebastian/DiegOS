@@ -1,7 +1,7 @@
 /*
  * DiegOS Operating System source code
  *
- * Copyright (C) 2012 - 2022 Diego Gallizioli
+ * Copyright (C) 2012 - 2023 Diego Gallizioli
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,56 @@
  *
  */
 
-#define CPSR_N_BIT (1 << 31)UL
-#define CPSR_Z_BIT (1 << 30)UL
-#define CPSR_C_BIT (1 << 29)UL
-#define CPSR_V_BIT (1 << 28)UL
-#define CPSR_Q_BIT (1 << 27)UL
-#define CPSR_J_BIT (1 << 24)UL
-/* GE are used on ARMv6 only */
-/* E bit used on ARMv6 only */
-/* A bit used on ARMv6 only */
-#define CPSR_I_BIT (1 << 7)UL
-#define CPSR_F_BIT (1 << 6)UL
-#define CPSR_T_BIT (1 << 5)UL
+/* Negative flag */
+#define CPSR_N_BIT (1UL << 31)
+/* Zero flag */
+#define CPSR_Z_BIT (1UL << 30)
+/* Carry flag */
+#define CPSR_C_BIT (1UL << 29)
+/* oVerflow flag */
+#define CPSR_V_BIT (1UL << 28)
+/* 
+ * Q bit used on ARMv5TE and beyond.
+ * Overflow on saturation.
+ */
+#define CPSR_Q_BIT (1UL << 27)
+/* 
+ * J bit used on ARMv5TE and beyond.
+ * Jazelle instruction set selection.
+ */
+#define CPSR_J_BIT (1UL << 24)
+/*
+ * GE[3:0] are used on ARMv6 and beyond.
+ * Greater than or equal flags for vector instructions.
+ */
+#define CPSR_GE_MSK (0xFUL << 16)
+/*
+ * E bit used on ARMv6 and beyond.
+ * Set endianness of load/store operations.
+ * If set the memory is BE.
+ */
+#define CPSR_E_BIT (1UL << 9)
+/*
+ * A bit used on ARMv6 and beyond.
+ * Set imprecise data aborts.
+ * If set disables imprecise data aborts
+ */
+#define CPSR_A_BIT (1UL << 8)
+/* 
+ * I bit disables IRQ if set.
+ */
+#define CPSR_I_BIT (1UL << 7)
+/* 
+ * F bit disables FIQ if set.
+ */
+#define CPSR_F_BIT (1UL << 6)
+/* 
+ * T bit used on ARMv4 and beyond.
+ * Thumb instruction set selection.
+ */
+#define CPSR_T_BIT (1UL << 5)
+
+#define CPSR_M_MSK  (0x1FUL << 0)
 
 #define CPSR_M_USR 0x10UL
 #define CPSR_M_FIQ 0x11UL
@@ -48,8 +86,5 @@
 #define CPSR_M_ABT 0x17UL
 #define CPSR_M_UND 0x1BUL
 #define CPSR_M_SYS 0x1FUL
-
-#define CPSR_GE_MSK (0xF << 16)UL
-#define CPSR_M_MSK  (0x1 << 0)FUL
 
 #endif

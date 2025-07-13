@@ -36,34 +36,40 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../kernel/libs/iomemory/$(OBJPREFIX)_libiomemory.a \
 	../../kernel/$(OBJPREFIX)_kernel.a \
 	../../platforms/ARM/$(PLATFORM)/$(PLATFORM).a \
-	../../platforms/$(CPU)/$(CPU).a \
-	../../drivers/$(OBJPREFIX)_drivers.a \
+	../../platforms/ARM/$(CPU)/$(OBJPREFIX).a \
+	../../platforms/ARM/$(OBJPREFIX)_ARM.a \
+	../../drivers/$(PLATFORM)/$(OBJPREFIX)_drivers.a \
 	../../libs/$(OBJPREFIX)_diegos_lib.a \
 	../../libs/libc/$(OBJPREFIX)_libc.a \
 	../../fat/$(OBJPREFIX)_fat.a
    
 all: 
-	cd ../../kernel && make all
-	cd ../../libs && make all
-	cd ../../drivers && make -f makefile.$(OBJPREFIX) all
-	cd ../../fat && make all
-	cd ../../applications/console && make all
-	cd ../../applications/demo && make all
-	$(LD) -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
-	objcopy -S DiegOS.elf DiegOS.stripped.elf
-	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
+	cd ../../platforms/ARM && $(MAKE) all
+	cd ../../platforms/ARM/$(CPU) && $(MAKE) all
+	cd ../../platforms/ARM/$(PLATFORM) && $(MAKE) all
+	cd ../../kernel && $(MAKE) all
+	cd ../../libs && $(MAKE) all
+	cd ../../drivers && $(MAKE) -f makefile.$(OBJPREFIX) all
+	cd ../../fat && $(MAKE) all
+	cd ../../applications/console && $(MAKE) all
+	cd ../../applications/demo && $(MAKE) all
+	#$(LN) -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
+	$(LN) --gc-sections -static -T diegos.ld -nostdlib -o DiegOS.elf --start-group $(STATICLIST) $(ARLIST) --end-group
+	$(OBJCPY) -S DiegOS.elf DiegOS.stripped.elf
+	$(OBJCPY) -O binary DiegOS.stripped.elf DiegOS.bin
 
 clean:
-	cd ../../kernel && make clean
-	cd ../../libs && make clean
-#	cd ../../platforms/$(CPU) && make clean
-#	cd ../../platforms/ARM/$(PLATFORM) && make clean
-	cd ../../drivers && make -f makefile.$(OBJPREFIX) clean
-	cd ../../fat && make clean
-	cd ../../applications/console && make clean
-	cd ../../applications/demo && make clean
-	cd ../../boot/N9H26 && make clean
+	cd ../../platforms/ARM && $(MAKE) clean
+	cd ../../platforms/ARM/$(CPU) && $(MAKE) clean
+	cd ../../platforms/ARM/$(PLATFORM) && $(MAKE) clean
+	cd ../../kernel && $(MAKE) clean
+	cd ../../libs && $(MAKE) clean
+	cd ../../drivers && $(MAKE) -f makefile.$(OBJPREFIX) clean
+	cd ../../fat && $(MAKE) clean
+	cd ../../applications/console && $(MAKE) clean
+	cd ../../applications/demo && $(MAKE) clean
+	cd ../../boot/N9H26 && $(MAKE) clean
 	rm -f *.o *.bin *.img *.elf
 
 boot:
-	cd ../../boot/N9H26 && make
+	cd ../../boot/N9H26 && $(MAKE)

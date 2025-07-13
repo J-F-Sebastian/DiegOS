@@ -29,11 +29,11 @@
 #define DRV_UNIT_MAX        (4)
 #define DRV_MAX_ADDR_LEN    (16)
 
-#include "drivers_common.h"
-#include "char_drivers.h"
-#include "block_drivers.h"
-#include "net_drivers.h"
-#include "ui_drivers.h"
+#include <diegos/drivers_common.h>
+#include <diegos/char_drivers.h>
+#include <diegos/block_drivers.h>
+#include <diegos/net_drivers.h>
+#include <diegos/ui_drivers.h>
 
 /*
  * Predefined, system-wide ioctrl values.

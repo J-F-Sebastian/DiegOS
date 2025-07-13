@@ -28,6 +28,8 @@
 #include <stdarg.h>
 #include <types_common.h>
 #include "wblib.h"
+#include <diegos/interrupts.h>
+#include "N9H26_aic.h"
 
 PFN_SYS_UART_CALLBACK(pfnUartIntHandlerTable)[2][2] = { 0 };
 
@@ -131,7 +133,7 @@ void sysUartISR()
 #endif
 
 	}
-	if (u32EnableInt & Tout_IF)	//½ÓÊÕ×´Ì¬·ÖÎö
+	if (u32EnableInt & Tout_IF)	//Â½Ã“ÃŠÃ•Ã—Â´ÃŒÂ¬Â·Ã–ÃŽÃ¶
 	{
 		uint32_t u32Count;
 		u32Count = (inpw(REG_UART_FSR + u32UartPort) & Rx_Pointer) >> 8;
@@ -515,7 +517,7 @@ char sysGetChar()
 void sysPutChar(char ucCh)
 {
 	/* Wait until the transmitter buffer is empty */
-	while (!(inpw(REG_UART_FSR + u32UartPort) & 0x400000)) ;
+	while (!(inpw(REG_UART_FSR + u32UartPort) & Tx_Empty)) ;
 	/* Transmit the character */
 	outpb(REG_UART_THR + u32UartPort, ucCh);
 }
@@ -525,6 +527,17 @@ void sysUartTransfer(int8_t * pu8buf, uint32_t u32Len)
 	do {
 		if ((inp32(REG_UART_FSR + u32UartPort) & Tx_Full) == 0) {
 			outpb(REG_UART_THR + u32UartPort, *pu8buf++);
+			u32Len = u32Len - 1;
+		}
+	}
+	while (u32Len != 0);
+}
+
+void sysUartReceive(int8_t * pu8buf, uint32_t u32Len)
+{
+	do {
+		if (inpw(REG_UART_ISR + u32UartPort) & RDA_IF) {
+			*pu8buf++ = inpb(REG_UART_RBR + u32UartPort);
 			u32Len = u32Len - 1;
 		}
 	}
