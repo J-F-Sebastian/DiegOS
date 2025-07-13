@@ -1112,7 +1112,6 @@ int sicSMpread(int chipSel, unsigned PBA, int page, uint8_t * buff)
 	if (status) {
 		DBG_PRINTF("read NAND page fail !!!\n");
 	}
-
 #ifdef OPT_FIRST_4BLOCKS_ECC4
 	if (PBA < systemAreaSize)
 		sicSMsetBCH(pSM, FALSE);
@@ -1171,7 +1170,6 @@ int CheckBadBlockMark(uint32_t BlockNo)
 			  BlockNo, status);
 		return 1;
 	}
-
 	// for 512B page size NAND
 	if (pSM->nPageSize == NAND_PAGE_512B) {
 		data512 = inpw(REG_SMDATA) & 0xff;

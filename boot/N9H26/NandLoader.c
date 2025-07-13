@@ -47,12 +47,12 @@ int isNVTLoader(NVT_NAND_INFO_T * image)
 
 int MoveData(NVT_NAND_INFO_T * image, BOOL IsExecute)
 {
-	unsigned int page_count, block_count, curBlock, addr;
+	unsigned int page_count, block_count, curBlock;
+	uintptr_t addr;
 	unsigned int i, j;
 	void (*fw_func)(void);
 
-	sysprintf("Load file length %d, execute address 0x%x\n", image->fileLen,
-		  image->executeAddr);
+	sysprintf("Loading %d bytes, execute address 0x%x\n", image->fileLen, image->executeAddr);
 
 	page_count = image->fileLen / pSM0->nPageSize;
 	if ((image->fileLen % pSM0->nPageSize) != 0)
@@ -63,33 +63,36 @@ int MoveData(NVT_NAND_INFO_T * image, BOOL IsExecute)
 	curBlock = image->startBlock;
 	addr = image->executeAddr;
 	j = 0;
-	while (1) {
-		if (j >= block_count)
-			break;
-
+	while (j < block_count) {
 		if (CheckBadBlockMark(curBlock) == Successful) {
 			for (i = 0; i < pSM0->uPagePerBlock; i++) {
 				sicSMpread(0, curBlock, i, (uint8_t *) addr);
 				addr += pSM0->nPageSize;
 			}
 			j++;
+			sysPutChar('.');
+		} else {
+			sysPutChar('!');
 		}
+
 		curBlock++;
 	}
 
-	if ((page_count % pSM0->uPagePerBlock) != 0) {
-		page_count = page_count - block_count * pSM0->uPagePerBlock;
- _read_:
-		if (CheckBadBlockMark(curBlock) == Successful) {
-			for (i = 0; i < page_count; i++) {
-				sicSMpread(0, curBlock, i, (uint8_t *) addr);
-				addr += pSM0->nPageSize;
-			}
-		} else {
+	page_count %= pSM0->uPagePerBlock;
+	if (page_count) {
+		while (CheckBadBlockMark(curBlock) != Successful) {
 			curBlock++;
-			goto _read_;
+			sysPutChar('!');
 		}
+
+		for (i = 0; i < page_count; i++) {
+			sicSMpread(0, curBlock, i, (uint8_t *) addr);
+			addr += pSM0->nPageSize;
+		}
+		sysPutChar('.');
 	}
+
+	sysprintf(" DONE\n");
 
 	if (IsExecute) {
 		// disable NAND control pin used
@@ -190,8 +193,15 @@ int main()
 	/* PLL clock setting */
 	initClock();
 
-	sysprintf("System clock = %dHz\nDRAM clock = %dHz\nREG_SDTIME = 0x%08X\n",
-		  sysGetSystemClock(), sysGetDramClock(), inp32(REG_SDTIME));
+	sysprintf("System clock = %dHz\n"
+		  "DRAM clock = %dHz\n"
+		  "CHIP ID = 0x%08X\n"
+		  "RAM type = %s\n"
+		  "Y %d M %d D %d Version %d\n",
+		  sysGetSystemClock(), sysGetDramClock(), inp32(REG_CHIPID) & CHIP_ID,
+		  ((inp32(REG_CHIPCFG) & SDRAMSEL) >> 4 == 3) ? "DDR2" : "N/A",
+		  inp32(REG_CDCVC) >> 24, (inp32(REG_CDCVC) >> 16) & 0xFF,
+		  (inp32(REG_CDCVC) >> 8) & 0xFF, inp32(REG_CDCVC) & 0xFF);
 
 	imagebuf = (unsigned int *)((uintptr_t) image_buffer | 0x80000000UL);
 	pImageList = (unsigned int *)(imagebuf);
@@ -241,7 +251,7 @@ int main()
 				image.startBlock = *(pImageList + 1) & 0xffff;
 				image.endBlock = (*(pImageList + 1) & 0xffff0000) >> 16;
 				image.executeAddr = *(pImageList + 2);
-				// sysprintf("executing address = 0x%x\n", image.executeAddr);
+				//sysprintf("executing address = 0x%x\n", image.executeAddr);
 				image.fileLen = *(pImageList + 3);
 				MoveData(&image, TRUE);
 				break;

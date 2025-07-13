@@ -47,8 +47,8 @@ void sysSetupCP15(unsigned int addr)
 	reg0 = addr;
 	__asm volatile ("MOV     %0, %1                \n"	// _mmuSectionTable
 			"MCR     p15, #0, %0, c2, c0, #0  \n"	// write translation table base register c2
-			 "MOV     %0, #0x40000000   \n" "MCR     p15, #0, %0, c3, c0, #0  \n"	// domain access control register c3
-			 "MRC     p15, #0, %0, c1, c0, #0 \n"	// read control register c1
+			"MOV     %0, #0x40000000   \n" "MCR     p15, #0, %0, c3, c0, #0  \n"	// domain access control register c3
+			"MRC     p15, #0, %0, c1, c0, #0 \n"	// read control register c1
 			"ORR     %0, %0, #0x1000 \n"	// enable I cache bit
 			"ORR     %0, %0, #0x5     \n"	// enable D cache and MMU bits
 			"MCR     p15, #0, %0, c1, c0, #0  \n"	// write control register c1

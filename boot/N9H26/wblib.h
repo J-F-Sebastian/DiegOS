@@ -303,6 +303,7 @@ extern "C" {
 	void sysUartInstallcallback(uint32_t u32IntType, PFN_SYS_UART_CALLBACK pfnCallback);
 	void sysUartEnableInt(int32_t eIntType);
 	void sysUartTransfer(int8_t * pu8buf, uint32_t u32Len);
+	void sysUartReceive(int8_t * pu8buf, uint32_t u32Len);
 
 /*--------------------------------------------------------------------------*/
 /* Define Function Prototypes for HUART                                     */

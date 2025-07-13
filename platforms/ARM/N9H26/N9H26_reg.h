@@ -1,4 +1,4 @@
-																																																																		    /**************************************************************************//**
+																																																																																																																		/**************************************************************************//**
  * @file     N9H26_reh.h
  * @version  V3.00
  * @brief    N9H26 series SYS driver header file
@@ -19,30 +19,30 @@
 #define 	ROT_BA			0xB0002000	/* Rotation Engine Control Registers */
 #define 	SDRAM_BA	   	0xB0003000	/* SDRAM Inteface Control Registers */
 #define    	CRC_BA    		0xB0004000	/* CRC Control */
-#define    	SDIODMAC_BA  	0xB0005000	/* SDIO DMA Control */
-#define    	SDIOFMI_BA  	0xB0005800	/* SDIO Interface */
+#define    	SDIODMAC_BA		0xB0005000	/* SDIO DMA Control */
+#define    	SDIOFMI_BA  		0xB0005800	/* SDIO Interface */
 #define    	CRC1_BA    		0xB0006000	/* CRC1 Control */
-#define    	EDMA_BA		0xB0008000	/* EDMA Controller */
+#define    	EDMA_BA			0xB0008000	/* EDMA Controller */
 #define    	SPU_BA			0xB1000000	/* SPU Controller */
 #define    	I2S_BA			0xB1001000	/* I2S Controller */
 #define    	VPOST_BA  		0xB1002000	/* VPOST Controller */
 #define    	VIN_BA    		0xB1003000	/* Video-In Controller */
-#define     MDCT_BA    		0xB1004000	/* AAC MDCT / IMDCT Controller */
-#define	UOHCI20_BA		0xB1005000	/* USB 2.0 OHCI Host Control */
+#define 	MDCT_BA    		0xB1004000	/* AAC MDCT / IMDCT Controller */
+#define 	UOHCI20_BA		0xB1005000	/* USB 2.0 OHCI Host Control */
 #define    	DMAC_BA    		0xB1006000	/* DMA Control */
 #define    	FMI_BA    		0xB1006800	/* Flash Memory Card Interface */
 #define    	USBD_BA   		0xB1008000	/* USB Device Control */
 #define    	USB_BA   		0xB1008000	/* USB Device Control */
 #define    	USBH_BA   		0xB1009000	/* USB Host Control */
 #define    	JPG_BA    		0xB100A000	/* JPEG Engine Control */
-#define	UEHCI20_BA		0xB100B000	/* USB 2.0 EHCI Host Control */
+#define 	UEHCI20_BA		0xB100B000	/* USB 2.0 EHCI Host Control */
 #define 	GE_BA			0xB100C000	/* GVE Control */
 #define 	VPE_BA			0xB100C800	/* VPE Control */
-#define     BLT_BA          	0xB100D000	/* 2D BLT Accelerator */
-#define 	EMAC_BA		0xB100E000	/* Ethernet MAC */
-#define     AES_BA          	0xB100F000	/* AES Control */
-#define     H264E_BA       	0xB1010000	/* H.264 Encoder Controller */
-#define     H264D_BA       	0xB1007000	/* H.264 Decoder Controller */
+#define 	BLT_BA          	0xB100D000	/* 2D BLT Accelerator */
+#define 	EMAC_BA 		0xB100E000	/* Ethernet MAC */
+#define 	AES_BA          	0xB100F000	/* AES Control */
+#define 	H264E_BA       		0xB1010000	/* H.264 Encoder Controller */
+#define 	H264D_BA       		0xB1007000	/* H.264 Decoder Controller */
 
 #define    	AIC_BA    		0xB8000000	/* Interrupt Controller */
 #define    	GPIO_BA   		0xB8001000	/* GPIO Control */
@@ -58,7 +58,7 @@
 #define    	SPI0_BA  		0xB800C000	/* Serial Interface Control 0 */
 #define    	SPI1_BA  		0xB800C400	/* Serial Interface Control 1 */
 #define    	AR_BA    		0xB800E000	/* ADC Control */
-#define    	TP_BA    			0xB800F000	/* Touch ADC Control */
+#define    	TP_BA    		0xB800F000	/* Touch ADC Control */
 
 // Define one bit mask
 #define BIT0	0x00000001
@@ -490,7 +490,7 @@
 #define XIN_CTL			BIT1	// Crystal pre-divide control for Wake-up from power down mode
 #define XTAL_EN			BIT0	// Crystal (Power Down) Control
 
-#define REG_AHBCLK	(CLK_BA+0x04)	// R/W¡@AHB Clock Enable Control Register
+#define REG_AHBCLK	(CLK_BA+0x04)	// R/WÂ¡@AHB Clock Enable Control Register
 #define SDIO_CKE			BIT31	// SDIO Clock Enable Control
 #define ADO_CKE			BIT30	// Audio DAC Engine Clock Enable Control0 = Disable1 = Enable
 #define SEN_CKE			BIT29	// Sensor Interface Clock Enable Control0 = Disable1 = Enable
@@ -526,7 +526,7 @@
 #define APBCLK_CKE			BIT1	// APB Clock Enable Control.0 = Disable1 = Enable
 #define CPU_CKE	 		BIT0	// CPU Clock Enable Control
 
-#define REG_APBCLK	(CLK_BA+0x08)	// R/W¡@APB Clock Enable Control Register
+#define REG_APBCLK	(CLK_BA+0x08)	// R/WÂ¡@APB Clock Enable Control Register
 #define KPI_CKE			BIT25	// KPI Clock Enable Control
 #define TIC_CKE			BIT24	// TIC Clock Enable
 #define TMR3_CKE			BIT17	//Timer3 Clock Enable Control
@@ -546,7 +546,7 @@
 #define I2C_CKE			BIT1	// I2C Clock Enable Control0 = Disable1 = Enable
 #define ADC_CKE			BIT0	// ADC Clock Enable Control (Also is ADC engine clock enable control)0 = Disable1 = Enable
 
-#define REG_CLKDIV0	(CLK_BA+0x0C)	// R/W¡@Clock Divider Register0
+#define REG_CLKDIV0	(CLK_BA+0x0C)	// R/WÂ¡@Clock Divider Register0
 	//#define SYSTEM_INTEG          NVTBIT(31, 29)          // Sensor clock divide number from sensor clock source
 	//#define SYSTEM_FRACTM         NVTBIT(28, 27)          // Sensor clock divide number from sensor clock source
 #define SENSOR0_N1		NVTBIT(27, 24)	// Sensor clock divide number from sensor clock source
@@ -559,7 +559,7 @@
 #define SYSTEM_S			NVTBIT(4, 3)	// System clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define SYSTEM_N0			NVTBIT(2, 0)	// SYSTEM clock pre-divider number from system clock source if System clock source select is APLL or UPLL
 
-#define REG_CLKDIV1	(CLK_BA+0x10)	// R/W¡@Clock Divider Register1
+#define REG_CLKDIV1	(CLK_BA+0x10)	// R/WÂ¡@Clock Divider Register1
 #define ADO_N1			NVTBIT(31, 24)	// Audio DAC engine clock divide number from Audio DAC engine clock source
 #define ADO_S				NVTBIT(20, 19)	// Audio DAC engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define ADO_N0			NVTBIT(18, 16)	// Audio DAC engine clock pre-divide number
@@ -567,7 +567,7 @@
 #define VPOST_S			NVTBIT(4, 3)	// VPOST engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define VPOST_N0			NVTBIT(2, 0)	// VPOST engine clock pre-divide number
 
-#define REG_CLKDIV2	(CLK_BA+0x14)	// R/W¡@Clock Divider Register2
+#define REG_CLKDIV2	(CLK_BA+0x14)	// R/WÂ¡@Clock Divider Register2
 #define SD_N1				NVTBIT(31, 24)	// SD engine clock divide number from SD engine clock source
 #define SD_S				NVTBIT(20, 19)	// SD engine clock source select  00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define SD_N0				NVTBIT(18, 16)	// SD engine clock pre-divide number
@@ -578,7 +578,7 @@
 #define USB_S				NVTBIT(4, 3)	// USB host engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define USB_N0			NVTBIT(2, 0)	// USB host engine clock Pre-divide number
 
-#define REG_CLKDIV3	(CLK_BA+0x18)	// R/W¡@Clock Divider Register3
+#define REG_CLKDIV3	(CLK_BA+0x18)	// R/WÂ¡@Clock Divider Register3
 #define ADC_N1			NVTBIT(31, 24)	// ADC engine clock divide number from ADC engine clock source
 #define ADC_S				NVTBIT(20, 19)	// ADC engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define ADC_N0			NVTBIT(18, 16)	// ADC engine clock pre-divide number from ADC engine clock source
@@ -589,7 +589,7 @@
 #define UART0_S			NVTBIT(4, 3)	// UART0 engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define UART0_N0			NVTBIT(2, 0)	// UART0 engine clock pre-divide number from UART1 engine clock source
 
-#define REG_CLKDIV4	(CLK_BA+0x1C)	// R/W¡@Clock Divider Register4
+#define REG_CLKDIV4	(CLK_BA+0x1C)	// R/WÂ¡@Clock Divider Register4
 #define VIN1_N				NVTBIT(29, 27)	// JPG  engine clock divide number from HCLK4
 #define JPG_N				NVTBIT(26, 24)	// JPG  engine clock divide number from HCLK3
 #define GPIO_N			NVTBIT(23, 17)	// GPIO engine clock divide number from GPIO engine clock source
@@ -600,9 +600,9 @@
 #define HCLK234_N			NVTBIT(7, 4)	// HCLK2, HCLK3 and HCLK4 clock divide number from HCLK clock. The HCLK clock frequency is the system clock frequency divided by two.The HCLK2,3,4 clock frequency = (HCLK frequency) / (HCLK234_N + 1)
 #define CPU_N				NVTBIT(3, 0)	// CPU clock divide number from System clock.The CPU clock frequency = (System frequency) / (CPU_N + 1)
 
-#define REG_APLLCON	(CLK_BA+0x20)	// R/W¡@APLL Control Register
-#define REG_UPLLCON	(CLK_BA+0x24)	// R/W¡@UPLL Control Register
-#define REG_MPLLCON	(CLK_BA+0x28)	// R/W¡@UPLL Control Register
+#define REG_APLLCON	(CLK_BA+0x20)	// R/WÂ¡@APLL Control Register
+#define REG_UPLLCON	(CLK_BA+0x24)	// R/WÂ¡@UPLL Control Register
+#define REG_MPLLCON	(CLK_BA+0x28)	// R/WÂ¡@UPLL Control Register
 #define BP				BIT15	// PLL By Pass Control
 #define PD				BIT14	// Power Down Mode
 #define OUT_DV			NVTBIT(12, 11)	// PLL Output Divider Control
@@ -614,7 +614,7 @@
 #define SW_CLK				BIT6	// Software Generated Clock.
 #define TEST_CLK_SEL		NVTBIT(5, 0)	// Test Clock Select.
 
-#define REG_AHBCLK2	(CLK_BA+0x34)	// R/W¡@AHB Clock Enable Control Register2
+#define REG_AHBCLK2	(CLK_BA+0x34)	// R/WÂ¡@AHB Clock Enable Control Register2
 #define CRC1_CKE				BIT19	// CRC1 Clock Enable Control
 #define ROTE_CKE				BIT18	// Rotate Engine Clock Enable Control
 #define EDMA26_CKE			BIT17	// EDMA#2 Controller Channel 6 Clock Enable Control
@@ -636,7 +636,7 @@
 #define EDMA6_CKE				BIT1	// EDMA Controller Channel 6 Clock Enable Control
 #define EDMA5_CKE				BIT0	// EDMA Controller Channel 5 Clock Enable Control
 
-#define REG_CLKDIV5	(CLK_BA+0x38)	// R/W¡@AHB Clock Enable Control Register2
+#define REG_CLKDIV5	(CLK_BA+0x38)	// R/WÂ¡@AHB Clock Enable Control Register2
 #define TOUCH_N1			NVTBIT(31, 27)	// TOUCH Engine Clock Divider Bits [4:0]
 #define TOUCH_S			NVTBIT(26, 25)	// TOUCH Engine Clock Source Selectione Control
 #define TOUCH_N0			NVTBIT(24, 22)	// TOUCH Engine Clock Divider If PLL
@@ -647,7 +647,7 @@
 #define PWM_S				NVTBIT(4, 3)	// PWM Clock Source Selectione Control
 #define PWM_N0			NVTBIT(2, 0)	// PWM Clock Divider If PLL
 
-#define REG_CLKDIV6	(CLK_BA+0x3C)	// R/W¡@AHB Clock Enable Control Register2
+#define REG_CLKDIV6	(CLK_BA+0x3C)	// R/WÂ¡@AHB Clock Enable Control Register2
 #define H20PHY_N1			NVTBIT(27, 24)	// USB2.0 Host PHY Clock Divider 1
 #define H20PHY_S			NVTBIT(20, 19)	// H20PHY Clock Source Divide Selection
 #define H20PHY_N0			NVTBIT(18, 16)	// USB2.0 Host PHY Clock Divider 0
@@ -655,7 +655,7 @@
 #define OHCI_S			NVTBIT(4, 3)	// OHCI Clock Source Selection
 #define OHCI_N0			NVTBIT(2, 0)	// OHCI Clock Divider 0
 
-#define REG_CLKDIV7 (CLK_BA+0x40)	// R/W¡@Clock Divider Register7
+#define REG_CLKDIV7 (CLK_BA+0x40)	// R/WÂ¡@Clock Divider Register7
 #define I2S_N1				NVTBIT(23, 16)	// I2S engine clock divide number 1
 #define I2S_S				NVTBIT(12, 11)	// I2S engine clock source select 00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define I2S_N0				NVTBIT(10, 8)	// I2S engine clock pre-divide number
@@ -663,7 +663,7 @@
 #define DRAM_S			NVTBIT(4, 3)	// DRAM Clock
 #define DRAM_N0			NVTBIT(2, 0)	// DRAM Clock Divider 0
 
-#define REG_CLKDIV8 (CLK_BA+0x44)	// R/W¡@Clock Divider Register8
+#define REG_CLKDIV8 (CLK_BA+0x44)	// R/WÂ¡@Clock Divider Register8
 #define SDIO_N1			NVTBIT(12, 5)	// SD engine clock divide number from SD engine clock source
 #define SDIO_S				NVTBIT(4, 3)	// SD engine clock source select  00 = XIN. 01 = X32K. 10 = APLL. 11 = UPLL
 #define SDIO_N0			NVTBIT(2, 0)	// SD engine clock pre-divide number
@@ -671,16 +671,16 @@
 /*
 	Rotation engine controller registers
 */
-#define REG_SCCR	(ROT_BA+0x00)	// R/W¡@SRAM Controller Control Register
+#define REG_SCCR	(ROT_BA+0x00)	// R/WÂ¡@SRAM Controller Control Register
 #define ROTSW_RST				BIT0	// SRAM Controller software reset
 
-#define REG_RCR	(ROT_BA+0x10)	// R/W¡@Control Register
+#define REG_RCR	(ROT_BA+0x10)	// R/WÂ¡@Control Register
 #define IMG_DFMT				NVTBIT(7, 6)	// Image Data Format
 #define LINE_BUF_SIZE			NVTBIT(5, 4)	// Line Buffer Size
 #define ROTE_DIR				BIT1	// Rotation Direction
 #define ROTE_EN				BIT0	// Rotation Enable
 
-#define REG_RICR	(ROT_BA+0x14)	// R/W¡@Interrupt Control Register
+#define REG_RICR	(ROT_BA+0x14)	// R/WÂ¡@Interrupt Control Register
 #define SRAM_OF_EN			BIT20	// SRAM read/write overflow Interrupt Enable
 #define TG_ABORT_EN			BIT18	// Target Abort Interrupt Enable
 #define ROTE_INT_EN			BIT16	// Rotation Finished Interrupt Enable
@@ -688,15 +688,15 @@
 #define TG_ABORT			        BIT2	// EAHB Master Receive Target Abort
 #define ROTE_FINISH			BIT0	// Rotation Finished
 
-#define REG_RIS		(ROT_BA+0x18)	// R/W¡@Rotation Image Size
+#define REG_RIS		(ROT_BA+0x18)	// R/WÂ¡@Rotation Image Size
 #define ROT_HEIGHT				NVTBIT(27, 16)	// Height of rotation image size (must be even number)
 #define ROT_WIDTH				NVTBIT(11, 0)	// Width of rotation image size (must be even number)
 
-#define REG_RSISA	(ROT_BA+0x1C)	// R/W¡@Source Image Starting Address
-#define REG_RSILOFF	(ROT_BA+0x20)	// R/W¡@Source Image Line Offset
+#define REG_RSISA	(ROT_BA+0x1C)	// R/WÂ¡@Source Image Starting Address
+#define REG_RSILOFF	(ROT_BA+0x20)	// R/WÂ¡@Source Image Line Offset
 #define RSI_LOFF				NVTBIT(11, 0)	// Rotation Source Image Line Offset (right-offset by byte-unit)
-#define REG_RDISA	(ROT_BA+0x24)	// R/W¡@Destination Image Starting Address
-#define REG_RDILOFF	(ROT_BA+0x2C)	// R/W¡@Destination Image Line Offset
+#define REG_RDISA	(ROT_BA+0x24)	// R/WÂ¡@Destination Image Starting Address
+#define REG_RDILOFF	(ROT_BA+0x2C)	// R/WÂ¡@Destination Image Line Offset
 #define RDI_LOFF				NVTBIT(11, 0)	// Rotation Destination  Image Line Offset (right-offset by byte-unit)
 
 /*
@@ -881,6 +881,7 @@
 #define TCON1_HBPD   			NVTBIT(23,12)	// Horizontal back porch is the number of LCD Pixel Clock periods between the falling edge of HSYNC and the start of active data.
 #define TCON1_HFPD   			NVTBIT(11,0)	// Horizontal front porch is the number of LCD Pixel Clock periods between the end of active data and the rising edge of HSYNC.
 
+#define REG_LCM_TCON2 			(VPOST_BA+0x14)	// R/W: Timing Control Register 2
 #define REG_LCM_TCON2 			(VPOST_BA+0x14)	// R/W: Timing Control Register 2
 #define TCON2_VSPW				NVTBIT(23,16)	// Vertical sync pulse width determines the VSYNC pulse's high level width by counting the number of inactive lines.
 #define TCON2_VBPD				NVTBIT(15,8)	// Vertical back porch is the number of inactive lines at the start of a frame, after vertical synchronization period.
@@ -2568,24 +2569,24 @@
 #define BYTE_ENDIN		BIT20	//BYTE ENDIN
 #define BYTE_SLEEP		BIT19	//BYTE SLEEP
 #define SLAVE			BIT18	// SLAVE Mode Indication
-#define IE				BIT17	// Interrupt Enable¡P
-#define IFG				BIT16	// Interrupt Flag¡P
+#define IE				BIT17	// Interrupt EnableÂ¡P
+#define IFG				BIT16	// Interrupt FlagÂ¡P
 #define SLEEP			NVTBIT(15,12)	// Suspend Interval.
-#define CLKP				BIT11	// Clock Polarity¡P
-#define LSB				BIT10	// Send LSB First¡P
-#define BIT_MODE		NVTBIT(9,8)	// Bit Mode¡P
+#define CLKP				BIT11	// Clock PolarityÂ¡P
+#define LSB				BIT10	// Send LSB FirstÂ¡P
+#define BIT_MODE		NVTBIT(9,8)	// Bit ModeÂ¡P
 #define Tx_BIT_LEN		NVTBIT(7,3)	// Transmit Bit Length.
-#define Tx_NEG			BIT2	// Transmit On Negative Edge¡P
-#define Rx_NEG			BIT1	// Receive On Negative Edge¡P
-#define GO_BUSY			BIT0	// Go and Busy Status¡P
+#define Tx_NEG			BIT2	// Transmit On Negative EdgeÂ¡P
+#define Rx_NEG			BIT1	// Receive On Negative EdgeÂ¡P
+#define GO_BUSY			BIT0	// Go and Busy StatusÂ¡P
 
 #define REG_SPI0_DIVIDER	(SPI0_BA + 0x0004)
 #define SPI0_DIV			NVTBIT(15,0)	//Clock Divider Register
 
 #define REG_SPI0_SSR		(SPI0_BA + 0x0008)
 #define LTRIG_FLAG		BIT5	// Level Trigger Flag
-#define SS_LTRIG			BIT4	// Slave Select Level Trigger¡P
-#define ASS				BIT3	// Automatic Slave Select¡P
+#define SS_LTRIG			BIT4	// Slave Select Level TriggerÂ¡P
+#define ASS				BIT3	// Automatic Slave SelectÂ¡P
 #define SS_LVL			BIT2	// Slave Select Active Level.
 											// It defines the active level of device/slave select signal (mw_ss_o).
 #define SSR				NVTBIT(1,0)	// Slave Select register
