@@ -21,6 +21,6 @@
 # makefile to configure build options for ARM 32 bit architectures.
 #
 
-#include makefile.arm
+include $(WSROOT)/build/makefiles/makefile.arm
 
 CARCH += -msoft-float

@@ -44,8 +44,8 @@
 default: prepare all
 
 prepare: prepclean
-	ln -s $(WSROOT)/platforms/$(CPU)/include $(WSROOT)/include/processor
-	ln -s $(WSROOT)/platforms/$(PLATFORM)/include $(WSROOT)/include/platform
+	ln -s $(WSROOT)/platforms/$(FAMILY)/$(CPU)/include $(WSROOT)/include/processor
+	ln -s $(WSROOT)/platforms/$(FAMILY)/$(PLATFORM)/include $(WSROOT)/include/platform
 
 prepclean:
 	rm -f $(WSROOT)/include/processor
