@@ -40,12 +40,13 @@ include $(WSROOT)/build/makefiles/makefile.$(PLATFORM)
 
 # Generic exports to compile, link and store derived objects
 
-export CC = gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g3
-export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g3
+export CC = $(TOOLCHAIN_PREFIX)gcc -ffreestanding -fno-stack-protector -nostdinc -pipe -g3
+export CXX = $(TOOLCHAIN_PREFIX)g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -pipe -g3
 export AS = $(CC) -xassembler
 export ASCC = $(CC) -xassembler-with-cpp
-export LN = ld --oformat binary -eDiegOS -static
-export AR = ar cr
+export LN = $(TOOLCHAIN_PREFIX)ld -static
+export AR = $(TOOLCHAIN_PREFIX)ar cr
+export OBJCPY = $(TOOLCHAIN_PREFIX)objcopy
 
 # OBJPREFIX is used to identify the derived objects of the selected CPU+PLATFORM
 # combine. Derived objects are stored in folder named after OBJPREFIX.

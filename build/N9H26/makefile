@@ -18,10 +18,10 @@
 #
 
 include makefile.config
+export FAMILY = ARM
+include ../makefiles/makefile.prepare
+include ../makefiles/makefile.exports
 include ../makefiles/makefile.master
-include ../makefiles/makefile.arm
-include ../makefiles/makefile.$(CPU)
-include ../makefiles/makefile.$(PLATFORM)
 
 .PHONY: all clean boot
 
@@ -31,7 +31,6 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../applications/demo/$(OBJPREFIX)_app.a \
 	../../kernel/libs/$(OBJPREFIX)_libkernel.a \
 	../../kernel/libs/time/$(OBJPREFIX)_libkerneltime.a \
-	../../kernel/libs/pci/$(OBJPREFIX)_libpci.a \
 	../../kernel/libs/unistd/$(OBJPREFIX)_libunistd.a \
 	../../kernel/libs/iomemory/$(OBJPREFIX)_libiomemory.a \
 	../../kernel/$(OBJPREFIX)_kernel.a \
