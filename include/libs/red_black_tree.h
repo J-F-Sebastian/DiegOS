@@ -15,22 +15,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */  
-    
+ */
+
 #ifndef _RED_BLACK_TREE_
 #define _RED_BLACK_TREE_
-    
+
 #include <types_common.h>
-    
+
 /*
  * return enum for compare functions, comparing is first param towards
  * second param
- */ 
-enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1 
+ */
+enum {
+	KEY_LOWER = -1,
+	KEY_EQUAL = 0,
+	KEY_GREATER = 1
 };
-enum { NODE_IS_RED = 1, NODE_IS_ROOT = 2 
+
+enum {
+	NODE_IS_RED = 1,
+	NODE_IS_ROOT = 2
 };
-
+
 /*
  * basic node struct, you do not need to mess with this header.
  * just add it as first field of your data struct.
@@ -39,16 +45,17 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  *          rbtree_node_t header;
  *          int mystuff;
  *  } foo;
- */ 
-    typedef struct rbtree_node {
-	struct rbtree_node *left;
-	struct rbtree_node *right;
-	unsigned flags;
-} rbtree_node_t;
-typedef int (*rbtreecmpfn) (const rbtree_node_t *, const rbtree_node_t *);
-typedef void (*rbtreeprnfn) (const rbtree_node_t *);
-typedef BOOL(*rbtreewlkfn) (rbtree_node_t *, void *);
-
+ */
+typedef struct rbtree_node {
+	struct rbtree_node *left;
+	struct rbtree_node *right;
+	unsigned flags;
+} rbtree_node_t;
+
+typedef int (*rbtreecmpfn)(const rbtree_node_t *, const rbtree_node_t *);
+typedef void (*rbtreeprnfn)(const rbtree_node_t *);
+typedef BOOL (*rbtreewlkfn)(rbtree_node_t *, void *);
+
 /*
  * insert a new node in the tree structure.
  * Memory management is up to the caller, root and node must be pre allocated.
@@ -60,9 +67,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the node cannot be inserted
  *  <value>            -  node value
- */ 
-    rbtree_node_t * rbtree_insert(rbtree_node_t ** root, rbtree_node_t * node, rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_insert(rbtree_node_t ** root, rbtree_node_t * node, rbtreecmpfn cmpfn);
+
 /*
  * Extract a node from the tree structure.
  * Extraction is not deletion, memory management is up to the caller; this routine
@@ -75,10 +82,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the node cannot be extracted
  *  <value>            -  extracted node value, matches target if target was linked in the tree
- */ 
-    rbtree_node_t * rbtree_extract(rbtree_node_t ** root, rbtree_node_t * target,
-				   rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_extract(rbtree_node_t ** root, rbtree_node_t * target, rbtreecmpfn cmpfn);
+
 /*
  * Search for a node in the tree structure.
  * PARAM:
@@ -89,10 +95,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the node cannot be found
  *  <value>            -  pointer to the node
- */ 
-    rbtree_node_t * rbtree_search(rbtree_node_t * root, rbtree_node_t * target,
-				  rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_search(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn);
+
 /*
  * Get the first item in tree order.
  * PARAM:
@@ -100,9 +105,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the tree is void
  *  <value>            -  pointer to the first in-order node
- */ 
-    rbtree_node_t * rbtree_first(rbtree_node_t * root);
-
+ */
+rbtree_node_t *rbtree_first(rbtree_node_t * root);
+
 /*
  * Get the last item in tree order.
  * PARAM:
@@ -110,9 +115,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the tree is void
  *  <value>            -  pointer to the last in-order node
- */ 
-    rbtree_node_t * rbtree_last(rbtree_node_t * root);
-
+ */
+rbtree_node_t *rbtree_last(rbtree_node_t * root);
+
 /*
  * Get the node preceding the target in the tree.
  * Target can be either linked in the tree or not, but it must match a node in the
@@ -125,10 +130,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the target cannot be found
  *  <value>            -  pointer to the preceding in-order node
- */ 
-    rbtree_node_t * rbtree_previous(rbtree_node_t * root, rbtree_node_t * target,
-				    rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_previous(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn);
+
 /*
  * Get the node following the target in the tree.
  * Target can be either linked in the tree or not, but it must match a node in the
@@ -141,9 +145,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the target cannot be found
  *  <value>            -  pointer to the following in-order node
- */ 
-    rbtree_node_t * rbtree_next(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_next(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn);
+
 /*
  * Get the node preceding the target.
  * Target can be either linked in the tree or not.
@@ -156,10 +160,10 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the target cannot be found
  *  <value>            -  pointer to the preceding in-order node
- */ 
-    rbtree_node_t * rbtree_search_previous(rbtree_node_t * root, rbtree_node_t * target,
-					   rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_search_previous(rbtree_node_t * root, rbtree_node_t * target,
+				      rbtreecmpfn cmpfn);
+
 /*
  * Get the node following the target.
  * Target can be either linked in the tree or not.
@@ -172,10 +176,9 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  * RETURNS:
  *  NULL               -  Some error was detected, or the target cannot be found
  *  <value>            -  pointer to the following in-order node
- */ 
-    rbtree_node_t * rbtree_search_next(rbtree_node_t * root, rbtree_node_t * target,
-				       rbtreecmpfn cmpfn);
-
+ */
+rbtree_node_t *rbtree_search_next(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn);
+
 /*
  * Look for a range of items, the boundaries are low and high keys; low and high
  * can be linked in the tree or not, and their keys can be present or not
@@ -196,12 +199,12 @@ enum { KEY_LOWER = -1, KEY_EQUAL = 0, KEY_GREATER = 1
  *                        pointers.
  * RETURNS:
  *  <value>            -  number of items copied in list.
- */ 
-unsigned rbtree_enumerate_inorder_range(rbtree_node_t * root, 
-					rbtree_node_t * low, 
-					rbtree_node_t * high, 
-					rbtreecmpfn cmpfn, rbtree_node_t ** list);
-
+ */
+unsigned rbtree_enumerate_inorder_range(rbtree_node_t * root,
+					rbtree_node_t * low,
+					rbtree_node_t * high,
+					rbtreecmpfn cmpfn, rbtree_node_t ** list);
+
 /*
  * Output the tree to list, in tree order.
  * The caller must provide enough items in *list to copy all pointers.
@@ -212,7 +215,7 @@ unsigned rbtree_enumerate_inorder_range(rbtree_node_t * root,
  * rbtree_node_t **list   - pointer to an array of rbtree_node_t pointers, nodes will be
  *                        copied in here.
  * RETURNS:
- */ 
+ */
 void rbtree_enumerate_inorder(rbtree_node_t * root, rbtree_node_t ** list);
 
 /*
@@ -226,9 +229,9 @@ void rbtree_enumerate_inorder(rbtree_node_t * root, rbtree_node_t ** list);
  * rbtree_node_t **list   - pointer to an array of rbtree_node_t pointers, nodes will be
  *                        copied in here.
  * RETURNS:
- */ 
+ */
 void rbtree_enumerate_layered(rbtree_node_t * root, rbtree_node_t ** list);
-
+
 /*
  * Return the number of nodes linked in the tree. This routine can be called
  * for intermediate nodes too; in this case, it will return the number of items
@@ -237,9 +240,9 @@ void rbtree_enumerate_layered(rbtree_node_t * root, rbtree_node_t ** list);
  *  const rbtree_node_t *root   -  pointer to the tree's root.
  * RETURNS:
  *  <value>            -  number of nodes
- */ 
+ */
 unsigned rbtree_count(rbtree_node_t * root);
-
+
 /*
  * This routine walks down the tree and calls wlkfn for every node; if wlkfn
  * returns FALSE the walk stops.
@@ -250,13 +253,13 @@ unsigned rbtree_count(rbtree_node_t * root);
  *  rbtreewlkfn wlkfn         - walk routine, return FALSE to stop the walk
  *  void *param               - generic parameter passed to wlkfn at every call.
  * RETURNS:
- */ 
+ */
 void rbtree_walk(rbtree_node_t * root, rbtreewlkfn wlkfn, void *param);
-
+
 #ifdef DBG_MODULE_ON
 void rbtree_print(rbtree_node_t * root, rbtreeprnfn prnfn);
-int rbtree_verify(rbtree_node_t * root, rbtreecmpfn cmpfn);
+int rbtree_verify(rbtree_node_t * root, rbtreecmpfn cmpfn);
 
-#endif				/*  */
-    
-#endif				/*  */
+#endif
+
+#endif
