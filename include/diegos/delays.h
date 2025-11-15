@@ -31,6 +31,19 @@ unsigned long loops_per_second(void);
 
 /*
  * This function should be invoked at boot time (much probably in platform
+ * dependent code) to set the internal delay.
+ * If the loop delay function is known and the loop count too then it is possible
+ * to spare boot time by directly setting the loop count with set_delay().
+ * If the delay is unknown it is possible to invoke calibrate_delay() to let
+ * the kernel figure out the loop count.
+ *
+ * PARAMETERS IN
+ * unsigned long lpm - loops per millisecond, i.e. delay loop count for 1 millisecond.
+ */
+void set_delay(unsigned long lpm);
+
+/*
+ * This function should be invoked at boot time (much probably in platform
  * dependent code) to calibrate the internal delay loop.
  * The function passed in as a parameter must return a value updating every millisecond.
  * Whenever a millisecond has expired, this function must return a different value.
@@ -40,7 +53,7 @@ unsigned long loops_per_second(void);
  * PARAMETERS IN
  * unsigned long (*tickfn(void)) - function returning an updated value every millisecond.
  */
-void calibrate_delay(unsigned long (*tickfn) (void));
+void calibrate_delay(unsigned long (*tickfn)(void));
 
 /*
  * Delay execution by at least msecs milliseconds.

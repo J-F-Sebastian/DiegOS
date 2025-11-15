@@ -33,7 +33,13 @@ unsigned long loops_per_second()
 	return (loops_per_msec * 1000);
 }
 
-void calibrate_delay(unsigned long (*tickfn) (void))
+void set_delay(unsigned long lpm)
+{
+	if (lpm)
+		loops_per_msec = lpm;
+}
+
+void calibrate_delay(unsigned long (*tickfn)(void))
 {
 	unsigned long oldticks;
 	unsigned long finder = BASE_VALUE;
