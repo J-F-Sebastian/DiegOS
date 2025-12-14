@@ -21,7 +21,11 @@
 #define _ARM_H_
 
 /*
- * CPSR values
+ * CPSR values.
+ * The register itself can be referred as CPSR_fsxc.
+ * The register is split into 4 bytes
+ *
+ * Flags                    Status                  eXtension       Control
  *
  * 31| 30| 29| 28| 27| 26 25| 24| 23 .. 20| 19 .. 16| 15 .. 10| 9| 8| 7| 6| 5| 4 .. 0
  * N | Z | C | V | Q |  RES | J | RESERVED| GE[3:0] | RESERVED| E| A| I| F| T| M[4:0]
