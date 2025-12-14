@@ -35,8 +35,8 @@
 #include <stdlib.h>
 #include <libs/cbuffers.h>
 
-#include "ARM/N9H26/N9H26.h"
-#include "ARM/N9H26/interrupts.h"
+#include <platform/N9H26.h>
+#include <platform/interrupts.h>
 #include "N9H26_UART.h"
 
 #define TX_SEQ_MAX  (16UL)
@@ -214,14 +214,12 @@ static void initialize_uart(unsigned unitno)
 	if (unitno == 0) {
 		//High Speed UART
 		N9H26c(N9H26CLK_BASE, CLKDIV3, UART0_N1 | UART0_S | UART0_N0);
-		N9H26c(N9H26GCR_BASE, GPDFUN0, MF_GPD1 | MF_GPD2);
-		N9H26u(N9H26GCR_BASE, GPDFUN0, 0x110);
+		N9H26cu(N9H26GCR_BASE, GPDFUN0, GPDFUN0, MF_GPD1 | MF_GPD2, 0x110);
 		N9H26u(N9H26CLK_BASE, APBCLK, UART0_CKE);
 	} else {
 		//Normal Speed UART
 		N9H26c(N9H26CLK_BASE, CLKDIV3, UART1_N1 | UART1_S | UART1_N0);
-		N9H26c(N9H26GCR_BASE, GPAFUN1, MF_GPA10 | MF_GPA11);
-		N9H26u(N9H26GCR_BASE, GPDFUN0, 0x3300);
+		N9H26cu(N9H26GCR_BASE, GPAFUN1, GPAFUN1, MF_GPA10 | MF_GPA11, 0x3300);
 		N9H26u(N9H26CLK_BASE, APBCLK, UART1_CKE);
 	}
 }
