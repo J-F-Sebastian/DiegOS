@@ -68,14 +68,33 @@
 ;                               (29184 Bytes)
 ;   |          ....         |
 ;   |          ....         |
-;   +-----------------------+
-;   |       0x0000F000      |   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
-;   |          ....         |   UNUSED (4096 Bytes)
-;   +-----------------------+
-;   |       0x00010000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;   |          ....         |
 ;   |          ....         |
-;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 32-BIT CODE (575 KBytes)
+;   +-----------------------+   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
+;   |       0x00010000      |
+;   |          ....         |   ISA DMA BUFFER 1
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00020000      |
+;   |          ....         |   ISA DMA BUFFER 2
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00030000      |
+;   |          ....         |   ISA DMA BUFFER 3
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00040000      |
+;   |          ....         |   ISA DMA BUFFER 4
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00050000      |   16-bit interrupts buffer (64 KBytes)
+;   |          ....         |
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00060000      |
+;   |          ....         |
+;   |          ....         |
+;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 16-BIT CODE (255 KBytes)
 ;   |          ....         |
 ;   |          ....         |
 ;   +-----------------------+
@@ -105,9 +124,11 @@
 ;   |          ....         |
 ;   +-----------------------+
 ;   |       0x00100000      |
-;   |                       |
+;   |                       |   HI 64Kb
+;   +-----------------------+
+;   |       0x00110000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;     ~~~~~~~~~~~~~~~~~~~~~
-;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS HEAP, FREE MEMORY
+;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS TEXT, DATA, HEAP, FREE MEMORY
 ;     ~~~~~~~~~~~~~~~~~~~~~
 ;
 
@@ -117,8 +138,9 @@
 BYTESPERSEC	EQU 512
 RAM_START	EQU 0x0600
 STACK16_START	EQU 0x7000
-STACK32_START	EQU 0x0000F000
-DIEGOS_START	EQU 0x00010000
+STACK32_START	EQU 0x00010000
+DIEGOS_START	EQU 0x00110000
+DIEGOS_LOAD     EQU 0x00010000
 
 ; Descriptors at beginning of RAM
 IDT_DESC	EQU RAM_START
@@ -184,10 +206,9 @@ JC	Error
 
 ; set destination buffer
 ; NOTE: the buffer is 64KBytes limited !!!
-MOV	BX, BPB 
-MOV 	SI, WORD [BX + 0xE]
+MOV 	SI, WORD [BPB + 0xE]
 DEC	SI
-MOV	AX, WORD DIEGOS_START>>4
+MOV	AX, WORD DIEGOS_LOAD>>4
 MOV	ES, AX
 MOV 	BP, AX
 
@@ -220,7 +241,7 @@ POP	BX
 ADD 	BX, BYTESPERSEC
 JNC 	NoNewSegment
 
-ADD 	BP, WORD DIEGOS_START>>4
+ADD 	BP, WORD DIEGOS_LOAD>>4
 MOV 	ES, BP
 NoNewSegment:
 
@@ -327,6 +348,13 @@ MOV	EBP, EDI
 
 ; execute a 32 bit LIDT
 LIDT 	[IDTR_START]
+MOV ESI, DWORD DIEGOS_LOAD
+MOV EDI, DWORD DIEGOS_START
+XOR ECX, ECX
+MOV CX, WORD [BPB + 0xE]
+DEC CX
+SHL ECX, 7
+REP MOVSD
 ; START THE SYSTEM!
 JMP	DIEGOS_START
 
@@ -397,7 +425,7 @@ TEST	AL, 0x02
 JNZ	empty_8042
 RET
 
-HelloString 	db 0xDB,0xDB,0xDD,'DiegOS Boot Loader 2.0', 0x0D, 0x0A, 0x00
+HelloString 	db 0xDB,0xDB,0xDD,'DiegOS Boot Loader 3.0', 0x0D, 0x0A, 0x00
 ErrorString	db 'Error', 0x00
 StartString     db 0x0D, 0x0A, 'Starting ...', 0x0D, 0x0A, 0x00
 TIMES 510 - ($ - $$) db 0xdf
