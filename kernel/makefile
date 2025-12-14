@@ -14,10 +14,12 @@ OBJSTARTO = $(addprefix $(OBJPREFIX)/, $(OBJSTART))
 
 all: objdirs $(OBJSO) $(OBJSTARTO)
 	cd libs && make all
+	test -s libs/makefile.$(OBJPREFIX) && cd libs && make -f makefile.$(OBJPREFIX) all || echo "SKIP $(OBJPREFIX)..."
 	$(AR) $(OBJPREFIX)_kernel.a $(OBJSO)
 	$(AR) $(OBJPREFIX)_diegos.a $(OBJSTARTO)
 
 	
 clean:
 	cd libs && make clean
+	test -s libs/makefile.$(OBJPREFIX) && cd libs && make -f makefile.$(OBJPREFIX) clean || echo "SKIP $(OBJPREFIX)..."
 	rm -rf $(OBJSO) $(OBJSTARTO) *.a

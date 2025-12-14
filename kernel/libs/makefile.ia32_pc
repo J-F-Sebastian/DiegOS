@@ -5,13 +5,8 @@ OBJS =
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
 all: objdirs $(OBJSO)
-	cd unistd && make all
-	cd time && make all
-	cd iomemory && make all
+	cd pci && make all
 	$(AR) $(OBJPREFIX)_libkernel.a $(OBJSO)
 	
 clean:
-	cd unistd && make clean
-	cd time && make clean
-	cd iomemory && make clean
-	rm -rf $(OBJSO) *.a
+	cd pci && make clean
