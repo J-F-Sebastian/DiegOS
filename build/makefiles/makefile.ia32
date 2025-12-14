@@ -26,6 +26,6 @@ export CWARN = -Wall -Wextra -Winline -Wcast-align -Wno-unused-parameter -Werror
 export CXXWARN = -Wall -Wextra -Wcast-align -Wno-unused-parameter -Werror -Wframe-larger-than=1023
 export COPT = -O2
 export CARCH = -m32 -march=$(CPU_SPEC) -fcall-used-ebx -fomit-frame-pointer
-export CFLAGS = $(CWARN) $(COPT) $(CARCH)
-export CXXFLAGS = $(CXXWARN) $(COPT) $(CARCH)
+export CFLAGS = $(CWARN) $(COPT) $(CARCH) --param=min-pagesize=0
+export CXXFLAGS = $(CXXWARN) $(COPT) $(CARCH) --param=min-pagesize=0
 export ASFLAGS = $(CARCH)
