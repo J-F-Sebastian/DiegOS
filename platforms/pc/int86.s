@@ -56,33 +56,40 @@
 ;   |       0x00000E50      |
 ;   |          ....         |
 ;   |          ....         |
-;   |          ....         |   FREE FOR 16-BIT STACK (25008 Bytes)
+;   |          ....         |   Stack for real-mode interrupts
+;   |          ....         |   handling.
 ;   |          ....         |
 ;   |          ....         |
 ;   |          ....         |
 ;   +-----------------------+
-;   |       0x00007000      |   16-BIT STACK START (GROWS TO LOWER ADDRESSES)
-;   |          ....         |   UNUSED (3072 Bytes)
+;   |       0x0000FDF0      |   16-bit Interrupts handling
+;   |          ....         |   code and data relocated
+;   |          ....         |   to 0xFDF0 (MUST BE less than 512 bytes)
 ;   +-----------------------+
-;   |       0x00007C00      |   BOOT CODE ENTRY point (16-BIT REAL MODE)
-;   |          ....         |   (512 Bytes)
-;   +-----------------------+
-;   |       0x00007E00      |
-;   |          ....         |
-;   |          ....         |
-;
-;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 32-BIT STACK (DiegOS init ONLY !!!)
-;                               (29184 Bytes)
-;   |          ....         |
+;   |       0x00010000      |
+;   |          ....         |   ISA DMA BUFFER 1
 ;   |          ....         |
 ;   +-----------------------+
-;   |       0x0000F000      |   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
-;   |          ....         |   DiegOS BOOT VARIABLES (4096 Bytes)
+;   |       0x00020000      |
+;   |          ....         |   ISA DMA BUFFER 2
+;   |          ....         |
 ;   +-----------------------+
-;   |       0x00010000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
+;   |       0x00030000      |
+;   |          ....         |   ISA DMA BUFFER 3
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00040000      |
+;   |          ....         |   ISA DMA BUFFER 4
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00050000      |   16-bit real-mode interrupts buffer (64KByte)
 ;   |          ....         |
 ;   |          ....         |
-;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 32-BIT CODE (575 KBytes)
+;   +-----------------------+
+;   |       0x00060000      |
+;   |          ....         |
+;   |          ....         |
+;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 16-BIT CODE (255 KBytes)
 ;   |          ....         |
 ;   |          ....         |
 ;   +-----------------------+
@@ -112,11 +119,14 @@
 ;   |          ....         |
 ;   +-----------------------+
 ;   |       0x00100000      |
-;   |                       |
+;   |                       |   HI 64Kb
+;   +-----------------------+
+;   |       0x00110000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;     ~~~~~~~~~~~~~~~~~~~~~
-;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS HEAP, FREE MEMORY
+;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS TEXT, DATA, HEAP, FREE MEMORY
 ;     ~~~~~~~~~~~~~~~~~~~~~
 ;
+
 [bits 32]
 
 ; C Prototype:
@@ -139,7 +149,7 @@ struc regs16_t
 	.ef resw 1
 endstruc
 
-%define INT32_BASE                             0x7C00
+%define INT32_BASE                             0xFDF0
 %define REBASE(x)                              (((x) - reloc) + INT32_BASE)
 %define GDTENTRY(x)                            ((x) << 3)
 %define CODE32                                 GDTENTRY(1)	; 0x08
@@ -321,7 +331,7 @@ global real_buffer, _real_buffer
 
 real_buffer:
 _real_buffer:
-        mov eax, 0x7000
+        mov eax, 0x50000
         ret
 
 ; C Prototype:
@@ -330,5 +340,5 @@ global real_buffer_size, _real_buffer_size
 
 real_buffer_size:
 _real_buffer_size:
-		mov eax, 0x6000
+		mov eax, 0x10000
 		ret
