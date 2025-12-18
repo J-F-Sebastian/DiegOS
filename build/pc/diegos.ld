@@ -2,7 +2,7 @@ ENTRY(DiegOS)
 
 SECTIONS
      {
-       .text 0x10000 : 
+       .text 0x110000 :
 	{
 		_text_start = .; *(.text) *(.rodata*); KEEP(.text.*) _text_end = .;
 	}
