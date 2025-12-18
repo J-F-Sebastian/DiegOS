@@ -21,6 +21,8 @@
 #include <platform/int86.h>
 #include <types_common.h>
 
+extern long _bss_end;
+
 void cacheable_memory(void **base, unsigned long *size)
 {
 	regs16_t regs;
@@ -46,14 +48,14 @@ void cacheable_memory(void **base, unsigned long *size)
 	/*
 	 * The first MByte is a legacy of shadow memories,
 	 * mapped VGA devices, etc.
-	 * Executable code is running below 1 Mbyte.
+	 * Executable code is running above 1 Mbyte (plus 64KByte).
 	 * Don't mess with this.
 	 * NOTE: interrupt services report available memory
 	 * above 1Mbyte.
 	 */
 	mem = (regs.ax << 10) + (regs.bx << 16);
-	*base = (void *)(1UL * MBYTE);
-	*size = mem - IOMEMORY_SIZE;
+	*base = (void *)(1UL * MBYTE + 64UL * KBYTE + (uintptr_t)&_bss_end);
+	*size = mem - IOMEMORY_SIZE - (uintptr_t) (*base);
 }
 
 void io_memory(void **base, unsigned long *size)
@@ -81,7 +83,7 @@ void io_memory(void **base, unsigned long *size)
 	/*
 	 * The first MByte is a legacy of shadow memories,
 	 * mapped VGA devices, etc.
-	 * Executable code is running below 1 Mbyte.
+	 * Executable code is running above 1 Mbyte (plus 64KByte).
 	 * Don't mess with this.
 	 * NOTE: interrupt services report available memory
 	 * above 1Mbyte.
