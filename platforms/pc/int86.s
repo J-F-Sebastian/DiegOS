@@ -326,19 +326,19 @@ section .text
 ; The 16 bit stack is reused in 32-bit word as a static buffer to
 ; be used with interrupts-BIOS calls
 ; C Prototype:
-;	void *real_buffer (void);
+; void *real_buffer (void);
 global real_buffer, _real_buffer
 
 real_buffer:
 _real_buffer:
-        mov eax, 0x50000
-        ret
+mov eax, 0x50000
+ret
 
 ; C Prototype:
-;	unsigned real_buffer_size (void);
+; unsigned real_buffer_size (void);
 global real_buffer_size, _real_buffer_size
 
 real_buffer_size:
 _real_buffer_size:
-		mov eax, 0x10000
-		ret
+mov eax, 0x10000
+ret
