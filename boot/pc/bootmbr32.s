@@ -68,14 +68,33 @@
 ;                               (29184 Bytes)
 ;   |          ....         |
 ;   |          ....         |
-;   +-----------------------+
-;   |       0x0000F000      |   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
-;   |          ....         |   UNUSED (4096 Bytes)
-;   +-----------------------+
-;   |       0x00010000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;   |          ....         |
 ;   |          ....         |
-;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 32-BIT CODE (575 KBytes)
+;   +-----------------------+   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
+;   |       0x00010000      |
+;   |          ....         |   ISA DMA BUFFER 1
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00020000      |
+;   |          ....         |   ISA DMA BUFFER 2
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00030000      |
+;   |          ....         |   ISA DMA BUFFER 3
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00040000      |
+;   |          ....         |   ISA DMA BUFFER 4
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00050000      |   16-bit interrupts buffer (64 KBytes)
+;   |          ....         |
+;   |          ....         |
+;   +-----------------------+
+;   |       0x00060000      |
+;   |          ....         |
+;   |          ....         |
+;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 16-BIT CODE (255 KBytes)
 ;   |          ....         |
 ;   |          ....         |
 ;   +-----------------------+
@@ -105,20 +124,27 @@
 ;   |          ....         |
 ;   +-----------------------+
 ;   |       0x00100000      |
-;   |                       |
+;   |                       |   HI 64Kb
+;   +-----------------------+
+;   |       0x00110000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;     ~~~~~~~~~~~~~~~~~~~~~
-;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS HEAP, FREE MEMORY
+;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS TEXT, DATA, HEAP, FREE MEMORY
 ;     ~~~~~~~~~~~~~~~~~~~~~
 ;
 
+; The Master Boot Record is loaded at 0x7C00 and is 512 bytes long.
+; At boot time the cpu is running in real mode, i.e. 16 bit.
 [ORG 0x7C00]
 [BITS 16]
 
-BYTESPERSEC	EQU 512
-RAM_START	EQU 0x0600
-STACK16_START	EQU 0x7000
-STACK32_START	EQU 0x0000F000
-DIEGOS_START	EQU 0x00010000
+; Back in real world this is not to be hard-coded, a sector ca be bigger
+; than 512 bytes.
+BYTESPERSEC     EQU 512
+RAM_START       EQU 0x0600
+STACK16_START   EQU 0x7000
+STACK32_START   EQU 0x0000F000
+DIEGOS_START    EQU 0x00110000
+DIEGOS_LOAD     EQU 0x00010000
 
 ; Descriptors at beginning of RAM
 IDT_DESC	EQU RAM_START
@@ -191,10 +217,11 @@ JC	Error
 
 ; set destination buffer
 ; NOTE: the buffer is 64KBytes limited !!!
-MOV 	SI, WORD [BX + 12]
-MOV	AX, WORD DIEGOS_START>>4
-MOV	ES, AX
-MOV 	BP, AX
+MOV    SI, WORD [BX + 12]
+MOV    [STACK16_START], SI
+MOV    AX, WORD DIEGOS_LOAD>>4
+MOV    ES, AX
+MOV    BP, AX
 
 ;1.44 MB Disk Format support 18 sectors per track,
 ; or 0x12. the first sector is used by boot code.
@@ -215,17 +242,13 @@ readOneSector:
 INT	0x13
 JC	Error
 
-SUB 	SI, 1
+DEC 	SI
 JZ  	StartDiegOS
-
-PUSH	BX
-CALL	PrintDot
-POP	BX
 
 ADD 	BX, BYTESPERSEC
 JNC 	NoNewSegment
 
-ADD 	BP, WORD DIEGOS_START>>4
+ADD 	BP, WORD DIEGOS_LOAD>>4
 MOV 	ES, BP
 NoNewSegment:
 
@@ -257,23 +280,6 @@ JNC	A20Enabled
 CALL	A20Enable
 
 A20Enabled:
-;Detect free memory
-;MOV     AX, 0xE801
-;INT     0x15		; request upper memory size
-;JC      Error
-;CMP	AX, 0x0
-;JNE    	useAX		; was the EAX result invalid?
-;MOV     AX, CX
-;MOV     BX, DX
-;useAX:
-; AX = number of contiguous Kb, 1M to 16M
-; BX = contiguous 64Kb pages above 16M
-;SHL     EAX, 10
-;SHL     EBX, 16
-;ADD     EAX, EBX
-;MOV     DWORD [DIEGOS_VARS], 0x00100000
-;MOV     DWORD [DIEGOS_VARS + 4], EAX
-
 ;Assign segments for proper kernel start
 XOR	AX, AX
 MOV	ES, AX
@@ -306,9 +312,8 @@ o32	LGDT [GDTR_START]
 
 ; enter protected mode
 MOV 	EBX, CR0
-OR	EBX, PE_BIT
-AND     EBX, ~CD_BIT
-AND	EBX, ~NW_BIT
+OR	    EBX, PE_BIT
+AND     EBX, ~(CD_BIT | NW_BIT)
 MOV 	CR0, EBX
 
 ; clear prefetch queue, sets CS
@@ -332,6 +337,11 @@ MOV	EBP, EDI
 
 ; execute a 32 bit LIDT
 LIDT 	[IDTR_START]
+MOV     ESI, DWORD DIEGOS_LOAD
+MOV     EDI, DWORD DIEGOS_START
+MOV     CX, WORD [STACK16_START]
+SHL     ECX, 7
+REP     MOVSD
 ; START THE SYSTEM!
 JMP	DIEGOS_START
 
@@ -373,18 +383,6 @@ JMP	PrintNext
 PrintQuit:
 RET
 
-; PrintDot
-; Print a green dot to display
-; Registers used (to be saved by the caller)
-; AX
-; BX
-PrintDot:
-; Print a dot for every sector read in memory
-MOV	AX, 0x0EFE
-MOV	BX, 0x0007
-INT	0x10
-RET
-
 A20Enable:
 MOV	AL, 0xD1
 OUT	0x64, AL
@@ -402,10 +400,10 @@ TEST	AL, 0x02
 JNZ	empty_8042
 RET
 
-HelloString 	db 0xDB,0xDB,0xDD,'DiegOS MBR Loader 2.0', 0x0D, 0x0A, 0x00
+HelloString 	db 0xDB,0xDB,0xDD,'DiegOS MBR Loader 3.0', 0x0D, 0x0A, 0x00
 MbrString 	db 'Partition not found', 0x00
 ErrorString	db 'Error', 0x00
-StartString     db 0x0D, 0x0A, 'Starting ...', 0x0D, 0x0A, 0x00
+StartString     db 0x0D, 0x0A, 'Starting..', 0x0D, 0x0A, 0x00
 TIMES	446 - ($ - $$) db 0xdf
 
 MBR:
