@@ -29,6 +29,10 @@ int thread_io_wait_init(wait_queue_t * wq);
 
 int thread_io_wait(wait_queue_t * wq);
 
+/*
+ * Resume all threads waiting on a wait queue.
+ * This function is expected to be called from an interrupt context.
+ */
 int thread_io_resume(wait_queue_t * wq);
 
 #endif				// IO_WAITS_H_INCLUDED
