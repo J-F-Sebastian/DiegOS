@@ -28,4 +28,6 @@ void barriers_dump(void);
 
 void threads_check(void);
 
+void diegos_dump(void);
+
 #endif
