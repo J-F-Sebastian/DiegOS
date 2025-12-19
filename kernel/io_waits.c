@@ -54,7 +54,7 @@ int thread_io_wait_init(wait_queue_t * wq)
 	}
 	temp->wq = wq;
 
-	if (EOK != list_add(&wait_queues, list_tail(&wait_queues), &temp->header)) {
+	if (EOK != list_append(&wait_queues, &temp->header)) {
 		chunks_pool_free(wait_queue_int_items, temp);
 		return EPERM;
 	}
@@ -66,7 +66,6 @@ static int thread_io_wait_internal(wait_queue_t * wq, unsigned flags)
 {
 	struct wait_queue_item *temp;
 	thread_t *prev, *next;
-	list_node *lstprev = NULL;
 	int retcode = EOK;
 
 	if (!wq) {
@@ -93,8 +92,7 @@ static int thread_io_wait_internal(wait_queue_t * wq, unsigned flags)
 	prev = scheduler_running_thread();
 
 	lock();
-	lstprev = list_tail(wq);
-	retcode = list_add(wq, lstprev, &temp->header);
+	retcode = list_append(wq, &temp->header);
 	unlock();
 
 	if (EOK != retcode) {
