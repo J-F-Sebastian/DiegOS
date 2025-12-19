@@ -91,11 +91,11 @@ void DiegOS(void)
 	tty_init();
 
 	kmsgprintf("%s\n\n", DiegOS_banner);
-#if 1
+
 	total_memory(&mem_size);
 	cacheable_memory(&heap_start, &heap_size);
 	io_memory(&iomem_start, &iomem_size);
-
+#if 0
 	kmsgprintf("        | Text   | Data   | BSS    | Heap   | I/O\n");
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n");
 	kmsgprintf("Start   |%#8x|%#8x|%#8x|%#8x|%#8x\n",
@@ -106,7 +106,7 @@ void DiegOS(void)
 		   &_text_end, &_data_end, &_bss_end, (uintptr_t) (heap_start) + heap_size,
 		   (uintptr_t) (iomem_start) + iomem_size);
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n\n");
-	kmsgprintf("RAM Size: %d MBytes\n", mem_size);
+	kmsgprintf("RAM Size: %d MBytes\n", mem_size/MBYTE);
 #endif
 	if (proctype) {
 		kmsgprintf("processor is a %s\n", proctype);

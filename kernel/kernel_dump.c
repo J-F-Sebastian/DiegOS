@@ -23,6 +23,9 @@
 
 #include "threads.h"
 #include "mutex_private.h"
+#include "platform_include.h"
+
+extern long _text_start, _text_end, _data_start, _data_end, _bss_start, _bss_end;
 
 void threads_dump()
 {
@@ -36,7 +39,7 @@ void threads_dump()
 		ptr = get_thread(i);
 		if (ptr) {
 			printf("%-15s | %3u | %6u | %s\n",
-				ptr->name, ptr->tid, ptr->stack_size, state2str(ptr->state));
+			       ptr->name, ptr->tid, ptr->stack_size, state2str(ptr->state));
 		}
 	}
 	printf("----------------------------------------------\n\n");
@@ -55,4 +58,32 @@ void barriers_dump()
 void threads_check()
 {
 	check_thread_stack();
+}
+
+void diegos_dump()
+{
+	void *heap_start;
+	unsigned long heap_size;
+	void *iomem_start;
+	unsigned long iomem_size;
+	unsigned long mem_size;
+
+	total_memory(&mem_size);
+	cacheable_memory(&heap_start, &heap_size);
+	io_memory(&iomem_start, &iomem_size);
+
+	printf("\n--- SYSTEM TABLE -----------------------------------------------\n");
+	printf("        |  Text    |  Data    |  BSS     |  Heap    |  I/O\n");
+	printf("_________________________________________________________________\n");
+	printf("Start   | %#8x | %#8x | %#8x | %#8x | %#8x\n",
+	       &_text_start, &_data_start, &_bss_start, (uintptr_t) (heap_start),
+	       (uintptr_t) iomem_start);
+	printf("--------+----------+----------+----------+----------+----------\n");
+	printf("End     | %#8x | %#8x | %#8x | %#8x | %#8x\n",
+	       &_text_end, &_data_end, &_bss_end, (uintptr_t) (heap_start) + heap_size,
+	       (uintptr_t) (iomem_start) + iomem_size);
+	printf("-----------------------------------------------------------------\n\n");
+	printf("Total RAM Size .....: %d MBytes\n", mem_size / MBYTE);
+	printf("Heap Memory Size ...: %d KBytes\n", heap_size / KBYTE);
+	printf("I/O Memory Size ....: %d KBytes\n", iomem_size / KBYTE);
 }
