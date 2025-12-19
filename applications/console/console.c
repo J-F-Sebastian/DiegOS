@@ -49,6 +49,7 @@ BEGIN_ALT_COMMAND(show)
     ALT_COMMAND_FUNC0(threads, "system threads", threads_dump)
     ALT_COMMAND_FUNC0(mutexes, "system mutexes", mutexes_dump)
     ALT_COMMAND_FUNC0(barriers, "system barriers", barriers_dump)
+    ALT_COMMAND_FUNC0(system, "DiegOS memory layout", diegos_dump)
     ALT_COMMAND_FUNC0(date, "date and time", print_time)
 END_ALT_COMMAND()
 
