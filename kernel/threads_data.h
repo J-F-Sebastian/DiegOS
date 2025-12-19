@@ -75,7 +75,7 @@ typedef struct thread {
 	/*
 	 * Thread entry point, NO return value, NO parameters
 	 */
-	void (*entry_ptr) (void);
+	void (*entry_ptr)(void);
 	/*
 	 * Thread's own stack, this will be used by interrupts
 	 * if they happen while this thread is executing - there

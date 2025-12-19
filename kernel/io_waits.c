@@ -40,7 +40,7 @@ static list_inst wait_queues;
 static chunks_pool_t *wait_queue_items;
 static chunks_pool_t *wait_queue_int_items;
 
-int thread_io_wait_init(wait_queue_t * wq)
+int thread_io_wait_init(wait_queue_t *wq)
 {
 	struct wait_queue_int *temp;
 
@@ -62,7 +62,7 @@ int thread_io_wait_init(wait_queue_t * wq)
 	return EOK;
 }
 
-static int thread_io_wait_internal(wait_queue_t * wq, unsigned flags)
+static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 {
 	struct wait_queue_item *temp;
 	thread_t *prev, *next;
@@ -121,12 +121,12 @@ static int thread_io_wait_internal(wait_queue_t * wq, unsigned flags)
 	return EOK;
 }
 
-int thread_io_wait(wait_queue_t * wq)
+int thread_io_wait(wait_queue_t *wq)
 {
 	return (thread_io_wait_internal(wq, IO_WAIT_DEFAULT));
 }
 
-int thread_io_resume(wait_queue_t * wq)
+int thread_io_resume(wait_queue_t *wq)
 {
 	struct wait_queue_item *cursor;
 
@@ -198,7 +198,7 @@ void io_wait_put_item(struct wait_queue_item *item)
 	unlock();
 }
 
-int io_wait_add(struct wait_queue_item *item, wait_queue_t * wq)
+int io_wait_add(struct wait_queue_item *item, wait_queue_t *wq)
 {
 	int retcode = EINVAL;
 
@@ -211,7 +211,7 @@ int io_wait_add(struct wait_queue_item *item, wait_queue_t * wq)
 	return (retcode);
 }
 
-int io_wait_remove(struct wait_queue_item *item, wait_queue_t * wq)
+int io_wait_remove(struct wait_queue_item *item, wait_queue_t *wq)
 {
 	int retcode = EINVAL;
 

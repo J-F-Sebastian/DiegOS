@@ -61,7 +61,7 @@ static device_int_t *lookup_name(const char *name)
 	return (NULL);
 }
 
-static STATUS insert_device(device_int_t * dev)
+static STATUS insert_device(device_int_t *dev)
 {
 	device_int_t *prev = list_head(&device_list);
 	int retval;
@@ -225,7 +225,7 @@ device_t *device_create(const void *inst, unsigned unitno)
 	return (&tmp->dv);
 }
 
-int device_set_access(device_t * dev, device_write_fn wfn, device_read_fn rfn)
+int device_set_access(device_t *dev, device_write_fn wfn, device_read_fn rfn)
 {
 	if (!dev) {
 		return (EINVAL);
@@ -276,7 +276,7 @@ device_t *device_lookup_name(const char *devname)
 	return ((retval) ? (&retval->dv) : (NULL));
 }
 
-int device_io_tx(device_t * dev, const char *buf, size_t bytes)
+int device_io_tx(device_t *dev, const char *buf, size_t bytes)
 {
 	int retcode = bytes;
 	size_t cbytes = 0;
@@ -313,7 +313,7 @@ int device_io_tx(device_t * dev, const char *buf, size_t bytes)
 	return (cbytes);
 }
 
-int device_io_rx(device_t * dev, char *buf, size_t bytes)
+int device_io_rx(device_t *dev, char *buf, size_t bytes)
 {
 	int retcode;
 
