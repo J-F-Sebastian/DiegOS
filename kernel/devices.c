@@ -80,7 +80,7 @@ static STATUS insert_device(device_int_t * dev)
 	/*
 	 * If the loop exited, we need to add the device at the end
 	 */
-	return (list_add(&device_list, list_tail(&device_list), &dev->header));
+	return (list_append(&device_list, &dev->header));
 }
 
 BOOL init_devices_lib()
