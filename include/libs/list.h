@@ -33,6 +33,11 @@ int list_init(list_inst * list);
 
 int list_add(list_inst * list, list_node * prev, list_node * data);
 
+inline int list_append(list_inst *list, list_node *data)
+{
+    return (list_add(list, list->tail, data));
+}
+
 int list_remove(list_inst * list, list_node * data);
 
 list_node *list_search(list_inst * list, void *param, BOOL(*fn) (list_node *, void *));
