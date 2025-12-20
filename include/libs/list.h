@@ -33,6 +33,11 @@ int list_init(list_inst * list);
 
 int list_add(list_inst * list, list_node * prev, list_node * data);
 
+inline int list_prepend(list_inst *list, list_node *data)
+{
+	return (list_add(list, NULL, data));
+}
+
 inline int list_append(list_inst *list, list_node *data)
 {
 	return (list_add(list, list->tail, data));
