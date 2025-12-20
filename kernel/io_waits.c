@@ -201,7 +201,7 @@ int io_wait_add(struct wait_queue_item *item, wait_queue_t *wq)
 
 	if (item && wq) {
 		lock();
-		retcode = list_add(wq, list_tail(wq), &item->header);
+		retcode = list_append(wq, &item->header);
 		unlock();
 	}
 

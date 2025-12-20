@@ -58,7 +58,7 @@ barrier_t *barrier_create(const char *name, BOOL autoclose)
 
 	lock();
 
-	if (EOK != list_add(&barriers_list, NULL, &ptr->header)) {
+	if (EOK != list_prepend(&barriers_list, &ptr->header)) {
 		unlock();
 		free(ptr);
 		return (NULL);

@@ -78,7 +78,7 @@ static STATUS create_pool(chunks_pool_t * ptr, unsigned numitems)
 
 	memset(tmp->bitmap, 0, BITMAPBYTES(numitems));
 
-	if (EOK != list_add(&ptr->pools, NULL, &tmp->header)) {
+	if (EOK != list_prepend(&ptr->pools, &tmp->header)) {
 		free(tmp->bitmap);
 		free(tmp->buffer);
 		free(tmp);

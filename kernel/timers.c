@@ -133,7 +133,7 @@ timer_t *timer_create(const char *name, unsigned millisecs, BOOL recursive, tmr_
 		}
 	}
 
-	if (EOK != list_add(&timers_list, NULL, &ptr->header)) {
+	if (EOK != list_prepend(&timers_list, &ptr->header)) {
 		unlock();
 		free(ptr);
 		errno = EPERM;
