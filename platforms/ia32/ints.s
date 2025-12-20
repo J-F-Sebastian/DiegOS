@@ -35,7 +35,7 @@ locked:
  */
 lock:
 cli
-addl 	$1, locked
+incl    locked
 ret
 
 
@@ -47,9 +47,10 @@ ret
  * Enable CPU interrupts.
  */
 unlock:
-subl	$1, locked
-cmpl	$0, locked
-jne	sk1
+cmp    $0, locked
+je     sk1
+decl   locked
+jnz    sk1
 sti
 sk1:
 ret
