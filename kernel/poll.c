@@ -101,7 +101,7 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 		return EAGAIN;
 	}
 
-	if ((EOK != list_add(&poll_table_list, NULL, &newtable->header)) ||
+	if ((EOK != list_prepend(&poll_table_list, &newtable->header)) ||
 	    (EOK != queue_init(&newtable->table))) {
 		chunks_pool_free(poll_tables, newtable);
 		return EAGAIN;
@@ -177,7 +177,7 @@ int poll_network(struct pollfd ufds[], unsigned nfds, int timeout)
 		return EAGAIN;
 	}
 
-	if ((EOK != list_add(&poll_table_list, NULL, &newtable->header)) ||
+	if ((EOK != list_prepend(&poll_table_list, &newtable->header)) ||
 	    (EOK != queue_init(&newtable->table))) {
 		chunks_pool_free(poll_tables, newtable);
 		return EAGAIN;

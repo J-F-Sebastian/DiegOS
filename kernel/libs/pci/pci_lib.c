@@ -106,7 +106,7 @@ static BOOL pci_bus_enumerate_function(unsigned bus,
 	if (!newdev) {
 		return (FALSE);
 	}
-	if (EOK != list_add(&pci_dev_list, NULL, &newdev->header)) {
+	if (EOK != list_prepend(&pci_dev_list, &newdev->header)) {
 		chunks_pool_free(pci_dev_pool, newdev);
 		return (FALSE);
 	}

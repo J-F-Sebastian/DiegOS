@@ -127,7 +127,7 @@ alarm_t *alarm_create(const char *name,
 		}
 	}
 
-	if (EOK != list_add(&alarms_list, NULL, &ptr->header)) {
+	if (EOK != list_prepend(&alarms_list, &ptr->header)) {
 		unlock();
 		free(ptr);
 		return (NULL);

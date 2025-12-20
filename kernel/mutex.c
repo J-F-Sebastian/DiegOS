@@ -61,7 +61,7 @@ struct mutex *init_mutex(const char *name)
 		return (NULL);
 	}
 
-	if (EOK != list_add(&mutexes_list, NULL, &tmp->header)) {
+	if (EOK != list_prepend(&mutexes_list, &tmp->header)) {
 		free(tmp);
 		return (NULL);
 	}

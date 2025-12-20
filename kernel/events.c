@@ -48,7 +48,7 @@ ev_queue_t *event_init_queue(const char *name)
 	}
 
 	if ((EOK != queue_init(&ptr->msgqueue)) ||
-	    (EOK != list_add(&events_list, NULL, &ptr->header))) {
+	    (EOK != list_prepend(&events_list, &ptr->header))) {
 		free(ptr);
 		return (NULL);
 	}
