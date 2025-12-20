@@ -32,12 +32,22 @@ typedef BOOL(*int_handler_t) (void);
 typedef void (*exc_handler_t) (void);
 
 /*
- * disable all interrupts
+ * disable all interrupts.
+ * function must be reentrant and nestable,
+ * i.e. each lock() must be matched by an unlock()
+ * call.
+ * calling lock more than one time must keep interrupts disabled.
  */
 extern void lock(void);
 
 /*
- * enable all interrupts
+ * enable all interrupts.
+ * each unlock() call must match a previous lock() call.
+ * only when the number of unlock() calls matches
+ * the number of lock() calls interrupts must be re-enabled.
+ * this means that until all lock calls have been matched
+ * by unlock calls interrupts must remain disabled.
+ * calling unlock more times than lock must have no effect.
  */
 extern void unlock(void);
 
