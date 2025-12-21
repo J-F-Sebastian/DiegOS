@@ -67,10 +67,13 @@ ev_queue_t *event_init_queue(const char *name)
 int event_done_queue(ev_queue_t * evqueue)
 {
 	queue_node *ptr;
+	int retval = EOK;
 
 	if (!evqueue) {
 		return (EINVAL);
 	}
+
+	lock();
 
 	if (queue_count(&evqueue->msgqueue)) {
 		kerrprintf("there are %d events left in queue %s\n",
@@ -80,12 +83,14 @@ int event_done_queue(ev_queue_t * evqueue)
 	}
 
 	if (EOK != list_remove(&events_list, &evqueue->header)) {
-		return EGENERIC;
+		retval = EGENERIC;
 	}
 
 	free(evqueue);
 
-	return EOK;
+	unlock();
+
+	return retval;
 }
 
 unsigned event_queue_size(ev_queue_t * evqueue)
@@ -124,7 +129,9 @@ int event_put(ev_queue_t * evqueue, event_t * ev, event_freefn fncb)
 
 	ev->freefn = fncb;
 
+	lock();
 	retcode = queue_enqueue(&evqueue->msgqueue, &ev->header);
+	unlock();
 
 	if (EOK != retcode) {
 		kerrprintf("failed queueing event to %s\n", evqueue->name);
@@ -143,7 +150,9 @@ event_t *event_get(ev_queue_t * evqueue)
 		return (NULL);
 	}
 
+	lock();
 	retcode = queue_dequeue(&evqueue->msgqueue, (queue_node **) & retval);
+	unlock();
 
 	if (EOK != retcode) {
 		kerrprintf("failed dequeueing event from %s\n", evqueue->name);
