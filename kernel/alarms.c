@@ -116,11 +116,8 @@ alarm_t *alarm_create(const char *name,
 		return (NULL);
 	}
 
-	lock();
-
 	if (list_count(&alarms_list) == 0) {
 		if (!clock_add_cb(alarm_cb, CLK_INST_ALARMS)) {
-			unlock();
 			free(ptr);
 			kerrprintf("failed adding alarm callback!\n");
 			return (NULL);
@@ -128,7 +125,6 @@ alarm_t *alarm_create(const char *name,
 	}
 
 	if (EOK != list_prepend(&alarms_list, &ptr->header)) {
-		unlock();
 		free(ptr);
 		return (NULL);
 	}
@@ -159,8 +155,6 @@ alarm_t *alarm_create(const char *name,
 	 */
 	if (millisecs < period)
 		clock_set_period(millisecs, CLK_INST_ALARMS);
-
-	unlock();
 
 	return (ptr);
 }
