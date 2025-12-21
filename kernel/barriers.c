@@ -56,10 +56,7 @@ barrier_t *barrier_create(const char *name, BOOL autoclose)
 		return (NULL);
 	}
 
-	lock();
-
 	if (EOK != list_prepend(&barriers_list, &ptr->header)) {
-		unlock();
 		free(ptr);
 		return (NULL);
 	}
@@ -78,8 +75,6 @@ barrier_t *barrier_create(const char *name, BOOL autoclose)
 		ptr->flags = 0;
 	}
 
-	unlock();
-
 	return (ptr);
 }
 
@@ -92,8 +87,6 @@ int barrier_done(barrier_t * barrier)
 
 	resume_on_barriers();
 
-	lock();
-
 	retval = list_remove(&barriers_list, &barrier->header);
 	if (retval != EOK)
 		kerrprintf("Invalid barrier");
@@ -105,26 +98,18 @@ int barrier_done(barrier_t * barrier)
 
 int barrier_open(barrier_t * barrier)
 {
-	lock();
-
 	if (barrier) {
 		barrier->flags |= BARRIER_OPEN;
 	}
-
-	unlock();
 
 	return ((barrier) ? EOK : EINVAL);
 }
 
 int barrier_close(barrier_t * barrier)
 {
-	lock();
-
 	if (barrier) {
 		barrier->flags &= ~BARRIER_OPEN;
 	}
-
-	unlock();
 
 	return ((barrier) ? EOK : EINVAL);
 }
@@ -138,16 +123,11 @@ int wait_for_barrier(barrier_t * barrier)
 		return EINVAL;
 	}
 
-	lock();
-
 	if (barrier->flags & BARRIER_OPEN) {
-		unlock();
 		return EOK;
 	}
 
 	bitmap_set(barrier->thread_ids, scheduler_running_tid());
-
-	unlock();
 
 	prev = scheduler_running_thread();
 	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_BARRIER)) {
@@ -180,8 +160,6 @@ void resume_on_barriers()
 {
 	struct barrier *cur = (struct barrier *)list_head(&barriers_list);
 
-	lock();
-
 	while (cur) {
 		if (cur->flags & BARRIER_OPEN) {
 			bitmap_for_each_set(cur->thread_ids,
@@ -192,8 +170,6 @@ void resume_on_barriers()
 		}
 		cur = (barrier_t *) cur->header.next;
 	}
-
-	unlock();
 }
 
 static void dump_internal(const barrier_t * barrier)
