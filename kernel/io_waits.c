@@ -73,6 +73,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 	}
 
 	lock();
+
 	temp = chunks_pool_malloc(wait_queue_items);
 	if (!temp) {
 		unlock();
@@ -88,8 +89,6 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 		return EINVAL;
 	}
 
-	prev = scheduler_running_thread();
-
 	retcode = list_append(wq, &temp->header);
 
 	if (EOK != retcode) {
@@ -98,6 +97,8 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 		unlock();
 		return EPERM;
 	}
+
+	prev = scheduler_running_thread();
 
 	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION)) {
 		kerrprintf("TID %u Cannot wait for I/O\n", prev);
