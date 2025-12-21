@@ -226,10 +226,10 @@ BOOL clock_set_period(unsigned ms, enum clock_client_id instance)
 		 */
 		lock();
 		retcode = clock->cmn->ioctrl_fn(&temp, CLK_SET_PERIOD, 0);
+		unlock();
 		if (EOK == retcode) {
 			period = temp;
 		}
-		unlock();
 	}
 
 	return ((EOK == retcode) ? TRUE : FALSE);
