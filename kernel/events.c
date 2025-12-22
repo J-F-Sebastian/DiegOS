@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 #include <libs/list.h>
 #include <libs/queue.h>
 #include <diegos/events.h>
@@ -154,8 +155,8 @@ event_t *event_get(ev_queue_t * evqueue)
 	retcode = queue_dequeue(&evqueue->msgqueue, (queue_node **) & retval);
 	unlock();
 
-	if (EOK != retcode) {
-		kerrprintf("failed dequeueing event from %s\n", evqueue->name);
+	if ((EOK != retcode) && (EAGAIN != retcode)) {
+		kerrprintf("failed dequeueing event from %s with error %s\n", evqueue->name, strerror(retcode));
 	}
 
 	return (retval);
