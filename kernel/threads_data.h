@@ -83,6 +83,10 @@ typedef struct thread {
 	 */
 	void *stack;
 	uint32_t stack_size;
+	/*
+	 * Delay in milliseconds for sleeping/waiting threads
+	 */
+	uint64_t delay;
 } thread_t;
 
 #endif				// THREADS_DATA_H_INCLUDED
