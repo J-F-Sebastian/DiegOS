@@ -119,7 +119,7 @@ uint8_t init_thread(const char *name,
 		      scheduler_fail_safe,
 		      thread_storage[new_tid].entry_ptr, &thread_storage[new_tid].context);
 
-	kmsgprintf("Created thread %s TID %u Stack at %p\n",
+	kmsgprintf("Created thread %s TID %u Stack is at %p\n",
 		   thread_storage[new_tid].name, new_tid, thread_storage[new_tid].stack);
 	return (new_tid);
 }
@@ -145,7 +145,9 @@ BOOL done_thread(uint8_t tid)
 
 thread_t *get_thread(uint8_t tid)
 {
-	if ((tid < THREAD_TID_INVALID) && (tid < DIEGOS_MAX_THREADS) && (thread_storage[tid].tid == tid)) {
+	if ((tid < THREAD_TID_INVALID) &&
+		(tid < DIEGOS_MAX_THREADS) &&
+		(thread_storage[tid].tid == tid)) {
 		return (&thread_storage[tid]);
 	}
 
