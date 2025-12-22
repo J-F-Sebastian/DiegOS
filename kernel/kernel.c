@@ -344,7 +344,7 @@ void thread_lock_mutex(mutex_t * mtx)
 	is_locked = mutex_is_locked(mtx);
 
 	if (lock_mutex(prev->tid, mtx) && is_locked) {
-		scheduler_wait_thread(THREAD_FLAG_WAIT_MUTEX);
+		scheduler_wait_thread(THREAD_FLAG_WAIT_MUTEX, 0);
 		schedule_thread();
 		next = scheduler_running_thread();
 		switch_context(&prev->context, next->context);

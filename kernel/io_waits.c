@@ -100,7 +100,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 
 	prev = scheduler_running_thread();
 
-	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION)) {
+	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION, 0)) {
 		kerrprintf("TID %u Cannot wait for I/O\n", prev);
 		list_remove(wq, &temp->header);
 		chunks_pool_free(wait_queue_items, temp);

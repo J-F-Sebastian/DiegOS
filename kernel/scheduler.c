@@ -384,7 +384,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 	return (TRUE);
 }
 
-BOOL scheduler_wait_thread(uint8_t flags)
+BOOL scheduler_wait_thread(uint8_t flags, uint64_t msecs)
 {
 	const uint8_t MYMASK = THREAD_FLAG_WAIT_MUTEX |
 	    THREAD_FLAG_WAIT_EVENT | THREAD_FLAG_WAIT_BARRIER | THREAD_FLAG_WAIT_COMPLETION;
@@ -398,9 +398,15 @@ BOOL scheduler_wait_thread(uint8_t flags)
 		return (FALSE);
 	}
 
+	/* Set timeout flag if msecs is specified */
+	if (msecs)
+	{
+		flags |= THREAD_FLAG_WAIT_TIMEOUT;
+	}
 	/*kprintf("Stopping running PID %d\n",running->tid); */
 	running->flags |= flags;
 	running->state = THREAD_WAITING;
+	running->delay = msecs;
 
 	return (TRUE);
 }

@@ -129,7 +129,7 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 	if (!newtable->signalled) {
 		prev = scheduler_running_thread();
 
-		if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION)) {
+		if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION, 0)) {
 			kerrprintf("TID %u Cannot wait for poll\n", prev);
 			cleanup(newtable);
 			return EPERM;
