@@ -77,11 +77,22 @@ static queue_inst dead_queue = {
 
 /*
  * Delayed queue for threads that are sleeping.
- * Threads in this queue are waiting for a delay to expire or for an alarm to
- * trigger or for I/O to complete with timeout.
- * Transition to DELAYED state must not happen while interrupts are disabled.
+ * Threads in this queue are waiting for a delay to expire.
+ * Transition from/to DELAYED state must not happen while interrupts are disabled.
  */
 static queue_inst delay_queue = {
+	.head = NULL,
+	.tail = NULL,
+	.counter = 0
+};
+
+/*
+ * Wait queue for threads that are waiting on events or a timeout.
+ * Threads in this queue are waiting for a delay to expire or for an alarm to
+ * trigger or for I/O to complete with timeout.
+ * Transition from/to WAITING state must not happen while interrupts are disabled.
+ */
+static queue_inst wait_queue = {
 	.head = NULL,
 	.tail = NULL,
 	.counter = 0
@@ -285,6 +296,10 @@ BOOL scheduler_init()
 	}
 
 	if (EOK != queue_init(&dead_queue)) {
+		return (FALSE);
+	}
+
+	if (EOK != queue_init(&wait_queue)) {
 		return (FALSE);
 	}
 
