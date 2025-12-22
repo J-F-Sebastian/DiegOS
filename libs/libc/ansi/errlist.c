@@ -29,12 +29,12 @@ const char *strerrorlist[] = {
 	"Interrupted system call",	/* EINTR */
 	"I/O error",		/* EIO */
 	"No such device or address",	/* ENXIO */
-	"Arg list too long",	/* E2BIG */
-	"Exec format error",	/* ENOEXEC */
+	"Argument list too long",	/* E2BIG */
+	"Executable format error",	/* ENOEXEC */
 	"Bad file number",	/* EBADF */
 	unknown,
 	"Resource temporarily unavailable",	/* EAGAIN */
-	"Not enough core",	/* ENOMEM */
+	"Not enough memory",	/* ENOMEM */
 	"Permission denied",	/* EACCES */
 	"Bad address",		/* EFAULT */
 	"Block device required",	/* ENOTBLK */
