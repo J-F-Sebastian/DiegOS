@@ -219,14 +219,13 @@ void schedule_thread()
 	uint32_t new_delay = SCHED_DELAY_MAX;
 
 	/*
-	 * Dead queue management
+	 * Ready queue management, fill in the ready queues first
 	 */
-	if (should_do_house_keeping()) {
-		house_keeping();
-	}
+	resume_on_events();
+	resume_on_barriers();
 
 	/*
-	 * delayed queue management
+	 * delayed queue management, fill in the ready queues if needed
 	 */
 	if (queue_count(&delay_queue)) {
 		schedule_delayed();
@@ -238,19 +237,20 @@ void schedule_thread()
 		kerrprintf("Clock device failed in %s\n", __FUNCTION__);
 	}
 
-	/*
-	 * Ready queue management (dead queue too again)
-	 */
-	resume_on_events();
-	resume_on_barriers();
-
 	while (i < NELEMENTS(ready_queues)) {
 		if (queue_count(&ready_queues[i])) {
 			if (new_runner(i)) {
-				return;
+				break;
 			}
 		}
 		++i;
+	}
+
+	/*
+	 * Dead queue management
+	 */
+	if (should_do_house_keeping()) {
+		house_keeping();
 	}
 }
 
