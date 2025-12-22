@@ -29,7 +29,6 @@
 static thread_t *thread_storage = NULL;
 
 static unsigned thread_num = 0;
-static unsigned thread_max = 0;
 
 BOOL init_thread_lib()
 {
@@ -39,9 +38,7 @@ BOOL init_thread_lib()
 		return (FALSE);
 	}
 
-	thread_max = DIEGOS_MAX_THREADS;
-
-	thread_storage = (thread_t *) malloc(thread_max * sizeof(*thread_storage) + CACHE_ALN);
+	thread_storage = (thread_t *) malloc(DIEGOS_MAX_THREADS * sizeof(*thread_storage) + CACHE_ALN);
 	if (!thread_storage) {
 		return (FALSE);
 	}
@@ -52,9 +49,9 @@ BOOL init_thread_lib()
 	 * anything will be cleared out.
 	 */
 	thread_storage = (thread_t *) ALNC((uintptr_t) thread_storage);
-	memset(thread_storage, 0, thread_max * sizeof(*thread_storage));
+	memset(thread_storage, 0, DIEGOS_MAX_THREADS * sizeof(*thread_storage));
 
-	for (i = 0; i < thread_max; i++) {
+	for (i = 0; i < DIEGOS_MAX_THREADS; i++) {
 		thread_storage[i].tid = THREAD_TID_INVALID;
 	}
 
@@ -66,7 +63,7 @@ uint8_t init_thread(const char *name,
 {
 	uint32_t i, new_tid = THREAD_TID_INVALID;
 
-	if ((thread_max == thread_num) || (!name) || (!entry_ptr) || !(prio < THREAD_PRIORITIES)) {
+	if ((DIEGOS_MAX_THREADS == thread_num) || (!name) || (!entry_ptr) || !(prio < THREAD_PRIORITIES)) {
 		return THREAD_TID_INVALID;
 	}
 
@@ -74,9 +71,9 @@ uint8_t init_thread(const char *name,
 	 * Double function : trace first available slot,
 	 * seek no other processes have his name.
 	 * Do NOT bail out once an empty slot is found, need to go all
-	 * way down to thread_max to check all names.
+	 * way down to DIEGOS_MAX_THREADS to check all names.
 	 */
-	for (i = 0; i < thread_max; i++) {
+	for (i = 0; i < DIEGOS_MAX_THREADS; i++) {
 		if ((new_tid == THREAD_TID_INVALID) &&
 		    !thread_storage[i].name[0] && (thread_storage[i].tid == THREAD_TID_INVALID)) {
 			new_tid = i;
@@ -147,7 +144,7 @@ BOOL done_thread(uint8_t tid)
 
 thread_t *get_thread(uint8_t tid)
 {
-	if ((tid < THREAD_TID_INVALID) && (tid < thread_max) && (thread_storage[tid].tid == tid)) {
+	if ((tid < THREAD_TID_INVALID) && (tid < DIEGOS_MAX_THREADS) && (thread_storage[tid].tid == tid)) {
 		return (&thread_storage[tid]);
 	}
 
@@ -175,7 +172,7 @@ void check_thread_stack()
 	unsigned i, j;
 	uint32_t *stack_top;
 
-	for (i = 0; i < thread_max; i++) {
+	for (i = 0; i < DIEGOS_MAX_THREADS; i++) {
 		if (thread_storage[i].tid == THREAD_TID_INVALID) {
 			continue;
 		}
