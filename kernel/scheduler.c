@@ -30,36 +30,57 @@
 #include "barriers_private.h"
 
 /*
- * Maximum delay for clock, this will be set and used
- * if no threads are delayed, so the clock does not need to measure
- * close ticks.
- * Value in milliseconds
- * */
+ * Maximum delay for the system clock tick.
+ * The scheduler will not delay more than this value
+ * to re-awake delayed threads.
+ * Sleeping threads are checked at every call to schedule_thread().
+ * If a thread is delayed for more than SCHED_DELAY_MAX, the scheduler
+ * will re-check the delayed queue after SCHED_DELAY_MAX milliseconds or less.
+ * This avoids problems with very long delays and clock overflows.
+ * The scheduler clock period is somewhat quantized.
+ * The value is in milliseconds.
+ */
 #define SCHED_DELAY_MAX (10*1000UL)
 
 /*
- * various queues and pointers for thread
- * execution management.
+ * Pointer to the currently running thread.
+ * Only one thread can be running at a time.
+ * The scheduler does not support multiple processors yet.
  */
-
 static thread_t *running = NULL;
 
 /*
- * Ready queues must be protected from interrupts
- * routines handling events.
- * Events can wake up threads putting them into
- * one of the ready queues.
- * No other state transition is allowed from interrupt
- * context.
+ * Ready queues for each priority level.
+ * All threads in these queues are in READY state.
+ * Transition to or from this list must not happen
+ * while interrupts are disabled.
+ * State transitions must not be performed while in an interrupt context.
  */
 static queue_inst ready_queues[THREAD_PRIORITIES];
 
+/*
+ * Dead queue for threads that have terminated.
+ * Threads in this queue are waiting for the scheduler
+ * to destroy them.
+ * Transition to DEAD state must not happen while interrupts are disabled.
+ * A RUNNING thread can transition into this queue as well as a WAITING thread.
+ * A READY thread cannot transition into this queue.
+ * A RUNNING thread can terminate itself, but the actual destruction
+ * of the thread context and stack must be performed by the scheduler.
+ * A WAITING thread can be terminated by another thread.
+ */
 static queue_inst dead_queue = {
 	.head = NULL,
 	.tail = NULL,
 	.counter = 0
 };
 
+/*
+ * Delayed queue for threads that are sleeping.
+ * Threads in this queue are waiting for a delay to expire or for an alarm to
+ * trigger or for I/O to complete with timeout.
+ * Transition to DELAYED state must not happen while interrupts are disabled.
+ */
 static queue_inst delay_queue = {
 	.head = NULL,
 	.tail = NULL,
@@ -90,6 +111,9 @@ static inline BOOL should_do_house_keeping(void)
 	return ((temp) ? (TRUE) : (FALSE));
 }
 
+/*
+ * Empties the dead queue.
+ */
 static inline void house_keeping(void)
 {
 	thread_t *temp = NULL;
@@ -110,6 +134,10 @@ static inline void house_keeping(void)
 	}
 }
 
+/*
+ * Select a new running thread from the ready queue.
+ * At the same time moves dead threads to the dead queue.
+ */
 static inline BOOL new_runner(unsigned q)
 {
 	thread_t *temp = NULL;
@@ -136,6 +164,15 @@ static inline BOOL new_runner(unsigned q)
 	return (FALSE);
 }
 
+/*
+ * Check the delayed queue for threads whose delay has expired
+ * and resume them.
+ * It is assumed that threads in the delay queue are sorted by delay
+ * expiration time, so the head of the queue is always the next
+ * thread to be resumed.
+ * Also, the threads in the delay queue have their delay field set
+ * to the absolute expiration time (in milliseconds since boot).
+ */
 static inline void schedule_delayed(void)
 {
 	uint64_t expiration = clock_get_milliseconds();
@@ -161,6 +198,11 @@ static inline void schedule_delayed(void)
 	}
 }
 
+/*
+ * Peek at the top expiration time in the delay queue.
+ * In case the delay is longer than SCHED_DELAY_MAX,
+ * return SCHED_DELAY_MAX.
+ */
 static inline uint32_t peek_top_expiration(void)
 {
 	thread_t *ptr = queue_head(&delay_queue);
