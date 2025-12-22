@@ -189,7 +189,7 @@ void wait_for_events(ev_queue_t * evqueue)
 		kerrprintf("events queue %s has events!\n", evqueue->name);
 	}
 
-	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_EVENT)) {
+	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_EVENT, 0)) {
 		kerrprintf("Cannot wait for events TID %u\n", prev);
 		return;
 	}

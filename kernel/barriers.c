@@ -130,7 +130,7 @@ int wait_for_barrier(barrier_t * barrier)
 	bitmap_set(barrier->thread_ids, scheduler_running_tid());
 
 	prev = scheduler_running_thread();
-	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_BARRIER)) {
+	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_BARRIER, 0)) {
 		return EPERM;
 	}
 	schedule_thread();
