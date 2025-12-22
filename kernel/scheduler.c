@@ -67,11 +67,6 @@ static queue_inst delay_queue = {
 };
 
 /*
- * Threads expiration in milliseconds
- */
-static uint64_t delays[DIEGOS_MAX_THREADS];
-
-/*
  * Perform house keeping, destroying dead threads waiting
  * in the dead queue (the green mile !).
  * The running thread might exit or call thread_terminate(),
@@ -146,7 +141,7 @@ static inline void schedule_delayed(void)
 	uint64_t expiration = clock_get_milliseconds();
 	thread_t *ptr = queue_head(&delay_queue);
 
-	while (ptr && delays[ptr->tid] <= expiration) {
+	while (ptr && (ptr->delay <= expiration)) {
 		if (EOK != queue_dequeue(&delay_queue, (queue_node **) & ptr)) {
 			if (ptr) {
 				kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
@@ -160,7 +155,7 @@ static inline void schedule_delayed(void)
 			break;
 		} else {
 			(void)scheduler_resume_thread(THREAD_FLAG_WAIT_TIMEOUT, ptr->tid);
-			delays[ptr->tid] = 0;
+			ptr->delay = 0;
 		}
 		ptr = queue_head(&delay_queue);
 	}
@@ -172,7 +167,7 @@ static inline uint32_t peek_top_expiration(void)
 	uint64_t now = clock_get_milliseconds();
 	uint64_t retval;
 
-	retval = (delays[ptr->tid] > now) ? (delays[ptr->tid] - now) : 0;
+	retval = (ptr->delay > now) ? (ptr->delay - now) : 0;
 	return (retval < SCHED_DELAY_MAX) ? (uint32_t) retval : SCHED_DELAY_MAX;
 }
 
@@ -306,7 +301,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 	}
 
 	ptr = queue_head(&delay_queue);
-	if (!ptr || (msecs < delays[ptr->tid])) {
+	if (!ptr || (msecs < ptr->delay)) {
 		if (EOK != queue_insert(&delay_queue, &running->header, NULL)) {
 			kerrprintf("failed delaying PID %d\n", running->tid);
 			return (FALSE);
@@ -314,7 +309,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 	} else {
 		while (ptr->header.next) {
 			ptr2 = (thread_t *) ptr->header.next;
-			if (msecs < delays[ptr2->tid]) {
+			if (msecs < ptr2->delay) {
 				break;
 			}
 			ptr = (thread_t *) ptr->header.next;
@@ -327,7 +322,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 
 	running->flags |= THREAD_FLAG_WAIT_TIMEOUT;
 	running->state = THREAD_WAITING;
-	delays[running->tid] = msecs;
+	running->delay = msecs;
 
 	return (TRUE);
 }

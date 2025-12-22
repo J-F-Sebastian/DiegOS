@@ -111,6 +111,7 @@ uint8_t init_thread(const char *name,
 	thread_storage[new_tid].state = THREAD_READY;
 	thread_storage[new_tid].tid = new_tid;
 	thread_storage[new_tid].entry_ptr = entry_ptr;
+	thread_storage[new_tid].delay = 0;
 
 	thread_num++;
 
