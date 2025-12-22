@@ -159,7 +159,7 @@ static inline void schedule_delayed(void)
 			 */
 			break;
 		} else {
-			(void)scheduler_resume_thread(THREAD_FLAG_DELAYED, ptr->tid);
+			(void)scheduler_resume_thread(THREAD_FLAG_WAIT_TIMEOUT, ptr->tid);
 			delays[ptr->tid] = 0;
 		}
 		ptr = queue_head(&delay_queue);
@@ -325,7 +325,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 		}
 	}
 
-	running->flags |= THREAD_FLAG_DELAYED;
+	running->flags |= THREAD_FLAG_WAIT_TIMEOUT;
 	running->state = THREAD_WAITING;
 	delays[running->tid] = msecs;
 
