@@ -24,7 +24,7 @@
 STATUS queue_init(queue_inst * queue)
 {
 	if (!queue) {
-		return (EGENERIC);
+		return (EINVAL);
 	}
 
 	queue->head = NULL;
@@ -63,7 +63,7 @@ STATUS queue_dequeue(queue_inst * queue, queue_node ** data)
 
 	if (!queue->counter) {
 		*data = NULL;
-		return (EGENERIC);
+		return (EAGAIN);
 	}
 
 	*data = queue->head;
