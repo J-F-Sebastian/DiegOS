@@ -125,7 +125,10 @@ static void *simple_alloc(struct mempart *location, uintptr_t cursor, size_t aln
 
 static void *iomalloc_internal(size_t newsize, size_t aln)
 {
-	uintptr_t cursor;
+	/*
+	 * First allocation ? suspicious warning with O1 but not O2...
+	 */
+	uintptr_t cursor = storage->pointer;
 	struct mempart *this = storage;
 	struct mempart *dst = storage + stored;
 	struct mempart *src = dst - 1;
