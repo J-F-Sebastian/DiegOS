@@ -45,7 +45,7 @@ static void demo_thread_entry(void)
 			if (evt) {
 				printf("%d classid %d eventid %d progress %u\n",
 				       event_queue_size(events), evt->classid, evt->eventid, i++);
-				free(evt);
+				event_free(evt);
 			} else {
 				printf("SKIP\n");
 			}
@@ -73,13 +73,13 @@ static void demo_thread_entry2(void)
 		evt = malloc(sizeof(event_t));
 		evt->classid = 1234;
 		evt->eventid = 5678;
-		if (EOK != event_put(events, evt, NULL)) {
+		if (EOK != event_put(events, evt, free)) {
 			printf("FAILURE 1 !!!\n");
 		}
 		evt = malloc(sizeof(event_t));
 		evt->classid = 1234;
 		evt->eventid = 0x9ABC;
-		if (EOK != event_put(events, evt, NULL)) {
+		if (EOK != event_put(events, evt, free)) {
 			printf("FAILURE 2 !!!\n");
 		}
 		printf("Going to delay PID %d\n", my_thread_id());
