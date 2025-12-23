@@ -89,10 +89,9 @@ STATUS queue_roll(queue_inst * queue)
 		queue->head = queue->head->next;
 		queue->tail = queue->tail->next;
 		queue->tail->next = NULL;
-		return (EOK);
 	}
 
-	return (EGENERIC);
+	return (EOK);
 }
 
 STATUS queue_insert(queue_inst * queue, queue_node * data, queue_node * after)
