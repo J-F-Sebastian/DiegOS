@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "barriers_private.h"
-#include "threads_data.h"
+#include "threads.h"
 #include "scheduler.h"
 #include "platform_include.h"
 #include "kprintf.h"
@@ -137,6 +137,35 @@ int wait_for_barrier(barrier_t * barrier)
 
 	next = scheduler_running_thread();
 	switch_context(&prev->context, next->context);
+
+	return EOK;
+}
+
+int cancel_wait_for_barrier(barrier_t * barrier, uint8_t tid)
+{
+	thread_t *ptr = get_thread(tid);
+
+	if (!barrier) {
+		kerrprintf("Invalid barrier");
+		return EINVAL;
+	}
+
+	if (!ptr) {
+		kerrprintf("No process with TID %d\n", tid);
+		return EINVAL;
+	}
+
+	if (!(ptr->flags & THREAD_FLAG_WAIT_BARRIER)) {
+		kerrprintf("Thread TID %d is not waiting on a barrier\n", tid);
+		return EPERM;
+	}
+
+	if (!bitmap_is_set(barrier->thread_ids, tid)) {
+		kerrprintf("Thread TID %d is not waiting on this barrier\n", tid);
+		return EPERM;
+	}
+
+	bitmap_clear(barrier->thread_ids, tid);
 
 	return EOK;
 }
