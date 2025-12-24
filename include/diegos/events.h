@@ -90,6 +90,19 @@ int event_done_queue(ev_queue_t * evqueue);
 int event_watch_queue(ev_queue_t * evqueue);
 
 /*
+ * Cancel the watch on the events queue for the specified thread id.
+ *
+ * PARAMETERS IN
+ * ev_queue_t *evqueue - pointer to a events queue object
+ * uint8_t tid        - thread id to be removed as listener
+ *
+ * RETURNS
+ * EINVAL in case evqueue is NULL or the specified tid is not the listener
+ * EOK in case of success
+ */
+int event_cancel_watch_queue(ev_queue_t * evqueue, uint8_t tid);
+
+/*
  * Returns the number of messages (events) stored in the queue.
  *
  * PARAMETERS IN
