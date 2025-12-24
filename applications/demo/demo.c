@@ -19,10 +19,11 @@
 
 #include <diegos/kernel.h>
 #include <diegos/kernel_dump.h>
+#include <diegos/mutexes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-static uint8_t mutex = 0;
+static mutex_t *mutex = NULL;
 
 static void demo_thread_entry(void)
 {
@@ -96,4 +97,6 @@ void platform_run(void)
 	thread_create("Demo2", THREAD_PRIO_HIGH, demo_thread_entry2, 0, 4096, &pid);
 
 	thread_create("Demo3", THREAD_PRIO_HIGH, demo_thread_entry3, 0, 4096, &pid);
+
+	thread_destroy_mutex(mutex);
 }
