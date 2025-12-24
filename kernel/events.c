@@ -123,6 +123,23 @@ int event_watch_queue(ev_queue_t * evqueue)
 	return (EOK);
 }
 
+int event_cancel_watch_queue(ev_queue_t * evqueue, uint8_t tid)
+{
+	if (!evqueue) {
+		return (EINVAL);
+	}
+
+	if (evqueue->threadid != tid) {
+		kerrprintf("TID %d is not watching %s for events.\n",
+			   tid, evqueue->name);
+		return (EINVAL);
+	}
+
+	evqueue->threadid = THREAD_TID_INVALID;
+
+	return (EOK);
+}
+
 int event_put(ev_queue_t * evqueue, event_t * ev, event_freefn fncb)
 {
 	STATUS retcode;
