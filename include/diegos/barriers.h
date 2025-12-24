@@ -105,6 +105,20 @@ int barrier_close(barrier_t * barrier);
 int wait_for_barrier(barrier_t * barrier);
 
 /*
+ * Cancel a wait for a barrier.
+ *
+ * PARAMETERS IN
+ * barrier_t *barrier - barrier handle
+ * uint8_t tid        - thread ID to cancel wait for
+ *
+ * RETURNS
+ * EOK in case of success
+ * EINVAL if barrier is invalid
+ * EPERM if the thread wait cannot be cancelled
+ */
+int cancel_wait_for_barrier(barrier_t * barrier, uint8_t tid);
+
+/*
  * Print to stderr the specified barrier's configuration and status.
  * If barrier is null, all barriers are processed.
  *
