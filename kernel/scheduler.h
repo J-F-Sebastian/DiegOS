@@ -48,4 +48,6 @@ uint8_t scheduler_ready_threads(uint8_t prio);
 
 void scheduler_fail_safe(void);
 
+void scheduler_dump(void);
+
 #endif				// SCHEDULER_H_INCLUDED

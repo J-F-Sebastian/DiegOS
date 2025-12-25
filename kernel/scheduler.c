@@ -580,3 +580,39 @@ thread_t *scheduler_running_thread()
 {
 	return (running);
 }
+
+void scheduler_dump()
+{
+	unsigned i;
+
+	kprintf("=== SCHEDULER DUMP ===\n");
+	kprintf("Running TID: %d\n", scheduler_running_tid());
+	for (i = 0; i < NELEMENTS(ready_queues); i++) {
+		kprintf("Ready queue PRIO %d: %d threads\n", i, queue_count(&ready_queues[i]));
+		if (queue_count(&ready_queues[i])) {
+			thread_t *ptr = queue_head(&ready_queues[i]);
+			while (ptr) {
+				kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+				ptr = (thread_t *) ptr->header.next;
+			}
+		}
+	}
+	kprintf("Delay queue: %d threads\n", queue_count(&delay_queue));
+	if (queue_count(&delay_queue)) {
+		thread_t *ptr = queue_head(&delay_queue);
+		while (ptr) {
+			kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			ptr = (thread_t *) ptr->header.next;
+		}
+	}
+	kprintf("Wait queue: %d threads\n", queue_count(&wait_queue));
+	if (queue_count(&wait_queue)) {
+		thread_t *ptr = queue_head(&wait_queue);
+		while (ptr) {
+			kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			ptr = (thread_t *) ptr->header.next;
+		}
+	}
+	kprintf("Dead queue: %d threads\n", queue_count(&dead_queue));
+	kprintf("======================\n");
+}
