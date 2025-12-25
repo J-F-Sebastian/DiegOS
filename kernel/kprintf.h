@@ -28,6 +28,8 @@ int kmsgprintf(const char *fmt, ...);
 
 int kerrprintf(const char *fmt, ...);
 
+int kwrnprintf(const char *fmt, ...);
+
 int kvprintf(const char *fmt, va_list ap);
 
 #endif
