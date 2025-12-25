@@ -23,6 +23,7 @@
 #include <string.h>
 #include <libs/list.h>
 #include <libs/queue.h>
+#include <libs/bitmaps.h>
 #include <diegos/events.h>
 #include <diegos/interrupts.h>
 
@@ -39,6 +40,8 @@ typedef struct ev_queue {
 } ev_queue_t;
 
 static list_inst events_list;
+
+static long thread_ids[BITMAPLEN(DIEGOS_MAX_THREADS)];
 
 ev_queue_t *event_init_queue(const char *name)
 {
@@ -77,7 +80,7 @@ int event_done_queue(ev_queue_t * evqueue)
 	lock();
 
 	if (queue_count(&evqueue->msgqueue)) {
-		kerrprintf("there are %d events left in queue %s\n",
+		kwrnprintf("there are %d events left in queue %s\n",
 			   queue_count(&evqueue->msgqueue), evqueue->name);
 		while (EOK == queue_dequeue(&evqueue->msgqueue, &ptr)) {
 		}
@@ -188,12 +191,15 @@ void wait_for_events(ev_queue_t * evqueue)
 
 	if (queue_count(&evqueue->msgqueue)) {
 		kerrprintf("events queue %s has events!\n", evqueue->name);
+		return;
 	}
 
 	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_EVENT, 0)) {
 		kerrprintf("Cannot wait for events TID %u\n", prev);
 		return;
 	}
+
+	bitmap_set(thread_ids, prev->tid);
 
 	schedule_thread();
 
@@ -208,6 +214,8 @@ BOOL init_events_lib()
 		return (FALSE);
 	}
 
+	memset(thread_ids, 0, sizeof(thread_ids));
+
 	return (TRUE);
 }
 
@@ -216,8 +224,14 @@ void resume_on_events()
 	ev_queue_t *cur = (ev_queue_t *) list_head(&events_list);
 
 	while (cur) {
-		if (queue_count(&cur->msgqueue)) {
+		/*
+		 * Should we drop the events if the queue is not watched?
+		 */
+		if ((cur->threadid != THREAD_TID_INVALID) &&
+		    (bitmap_is_set(thread_ids, cur->threadid)) &&
+			queue_count(&cur->msgqueue)) {
 			scheduler_resume_thread(THREAD_FLAG_WAIT_EVENT, cur->threadid);
+			bitmap_clear(thread_ids, cur->threadid);
 		}
 		cur = (ev_queue_t *) cur->header.next;
 	}
