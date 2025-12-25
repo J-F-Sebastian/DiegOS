@@ -55,4 +55,6 @@ int io_wait_add(struct wait_queue_item *item, wait_queue_t * wq);
 
 int io_wait_remove(struct wait_queue_item *item, wait_queue_t * wq);
 
+void resume_on_io_wait(void);
+
 #endif				// IO_WAITS_PRIVATE_H_INCLUDED

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <libs/chunks.h>
+#include <libs/bitmaps.h>
 #include <diegos/io_waits.h>
 #include <diegos/interrupts.h>
 
@@ -39,6 +40,8 @@ struct wait_queue_int {
 static list_inst wait_queues;
 static chunks_pool_t *wait_queue_items;
 static chunks_pool_t *wait_queue_int_items;
+
+static long thread_ids[BITMAPLEN(DIEGOS_MAX_THREADS)];
 
 int thread_io_wait_init(wait_queue_t *wq)
 {
@@ -137,8 +140,8 @@ int thread_io_resume(wait_queue_t *wq)
 		cursor = list_head(wq);
 		if (IO_WAIT_POLL == cursor->flags) {
 			(void)poll_wakeup(cursor);
-		} else if (!scheduler_resume_thread(THREAD_FLAG_WAIT_COMPLETION, cursor->tid)) {
-			kerrprintf("TID %u Cannot be resumed for I/O\n", cursor->tid);
+		} else {
+			bitmap_set(thread_ids, cursor->tid);
 		}
 		if (EOK != list_remove(wq, &cursor->header)) {
 			break;
@@ -174,6 +177,8 @@ BOOL init_io_waits_lib()
 		chunks_pool_done(wait_queue_int_items);
 		return (FALSE);
 	}
+
+	memset(thread_ids, 0, sizeof(thread_ids));
 
 	return (TRUE);
 }
@@ -220,4 +225,19 @@ int io_wait_remove(struct wait_queue_item *item, wait_queue_t *wq)
 	}
 
 	return (retcode);
+}
+
+static void resumecb(long *bitmap, unsigned pos, void *param)
+{
+	if (!scheduler_resume_thread(THREAD_FLAG_WAIT_COMPLETION, (uint8_t) pos)) {
+		kerrprintf("TID %u Cannot be resumed for I/O\n", pos);
+	}
+	bitmap_clear(bitmap, pos);
+}
+
+void resume_on_io_wait()
+{
+	lock();
+	bitmap_for_each_set(thread_ids, BITMAPLEN(DIEGOS_MAX_THREADS), resumecb, NULL);
+	unlock();
 }
