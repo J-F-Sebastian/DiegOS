@@ -24,6 +24,8 @@
 #include <errno.h>
 #include <libs/list.h>
 #include <libs/chunks.h>
+#include <libs/bitmaps.h>
+#include <string.h>
 
 #include "scheduler.h"
 #include "threads.h"
@@ -66,6 +68,7 @@ typedef struct poll_table {
 static chunks_pool_t *poll_items = NULL;
 static chunks_pool_t *poll_tables = NULL;
 static list_inst poll_table_list;
+static long thread_ids[BITMAPLEN(DIEGOS_MAX_THREADS)];
 
 static void cleanup(poll_table_t * table)
 {
@@ -301,6 +304,8 @@ BOOL init_poll_lib()
 		return (FALSE);
 	}
 
+	memset(thread_ids, 0, sizeof(thread_ids));
+
 	return (TRUE);
 }
 
@@ -316,11 +321,24 @@ int poll_wakeup(struct wait_queue_item *wqi)
 	pt = (poll_table_t *) wqi->pt;
 	if (!pt->signalled) {
 		pt->signalled = 1;
-		if (!scheduler_resume_thread(THREAD_FLAG_WAIT_COMPLETION, pt->tid)) {
-			kerrprintf("TID %u cannot be resumed from poll\n", pt->tid);
-		}
+		bitmap_set(thread_ids, pt->tid);
 	}
 	unlock();
 
 	return EOK;
+}
+
+static void resumecb(long *bitmap, unsigned pos, void *param)
+{
+	if (!scheduler_resume_thread(THREAD_FLAG_WAIT_COMPLETION, (uint8_t) pos)) {
+		kerrprintf("TID %u cannot be resumed from poll\n", pos);
+	}
+	bitmap_clear(bitmap, pos);
+}
+
+void resume_on_poll()
+{
+	lock();
+	bitmap_for_each_set(thread_ids, BITMAPLEN(DIEGOS_MAX_THREADS), resumecb, NULL);
+	unlock();
 }

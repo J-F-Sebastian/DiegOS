@@ -26,4 +26,6 @@ BOOL init_poll_lib(void);
 
 int poll_wakeup(struct wait_queue_item *wqi);
 
+void resume_on_poll(void);
+
 #endif
