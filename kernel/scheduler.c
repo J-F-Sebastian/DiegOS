@@ -28,6 +28,8 @@
 #include "kprintf.h"
 #include "events_private.h"
 #include "barriers_private.h"
+#include "io_waits_private.h"
+#include "poll_private.h"
 
 /*
  * Maximum delay for the system clock tick.
@@ -165,7 +167,6 @@ static inline BOOL new_runner(unsigned q)
 		} else {
 			running = temp;
 			running->state = THREAD_RUNNING;
-			//kprintf("Scheduled PID %d\n",temp->tid);
 			return (TRUE);
 		}
 	}
@@ -284,10 +285,22 @@ void schedule_thread()
 	uint32_t new_delay = SCHED_DELAY_MAX;
 
 	/*
-	 * Ready queue management, fill in the ready queues first
+	 * Wait queue management, update waiting threads state
 	 */
 	resume_on_events();
 	resume_on_barriers();
+	resume_on_io_wait();
+	resume_on_poll();
+
+	/*
+	 * Wait queue management, fill in the ready queues if needed
+	 */
+	if (queue_count(&wait_queue)) {
+		schedule_waiting();
+		//if (queue_count(&wait_queue)) {
+		//	new_delay = peek_top_expiration();
+		//}
+	}
 
 	/*
 	 * delayed queue management, fill in the ready queues if needed
@@ -322,17 +335,26 @@ void schedule_thread()
 void update_schedule()
 {
 	/*
-	 * delayed queue management
+	 * Wait queue management, update waiting threads state
+	 */
+	resume_on_events();
+	resume_on_barriers();
+	resume_on_io_wait();
+	resume_on_poll();
+
+	/*
+	 * Wait queue management, fill in the ready queues if needed
+	 */
+	if (queue_count(&wait_queue)) {
+		schedule_waiting();
+	}
+
+	/*
+	 * delayed queue management, fill in the ready queues if needed
 	 */
 	if (queue_count(&delay_queue)) {
 		schedule_delayed();
 	}
-
-	/*
-	 * Ready queue management
-	 */
-	resume_on_events();
-	resume_on_barriers();
 }
 
 BOOL scheduler_init()
