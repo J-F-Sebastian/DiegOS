@@ -30,7 +30,7 @@ void update_schedule(void);
 
 BOOL scheduler_suspend_thread(void);
 
-BOOL scheduler_resume_thread(uint8_t flags, uint8_t tid);
+BOOL scheduler_resume_thread(uint32_t flags, uint8_t tid);
 
 BOOL scheduler_delay_thread(uint64_t msecs);
 

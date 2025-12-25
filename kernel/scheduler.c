@@ -318,9 +318,10 @@ BOOL scheduler_suspend_thread()
 	return (TRUE);
 }
 
-BOOL scheduler_resume_thread(uint8_t flags, uint8_t tid)
+BOOL scheduler_resume_thread(uint32_t flags, uint8_t tid)
 {
 	thread_t *ptr = get_thread(tid);
+	uint32_t check;
 
 	if (!ptr) {
 		kerrprintf("No process with TID %d\n", tid);
@@ -328,23 +329,20 @@ BOOL scheduler_resume_thread(uint8_t flags, uint8_t tid)
 	}
 
 	if (THREAD_WAITING != ptr->state) {
-		kerrprintf("TID %d is %s, cannot resume\n", tid, state2str(ptr->state));
+		kerrprintf("TID %d state %s flags %s, cannot resume\n", tid, state2str(ptr->state), flags2str(ptr->flags));
 		return (FALSE);
 	}
 
-	if (flags != (ptr->flags & THREAD_MASK_WAIT)) {
-		kerrprintf("TID %d flags 0x%X mismatches flags 0x%X\n",
-			   tid, ptr->flags & THREAD_MASK_WAIT, flags);
+	check = flags & (ptr->flags & THREAD_MASK_WAIT);
+	if (check == 0) {
+		kerrprintf("TID %d flags %x %s mismatches flags %x %s\n",
+			   tid, ptr->flags & THREAD_MASK_WAIT, flags2str(ptr->flags & THREAD_MASK_WAIT), flags, flags2str(flags));
 		return (FALSE);
 	}
 
-	if (EOK != queue_enqueue(&ready_queues[ptr->priority], &ptr->header)) {
-		kerrprintf("failed resuming TID %d\n", tid);
-		return (FALSE);
-	}
-
-	ptr->flags &= ~flags;
+	ptr->flags &= ~check;
 	ptr->state = THREAD_READY;
+	ptr->delay = 0;
 
 	return (TRUE);
 }
