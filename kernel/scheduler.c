@@ -382,26 +382,23 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 	return (TRUE);
 }
 
-BOOL scheduler_wait_thread(uint8_t flags, uint64_t msecs)
+BOOL scheduler_wait_thread(uint32_t flags, uint64_t msecs)
 {
-	const uint8_t MYMASK = THREAD_FLAG_WAIT_MUTEX |
-	    THREAD_FLAG_WAIT_EVENT | THREAD_FLAG_WAIT_BARRIER | THREAD_FLAG_WAIT_COMPLETION;
-
 	if (THREAD_TID_IDLE == running->tid) {
 		return (FALSE);
 	}
 
-	if (!(MYMASK & flags)) {
+	if (!(THREAD_MASK_EVENTS & flags)) {
 		kerrprintf("Unknown flag 0x%X\n", flags);
 		return (FALSE);
 	}
 
-	/* Set timeout flag if msecs is specified */
-	if (msecs)
-	{
-		flags |= THREAD_FLAG_WAIT_TIMEOUT;
+	if (EOK != queue_enqueue(&wait_queue, &running->header)) {
+		kerrprintf("failed waiting PID %d\n", running->tid);
+		return (FALSE);
 	}
-	/*kprintf("Stopping running PID %d\n",running->tid); */
+
+	flags &= THREAD_MASK_EVENTS;
 	running->flags |= flags;
 	running->state = THREAD_WAITING;
 	running->delay = msecs;

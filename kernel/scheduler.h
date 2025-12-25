@@ -34,7 +34,7 @@ BOOL scheduler_resume_thread(uint32_t flags, uint8_t tid);
 
 BOOL scheduler_delay_thread(uint64_t msecs);
 
-BOOL scheduler_wait_thread(uint8_t flags, uint64_t msecs);
+BOOL scheduler_wait_thread(uint32_t flags, uint64_t msecs);
 
 BOOL scheduler_add_thread(uint8_t tid);
 
