@@ -45,7 +45,7 @@ struct wait_queue_item {
  * FALSE in any other case
  *
  */
-BOOL init_io_waits_lib(void);
+BOOL init_io_wait_lib(void);
 
 struct wait_queue_item *io_wait_get_item(void);
 
