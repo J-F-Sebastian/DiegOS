@@ -236,16 +236,15 @@ static void schedule_waiting(void)
  * Also, the threads in the delay queue have their delay field set
  * to the absolute expiration time (in milliseconds since boot).
  */
-static inline void schedule_delayed(void)
+static void schedule_delayed(void)
 {
 	uint64_t expiration = clock_get_milliseconds();
 	thread_t *ptr = queue_head(&delay_queue);
+	thread_t *temp;
 
 	while (ptr && (ptr->delay <= expiration)) {
-		if (EOK != queue_dequeue(&delay_queue, (queue_node **) & ptr)) {
-			if (ptr) {
-				kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
-			}
+		if (EOK != queue_dequeue(&delay_queue, (queue_node **) & temp)) {
+			kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
 			/*
 			 * Break the loop as much probably the data structure is
 			 * corrupted, probably an assert or abort would be better
@@ -254,8 +253,11 @@ static inline void schedule_delayed(void)
 			 */
 			break;
 		} else {
-			(void)scheduler_resume_thread(THREAD_FLAG_WAIT_TIMEOUT, ptr->tid);
-			ptr->delay = 0;
+			if (!scheduler_resume_thread(THREAD_FLAG_WAIT_TIMEOUT, temp->tid)) {
+				kerrprintf("failed resuming delayed TID %d\n", temp->tid);
+			} else if (EOK != queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
+				kerrprintf("failed moving delayed TID %d to ready queue\n", temp->tid);
+			}
 		}
 		ptr = queue_head(&delay_queue);
 	}
