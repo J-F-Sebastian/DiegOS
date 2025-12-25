@@ -240,6 +240,7 @@ void thread_delay(unsigned msecs)
 	prev = scheduler_running_thread();
 
 	if (!scheduler_delay_thread(delay)) {
+		kerrprintf("cannot delay thread %d for %u ms.\n", prev->tid, msecs);
 		kernel_panic("cannot delay a thread.\n");
 		return;
 	}
