@@ -176,6 +176,58 @@ static inline BOOL new_runner(unsigned q)
 }
 
 /*
+ * Check the wait queue for threads whose delay has expired and are still waiting
+ * and resume them.
+ * Check also for threads that became ready and move the to the ready qeues.
+ * It is not assumed that threads in the wait queue are sorted by delay
+ * expiration time.
+ * Also, the threads in the wait queue have their delay field set
+ * to the absolute expiration time (in milliseconds since boot).
+ */
+static void schedule_waiting(void)
+{
+	uint64_t expiration = clock_get_milliseconds();
+	thread_t *ptr, *temp;
+	unsigned i;
+
+	i = queue_count(&wait_queue);
+	while (i--) {
+		ptr = queue_head(&wait_queue);
+
+		switch (ptr->state) {
+		case THREAD_WAITING:
+			if ((ptr->flags & THREAD_FLAG_WAIT_TIMEOUT) && (ptr->delay <= expiration)) {
+				if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
+					kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
+				} else {
+					if (!scheduler_resume_thread(temp->flags & THREAD_MASK_EVENTS, temp->tid)) {
+						kerrprintf("failed resuming TID %d\n", temp->tid);
+					}
+					else if (EOK != queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
+						kerrprintf("failed moving TID %d to ready queue\n", temp->tid);
+					}
+				}
+			}
+		break;
+
+		case THREAD_READY:
+			if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
+				kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
+			}
+			else if (EOK != queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
+					kerrprintf("failed moving TID %d to ready queue\n", temp->tid);
+			}
+		break;
+		}
+
+		if (EOK != queue_roll(&wait_queue)) {
+			kerrprintf("failed rolling wait queue\n");
+			return;
+		}
+	}
+}
+
+/*
  * Check the delayed queue for threads whose delay has expired
  * and resume them.
  * It is assumed that threads in the delay queue are sorted by delay
