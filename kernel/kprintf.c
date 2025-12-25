@@ -80,6 +80,19 @@ int kerrprintf(const char *fmt, ...)
 	return (n);
 }
 
+int kwrnprintf(const char *fmt, ...)
+{
+	va_list ap;
+	int n;
+
+	va_start(ap, fmt);
+	n = kvprintf("[WRN]: ", ap);
+	n = kvprintf(fmt, ap);
+	va_end(ap);
+
+	return (n);
+}
+
 #define VPRINTF_BUFSIZE (80)
 
 static inline void count_kputc(int c, int *count, char *buffer, unsigned *bcount)
