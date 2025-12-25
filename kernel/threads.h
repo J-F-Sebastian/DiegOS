@@ -33,6 +33,8 @@ thread_t *get_thread(uint8_t tid);
 
 const char *state2str(uint8_t state);
 
+const char *flags2str(uint32_t flags);
+
 void check_thread_stack(void);
 
 #endif				// THREADS_H_INCLUDED

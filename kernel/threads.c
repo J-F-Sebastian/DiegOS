@@ -170,6 +170,37 @@ const char *state2str(uint8_t state)
 	return ("N/A");
 }
 
+const char *flags2str(uint32_t flags)
+{
+	static char flagstr[36];
+
+	flagstr[0] = 0;
+
+	if (flags & THREAD_FLAG_TERMINATE) {
+		strcat(flagstr, "TERM ");
+	}
+	if (flags & THREAD_FLAG_REL_STACK) {
+		strcat(flagstr, "RELS ");
+	}
+	if (flags & THREAD_FLAG_WAIT_TIMEOUT) {
+		strcat(flagstr, "WTMO ");
+	}
+	if (flags & THREAD_FLAG_WAIT_MUTEX) {
+		strcat(flagstr, "WMTX ");
+	}
+	if (flags & THREAD_FLAG_WAIT_EVENT) {
+		strcat(flagstr, "WEVT ");
+	}
+	if (flags & THREAD_FLAG_WAIT_BARRIER) {
+		strcat(flagstr, "WBAR ");
+	}
+	if (flags & THREAD_FLAG_WAIT_COMPLETION) {
+		strcat(flagstr, "WCOM ");
+	}
+
+	return (flagstr);
+}
+
 void check_thread_stack()
 {
 	unsigned i, j;
