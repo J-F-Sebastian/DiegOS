@@ -334,6 +334,8 @@ void schedule_thread()
 
 void update_schedule()
 {
+	uint32_t new_delay = SCHED_DELAY_MAX;
+
 	/*
 	 * Wait queue management, update waiting threads state
 	 */
@@ -354,6 +356,12 @@ void update_schedule()
 	 */
 	if (queue_count(&delay_queue)) {
 		schedule_delayed();
+		if (queue_count(&delay_queue)) {
+			new_delay = peek_top_expiration();
+		}
+	}
+	if (FALSE == clock_set_period(new_delay, CLK_INST_SCHEDULER)) {
+		kerrprintf("Clock device failed in %s\n", __FUNCTION__);
 	}
 }
 
