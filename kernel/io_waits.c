@@ -157,7 +157,7 @@ int thread_io_resume(wait_queue_t *wq)
  * Private section
  */
 
-BOOL init_io_waits_lib()
+BOOL init_io_wait_lib()
 {
 	if (EOK != list_init(&wait_queues)) {
 		return (FALSE);
