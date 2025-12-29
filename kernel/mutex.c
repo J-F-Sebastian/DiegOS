@@ -153,6 +153,41 @@ BOOL mutex_is_locked(struct mutex * mtx)
 		? (TRUE) : (FALSE));
 }
 
+int cancel_wait_on_mutex(uint8_t tid)
+{
+	thread_t *ptr;
+	unsigned i;
+	struct mutex *curr = list_head(&mutexes_list);
+
+	while (curr) {
+		if (curr->locker_tid == tid) {
+			return (unlock_mutex(tid, curr)) ? (EOK) : (EPERM);
+		}
+
+		i = queue_count(&curr->wait_queue);
+		while (i--) {
+
+			ptr = (thread_t *) queue_head(&curr->wait_queue);
+
+			if (ptr->tid == tid) {
+				if (EOK != queue_dequeue(&curr->wait_queue, (queue_node **) & ptr)) {
+					kprintf("could not remove TID %d from mutex wait queue\n", tid);
+					return (EPERM);
+				}
+				return (EOK);
+			}
+
+			if (EOK != queue_roll(&curr->wait_queue)) {
+				kerrprintf("failed rolling wait queue\n");
+				return EPERM;
+			}
+		}
+		curr = (struct mutex *)curr->header.next;
+	}
+
+	return (EINVAL);
+}
+
 static void dump_internal(struct mutex *mtx)
 {
 	printf("%-15s | %11u | %8s | %s\n",

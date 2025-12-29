@@ -88,6 +88,8 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx);
  */
 BOOL mutex_is_locked(struct mutex *mtx);
 
+int cancel_wait_on_mutex(uint8_t tid);
+
 /*
  * Print to stdout either a single mutex structure and state, or the whole
  * list of active mutexes if the parameter is NULL.
