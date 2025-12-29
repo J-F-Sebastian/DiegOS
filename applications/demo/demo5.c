@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <chunks.h>
+#include <libs/chunks.h>
 #include <stdio.h>
 
 void platform_run(void)
