@@ -70,7 +70,7 @@ static chunks_pool_t *poll_tables = NULL;
 static list_inst poll_table_list;
 static long thread_ids[BITMAPLEN(DIEGOS_MAX_THREADS)];
 
-static void cleanup(poll_table_t * table)
+static void cleanup(poll_table_t *table)
 {
 	struct poll_item *cursor;
 
@@ -117,7 +117,8 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 		cursor = fdget(ufds[i].fd);
 		if (cursor) {
 			if (EOK != device_poll(cursor->rawdev, newtable, &events)) {
-				kerrprintf("Device %s failed polling 1\n", cursor->rawdev->header.name);
+				kerrprintf("Device %s failed polling 1\n",
+					   cursor->rawdev->header.name);
 				cleanup(newtable);
 				return ENOSYS;
 			}
@@ -147,7 +148,8 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 		cursor = fdget(ufds[i].fd);
 		if (cursor) {
 			if (EOK != device_poll(cursor->rawdev, NULL, &events)) {
-				kerrprintf("Device %s failed polling 2\n", cursor->rawdev->header.name);
+				kerrprintf("Device %s failed polling 2\n",
+					   cursor->rawdev->header.name);
 				cleanup(newtable);
 				return ENOSYS;
 			}
@@ -237,7 +239,7 @@ int poll_network(struct pollfd ufds[], unsigned nfds, int timeout)
 	return EOK;
 }
 
-int poll_wait(wait_queue_t * wq, poll_table_t * table)
+int poll_wait(wait_queue_t *wq, poll_table_t *table)
 {
 	struct wait_queue_item *temp;
 	struct poll_item *cursor;

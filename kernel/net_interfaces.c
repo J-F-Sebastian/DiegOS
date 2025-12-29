@@ -49,7 +49,7 @@ static chunks_pool_t *interfaces_pool = NULL;
  */
 static int ifindex_counter = 0;
 
-static int cmpfn(const rbtree_node_t * a, const rbtree_node_t * b)
+static int cmpfn(const rbtree_node_t *a, const rbtree_node_t *b)
 {
 	tree_node_t *aa = (tree_node_t *) a;
 	tree_node_t *bb = (tree_node_t *) b;
@@ -66,7 +66,7 @@ static int cmpfn(const rbtree_node_t * a, const rbtree_node_t * b)
 	return (KEY_EQUAL);
 }
 
-static int cmpfnif(const rbtree_node_t * a, const rbtree_node_t * b)
+static int cmpfnif(const rbtree_node_t *a, const rbtree_node_t *b)
 {
 	tree_node_t *aa = (tree_node_t *) a;
 	tree_node_t *bb = (tree_node_t *) b;
@@ -123,7 +123,7 @@ void start_net_interfaces_lib(void)
  * Public section
  */
 
-net_interface_t *net_interface_create(net_driver_t * inst)
+net_interface_t *net_interface_create(net_driver_t *inst)
 {
 	net_interface_t *temp;
 	tree_node_t *node, *node2;
@@ -209,7 +209,7 @@ net_interface_t *net_interface_first()
 	return ((retval) ? (((tree_node_t *) retval)->ni) : NULL);
 }
 
-net_interface_t *net_interface_next(net_interface_t * intp)
+net_interface_t *net_interface_next(net_interface_t *intp)
 {
 	rbtree_node_t *retval;
 	tree_node_t temp;

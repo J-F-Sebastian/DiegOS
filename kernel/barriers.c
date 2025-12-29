@@ -78,7 +78,7 @@ barrier_t *barrier_create(const char *name, BOOL autoclose)
 	return (ptr);
 }
 
-int barrier_done(barrier_t * barrier)
+int barrier_done(barrier_t *barrier)
 {
 	int retval;
 
@@ -96,7 +96,7 @@ int barrier_done(barrier_t * barrier)
 	return retval;
 }
 
-int barrier_open(barrier_t * barrier)
+int barrier_open(barrier_t *barrier)
 {
 	lock();
 	if (barrier) {
@@ -107,7 +107,7 @@ int barrier_open(barrier_t * barrier)
 	return ((barrier) ? EOK : EINVAL);
 }
 
-int barrier_close(barrier_t * barrier)
+int barrier_close(barrier_t *barrier)
 {
 	lock();
 	if (barrier) {
@@ -118,7 +118,7 @@ int barrier_close(barrier_t * barrier)
 	return ((barrier) ? EOK : EINVAL);
 }
 
-int wait_for_barrier(barrier_t * barrier)
+int wait_for_barrier(barrier_t *barrier)
 {
 	thread_t *prev, *next;
 	BOOL check;
@@ -169,8 +169,8 @@ int cancel_wait_for_barrier(uint8_t tid)
 
 	while (barrier) {
 		if (bitmap_is_set(barrier->thread_ids, tid)) {
-				bitmap_clear(barrier->thread_ids, tid);
-				return EOK;
+			bitmap_clear(barrier->thread_ids, tid);
+			return EOK;
 		}
 		barrier = (barrier_t *) barrier->header.next;
 	}
@@ -210,21 +210,20 @@ void resume_on_barriers()
 	}
 }
 
-static void dump_internal(const barrier_t * barrier)
+static void dump_internal(const barrier_t *barrier)
 {
 	printf("%-15s | %5s | %4s | %s\n",
-		barrier->name,
-		(barrier->flags & BARRIER_OPEN) ? "OPEN" : "CLOSED",
-		(barrier->flags & BARRIER_AUTOCLOSE) ? "YES" : "NO", "N/A");
+	       barrier->name,
+	       (barrier->flags & BARRIER_OPEN) ? "OPEN" : "CLOSED",
+	       (barrier->flags & BARRIER_AUTOCLOSE) ? "YES" : "NO", "N/A");
 }
 
-void barrier_dump(const barrier_t * barrier)
+void barrier_dump(const barrier_t *barrier)
 {
 	if (!barrier) {
 		printf("\n--- BARRIERS TABLE ----------------------\n\n");
 	}
-	printf("%-15s   %5s   %4s   %s\n",
-		"BARRIER NAME", "STATE", "AUTO", "WAITING THREADS");
+	printf("%-15s   %5s   %4s   %s\n", "BARRIER NAME", "STATE", "AUTO", "WAITING THREADS");
 	printf("________________________________________\n");
 	if (barrier) {
 		dump_internal(barrier);

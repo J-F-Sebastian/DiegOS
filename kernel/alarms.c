@@ -102,7 +102,7 @@ BOOL init_alarms_lib()
 }
 
 alarm_t *alarm_create(const char *name,
-		      uint16_t alarmid, unsigned millisecs, BOOL recursive, ev_queue_t * evqueue)
+		      uint16_t alarmid, unsigned millisecs, BOOL recursive, ev_queue_t *evqueue)
 {
 	struct alarm *ptr;
 
@@ -159,7 +159,7 @@ alarm_t *alarm_create(const char *name,
 	return (ptr);
 }
 
-void alarm_set(alarm_t * alm, BOOL start)
+void alarm_set(alarm_t *alm, BOOL start)
 {
 	if (!alm) {
 		errno = EINVAL;
@@ -181,7 +181,7 @@ void alarm_set(alarm_t * alm, BOOL start)
 	unlock();
 }
 
-STATUS alarm_acknowledge(alarm_t * alm)
+STATUS alarm_acknowledge(alarm_t *alm)
 {
 	const uint32_t MATCH = (ALM_RECURSIVE | ALM_TRIGGERED | ALM_EXPIRED);
 
@@ -201,7 +201,7 @@ STATUS alarm_acknowledge(alarm_t * alm)
 	return (EOK);
 }
 
-STATUS alarm_update(alarm_t * alm, unsigned millisecs, BOOL recursive)
+STATUS alarm_update(alarm_t *alm, unsigned millisecs, BOOL recursive)
 {
 	if (!alm || !millisecs) {
 		return (EINVAL);
@@ -232,7 +232,7 @@ STATUS alarm_update(alarm_t * alm, unsigned millisecs, BOOL recursive)
 	return (EOK);
 }
 
-STATUS alarm_done(alarm_t * alm)
+STATUS alarm_done(alarm_t *alm)
 {
 	if (!alm) {
 		return (EINVAL);
@@ -258,7 +258,7 @@ STATUS alarm_done(alarm_t * alm)
 	return (EOK);
 }
 
-static void dump_internal(const alarm_t * alm)
+static void dump_internal(const alarm_t *alm)
 {
 	char tempbuf[60];
 
@@ -278,7 +278,7 @@ static void dump_internal(const alarm_t * alm)
 	printf("%-15s | %6u | %s\n", alm->name, alm->msecs, tempbuf);
 }
 
-void alarm_dump(const alarm_t * alm)
+void alarm_dump(const alarm_t *alm)
 {
 	if (!alm) {
 		printf("\n--- ALARMS TABLE -----------------------\n\n");

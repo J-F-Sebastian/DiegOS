@@ -251,10 +251,10 @@ int cancel_io_waits(uint8_t tid)
 	lock();
 	ptr = list_head(&wait_queues);
 	while (ptr) {
-		wq_int = (struct wait_queue_int *) ptr;
+		wq_int = (struct wait_queue_int *)ptr;
 		temp = list_head(wq_int->wq);
 		while (temp) {
-			wq_item = (struct wait_queue_item *) temp;
+			wq_item = (struct wait_queue_item *)temp;
 			if (wq_item->tid == tid) {
 				list_remove(wq_int->wq, &wq_item->header);
 				chunks_pool_free(wait_queue_items, wq_item);

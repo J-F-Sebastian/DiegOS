@@ -83,7 +83,7 @@ static const char *get_subclass_desc(uint8_t class, uint8_t subclass, uint8_t pr
  * Return FALSE in any other case.
  */
 static BOOL pci_bus_enumerate_function(unsigned bus,
-				       unsigned device, unsigned function, BOOL * is_multi)
+				       unsigned device, unsigned function, BOOL *is_multi)
 {
 	uint32_t buffer[PCI_HEADER_SIZE_REGS];
 	pci_config_t *cfgspace = (pci_config_t *) buffer;
@@ -265,7 +265,7 @@ STATUS pci_bus_init()
 	return (EOK);
 }
 
-pci_bus_device_t *pci_bus_find_device(uint16_t vendorid, uint16_t deviceid, pci_bus_device_t * prev)
+pci_bus_device_t *pci_bus_find_device(uint16_t vendorid, uint16_t deviceid, pci_bus_device_t *prev)
 {
 	pci_dev_list_t *cursor = list_head(&pci_dev_list);
 

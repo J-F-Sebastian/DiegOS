@@ -29,7 +29,7 @@
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
 extern STATUS iomalloc_init(const void *start, const void *end);
-extern int atexit(void (*func) (void));
+extern int atexit(void (*func)(void));
 
 static const char DiegOS_banner[] = "DiegOS operating system release 1.0";
 
@@ -96,10 +96,10 @@ void DiegOS(void)
 	 * Complete memory allocators initialization.
 	 * Cannot print out anything at this stage.
 	 */
-	if (EOK != malloc_init((const void *)heap_start, (const void *)(heap_start + heap_size))) {
+	if (EOK != malloc_init(heap_start, heap_start + heap_size)) {
 		kernel_done();
 	}
-	if (EOK != iomalloc_init((const void *)iomem_start, (const void *)(iomem_start + iomem_size))) {
+	if (EOK != iomalloc_init(iomem_start, iomem_start + iomem_size)) {
 		kernel_done();
 	}
 	/*
@@ -136,7 +136,7 @@ void DiegOS(void)
 		   &_text_end, &_data_end, &_bss_end, (uintptr_t) (heap_start) + heap_size,
 		   (uintptr_t) (iomem_start) + iomem_size);
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n\n");
-	kmsgprintf("RAM Size: %d MBytes\n", mem_size/MBYTE);
+	kmsgprintf("RAM Size: %d MBytes\n", mem_size / MBYTE);
 #endif
 	if (proctype) {
 		kmsgprintf("processor is a %s\n", proctype);

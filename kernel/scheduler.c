@@ -199,35 +199,41 @@ static void schedule_waiting(void)
 		switch (ptr->state) {
 		case THREAD_WAITING:
 			if (ptr->flags & THREAD_FLAG_TERMINATE) {
-				if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
-					kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
+				if (EOK != queue_dequeue(&wait_queue, (queue_node **) & temp)) {
+					kerrprintf("failed extracting TID %d from wait queue\n",
+						   ptr->tid);
 				} else if (EOK != queue_enqueue(&dead_queue, &temp->header)) {
 					kerrprintf("failed killing PID %d\n", temp->tid);
 				} else {
 					temp->state = THREAD_DEAD;
 				}
-			} else if ((ptr->flags & THREAD_FLAG_WAIT_TIMEOUT) && (ptr->delay <= expiration)) {
-				if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
-					kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
+			} else if ((ptr->flags & THREAD_FLAG_WAIT_TIMEOUT)
+				   && (ptr->delay <= expiration)) {
+				if (EOK != queue_dequeue(&wait_queue, (queue_node **) & temp)) {
+					kerrprintf("failed extracting TID %d from wait queue\n",
+						   ptr->tid);
 				} else {
-					if (!scheduler_resume_thread(temp->flags & THREAD_MASK_EVENTS, temp->tid)) {
+					if (!scheduler_resume_thread
+					    (temp->flags & THREAD_MASK_EVENTS, temp->tid)) {
 						kerrprintf("failed resuming TID %d\n", temp->tid);
-					}
-					else if (EOK != queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
-						kerrprintf("failed moving TID %d to ready queue\n", temp->tid);
+					} else if (EOK !=
+						   queue_enqueue(&ready_queues[temp->priority],
+								 &temp->header)) {
+						kerrprintf("failed moving TID %d to ready queue\n",
+							   temp->tid);
 					}
 				}
 			}
-		break;
+			break;
 
 		case THREAD_READY:
-			if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
+			if (EOK != queue_dequeue(&wait_queue, (queue_node **) & temp)) {
 				kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
+			} else if (EOK !=
+				   queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
+				kerrprintf("failed moving TID %d to ready queue\n", temp->tid);
 			}
-			else if (EOK != queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
-					kerrprintf("failed moving TID %d to ready queue\n", temp->tid);
-			}
-		break;
+			break;
 		}
 
 		if (EOK != queue_roll(&wait_queue)) {
@@ -265,8 +271,10 @@ static void schedule_delayed(void)
 		} else {
 			if (!scheduler_resume_thread(THREAD_FLAG_WAIT_TIMEOUT, temp->tid)) {
 				kerrprintf("failed resuming delayed TID %d\n", temp->tid);
-			} else if (EOK != queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
-				kerrprintf("failed moving delayed TID %d to ready queue\n", temp->tid);
+			} else if (EOK !=
+				   queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
+				kerrprintf("failed moving delayed TID %d to ready queue\n",
+					   temp->tid);
 			}
 		}
 		ptr = queue_head(&delay_queue);
@@ -307,7 +315,7 @@ void schedule_thread()
 	if (queue_count(&wait_queue)) {
 		schedule_waiting();
 		//if (queue_count(&wait_queue)) {
-		//	new_delay = peek_top_expiration();
+		//      new_delay = peek_top_expiration();
 		//}
 	}
 
@@ -426,14 +434,16 @@ BOOL scheduler_resume_thread(uint32_t flags, uint8_t tid)
 	}
 
 	if (THREAD_WAITING != ptr->state) {
-		kerrprintf("TID %d state %s flags %s, cannot resume\n", tid, state2str(ptr->state), flags2str(ptr->flags));
+		kerrprintf("TID %d state %s flags %s, cannot resume\n", tid, state2str(ptr->state),
+			   flags2str(ptr->flags));
 		return (FALSE);
 	}
 
 	check = flags & (ptr->flags & THREAD_MASK_WAIT);
 	if (check == 0) {
 		kerrprintf("TID %d flags %x %s mismatches flags %x %s\n",
-			   tid, ptr->flags & THREAD_MASK_WAIT, flags2str(ptr->flags & THREAD_MASK_WAIT), flags, flags2str(flags));
+			   tid, ptr->flags & THREAD_MASK_WAIT,
+			   flags2str(ptr->flags & THREAD_MASK_WAIT), flags, flags2str(flags));
 		return (FALSE);
 	}
 
@@ -554,46 +564,46 @@ BOOL scheduler_remove_thread(uint8_t tid)
 	case THREAD_WAITING:
 		switch (ptr->flags & THREAD_MASK_WAIT) {
 		case THREAD_FLAG_WAIT_EVENT:
-		if (EOK != cancel_wait_for_events(tid)) {
-			kerrprintf("failed killing PID %d\n", tid);
-			return (FALSE);
-		}
-		break;
-
-		case THREAD_FLAG_WAIT_BARRIER:
-		if (EOK != cancel_wait_for_barrier(tid)) {
-			kerrprintf("failed killing PID %d\n", tid);
-			return (FALSE);
-		}
-		break;
-
-		case THREAD_FLAG_WAIT_COMPLETION:
-		if (EOK != cancel_io_waits(tid)) {
-			kerrprintf("failed killing PID %d\n", tid);
-			return (FALSE);
-		}
-		break;
-
-		case THREAD_FLAG_WAIT_TIMEOUT:
-		break;
-
-		case THREAD_FLAG_WAIT_MUTEX:
-		/*
-		 * Threads waiting on mutexes are stored in lists and queues,
-		 * when cancelled are orphaned so we need to put them directly in the dead queue
-		 * as if they were running threads.
-		 */
-		if (EOK != cancel_wait_on_mutex(tid)) {
-			kerrprintf("failed killing PID %d\n", tid);
-			return (FALSE);
-		} else {
-			 ptr->state = THREAD_DEAD;
-			if (EOK != queue_enqueue(&dead_queue, &ptr->header)) {
+			if (EOK != cancel_wait_for_events(tid)) {
 				kerrprintf("failed killing PID %d\n", tid);
 				return (FALSE);
 			}
-		}
-		break;
+			break;
+
+		case THREAD_FLAG_WAIT_BARRIER:
+			if (EOK != cancel_wait_for_barrier(tid)) {
+				kerrprintf("failed killing PID %d\n", tid);
+				return (FALSE);
+			}
+			break;
+
+		case THREAD_FLAG_WAIT_COMPLETION:
+			if (EOK != cancel_io_waits(tid)) {
+				kerrprintf("failed killing PID %d\n", tid);
+				return (FALSE);
+			}
+			break;
+
+		case THREAD_FLAG_WAIT_TIMEOUT:
+			break;
+
+		case THREAD_FLAG_WAIT_MUTEX:
+			/*
+			 * Threads waiting on mutexes are stored in lists and queues,
+			 * when cancelled are orphaned so we need to put them directly in the dead queue
+			 * as if they were running threads.
+			 */
+			if (EOK != cancel_wait_on_mutex(tid)) {
+				kerrprintf("failed killing PID %d\n", tid);
+				return (FALSE);
+			} else {
+				ptr->state = THREAD_DEAD;
+				if (EOK != queue_enqueue(&dead_queue, &ptr->header)) {
+					kerrprintf("failed killing PID %d\n", tid);
+					return (FALSE);
+				}
+			}
+			break;
 		}
 
 		ptr->flags &= ~THREAD_MASK_WAIT;
@@ -650,7 +660,8 @@ void scheduler_dump()
 		if (queue_count(&ready_queues[i])) {
 			thread_t *ptr = queue_head(&ready_queues[i]);
 			while (ptr) {
-				kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+				kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid,
+					ptr->name, state2str(ptr->state), flags2str(ptr->flags));
 				ptr = (thread_t *) ptr->header.next;
 			}
 		}
@@ -659,7 +670,8 @@ void scheduler_dump()
 	if (queue_count(&delay_queue)) {
 		thread_t *ptr = queue_head(&delay_queue);
 		while (ptr) {
-			kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name,
+				state2str(ptr->state), flags2str(ptr->flags));
 			ptr = (thread_t *) ptr->header.next;
 		}
 	}
@@ -667,7 +679,8 @@ void scheduler_dump()
 	if (queue_count(&wait_queue)) {
 		thread_t *ptr = queue_head(&wait_queue);
 		while (ptr) {
-			kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			kprintf("  TID %d NAME %15s STATE %s FLAGS %s\n", ptr->tid, ptr->name,
+				state2str(ptr->state), flags2str(ptr->flags));
 			ptr = (thread_t *) ptr->header.next;
 		}
 	}

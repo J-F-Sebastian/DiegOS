@@ -172,7 +172,7 @@ timer_t *timer_create(const char *name, unsigned millisecs, BOOL recursive, tmr_
 	return (ptr);
 }
 
-void timer_set(timer_t * tmr, BOOL start)
+void timer_set(timer_t *tmr, BOOL start)
 {
 	if (!tmr) {
 		errno = EINVAL;
@@ -198,7 +198,7 @@ void timer_set(timer_t * tmr, BOOL start)
 	unlock();
 }
 
-int timer_update(timer_t * tmr, unsigned millisecs, BOOL recursive)
+int timer_update(timer_t *tmr, unsigned millisecs, BOOL recursive)
 {
 	if (!tmr || !millisecs) {
 		return (EINVAL);
@@ -229,7 +229,7 @@ int timer_update(timer_t * tmr, unsigned millisecs, BOOL recursive)
 	return (EOK);
 }
 
-int timer_done(timer_t * tmr)
+int timer_done(timer_t *tmr)
 {
 	if (!tmr) {
 		return (EINVAL);
@@ -255,7 +255,7 @@ int timer_done(timer_t * tmr)
 	return (EOK);
 }
 
-static void dump_internal(const timer_t * tmr)
+static void dump_internal(const timer_t *tmr)
 {
 	char tempbuf[60];
 
@@ -272,17 +272,15 @@ static void dump_internal(const timer_t * tmr)
 	if (!tmr->flags) {
 		strcat(tempbuf, "DISABLED");
 	}
-	printf("%-15s | %6u | %10llu | %s\n", tmr->name, tmr->msecs, tmr->expiration,
-		tempbuf);
+	printf("%-15s | %6u | %10llu | %s\n", tmr->name, tmr->msecs, tmr->expiration, tempbuf);
 }
 
-void timers_dump(const timer_t * tmr)
+void timers_dump(const timer_t *tmr)
 {
 	if (!tmr) {
 		printf("\n--- TIMERS TABLE -------------------------------------\n\n");
 	}
-	printf("%-15s   %6s   %10s    %s\n", "TIMER NAME", "PERIOD", "EXPIRATION",
-		"FLAGS");
+	printf("%-15s   %6s   %10s    %s\n", "TIMER NAME", "PERIOD", "EXPIRATION", "FLAGS");
 	printf("______________________________________________________\n");
 	if (tmr) {
 		dump_internal(tmr);

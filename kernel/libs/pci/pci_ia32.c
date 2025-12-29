@@ -67,7 +67,7 @@ bdf_addr_t pci_create_bdf(unsigned busid, unsigned deviceid, unsigned function)
 	return (pci_create_bdf_internal(busid, deviceid, function));
 }
 
-void pci_read_config(bdf_addr_t address, uint32_t * confmem)
+void pci_read_config(bdf_addr_t address, uint32_t *confmem)
 {
 	unsigned loop;
 
@@ -99,7 +99,7 @@ void pci_read_config(bdf_addr_t address, uint32_t * confmem)
 	}
 }
 
-void pci_write_config(bdf_addr_t address, const uint32_t * confmem)
+void pci_write_config(bdf_addr_t address, const uint32_t *confmem)
 {
 	unsigned loop;
 
@@ -127,7 +127,7 @@ static inline void pci_config_space_set_addr(bdf_addr_t address, unsigned offset
 	out_dword(PCI_CONFIG_ADDRESS, address);
 }
 
-void pci_read_config_reg32(bdf_addr_t address, unsigned offset, uint32_t * value)
+void pci_read_config_reg32(bdf_addr_t address, unsigned offset, uint32_t *value)
 {
 	if (!value) {
 		return;
@@ -145,7 +145,7 @@ void pci_write_config_reg32(bdf_addr_t address, unsigned offset, const uint32_t 
 	out_dword(PCI_CONFIG_DATA, value);
 }
 
-void pci_read_config_reg16(bdf_addr_t address, unsigned offset, uint16_t * value)
+void pci_read_config_reg16(bdf_addr_t address, unsigned offset, uint16_t *value)
 {
 	if (!value) {
 		return;
@@ -163,7 +163,7 @@ void pci_write_config_reg16(bdf_addr_t address, unsigned offset, const uint16_t 
 	out_word(PCI_CONFIG_DATA + (offset & 2), value);
 }
 
-void pci_read_config_reg8(bdf_addr_t address, unsigned offset, uint8_t * value)
+void pci_read_config_reg8(bdf_addr_t address, unsigned offset, uint8_t *value)
 {
 	if (!value) {
 		return;

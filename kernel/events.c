@@ -69,7 +69,7 @@ ev_queue_t *event_init_queue(const char *name)
 	return (ptr);
 }
 
-int event_done_queue(ev_queue_t * evqueue)
+int event_done_queue(ev_queue_t *evqueue)
 {
 	queue_node *ptr;
 	int retval = EOK;
@@ -98,7 +98,7 @@ int event_done_queue(ev_queue_t * evqueue)
 	return retval;
 }
 
-unsigned event_queue_size(ev_queue_t * evqueue)
+unsigned event_queue_size(ev_queue_t *evqueue)
 {
 	if (!evqueue) {
 		return (EINVAL);
@@ -107,7 +107,7 @@ unsigned event_queue_size(ev_queue_t * evqueue)
 	return (queue_count(&evqueue->msgqueue));
 }
 
-int event_watch_queue(ev_queue_t * evqueue)
+int event_watch_queue(ev_queue_t *evqueue)
 {
 	if (!evqueue) {
 		return (EINVAL);
@@ -124,7 +124,7 @@ int event_watch_queue(ev_queue_t * evqueue)
 	return (EOK);
 }
 
-int event_put(ev_queue_t * evqueue, event_t * ev, event_freefn fncb)
+int event_put(ev_queue_t *evqueue, event_t *ev, event_freefn fncb)
 {
 	STATUS retcode;
 
@@ -146,7 +146,7 @@ int event_put(ev_queue_t * evqueue, event_t * ev, event_freefn fncb)
 	return (retcode);
 }
 
-event_t *event_get(ev_queue_t * evqueue)
+event_t *event_get(ev_queue_t *evqueue)
 {
 	event_t *retval = NULL;
 	STATUS retcode;
@@ -160,20 +160,21 @@ event_t *event_get(ev_queue_t * evqueue)
 	unlock();
 
 	if ((EOK != retcode) && (EAGAIN != retcode)) {
-		kerrprintf("failed dequeueing event from %s with error %s\n", evqueue->name, strerror(retcode));
+		kerrprintf("failed dequeueing event from %s with error %s\n", evqueue->name,
+			   strerror(retcode));
 	}
 
 	return (retval);
 }
 
-void event_free(event_t * ev)
+void event_free(event_t *ev)
 {
 	if (ev && ev->freefn) {
 		ev->freefn(ev);
 	}
 }
 
-void wait_for_events(ev_queue_t * evqueue)
+void wait_for_events(ev_queue_t *evqueue)
 {
 	thread_t *prev, *next;
 
@@ -229,8 +230,7 @@ void resume_on_events()
 		 * Should we drop the events if the queue is not watched?
 		 */
 		if ((cur->threadid != THREAD_TID_INVALID) &&
-		    (bitmap_is_set(thread_ids, cur->threadid)) &&
-			queue_count(&cur->msgqueue)) {
+		    (bitmap_is_set(thread_ids, cur->threadid)) && queue_count(&cur->msgqueue)) {
 			scheduler_resume_thread(THREAD_FLAG_WAIT_EVENT, cur->threadid);
 			bitmap_clear(thread_ids, cur->threadid);
 		}
@@ -267,13 +267,13 @@ int cancel_wait_for_events(uint8_t tid)
 	return (EINVAL);
 }
 
-static void dump_internal(ev_queue_t * evqueue)
+static void dump_internal(ev_queue_t *evqueue)
 {
 	fprintf(stderr, "%-15s   %12u   %u\n",
 		evqueue->name, evqueue->threadid, queue_count(&evqueue->msgqueue));
 }
 
-void event_dump(ev_queue_t * evqueue)
+void event_dump(ev_queue_t *evqueue)
 {
 	if (!evqueue) {
 		fprintf(stderr, "\n--- EVENTS TABLE -----------------------\n\n");

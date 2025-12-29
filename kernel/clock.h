@@ -47,7 +47,7 @@ enum clock_client_id {
  * RETURN VALUES
  * none
  */
-typedef void (*kernel_clock_cb) (uint64_t msecs);
+typedef void (*kernel_clock_cb)(uint64_t msecs);
 
 /*
  * Init clock library, this will configure the system ticks

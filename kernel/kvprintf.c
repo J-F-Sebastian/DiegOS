@@ -152,7 +152,7 @@ int kvprintf(const char *fmt, va_list argp)
 			p = temp + sizeof(temp) - 1;
 			*p = 0;
 			do {
-				*--p = x2c[(ptrdiff_t) (u % base)];
+				*--p = x2c[(ptrdiff_t)(u % base)];
 			} while ((u /= base) > 0);
 			goto string_length;
 

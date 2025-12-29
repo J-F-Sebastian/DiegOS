@@ -25,7 +25,7 @@
 BOOL init_thread_lib(void);
 
 uint8_t init_thread(const char *name,
-		    uint8_t prio, void (*entry_ptr) (void), void *stack, uint32_t stack_size);
+		    uint8_t prio, void (*entry_ptr)(void), void *stack, uint32_t stack_size);
 
 BOOL done_thread(uint8_t tid);
 

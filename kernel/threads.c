@@ -38,7 +38,8 @@ BOOL init_thread_lib()
 		return (FALSE);
 	}
 
-	thread_storage = (thread_t *) malloc(DIEGOS_MAX_THREADS * sizeof(*thread_storage) + CACHE_ALN);
+	thread_storage =
+	    (thread_t *) malloc(DIEGOS_MAX_THREADS * sizeof(*thread_storage) + CACHE_ALN);
 	if (!thread_storage) {
 		return (FALSE);
 	}
@@ -59,11 +60,12 @@ BOOL init_thread_lib()
 }
 
 uint8_t init_thread(const char *name,
-		    uint8_t prio, void (*entry_ptr) (void), void *stack, uint32_t stack_size)
+		    uint8_t prio, void (*entry_ptr)(void), void *stack, uint32_t stack_size)
 {
 	uint32_t i, new_tid = THREAD_TID_INVALID;
 
-	if ((DIEGOS_MAX_THREADS == thread_num) || (!name) || (!entry_ptr) || !(prio < THREAD_PRIORITIES)) {
+	if ((DIEGOS_MAX_THREADS == thread_num) || (!name) || (!entry_ptr)
+	    || !(prio < THREAD_PRIORITIES)) {
 		return THREAD_TID_INVALID;
 	}
 
@@ -146,8 +148,7 @@ BOOL done_thread(uint8_t tid)
 thread_t *get_thread(uint8_t tid)
 {
 	if ((tid < THREAD_TID_INVALID) &&
-		(tid < DIEGOS_MAX_THREADS) &&
-		(thread_storage[tid].tid == tid)) {
+	    (tid < DIEGOS_MAX_THREADS) && (thread_storage[tid].tid == tid)) {
 		return (&thread_storage[tid]);
 	}
 

@@ -69,7 +69,7 @@ struct mutex *init_mutex(const char *name)
 	return (tmp);
 }
 
-BOOL done_mutex(struct mutex * mtx)
+BOOL done_mutex(struct mutex *mtx)
 {
 	if (!mtx) {
 		return (FALSE);
@@ -89,7 +89,7 @@ BOOL done_mutex(struct mutex * mtx)
 	return (TRUE);
 }
 
-BOOL lock_mutex(uint8_t tid, struct mutex * mtx)
+BOOL lock_mutex(uint8_t tid, struct mutex *mtx)
 {
 	thread_t *ptr;
 
@@ -120,7 +120,7 @@ BOOL lock_mutex(uint8_t tid, struct mutex * mtx)
 	}
 }
 
-BOOL unlock_mutex(uint8_t tid, struct mutex * mtx)
+BOOL unlock_mutex(uint8_t tid, struct mutex *mtx)
 {
 	thread_t *ptr;
 
@@ -147,7 +147,7 @@ BOOL unlock_mutex(uint8_t tid, struct mutex * mtx)
 	return (TRUE);
 }
 
-BOOL mutex_is_locked(struct mutex * mtx)
+BOOL mutex_is_locked(struct mutex *mtx)
 {
 	return ((mtx && (THREAD_TID_INVALID != mtx->locker_tid))
 		? (TRUE) : (FALSE));
@@ -171,7 +171,8 @@ int cancel_wait_on_mutex(uint8_t tid)
 
 			if (ptr->tid == tid) {
 				if (EOK != queue_dequeue(&curr->wait_queue, (queue_node **) & ptr)) {
-					kprintf("could not remove TID %d from mutex wait queue\n", tid);
+					kprintf("could not remove TID %d from mutex wait queue\n",
+						tid);
 					return (EPERM);
 				}
 				return (EOK);
@@ -191,7 +192,7 @@ int cancel_wait_on_mutex(uint8_t tid)
 static void dump_internal(struct mutex *mtx)
 {
 	printf("%-15s | %11u | %8s | %s\n",
-		mtx->name, mtx->locker_tid, mutex_is_locked(mtx) ? "LOCKED" : "UNLOCKED", "N/A");
+	       mtx->name, mtx->locker_tid, mutex_is_locked(mtx) ? "LOCKED" : "UNLOCKED", "N/A");
 }
 
 void dump_mutex(struct mutex *mtx)

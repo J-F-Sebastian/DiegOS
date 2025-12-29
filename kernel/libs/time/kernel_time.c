@@ -35,7 +35,7 @@ int kernel_time_init(uint32_t base_val, uint32_t min_val, uint32_t max_val, stru
 	return (EOK);
 }
 
-uint32_t kernel_time_get_msecs(uint32_t cntrticks, const struct time_util * tu)
+uint32_t kernel_time_get_msecs(uint32_t cntrticks, const struct time_util *tu)
 {
 	uint32_t retval = 0;
 	uint32_t fract = 0;
@@ -49,7 +49,7 @@ uint32_t kernel_time_get_msecs(uint32_t cntrticks, const struct time_util * tu)
 	return (retval);
 }
 
-uint64_t kernel_time_get_elapsed_msecs(const struct time_util * tu)
+uint64_t kernel_time_get_elapsed_msecs(const struct time_util *tu)
 {
 	uint64_t retval = 0ULL;
 
@@ -73,7 +73,7 @@ uint64_t kernel_time_get_elapsed_msecs(const struct time_util * tu)
 	return (retval);
 }
 
-uint32_t kernel_time_get_value(uint32_t msecs, const struct time_util * tu)
+uint32_t kernel_time_get_value(uint32_t msecs, const struct time_util *tu)
 {
 	if (!msecs || !tu)
 		return 0;
@@ -99,7 +99,7 @@ int kernel_time_get_minmax_msecs(uint32_t msecs[], const struct time_util *tu)
 	return (EOK);
 }
 
-uint32_t kernel_time_adjust_msecs(uint32_t msecs, const struct time_util * tu)
+uint32_t kernel_time_adjust_msecs(uint32_t msecs, const struct time_util *tu)
 {
 	uint32_t range[2];
 

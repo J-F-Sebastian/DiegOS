@@ -79,7 +79,7 @@ static const initlibfn libs_init_array[] = { init_thread_lib,
 	init_net_interfaces_lib
 };
 
-typedef void (*startlibfn) (void);
+typedef void (*startlibfn)(void);
 
 static const startlibfn start_array[] = { start_devices_lib,
 	start_net_interfaces_lib
@@ -269,7 +269,7 @@ void thread_terminate()
 
 BOOL thread_create(const char *name,
 		   diegos_prio_t prio,
-		   void (*entry_ptr) (void), void *stack, unsigned stack_size, uint8_t * tid)
+		   void (*entry_ptr)(void), void *stack, unsigned stack_size, uint8_t *tid)
 {
 	uint8_t ntid;
 
@@ -337,7 +337,7 @@ mutex_t *thread_create_mutex(const char *name)
 	return (tmp);
 }
 
-void thread_lock_mutex(mutex_t * mtx)
+void thread_lock_mutex(mutex_t *mtx)
 {
 	thread_t *prev, *next;
 	BOOL is_locked;
@@ -358,7 +358,7 @@ void thread_lock_mutex(mutex_t * mtx)
 	}
 }
 
-void thread_unlock_mutex(mutex_t * mtx)
+void thread_unlock_mutex(mutex_t *mtx)
 {
 	uint8_t ptid;
 	thread_t *prev;
@@ -377,12 +377,12 @@ void thread_unlock_mutex(mutex_t * mtx)
 	}
 }
 
-BOOL thread_mutex_is_locked(mutex_t * mtx)
+BOOL thread_mutex_is_locked(mutex_t *mtx)
 {
 	return (mutex_is_locked(mtx));
 }
 
-void thread_destroy_mutex(mutex_t * mtx)
+void thread_destroy_mutex(mutex_t *mtx)
 {
 	if (!mtx) {
 		return;
