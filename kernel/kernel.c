@@ -257,7 +257,11 @@ void thread_terminate()
 {
 	thread_t *me = scheduler_running_thread();
 
-	(void)scheduler_remove_thread(me->tid);
+	if (!scheduler_remove_thread(me->tid)) {
+		kerrprintf("killing my TID %d failed\n", me->tid);
+		kernel_panic("cannot terminate myself.\n");
+		return;
+	}
 	schedule_thread();
 	me = scheduler_running_thread();
 	load_context(me->context);
@@ -298,7 +302,8 @@ void thread_kill(uint8_t tid)
 	}
 
 	if (!scheduler_remove_thread(tid)) {
-		kprintf("killing TID %d failed\n", tid);
+		kerrprintf("killing TID %d failed\n", tid);
+		kernel_panic("cannot terminate a thread.\n");
 		return;
 	}
 
