@@ -35,7 +35,7 @@ static void demo_thread_entry(void)
 	point_t b = { 639, 479 };
 	unsigned i;
 
-	vga_drv.init_fn();
+	vga_drv.cmn.init_fn(0);
 
 	for (i = 0; i < 16; i++) {
 		vga_drv.rectangle_fn(a, b, 5, i);
@@ -54,7 +54,7 @@ static void demo_thread_entry(void)
 	point_t a, b, c, d;
 	//unsigned i;
 
-	vga_drv.init_fn();
+	vga_drv.cmn.init_fn(0);
 	a.x = a.y = 0;
 	b.x = 639;
 	b.y = 479;
