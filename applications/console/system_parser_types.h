@@ -36,7 +36,7 @@ enum PARSER_TYPES {
 	PARSER_PARAMS = 0xFF << 24
 };
 
-typedef void (*system_parser_func0) (void);
+typedef void (*system_parser_func0)(void);
 
 struct alternates;
 

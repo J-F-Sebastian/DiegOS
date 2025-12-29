@@ -37,7 +37,7 @@ void gv_zoom(point_t a, point_t b, int zoom)
 	b.y -= zoom;
 }
 
-void gv_desktop(uint8_t color, const uint8_t * pattern)
+void gv_desktop(uint8_t color, const uint8_t *pattern)
 {
 	point_t a = { 0, 0 };
 	point_t b = { 639, 479 };

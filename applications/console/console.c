@@ -94,7 +94,7 @@ static void print_banner(void)
 	puts("\n==================\n");
 	puts("\n\nDiegOS version 1.0\n");
 	puts("==================\n");
-        puts("Copyright (C) 2012-2025  Diego Gallizioli\n");
+	puts("Copyright (C) 2012-2025  Diego Gallizioli\n");
 	puts("This program comes with ABSOLUTELY NO WARRANTY.");
 	puts("This is free software, and you are welcome to redistribute it");
 	puts("under certain conditions.");
@@ -163,7 +163,7 @@ static void console_main_entry(void)
 		cmd_typein = TRUE;
 	}
 
-	event_t *ev = (event_t *)malloc(sizeof(*ev));
+	event_t *ev = (event_t *) malloc(sizeof(*ev));
 	ev->classid = CLASS_THREAD;
 	ev->eventid = 0xdead;
 	event_put(events, ev, free);
@@ -236,14 +236,10 @@ static void login_main_entry(void)
 		console_is_on = TRUE;
 
 		retlogin = thread_create("Console",
-					 THREAD_PRIO_NORMAL,
-					 console_main_entry,
-					 0,
-					 8192,
-					 &tid);
+					 THREAD_PRIO_NORMAL, console_main_entry, 0, 8192, &tid);
 		if (!retlogin) {
 			TRACE_PRINT("Failed spawning thread Console")
-			continue;
+			    continue;
 		}
 
 		timeout = 0;
