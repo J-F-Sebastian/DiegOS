@@ -28,6 +28,7 @@
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
 extern STATUS iomalloc_init(const void *start, const void *end);
+extern int atexit(void (*func) (void));
 
 static const char DiegOS_banner[] = "DiegOS operating system release 1.0";
 
@@ -114,8 +115,15 @@ void DiegOS(void)
 	 */
 	tty_init();
 
-	kmsgprintf("%s\n\n", DiegOS_banner);
+	/*
+	 * Initialize the exit handlers table!
+	 */
+	atexit(kernel_done);
 
+	/*
+	 * Print banner
+	 */
+	kmsgprintf("%s\n\n", DiegOS_banner);
 #if 0
 	kmsgprintf("        | Text   | Data   | BSS    | Heap   | I/O\n");
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n");

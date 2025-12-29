@@ -45,5 +45,4 @@ void exit(int status)
 			exitcbfn[exitcbnum] ();
 		}
 	}
-	kernel_done();
 }
