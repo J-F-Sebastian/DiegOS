@@ -23,6 +23,7 @@
 #include <diegos/kernel.h>
 #include <diegos/delays.h>
 
+#include "kernel_private.h"
 #include "kprintf.h"
 #include "platform_include.h"
 

@@ -25,6 +25,7 @@
 #include <diegos/mutexes.h>
 #include <diegos/devices.h>
 
+#include "kernel_private.h"
 #include "threads.h"
 #include "kprintf.h"
 #include "scheduler.h"

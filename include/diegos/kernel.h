@@ -48,22 +48,6 @@ typedef enum {
 } diegos_prio_t;
 
 /*
- * kernel functions, if one of these fails,
- * you get a kernel panic.
- */
-void kernel_init(void);
-
-void kernel_libs_init(void);
-
-void kernel_threads_init(void);
-
-void kernel_panic(const char *msg);
-
-void kernel_run(void);
-
-void kernel_done(void);
-
-/*
  * thread functions for voluntary suspension,
  * delaying or termination.
  */

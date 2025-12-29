@@ -29,6 +29,7 @@
 #include <libs/list.h>
 
 #include "timers_private.h"
+#include "kernel_private.h"
 #include "clock.h"
 #include "kprintf.h"
 
