@@ -40,4 +40,17 @@ BOOL init_barriers_lib(void);
  */
 void resume_on_barriers(void);
 
+/*
+ * Cancel a wait for a barrier.
+  *
+ * PARAMETERS IN
+  * uint8_t tid        - thread ID to cancel wait for
+ *
+ * RETURNS
+ * EOK in case of success
+ * EINVAL if barrier is invalid
+ * EPERM if the thread wait cannot be cancelled
+ */
+int cancel_wait_for_barrier(uint8_t tid);
+
 #endif

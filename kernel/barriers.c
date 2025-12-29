@@ -141,14 +141,10 @@ int wait_for_barrier(barrier_t * barrier)
 	return EOK;
 }
 
-int cancel_wait_for_barrier(barrier_t * barrier, uint8_t tid)
+int cancel_wait_for_barrier(uint8_t tid)
 {
+	barrier_t *barrier = NULL;
 	thread_t *ptr = get_thread(tid);
-
-	if (!barrier) {
-		kerrprintf("Invalid barrier");
-		return EINVAL;
-	}
 
 	if (!ptr) {
 		kerrprintf("No process with TID %d\n", tid);
@@ -160,14 +156,18 @@ int cancel_wait_for_barrier(barrier_t * barrier, uint8_t tid)
 		return EPERM;
 	}
 
-	if (!bitmap_is_set(barrier->thread_ids, tid)) {
-		kerrprintf("Thread TID %d is not waiting on this barrier\n", tid);
-		return EPERM;
+	barrier = (barrier_t *) list_head(&barriers_list);
+
+	while (barrier) {
+		if (bitmap_is_set(barrier->thread_ids, tid)) {
+				bitmap_clear(barrier->thread_ids, tid);
+				return EOK;
+		}
+		barrier = (barrier_t *) barrier->header.next;
 	}
 
-	bitmap_clear(barrier->thread_ids, tid);
-
-	return EOK;
+	kerrprintf("Thread TID %d is not waiting on any barrier\n", tid);
+	return EINVAL;
 }
 
 BOOL init_barriers_lib()
