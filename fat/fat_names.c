@@ -34,7 +34,7 @@ static inline int check(const char chk)
 		((chk >= 0x5B) && (chk <= 0x5D)) || (chk == 0x7C));
 }
 
-size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t * startpos, size_t * endpos)
+size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t *startpos, size_t *endpos)
 {
 	while (*startpos < dirlen) {
 		if (directory[*startpos] == '\\')

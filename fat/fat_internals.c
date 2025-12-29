@@ -83,7 +83,7 @@ int FAT_check_attrib(uint8_t attributes)
 	return -1;
 }
 
-uint16_t FAT_get_free_cluster_from_table(struct FATVolume * vol)
+uint16_t FAT_get_free_cluster_from_table(struct FATVolume *vol)
 {
 	uint16_t N;
 

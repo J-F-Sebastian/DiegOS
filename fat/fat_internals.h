@@ -67,7 +67,7 @@ static inline uint32_t FAT_FSoC(struct FATVolume *vol, uint32_t N)
  *
  * @return cluster number
  */
-uint16_t FAT_get_cluster_from_table(struct FATVolume * vol, uint16_t N);
+uint16_t FAT_get_cluster_from_table(struct FATVolume *vol, uint16_t N);
 
 /**
  * @brief FAT_set_cluster_into_table write the value val into FAT table at cluster index N.

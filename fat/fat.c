@@ -30,7 +30,7 @@
 
 #define MIN(a,b) ((a < b) ? a : b)
 
-typedef unsigned (*fn_foreach) (const char *name, struct FAT * buffer, unsigned FATEntries);
+typedef unsigned (*fn_foreach)(const char *name, struct FAT * buffer, unsigned FATEntries);
 
 static inline int diskRead(struct FATVolume *vol, unsigned sec, unsigned numsec, char *buf)
 {
@@ -355,7 +355,7 @@ static int FAT_clear_cluster_chain(struct FATVolume *vol, struct FAT *entry)
  * If a free cluster is found it is appended at the end of the chain and returned in newcluster.
  * Return 0 on success, -1 on failure
  */
-static int FAT_append_cluster_chain(struct FATVolume *vol, uint16_t cluster, uint16_t * newcluster)
+static int FAT_append_cluster_chain(struct FATVolume *vol, uint16_t cluster, uint16_t *newcluster)
 {
 	uint16_t FATContent;
 	uint16_t freecluster = FAT_get_free_cluster_from_table(vol);
@@ -1132,7 +1132,7 @@ FAT_write_update_on_disk(int appended,
 
 static int
 FAT_write_get_first(unsigned filepos,
-		    struct FATVolume *vol, struct FAT *entry, uint16_t * newcluster)
+		    struct FATVolume *vol, struct FAT *entry, uint16_t *newcluster)
 {
 	uint16_t cluster = FAT_lookup_FAT_table(vol, entry, filepos);
 
@@ -1154,7 +1154,7 @@ FAT_write_get_first(unsigned filepos,
 	return 0;
 }
 
-static int FAT_write_get_next(uint16_t cluster, struct FATVolume *vol, uint16_t * newcluster)
+static int FAT_write_get_next(uint16_t cluster, struct FATVolume *vol, uint16_t *newcluster)
 {
 	uint16_t FATContent = FAT_get_cluster_from_table(vol, cluster);
 
@@ -1313,7 +1313,7 @@ int FAT_write(struct FATVolume *vol,
 	return 0;
 }
 
-int FAT_available(struct FATVolume *vol, uint32_t * bytes, uint16_t * clusters)
+int FAT_available(struct FATVolume *vol, uint32_t *bytes, uint16_t *clusters)
 {
 	unsigned i;
 	uint16_t freeclusters = 0;
