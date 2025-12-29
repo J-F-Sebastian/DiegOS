@@ -32,7 +32,7 @@ static const char x2c_tab[] = "0123456789abcdef";
 
 #define TEMP_SIZE (8 * sizeof(long long) / 3 + 2)
 
-static inline int fputc_internal(int c, int skipeof, FILE * stream, unsigned *bcount)
+static inline int fputc_internal(int c, int skipeof, FILE *stream, unsigned *bcount)
 {
 	if (EOF == fputc(c, stream)) {
 		if (!skipeof) {
@@ -49,7 +49,7 @@ static inline int fputc_internal(int c, int skipeof, FILE * stream, unsigned *bc
  * %[flags][width][.precision][length]specifier
  *    
  */
-int formatted_printf(FILE * stream, const char *fmt, const int skipeof, va_list ap)
+int formatted_printf(FILE *stream, const char *fmt, const int skipeof, va_list ap)
 {
 	int c;
 	int fill;

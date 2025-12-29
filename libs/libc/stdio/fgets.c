@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 
-char *fgets(char *s, int n, FILE * stream)
+char *fgets(char *s, int n, FILE *stream)
 {
 	int ch = EOF;
 	char *ptr;

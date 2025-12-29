@@ -22,7 +22,7 @@
 
 #include "loc_time.h"
 
-struct tm *gmtime(const time_t * timer)
+struct tm *gmtime(const time_t *timer)
 {
 	time_t adj = EPOCH_SECS;
 	struct tm *retval = NULL;

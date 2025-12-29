@@ -67,7 +67,7 @@ static time_t adjust_to_epoch()
  */
 static struct tm retval = { 0 };
 
-struct tm *convtime(const time_t * epoch)
+struct tm *convtime(const time_t *epoch)
 {
 	time_t counter;
 	int myvar;

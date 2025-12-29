@@ -102,7 +102,6 @@ void perror(const char *s)
 		    case EILSEQ(-44)	/* illegal byte sequence */
 		    case EFTYPE(-45)	/* wrong file format or type */
 		    case EOVERFLOW(-46)
-
 		    /* value too large to store in data type */
 		    /* The following errors relate to networking. */
 		    case EPACKSIZE(-50)	/* invalid packet size for some protocol */

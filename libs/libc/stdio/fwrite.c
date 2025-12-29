@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 
-size_t fwrite(const void *ptr, size_t size, size_t count, FILE * stream)
+size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream)
 {
 	const char *dest = ptr;
 	size_t total;

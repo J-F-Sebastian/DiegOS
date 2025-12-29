@@ -21,7 +21,7 @@
 
 #include "loc_incl.h"
 
-int fgetc(FILE * stream)
+int fgetc(FILE *stream)
 {
 	if (!stream) {
 		return (EOF);

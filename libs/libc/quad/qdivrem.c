@@ -71,7 +71,7 @@ static void shl __P((digit * p, int len, int sh));
  * divisor are 4 `digits' in this base (they are shorter if they have
  * leading zeros).
  */
-u_quad_t __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t * arq)
+u_quad_t __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 {
 	union uu tmp;
 	digit *u, *v, *q;
@@ -271,7 +271,7 @@ u_quad_t __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t * arq)
  * `fall out' the left (there never will be any such anyway).
  * We may assume len >= 0.  NOTE THAT THIS WRITES len+1 DIGITS.
  */
-static void shl(digit * p, int len, int sh)
+static void shl(digit *p, int len, int sh)
 {
 	int i;
 

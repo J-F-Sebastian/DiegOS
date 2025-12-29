@@ -20,13 +20,13 @@
 #include <stdlib.h>
 
 static void qsort1(char *, char *, size_t);
-static int (*qcompar) (const char *, const char *);
+static int (*qcompar)(const char *, const char *);
 static void qexchange(char *, char *, size_t);
 static void q3exchange(char *, char *, char *, size_t);
 
-void qsort(void *base, size_t n, size_t size, int (*cmp) (const void *keyval, const void *datum))
+void qsort(void *base, size_t n, size_t size, int (*cmp)(const void *keyval, const void *datum))
 {
-	if (!base || !n || !size || !cmp)
+	if(!base || !n || !size || !cmp)
 		return;
 
 	qcompar = (int (*)(const char *, const char *))cmp;

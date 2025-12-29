@@ -25,7 +25,7 @@
 
 #define	PMODE		0666
 
-FILE *freopen(const char *filename, const char *mode, FILE * stream)
+FILE *freopen(const char *filename, const char *mode, FILE *stream)
 {
 	unsigned i;
 	unsigned flags = stream->flags & (_IONBF | _IOFBF | _IOLBF);

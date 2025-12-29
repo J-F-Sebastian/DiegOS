@@ -21,7 +21,7 @@
 
 #include	"loc_incl.h"
 
-void setlinebuf(FILE * stream)
+void setlinebuf(FILE *stream)
 {
 	(void)setvbuf(stream, NULL, IOBUF_LBUF, BUFSIZ);
 }

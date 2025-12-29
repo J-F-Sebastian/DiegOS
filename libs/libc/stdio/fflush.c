@@ -22,7 +22,7 @@
 
 #include	"loc_incl.h"
 
-int fflush(FILE * stream)
+int fflush(FILE *stream)
 {
 	unsigned i, count;
 	int c1, retval = 0;

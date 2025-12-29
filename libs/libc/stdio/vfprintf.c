@@ -24,7 +24,7 @@
 
 #include "loc_incl.h"
 
-int vfprintf(FILE * stream, const char *format, va_list arg)
+int vfprintf(FILE *stream, const char *format, va_list arg)
 {
 	int retval = 0;
 

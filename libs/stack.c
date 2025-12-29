@@ -21,7 +21,7 @@
 
 #include <libs/stack.h>
 
-STATUS stack_init(queue_inst * queue)
+STATUS stack_init(queue_inst *queue)
 {
 	if (!queue) {
 		return (EINVAL);
@@ -34,7 +34,7 @@ STATUS stack_init(queue_inst * queue)
 	return (EOK);
 }
 
-STATUS stack_push(queue_inst * queue, queue_node * data)
+STATUS stack_push(queue_inst *queue, queue_node *data)
 {
 	if (!queue || !data) {
 		return (EINVAL);
@@ -54,7 +54,7 @@ STATUS stack_push(queue_inst * queue, queue_node * data)
 	return (EOK);
 }
 
-STATUS stack_pop(queue_inst * queue, queue_node ** data)
+STATUS stack_pop(queue_inst *queue, queue_node **data)
 {
 	if (!queue || !data) {
 		return (EINVAL);

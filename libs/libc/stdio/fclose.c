@@ -24,7 +24,7 @@
 #include <errno.h>
 #include "loc_incl.h"
 
-int fclose(FILE * stream)
+int fclose(FILE *stream)
 {
 	unsigned i;
 	int retval = 0;

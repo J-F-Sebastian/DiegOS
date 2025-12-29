@@ -22,7 +22,7 @@
 
 #include "loc_incl.h"
 
-int fseek(FILE * stream, long offset, int origin)
+int fseek(FILE *stream, long offset, int origin)
 {
 	int adjust = 0;
 	long pos;

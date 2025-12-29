@@ -21,7 +21,7 @@
 #include	<stdlib.h>
 #include	"loc_incl.h"
 
-int setvbuf(FILE * stream, char *buf, int mode, size_t size)
+int setvbuf(FILE *stream, char *buf, int mode, size_t size)
 {
 	int retval = 0;
 

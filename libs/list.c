@@ -21,7 +21,7 @@
 
 #include <libs/list.h>
 
-int list_init(list_inst * list)
+int list_init(list_inst *list)
 {
 	if (!list) {
 		return (EINVAL);
@@ -34,7 +34,7 @@ int list_init(list_inst * list)
 	return (EOK);
 }
 
-int list_add(list_inst * list, list_node * prev, list_node * data)
+int list_add(list_inst *list, list_node *prev, list_node *data)
 {
 	if (!list || !data) {
 		return (EINVAL);
@@ -69,7 +69,7 @@ int list_add(list_inst * list, list_node * prev, list_node * data)
 	return (EOK);
 }
 
-int list_remove(list_inst * list, list_node * data)
+int list_remove(list_inst *list, list_node *data)
 {
 	if (!list || !list->counter || !data) {
 		return (EINVAL);
@@ -98,7 +98,7 @@ int list_remove(list_inst * list, list_node * data)
 	return (EOK);
 }
 
-list_node *list_search(list_inst * list, void *param, BOOL(*fn) (list_node *, void *))
+list_node *list_search(list_inst *list, void *param, BOOL(*fn) (list_node *, void *))
 {
 	list_node *cursor;
 

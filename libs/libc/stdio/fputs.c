@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 
-int fputs(const char *s, FILE * stream)
+int fputs(const char *s, FILE *stream)
 {
 	int i = 0;
 

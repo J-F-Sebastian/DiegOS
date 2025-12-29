@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <libs/hash_list.h>
 
-int hash_list_init(hash_list_inst_t * inst, unsigned hash_size)
+int hash_list_init(hash_list_inst_t *inst, unsigned hash_size)
 {
 	void *temp = NULL;
 
@@ -49,7 +49,7 @@ int hash_list_init(hash_list_inst_t * inst, unsigned hash_size)
 	return EOK;
 }
 
-int hash_list_add(hash_list_inst_t * list, void *item, hash_t hash)
+int hash_list_add(hash_list_inst_t *list, void *item, hash_t hash)
 {
 	hash_list_item_t *cursor;
 
@@ -88,7 +88,7 @@ int hash_list_add(hash_list_inst_t * list, void *item, hash_t hash)
 	return EGENERIC;
 }
 
-hash_list_item_t *hash_list_get(hash_list_inst_t * list, hash_t hash)
+hash_list_item_t *hash_list_get(hash_list_inst_t *list, hash_t hash)
 {
 	hash_list_item_t *cursor;
 
@@ -111,7 +111,7 @@ hash_list_item_t *hash_list_get(hash_list_inst_t * list, hash_t hash)
 /*
  * Recursive copy and last item deletion
  */
-static int hash_list_shrink_row(hash_list_item_t * item)
+static int hash_list_shrink_row(hash_list_item_t *item)
 {
 	if (item->next) {
 		item->data = item->next->data;
@@ -126,7 +126,7 @@ static int hash_list_shrink_row(hash_list_item_t * item)
 	}
 }
 
-int hash_list_del(hash_list_inst_t * list, hash_t hash)
+int hash_list_del(hash_list_inst_t *list, hash_t hash)
 {
 	hash_list_item_t *cursor, *prev;
 
@@ -166,7 +166,7 @@ int hash_list_del(hash_list_inst_t * list, hash_t hash)
 /*
  * Recursive deletion
  */
-static void hash_list_clear_row(hash_list_item_t * item)
+static void hash_list_clear_row(hash_list_item_t *item)
 {
 	if (item->next) {
 		hash_list_clear_row(item->next);
@@ -174,7 +174,7 @@ static void hash_list_clear_row(hash_list_item_t * item)
 	free(item);
 }
 
-int hash_list_done(hash_list_inst_t * inst)
+int hash_list_done(hash_list_inst_t *inst)
 {
 	hash_list_item_t *cursor;
 
@@ -197,7 +197,7 @@ int hash_list_done(hash_list_inst_t * inst)
 	return (EOK);
 }
 
-void hash_list_dump(hash_list_inst_t * list)
+void hash_list_dump(hash_list_inst_t *list)
 {
 	unsigned i = 0;
 	hash_list_item_t *item, *row;

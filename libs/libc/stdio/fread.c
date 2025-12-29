@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 
-size_t fread(void *ptr, size_t size, size_t count, FILE * stream)
+size_t fread(void *ptr, size_t size, size_t count, FILE *stream)
 {
 	char *dest = ptr;
 	int c;

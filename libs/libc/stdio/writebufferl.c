@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include "loc_incl.h"
 
-int writebufferl(int c, FILE * stream)
+int writebufferl(int c, FILE *stream)
 {
 	size_t count;
 

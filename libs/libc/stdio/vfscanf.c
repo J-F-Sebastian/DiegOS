@@ -23,7 +23,7 @@
 
 #include "loc_incl.h"
 
-int vfscanf(FILE * stream, const char *format, va_list arg)
+int vfscanf(FILE *stream, const char *format, va_list arg)
 {
 	int retval;
 

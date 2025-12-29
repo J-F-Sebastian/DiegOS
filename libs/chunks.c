@@ -43,7 +43,7 @@ typedef struct pool_array {
 	long *bitmap;
 } pool_array_t;
 
-static STATUS create_pool(chunks_pool_t * ptr, unsigned numitems)
+static STATUS create_pool(chunks_pool_t *ptr, unsigned numitems)
 {
 	unsigned total;
 	pool_array_t *tmp;
@@ -88,7 +88,7 @@ static STATUS create_pool(chunks_pool_t * ptr, unsigned numitems)
 	return (EOK);
 }
 
-static void delete_pool(chunks_pool_t * ptr, pool_array_t * dlt)
+static void delete_pool(chunks_pool_t *ptr, pool_array_t *dlt)
 {
 	/*
 	 * Never remove the main pool!
@@ -148,7 +148,7 @@ chunks_pool_t *chunks_pool_create(const char *name,
 	return (ptr);
 }
 
-void *chunks_pool_malloc(chunks_pool_t * pool)
+void *chunks_pool_malloc(chunks_pool_t *pool)
 {
 	pool_array_t *ptr;
 	unsigned pos;
@@ -191,7 +191,7 @@ void *chunks_pool_malloc(chunks_pool_t * pool)
 	return (ptr->bufstart);
 }
 
-void chunks_pool_free(chunks_pool_t * pool, void *ptr)
+void chunks_pool_free(chunks_pool_t *pool, void *ptr)
 {
 	pool_array_t *cur;
 	uintptr_t val;
@@ -223,7 +223,7 @@ void chunks_pool_free(chunks_pool_t * pool, void *ptr)
 	}
 }
 
-void chunks_pool_done(chunks_pool_t * pool)
+void chunks_pool_done(chunks_pool_t *pool)
 {
 	pool_array_t *cur;
 
@@ -247,7 +247,7 @@ void chunks_pool_done(chunks_pool_t * pool)
 	free(pool);
 }
 
-void chunks_pool_dump(chunks_pool_t * pool)
+void chunks_pool_dump(chunks_pool_t *pool)
 {
 	pool_array_t *cur;
 	unsigned i = 0;

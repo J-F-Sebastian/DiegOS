@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-unsigned long long __udivmodti4 (unsigned long long a, unsigned long long b, unsigned long long *c)
+unsigned long long __udivmodti4(unsigned long long a, unsigned long long b, unsigned long long *c)
 {
 	if (c)
 		*c = a % b;

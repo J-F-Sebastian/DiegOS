@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 
-uint64_t __udivmoddi4 (uint64_t a, uint64_t b, uint64_t *c)
+uint64_t __udivmoddi4(uint64_t a, uint64_t b, uint64_t *c)
 {
 	if (c)
 		*c = a % b;

@@ -21,7 +21,7 @@
 
 #include "loc_incl.h"
 
-int ungetc(int ch, FILE * stream)
+int ungetc(int ch, FILE *stream)
 {
 	char *p;
 

@@ -39,7 +39,7 @@ static char inp_buf[NUMLEN];
  * according to the format of the number. At the end of the function, base
  * is then set to 0, so strtol() will get the right argument.
  */
-static char *o_collect(int c, FILE * stream, char type, unsigned int width, int *basep)
+static char *o_collect(int c, FILE *stream, char type, unsigned int width, int *basep)
 {
 	char *bufp = inp_buf;
 	int base = 10;
@@ -116,7 +116,7 @@ static char *o_collect(int c, FILE * stream, char type, unsigned int width, int 
  * not necessary, although the use of the width field can cause incomplete
  * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
-static char *f_collect(int c, FILE * stream, unsigned int width)
+static char *f_collect(int c, FILE *stream, unsigned int width)
 {
 	char *bufp = inp_buf;
 	int digit_seen = 0;
@@ -184,7 +184,7 @@ static char *f_collect(int c, FILE * stream, unsigned int width)
  * the routine that does the scanning
  */
 
-int formatted_scan(FILE * stream, const char *format, va_list ap)
+int formatted_scan(FILE *stream, const char *format, va_list ap)
 {
 	int done = 0;		/* number of items done */
 	int nrchars = 0;	/* number of characters read */

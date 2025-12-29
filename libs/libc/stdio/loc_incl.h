@@ -89,73 +89,73 @@ struct iobuf {
 
 extern FILE *iostreams[FOPEN_MAX];
 
-inline int stream_r(FILE * stream)
+inline int stream_r(FILE *stream)
 {
 	return ((stream->flags & IOBUF_READ) ? (1) : (0));
 }
 
-inline int stream_w(FILE * stream)
+inline int stream_w(FILE *stream)
 {
 	return ((stream->flags & IOBUF_WRITE) ? (1) : (0));
 }
 
-inline int stream_rw(FILE * stream)
+inline int stream_rw(FILE *stream)
 {
 	return (((stream->flags & (IOBUF_READ | IOBUF_WRITE)) ==
 		 (IOBUF_READ | IOBUF_WRITE)) ? (1) : (0));
 }
 
-inline int stream_dirty(FILE * stream)
+inline int stream_dirty(FILE *stream)
 {
 	return ((stream->flags & (IOBUF_WRITING | IOBUF_READING)) ? (1) : (0));
 }
 
-inline int stream_wrting(FILE * stream)
+inline int stream_wrting(FILE *stream)
 {
 	return ((stream->flags & IOBUF_WRITING) ? (1) : (0));
 }
 
-inline int stream_rding(FILE * stream)
+inline int stream_rding(FILE *stream)
 {
 	return ((stream->flags & IOBUF_READING) ? (1) : (0));
 }
 
-inline int stream_nbuf(FILE * stream)
+inline int stream_nbuf(FILE *stream)
 {
 	return ((stream->flags & IOBUF_NBUF) ? (1) : (0));
 }
 
-inline int stream_lbuf(FILE * stream)
+inline int stream_lbuf(FILE *stream)
 {
 	return ((stream->flags & IOBUF_LBUF) ? (1) : (0));
 }
 
-inline int stream_fbuf(FILE * stream)
+inline int stream_fbuf(FILE *stream)
 {
 	return ((stream->flags & IOBUF_FBUF) ? (1) : (0));
 }
 
-inline int stream_isb(FILE * stream)
+inline int stream_isb(FILE *stream)
 {
 	return ((stream->flags & IOBUF_BIN) ? (1) : (0));
 }
 
-inline int stream_testflags(FILE * stream, unsigned flags)
+inline int stream_testflags(FILE *stream, unsigned flags)
 {
 	return ((stream->flags & flags) ? (1) : (0));
 }
 
-inline void stream_setflags(FILE * stream, unsigned flags)
+inline void stream_setflags(FILE *stream, unsigned flags)
 {
 	stream->flags |= flags;
 }
 
-inline void stream_clearflags(FILE * stream, unsigned flags)
+inline void stream_clearflags(FILE *stream, unsigned flags)
 {
 	stream->flags &= ~flags;
 }
 
-inline void stream_init(FILE * stream, int fd, char *buffer, unsigned bufsize, unsigned flags)
+inline void stream_init(FILE *stream, int fd, char *buffer, unsigned bufsize, unsigned flags)
 {
 	if (stream) {
 		stream->fd = fd;

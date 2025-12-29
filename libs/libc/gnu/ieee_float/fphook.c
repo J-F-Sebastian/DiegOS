@@ -156,7 +156,7 @@ static char *_gcvt(long double value, int ndigit, char *s, int flags)
 	return s;
 }
 
-char *_f_print(va_list * ap, int flags, char *s, char c, int precision)
+char *_f_print(va_list *ap, int flags, char *s, char c, int precision)
 {
 	char *old_s = s;
 	long double ld_val;

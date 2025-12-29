@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "loc_incl.h"
 
-int fputc(int c, FILE * stream)
+int fputc(int c, FILE *stream)
 {
 	/*
 	 * First stage: check stream validity and update flags

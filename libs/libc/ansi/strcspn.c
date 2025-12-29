@@ -31,7 +31,7 @@ size_t strcspn(const char *cs, const char *ct)
 				break;
 			}
 		}
-		return ((size_t) (s1 - cs));
+		return ((size_t)(s1 - cs));
 	} else {
 		return (0);
 	}

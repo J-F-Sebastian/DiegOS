@@ -21,7 +21,7 @@
 
 #include <libs/queue.h>
 
-STATUS queue_init(queue_inst * queue)
+STATUS queue_init(queue_inst *queue)
 {
 	if (!queue) {
 		return (EINVAL);
@@ -34,7 +34,7 @@ STATUS queue_init(queue_inst * queue)
 	return (EOK);
 }
 
-STATUS queue_enqueue(queue_inst * queue, queue_node * data)
+STATUS queue_enqueue(queue_inst *queue, queue_node *data)
 {
 	if (!queue || !data) {
 		return (EINVAL);
@@ -55,7 +55,7 @@ STATUS queue_enqueue(queue_inst * queue, queue_node * data)
 	return (EOK);
 }
 
-STATUS queue_dequeue(queue_inst * queue, queue_node ** data)
+STATUS queue_dequeue(queue_inst *queue, queue_node **data)
 {
 	if (!queue || !data) {
 		return (EINVAL);
@@ -78,7 +78,7 @@ STATUS queue_dequeue(queue_inst * queue, queue_node ** data)
 	return (EOK);
 }
 
-STATUS queue_roll(queue_inst * queue)
+STATUS queue_roll(queue_inst *queue)
 {
 	if (!queue) {
 		return (EINVAL);
@@ -94,7 +94,7 @@ STATUS queue_roll(queue_inst * queue)
 	return (EOK);
 }
 
-STATUS queue_insert(queue_inst * queue, queue_node * data, queue_node * after)
+STATUS queue_insert(queue_inst *queue, queue_node *data, queue_node *after)
 {
 	if (!queue || !data) {
 		return (EINVAL);

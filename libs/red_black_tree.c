@@ -33,21 +33,21 @@ enum {
 /*
  * The following routines are internals, used for tree management
  */
-static inline void color_node_red(rbtree_node_t * node)
+static inline void color_node_red(rbtree_node_t *node)
 {
 	if (node) {
 		node->flags |= NODE_IS_RED;
 	}
 }
 
-static inline void color_node_black(rbtree_node_t * node)
+static inline void color_node_black(rbtree_node_t *node)
 {
 	if (node) {
 		node->flags &= ~NODE_IS_RED;
 	}
 }
 
-static inline BOOL node_is_red(rbtree_node_t * node)
+static inline BOOL node_is_red(rbtree_node_t *node)
 {
 	return ((node && (node->flags & NODE_IS_RED)) ? TRUE : FALSE);
 }
@@ -58,19 +58,19 @@ static inline BOOL node_is_red(rbtree_node_t * node)
  return ((node && !(node->flags & NODE_IS_RED)) ? TRUE : FALSE);
  }
  */
-static inline BOOL node_is_root(rbtree_node_t * node)
+static inline BOOL node_is_root(rbtree_node_t *node)
 {
 	return ((node && (node->flags & NODE_IS_ROOT)) ? TRUE : FALSE);
 }
 
-static inline void set_node_as_root(rbtree_node_t * node)
+static inline void set_node_as_root(rbtree_node_t *node)
 {
 	if (node) {
 		node->flags |= NODE_IS_ROOT;
 	}
 }
 
-static inline void clear_node_as_root(rbtree_node_t * node)
+static inline void clear_node_as_root(rbtree_node_t *node)
 {
 	if (node) {
 		node->flags &= ~NODE_IS_ROOT;
@@ -87,7 +87,7 @@ static inline void clear_node_as_root(rbtree_node_t * node)
 /*
  * common binary tree rotation
  */
-static rbtree_node_t *rotate_right(rbtree_node_t * root)
+static rbtree_node_t *rotate_right(rbtree_node_t *root)
 {
 	rbtree_node_t *save = root->left;
 	root->left = save->right;
@@ -104,7 +104,7 @@ static rbtree_node_t *rotate_right(rbtree_node_t * root)
 /*
  * common binary tree rotation
  */
-static rbtree_node_t *rotate_left(rbtree_node_t * root)
+static rbtree_node_t *rotate_left(rbtree_node_t *root)
 {
 	rbtree_node_t *save = root->right;
 	root->right = save->left;
@@ -118,7 +118,7 @@ static rbtree_node_t *rotate_left(rbtree_node_t * root)
 	return (save);
 }
 
-static inline rbtree_node_t *rotate(rbtree_node_t * root, int dir)
+static inline rbtree_node_t *rotate(rbtree_node_t *root, int dir)
 {
 	return ((DIR_RIGHT == dir) ? rotate_right(root) : rotate_left(root));
 }
@@ -127,7 +127,7 @@ static inline rbtree_node_t *rotate(rbtree_node_t * root, int dir)
  * common binary tree double rotation, just a cascade of two rotations
  * in opposite directions.
  */
-static rbtree_node_t *double_rotate_right(rbtree_node_t * root)
+static rbtree_node_t *double_rotate_right(rbtree_node_t *root)
 {
 	root->left = rotate_left(root->left);
 	return (rotate_right(root));
@@ -137,23 +137,23 @@ static rbtree_node_t *double_rotate_right(rbtree_node_t * root)
  * common binary tree double rotation, just a cascade of two rotations
  * in opposite directions.
  */
-static rbtree_node_t *double_rotate_left(rbtree_node_t * root)
+static rbtree_node_t *double_rotate_left(rbtree_node_t *root)
 {
 	root->right = rotate_right(root->right);
 	return (rotate_left(root));
 }
 
-static inline rbtree_node_t *double_rotate(rbtree_node_t * root, int dir)
+static inline rbtree_node_t *double_rotate(rbtree_node_t *root, int dir)
 {
 	return ((DIR_RIGHT == dir) ? (double_rotate_right(root)) : (double_rotate_left(root)));
 }
 
-static inline rbtree_node_t *get_child(rbtree_node_t * node, int dir)
+static inline rbtree_node_t *get_child(rbtree_node_t *node, int dir)
 {
 	return ((DIR_RIGHT == dir) ? node->right : node->left);
 }
 
-static inline void set_child(rbtree_node_t * node, int dir, rbtree_node_t * target)
+static inline void set_child(rbtree_node_t *node, int dir, rbtree_node_t *target)
 {
 	if (DIR_RIGHT == dir) {
 		node->right = target;
@@ -166,8 +166,8 @@ static inline void set_child(rbtree_node_t * node, int dir, rbtree_node_t * targ
  * returns a tree node.
  * INTERNAL USE ONLY
  */
-static rbtree_node_t *get_from_rbtree_internal(rbtree_node_t * root,
-					       rbtree_node_t * target, rbtreecmpfn cmpfn)
+static rbtree_node_t *get_from_rbtree_internal(rbtree_node_t *root,
+					       rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	int cmpresval;
 	while (root) {
@@ -186,9 +186,8 @@ static rbtree_node_t *get_from_rbtree_internal(rbtree_node_t * root,
 	return (root);
 }
 
-static rbtree_node_t *find_common(rbtree_node_t * root,
-				  rbtree_node_t * target,
-				  rbtreecmpfn cmpfn, rbtree_node_t ** parents)
+static rbtree_node_t *find_common(rbtree_node_t *root,
+				  rbtree_node_t *target, rbtreecmpfn cmpfn, rbtree_node_t **parents)
 {
 	BOOL found = FALSE;
 	int retval;
@@ -219,8 +218,8 @@ static rbtree_node_t *find_common(rbtree_node_t * root,
  * in the tree itself.
  * If a match is found, walk the tree to find the closes lower or higher node in the tree.
  */
-static rbtree_node_t *find_in_rbtree(rbtree_node_t * root,
-				     rbtree_node_t * target, rbtreecmpfn cmpfn, const BOOL lower)
+static rbtree_node_t *find_in_rbtree(rbtree_node_t *root,
+				     rbtree_node_t *target, rbtreecmpfn cmpfn, const BOOL lower)
 {
 	rbtree_node_t *lastp[] = {
 		NULL, NULL
@@ -244,8 +243,8 @@ static rbtree_node_t *find_in_rbtree(rbtree_node_t * root,
  * NULL.
  * If a match is found, walk the tree to find the closes lower or higher node in the tree.
  */
-static rbtree_node_t *find_in_rbtree_exact(rbtree_node_t * root,
-					   rbtree_node_t * target,
+static rbtree_node_t *find_in_rbtree_exact(rbtree_node_t *root,
+					   rbtree_node_t *target,
 					   rbtreecmpfn cmpfn, const BOOL lower)
 {
 	rbtree_node_t *lastp[] = {
@@ -274,8 +273,8 @@ static rbtree_node_t *find_in_rbtree_exact(rbtree_node_t * root,
  * From the twisted minds of Julienne Walker and The EC Team
  * http://eternallyconfuzzled.com
  */
-static rbtree_node_t *insert_recursive(rbtree_node_t * root,
-				       rbtree_node_t * newn, rbtreecmpfn cmpfn, BOOL * dup)
+static rbtree_node_t *insert_recursive(rbtree_node_t *root,
+				       rbtree_node_t *newn, rbtreecmpfn cmpfn, BOOL *dup)
 {
 	int cmpval;
 	int dir;
@@ -325,7 +324,7 @@ static rbtree_node_t *insert_recursive(rbtree_node_t * root,
 /*
  * Global, public functions
  */
-rbtree_node_t *rbtree_insert(rbtree_node_t ** root, rbtree_node_t * node, rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_insert(rbtree_node_t **root, rbtree_node_t *node, rbtreecmpfn cmpfn)
 {
 	BOOL dup = FALSE;
 
@@ -372,7 +371,7 @@ rbtree_node_t *rbtree_insert(rbtree_node_t ** root, rbtree_node_t * node, rbtree
  * From the twisted minds of Julienne Walker and The EC Team
  * http://eternallyconfuzzled.com
  */
-static rbtree_node_t *rbtree_extract_balance(rbtree_node_t * root, int dir, BOOL * done)
+static rbtree_node_t *rbtree_extract_balance(rbtree_node_t *root, int dir, BOOL *done)
 {
 	rbtree_node_t *p = root;
 	rbtree_node_t *s = get_child(root, !dir);
@@ -434,10 +433,9 @@ static rbtree_node_t *rbtree_extract_balance(rbtree_node_t * root, int dir, BOOL
 	return (root);
 }
 
-static rbtree_node_t *rbtree_extract_recursive(rbtree_node_t * root,
-					       rbtree_node_t * target,
-					       rbtreecmpfn cmpfn,
-					       BOOL * done, rbtree_node_t ** retv)
+static rbtree_node_t *rbtree_extract_recursive(rbtree_node_t *root,
+					       rbtree_node_t *target,
+					       rbtreecmpfn cmpfn, BOOL *done, rbtree_node_t **retv)
 {
 	int dir;
 	int res;
@@ -509,7 +507,7 @@ static rbtree_node_t *rbtree_extract_recursive(rbtree_node_t * root,
 	return (root);
 }
 
-rbtree_node_t *rbtree_extract(rbtree_node_t ** root, rbtree_node_t * target, rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_extract(rbtree_node_t **root, rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	BOOL done = FALSE;
 	rbtree_node_t *retval = NULL;
@@ -524,7 +522,7 @@ rbtree_node_t *rbtree_extract(rbtree_node_t ** root, rbtree_node_t * target, rbt
 	return (retval);
 }
 
-rbtree_node_t *rbtree_search(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_search(rbtree_node_t *root, rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	if (!root || !target || !cmpfn) {
 		return (NULL);
@@ -532,7 +530,7 @@ rbtree_node_t *rbtree_search(rbtree_node_t * root, rbtree_node_t * target, rbtre
 	return (get_from_rbtree_internal(root, target, cmpfn));
 }
 
-rbtree_node_t *rbtree_first(rbtree_node_t * root)
+rbtree_node_t *rbtree_first(rbtree_node_t *root)
 {
 	rbtree_node_t *first = root;
 	while (first && first->left) {
@@ -541,7 +539,7 @@ rbtree_node_t *rbtree_first(rbtree_node_t * root)
 	return (first);
 }
 
-rbtree_node_t *rbtree_last(rbtree_node_t * root)
+rbtree_node_t *rbtree_last(rbtree_node_t *root)
 {
 	rbtree_node_t *last = root;
 	while (last && last->right) {
@@ -550,7 +548,7 @@ rbtree_node_t *rbtree_last(rbtree_node_t * root)
 	return (last);
 }
 
-rbtree_node_t *rbtree_previous(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_previous(rbtree_node_t *root, rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	if (!root || !target || !cmpfn) {
 		return (NULL);
@@ -558,7 +556,7 @@ rbtree_node_t *rbtree_previous(rbtree_node_t * root, rbtree_node_t * target, rbt
 	return (find_in_rbtree_exact(root, target, cmpfn, TRUE));
 }
 
-rbtree_node_t *rbtree_next(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_next(rbtree_node_t *root, rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	if (!root || !target || !cmpfn) {
 		return (NULL);
@@ -566,8 +564,7 @@ rbtree_node_t *rbtree_next(rbtree_node_t * root, rbtree_node_t * target, rbtreec
 	return (find_in_rbtree_exact(root, target, cmpfn, FALSE));
 }
 
-rbtree_node_t *rbtree_search_previous(rbtree_node_t * root, rbtree_node_t * target,
-				      rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_search_previous(rbtree_node_t *root, rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	if (!root || !target || !cmpfn) {
 		return (NULL);
@@ -575,7 +572,7 @@ rbtree_node_t *rbtree_search_previous(rbtree_node_t * root, rbtree_node_t * targ
 	return (find_in_rbtree(root, target, cmpfn, TRUE));
 }
 
-rbtree_node_t *rbtree_search_next(rbtree_node_t * root, rbtree_node_t * target, rbtreecmpfn cmpfn)
+rbtree_node_t *rbtree_search_next(rbtree_node_t *root, rbtree_node_t *target, rbtreecmpfn cmpfn)
 {
 	if (!root || !target || !cmpfn) {
 		return (NULL);
@@ -584,7 +581,7 @@ rbtree_node_t *rbtree_search_next(rbtree_node_t * root, rbtree_node_t * target, 
 }
 
 #ifdef DBG_MODULE_ON
-void rbtree_print(rbtree_node_t * root, rbtreeprnfn prnfn)
+void rbtree_print(rbtree_node_t *root, rbtreeprnfn prnfn)
 {
 	if (root) {
 		rbtree_print(root->left, prnfn);
@@ -603,7 +600,7 @@ void rbtree_print(rbtree_node_t * root, rbtreeprnfn prnfn)
 	}
 }
 
-int rbtree_verify(rbtree_node_t * root, rbtreecmpfn cmpfn)
+int rbtree_verify(rbtree_node_t *root, rbtreecmpfn cmpfn)
 {
 	int lh, rh;
 	rbtree_node_t *ln, *rn;
@@ -642,7 +639,7 @@ int rbtree_verify(rbtree_node_t * root, rbtreecmpfn cmpfn)
 }
 
 #endif
-uint32_t rbtree_count(rbtree_node_t * root)
+uint32_t rbtree_count(rbtree_node_t *root)
 {
 	if (root) {
 		return (1 + rbtree_count(root->left) + rbtree_count(root->right));
@@ -650,9 +647,9 @@ uint32_t rbtree_count(rbtree_node_t * root)
 	return (0);
 }
 
-uint32_t rbtree_enumerate_inorder_range(rbtree_node_t * root, rbtree_node_t * low,
-					rbtree_node_t * high, rbtreecmpfn cmpfn,
-					rbtree_node_t ** list)
+uint32_t rbtree_enumerate_inorder_range(rbtree_node_t *root, rbtree_node_t *low,
+					rbtree_node_t *high, rbtreecmpfn cmpfn,
+					rbtree_node_t **list)
 {
 	rbtree_node_t *start, *stop, *cursor;
 	uint32_t counter = 0;
@@ -690,7 +687,7 @@ uint32_t rbtree_enumerate_inorder_range(rbtree_node_t * root, rbtree_node_t * lo
 }
 
 static
-void rbtree_enum_recursive(rbtree_node_t * root, rbtree_node_t ** item, uint32_t * pos)
+void rbtree_enum_recursive(rbtree_node_t *root, rbtree_node_t **item, uint32_t *pos)
 {
 	if (root->left) {
 		rbtree_enum_recursive(root->left, item, pos);
@@ -702,13 +699,13 @@ void rbtree_enum_recursive(rbtree_node_t * root, rbtree_node_t ** item, uint32_t
 	}
 }
 
-void rbtree_enumerate_inorder(rbtree_node_t * root, rbtree_node_t ** list)
+void rbtree_enumerate_inorder(rbtree_node_t *root, rbtree_node_t **list)
 {
 	uint32_t pos = 0;
 	rbtree_enum_recursive(root, list, &pos);
 }
 
-void rbtree_enumerate_layered(rbtree_node_t * root, rbtree_node_t ** list)
+void rbtree_enumerate_layered(rbtree_node_t *root, rbtree_node_t **list)
 {
 	uint32_t r1, r2, c;
 	if (!root || !list) {
@@ -732,7 +729,7 @@ void rbtree_enumerate_layered(rbtree_node_t * root, rbtree_node_t ** list)
 	} while (r2 != c);
 }
 
-static BOOL rbtree_walk_recursive(rbtree_node_t * root, rbtreewlkfn wlkfn, void *param)
+static BOOL rbtree_walk_recursive(rbtree_node_t *root, rbtreewlkfn wlkfn, void *param)
 {
 	BOOL retval;
 	if (!root) {
@@ -750,7 +747,7 @@ static BOOL rbtree_walk_recursive(rbtree_node_t * root, rbtreewlkfn wlkfn, void 
 	return (retval);
 }
 
-void rbtree_walk(rbtree_node_t * root, rbtreewlkfn wlkfn, void *param)
+void rbtree_walk(rbtree_node_t *root, rbtreewlkfn wlkfn, void *param)
 {
 	if (!root || !wlkfn) {
 		return;

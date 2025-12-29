@@ -107,7 +107,7 @@ typedef struct packet_buffer {
 	void *storage_last_chunk;
 } pakman;
 
-static unsigned space_in_packet(pakman * pk)
+static unsigned space_in_packet(pakman *pk)
 {
 	if (pk->pkts_head == pk->pkts_tail)
 		return (pk->packets_number - 1);
@@ -118,12 +118,12 @@ static unsigned space_in_packet(pakman * pk)
 	}
 }
 
-static unsigned space_in_storage(pakman * pk)
+static unsigned space_in_storage(pakman *pk)
 {
 	return (pk->storage_free_chunks);
 }
 
-int init_pakman(unsigned bytes, unsigned packets, pakman ** pakmanptr)
+int init_pakman(unsigned bytes, unsigned packets, pakman **pakmanptr)
 {
 	pakman *pk;
 	unsigned slot_num;
@@ -168,7 +168,7 @@ int init_pakman(unsigned bytes, unsigned packets, pakman ** pakmanptr)
 	return EOK;
 }
 
-int delete_pakman(pakman * pakmanptr)
+int delete_pakman(pakman *pakmanptr)
 {
 	if (!pakmanptr) {
 		return EINVAL;
@@ -181,7 +181,7 @@ int delete_pakman(pakman * pakmanptr)
 	return EOK;
 }
 
-struct packet *pakman_get_packet(pakman * pakmanptr, uint16_t len)
+struct packet *pakman_get_packet(pakman *pakmanptr, uint16_t len)
 {
 	struct packet_int *ptr;
 
@@ -214,7 +214,7 @@ struct packet *pakman_get_packet(pakman * pakmanptr, uint16_t len)
 	return (&ptr->pkt);
 }
 
-int pakman_put_packet(pakman * pakmanptr, struct packet *pkt)
+int pakman_put_packet(pakman *pakmanptr, struct packet *pkt)
 {
 	struct packet_int *ptr;
 

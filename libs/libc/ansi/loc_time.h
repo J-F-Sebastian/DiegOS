@@ -50,4 +50,4 @@ extern const int days_per_month[2][12];
  * RETURNS
  * A pointer to an internal struct tm filled with the converted values.
  */
-struct tm *convtime(const time_t *epoch);
+struct tm *convtime(const time_t * epoch);

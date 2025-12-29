@@ -24,7 +24,7 @@
 
 #include "loc_incl.h"
 
-int readbuffer(FILE * stream)
+int readbuffer(FILE *stream)
 {
 	unsigned i;
 	ssize_t retcode;

@@ -22,7 +22,7 @@
 
 #include "loc_incl.h"
 
-long ftell(FILE * stream)
+long ftell(FILE *stream)
 {
 	long result, adjust = 0;
 
