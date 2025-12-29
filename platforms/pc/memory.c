@@ -54,7 +54,7 @@ void cacheable_memory(void **base, unsigned long *size)
 	 * above 1Mbyte.
 	 */
 	mem = (regs.ax << 10) + (regs.bx << 16);
-	*base = (void *)(1UL * MBYTE + 64UL * KBYTE + (uintptr_t)&_bss_end);
+	*base = (void *)(1UL * MBYTE + 64UL * KBYTE + (uintptr_t) (&_bss_end));
 	*size = mem - IOMEMORY_SIZE - (uintptr_t) (*base);
 }
 

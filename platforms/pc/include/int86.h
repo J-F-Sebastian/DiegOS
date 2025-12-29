@@ -22,12 +22,12 @@
 
 #include <stdint.h>
 
-typedef struct __attribute__ ((packed)) {
+typedef struct __attribute__((packed)) {
 	uint16_t di, si, bp, sp, bx, dx, cx, ax;
 	uint16_t gs, fs, es, ds, eflags;
 } regs16_t;
 
-inline void prot_to_seg_ofs(void *prot, uint16_t * seg, uint16_t * ofs)
+inline void prot_to_seg_ofs(void *prot, uint16_t *seg, uint16_t *ofs)
 {
 	*seg = ((uintptr_t) prot >> 4) & 0xFFFFUL;
 	*ofs = ((uintptr_t) prot & 0xFUL);

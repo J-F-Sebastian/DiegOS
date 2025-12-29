@@ -78,7 +78,7 @@ static unsigned long tickfn(void)
 	/*
 	 * Hardware timer need no update right now
 	 */
-	if (rval > TDELTA*53)
+	if (rval > TDELTA * 53)
 		return ticks;
 
 	/* Start counter value */
