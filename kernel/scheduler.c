@@ -30,6 +30,7 @@
 #include "barriers_private.h"
 #include "io_waits_private.h"
 #include "poll_private.h"
+#include "mutex_private.h"
 
 /*
  * Maximum delay for the system clock tick.
@@ -197,7 +198,15 @@ static void schedule_waiting(void)
 
 		switch (ptr->state) {
 		case THREAD_WAITING:
-			if ((ptr->flags & THREAD_FLAG_WAIT_TIMEOUT) && (ptr->delay <= expiration)) {
+			if (ptr->flags & THREAD_FLAG_TERMINATE) {
+				if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
+					kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
+				} else if (EOK != queue_enqueue(&dead_queue, &temp->header)) {
+					kerrprintf("failed killing PID %d\n", temp->tid);
+				} else {
+					temp->state = THREAD_DEAD;
+				}
+			} else if ((ptr->flags & THREAD_FLAG_WAIT_TIMEOUT) && (ptr->delay <= expiration)) {
 				if (EOK != queue_dequeue(&wait_queue, (queue_node **) &temp)) {
 					kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
 				} else {
@@ -325,7 +334,11 @@ void schedule_thread()
 	}
 
 	/*
-	 * Dead queue management
+	 * Dead queue management.
+	 * Keep it here as the running thread might have called
+	 * thread_terminate in which case it is not possible to
+	 * destroy the thread in its own context, i.e. the running thread
+	 * must change to destroy the previous running thread.
 	 */
 	if (should_do_house_keeping()) {
 		house_keeping();
@@ -523,7 +536,7 @@ BOOL scheduler_remove_thread(uint8_t tid)
 
 	switch (ptr->state) {
 		/*
-		 * RUNNING and WAITING threads are not linked in a ready queue
+		 * RUNNING thread is not linked in a ready queue
 		 */
 	case THREAD_RUNNING:
 		ptr->state = THREAD_DEAD;
@@ -534,12 +547,52 @@ BOOL scheduler_remove_thread(uint8_t tid)
 		break;
 
 	case THREAD_WAITING:
-		ptr->state = THREAD_DEAD;
-		if (EOK != queue_enqueue(&dead_queue, &ptr->header)) {
+		switch (ptr->flags & THREAD_MASK_WAIT) {
+		case THREAD_FLAG_WAIT_EVENT:
+		if (EOK != cancel_wait_for_events(tid)) {
 			kerrprintf("failed killing PID %d\n", tid);
 			return (FALSE);
 		}
 		break;
+
+		case THREAD_FLAG_WAIT_BARRIER:
+		if (EOK != cancel_wait_for_barrier(tid)) {
+			kerrprintf("failed killing PID %d\n", tid);
+			return (FALSE);
+		}
+		break;
+
+		case THREAD_FLAG_WAIT_COMPLETION:
+		if (EOK != cancel_io_waits(tid)) {
+			kerrprintf("failed killing PID %d\n", tid);
+			return (FALSE);
+		}
+		break;
+
+		case THREAD_FLAG_WAIT_TIMEOUT:
+		break;
+
+		case THREAD_FLAG_WAIT_MUTEX:
+		/*
+		 * Threads waiting on mutexes are stored in lists and queues,
+		 * when cancelled are orphaned so we need to put them directly in the dead queue
+		 * as if they were running threads.
+		 */
+		if (EOK != cancel_wait_on_mutex(tid)) {
+			kerrprintf("failed killing PID %d\n", tid);
+			return (FALSE);
+		} else {
+			 ptr->state = THREAD_DEAD;
+			if (EOK != queue_enqueue(&dead_queue, &ptr->header)) {
+				kerrprintf("failed killing PID %d\n", tid);
+				return (FALSE);
+			}
+		}
+		break;
+		}
+
+		ptr->flags &= ~THREAD_MASK_WAIT;
+		/* FALLTHRU */
 		/*
 		 * READY threads are linked in a ready queue, so flag them and remove
 		 * them when executing new_runner()
