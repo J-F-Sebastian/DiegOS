@@ -534,6 +534,11 @@ BOOL scheduler_remove_thread(uint8_t tid)
 		return (FALSE);
 	}
 
+	if (THREAD_TID_TMRS == tid) {
+		kerrprintf("No removal for TIMERS\n");
+		return (FALSE);
+	}
+
 	switch (ptr->state) {
 		/*
 		 * RUNNING thread is not linked in a ready queue
