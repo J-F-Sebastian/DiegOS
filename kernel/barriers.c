@@ -56,7 +56,7 @@ barrier_t *barrier_create(const char *name, BOOL autoclose)
 		return (NULL);
 	}
 
-	if (EOK != list_prepend(&barriers_list, &ptr->header)) {
+	if (EOK != list_append(&barriers_list, &ptr->header)) {
 		free(ptr);
 		return (NULL);
 	}
@@ -98,18 +98,22 @@ int barrier_done(barrier_t * barrier)
 
 int barrier_open(barrier_t * barrier)
 {
+	lock();
 	if (barrier) {
 		barrier->flags |= BARRIER_OPEN;
 	}
+	unlock();
 
 	return ((barrier) ? EOK : EINVAL);
 }
 
 int barrier_close(barrier_t * barrier)
 {
+	lock();
 	if (barrier) {
 		barrier->flags &= ~BARRIER_OPEN;
 	}
+	unlock();
 
 	return ((barrier) ? EOK : EINVAL);
 }
@@ -117,13 +121,18 @@ int barrier_close(barrier_t * barrier)
 int wait_for_barrier(barrier_t * barrier)
 {
 	thread_t *prev, *next;
+	BOOL check;
 
 	if (!barrier) {
 		kerrprintf("Invalid barrier");
 		return EINVAL;
 	}
 
-	if (barrier->flags & BARRIER_OPEN) {
+	lock();
+	check = (barrier->flags & BARRIER_OPEN);
+	unlock();
+
+	if (check) {
 		return EOK;
 	}
 
