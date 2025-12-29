@@ -147,7 +147,7 @@ inline int kernel_time_validate_range(uint32_t value, const struct time_util *tu
 	return EINVAL;
 }
 
-inline uint32_t kernel_time_adjust_range(uint32_t value, const struct time_util * tu)
+inline uint32_t kernel_time_adjust_range(uint32_t value, const struct time_util *tu)
 {
 	if (tu) {
 		if (value < tu->min_counter)

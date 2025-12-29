@@ -54,7 +54,7 @@ typedef struct rbtree_node {
 
 typedef int (*rbtreecmpfn)(const rbtree_node_t *, const rbtree_node_t *);
 typedef void (*rbtreeprnfn)(const rbtree_node_t *);
-typedef BOOL (*rbtreewlkfn)(rbtree_node_t *, void *);
+typedef BOOL(*rbtreewlkfn) (rbtree_node_t *, void *);
 
 /*
  * insert a new node in the tree structure.

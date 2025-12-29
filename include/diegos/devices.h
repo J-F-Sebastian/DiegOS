@@ -174,7 +174,7 @@ device_t *device_create(const void *inst, unsigned unitno);
  *        |  NULL |  NULL |     NULL        |     NULL       |
  *        +-------+-------+-----------------+----------------+
  */
-int device_set_access(device_t *dev, device_write_fn wfn, device_read_fn rfn);
+int device_set_access(device_t * dev, device_write_fn wfn, device_read_fn rfn);
 
 /*
  * device_lookup() retrieves a pointer to a device.
@@ -223,7 +223,7 @@ device_t *device_lookup_name(const char *devname);
  * returned value is the amount of bytes transmitted (it might not match the
  * value passed in with the parameter bytes).
  */
-int device_io_tx(device_t *dev, const char *buf, size_t bytes);
+int device_io_tx(device_t * dev, const char *buf, size_t bytes);
 
 /*
  * Perform reading from devices. If the driver support suspending (blocking)
@@ -245,7 +245,7 @@ int device_io_tx(device_t *dev, const char *buf, size_t bytes);
  * returned value is the amount of bytes read in the buffer (it might not match
  * the value passed in with the parameter bytes).
  */
-int device_io_rx(device_t *dev, char *buf, size_t bytes);
+int device_io_rx(device_t * dev, char *buf, size_t bytes);
 
 /*
  * Perform polling. If the driver support polling the corresponding
@@ -262,7 +262,6 @@ int device_io_rx(device_t *dev, char *buf, size_t bytes);
  * EINVAL if dev or events are NULL
  * EOK in case of success
  */
-int device_poll(device_t *dev, poll_table_t *table, short *events);
-
+int device_poll(device_t * dev, poll_table_t * table, short *events);
 
 #endif

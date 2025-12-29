@@ -42,24 +42,24 @@ typedef struct block_driver {
 	/*
 	 * Write function, the data buffer pointed by buf will be output to the device
 	 */
-	int (*write_fn) (const void *buf, unsigned bytes, uint64_t start_block, unsigned unitno);
+	int (*write_fn)(const void *buf, unsigned bytes, uint64_t start_block, unsigned unitno);
 	/*
 	 * Read function, the data buffer pointed by buf will be written with data
 	 */
-	int (*read_fn) (void *buf, unsigned bytes, uint64_t start_block, unsigned unitno);
+	int (*read_fn)(void *buf, unsigned bytes, uint64_t start_block, unsigned unitno);
 	/*
 	 * Multi Write function, the data buffer list pointed by buf
 	 * will be output to the device
 	 */
-	int (*write_multi_fn) (const void **buf,
-			       const unsigned *bytes, const uint64_t * start_block, unsigned items,
-			       unsigned unitno);
+	int (*write_multi_fn)(const void **buf,
+			      const unsigned *bytes, const uint64_t * start_block, unsigned items,
+			      unsigned unitno);
 	/*
 	 * Multi Read function, the data buffer list pointed by buf
 	 * will be written with data
 	 */
-	int (*read_multi_fn) (void **buf, const unsigned *bytes, const uint64_t * start_block,
-			      unsigned items, unsigned unitno);
+	int (*read_multi_fn)(void **buf, const unsigned *bytes, const uint64_t * start_block,
+			     unsigned items, unsigned unitno);
 
 } block_driver_t;
 

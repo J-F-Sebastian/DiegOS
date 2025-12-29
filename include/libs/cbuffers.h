@@ -133,7 +133,7 @@ inline unsigned cbuffer_in_use(struct cbuffer *cbuf)
 	}
 }
 
-inline BOOL cbuffer_is_empty(struct cbuffer * cbuf)
+inline BOOL cbuffer_is_empty(struct cbuffer *cbuf)
 {
 	return (cbuf->head == cbuf->tail) ? TRUE : FALSE;
 }

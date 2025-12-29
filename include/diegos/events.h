@@ -22,7 +22,7 @@
 
 #include <libs/queue_type.h>
 
-typedef void (*event_freefn) (void *ptr);
+typedef void (*event_freefn)(void *ptr);
 
 typedef struct event {
 	queue_node header;

@@ -51,26 +51,26 @@ void *realloc(void *p, size_t size);
 void free(void *p);
 void abort(void);
 void exit(int status);
-int atexit(void (*_func) (void));
+int atexit(void (*_func)(void));
 div_t div(int _numer, int denom);
 char *getenv(const char *name);
 
 ldiv_t ldiv(long numer, long denom);
 int mblen(const char *s, size_t n);
-size_t mbstowcs(wchar_t * pwcs, const char *s, size_t n);
-int mbtowc(wchar_t * pwc, const char *s, size_t n);
+size_t mbstowcs(wchar_t *pwcs, const char *s, size_t n);
+int mbtowc(wchar_t *pwc, const char *s, size_t n);
 int rand(void);
 void srand(unsigned int seed);
 double strtod(const char *nptr, char **endptr);
 long strtol(const char *nptr, char **endptr, int base);
 int system(const char *string);
-size_t wcstombs(char *s, const wchar_t * pwcs, size_t n);
+size_t wcstombs(char *s, const wchar_t *pwcs, size_t n);
 int wctomb(char *s, wchar_t wchar);
 
 void *bsearch(const void *key,
 	      const void *base,
-	      size_t nmemb, size_t size, int (*compar) (const void *, const void *));
-void qsort(void *base, size_t nmemb, size_t size, int (*compar) (const void *, const void *));
+	      size_t nmemb, size_t size, int (*compar)(const void *, const void *));
+void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 
 unsigned long int strtoul(const char *nptr, char **endptr, int base);
 const char *getprogname(void);

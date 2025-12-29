@@ -41,7 +41,7 @@
  * Callback function, to be used with bitmap_for_each_set,
  * bitmap_for_each_clear, bitmap_if_any_set
  */
-typedef void (*bitmapcb) (long *bitmap, unsigned bitpos, void *);
+typedef void (*bitmapcb)(long *bitmap, unsigned bitpos, void *);
 
 /*
  * For any function, bitpos is 0 BASED

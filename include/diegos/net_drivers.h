@@ -57,26 +57,26 @@ typedef struct net_driver {
 	/*
 	 * Write function, the data buffer pointed by buf will be output to the device
 	 */
-	int (*tx_fn) (const struct packet * buf, unsigned unitno);
+	int (*tx_fn)(const struct packet * buf, unsigned unitno);
 	/*
 	 * Read function, the data buffer pointed by buf will be written with data
 	 */
-	int (*rx_fn) (struct packet * buf, unsigned unitno);
+	int (*rx_fn)(struct packet * buf, unsigned unitno);
 	/*
 	 * Multi Write function, the data buffer list pointed by buf
 	 * will be output to the device
 	 */
-	int (*tx_multi_fn) (const struct packet ** buf, unsigned items, unsigned unitno);
+	int (*tx_multi_fn)(const struct packet ** buf, unsigned items, unsigned unitno);
 	/*
 	 * Multi Read function, the data buffer list pointed by buf
 	 * will be written with data
 	 */
-	int (*rx_multi_fn) (struct packet ** buf, unsigned items, unsigned unitno);
+	int (*rx_multi_fn)(struct packet ** buf, unsigned items, unsigned unitno);
 	/*
 	 * Peak buffer size of the next rx operation; can be used to size
 	 * the receiving buffer
 	 */
-	int (*rx_peak_fn) (unsigned *bsize, unsigned items, unsigned unitno);
+	int (*rx_peak_fn)(unsigned *bsize, unsigned items, unsigned unitno);
 
 } net_driver_t;
 

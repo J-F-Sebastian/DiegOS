@@ -21,7 +21,7 @@
 #define _TIMERS_H_
 
 typedef struct timer timer_t;
-typedef void (*tmr_cb) (void *);
+typedef void (*tmr_cb)(void *);
 
 /*
  * Timers API.

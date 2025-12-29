@@ -65,7 +65,7 @@ void thread_terminate(void);
  */
 BOOL thread_create(const char *name,
 		   diegos_prio_t prio,
-		   void (*entry_ptr) (void), void *stack, unsigned stack_size, uint8_t * tid);
+		   void (*entry_ptr)(void), void *stack, unsigned stack_size, uint8_t * tid);
 
 void thread_kill(uint8_t tid);
 
