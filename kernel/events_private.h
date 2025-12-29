@@ -41,4 +41,6 @@ BOOL init_events_lib(void);
  */
 void resume_on_events(void);
 
+int cancel_wait_for_events(uint8_t tid);
+
 #endif

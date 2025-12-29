@@ -27,6 +27,7 @@
 #include <diegos/events.h>
 #include <diegos/interrupts.h>
 
+#include "threads.h"
 #include "scheduler.h"
 #include "events_private.h"
 #include "platform_include.h"
@@ -119,23 +120,6 @@ int event_watch_queue(ev_queue_t * evqueue)
 	}
 
 	evqueue->threadid = scheduler_running_tid();
-
-	return (EOK);
-}
-
-int event_cancel_watch_queue(ev_queue_t * evqueue, uint8_t tid)
-{
-	if (!evqueue) {
-		return (EINVAL);
-	}
-
-	if (evqueue->threadid != tid) {
-		kerrprintf("TID %d is not watching %s for events.\n",
-			   tid, evqueue->name);
-		return (EINVAL);
-	}
-
-	evqueue->threadid = THREAD_TID_INVALID;
 
 	return (EOK);
 }
@@ -252,6 +236,35 @@ void resume_on_events()
 		}
 		cur = (ev_queue_t *) cur->header.next;
 	}
+}
+
+int cancel_wait_for_events(uint8_t tid)
+{
+	ev_queue_t *evqueue;
+	thread_t *ptr = get_thread(tid);
+
+	if (!ptr) {
+		kerrprintf("No process with TID %d\n", tid);
+		return EINVAL;
+	}
+
+	if (!(ptr->flags & THREAD_FLAG_WAIT_EVENT)) {
+		kerrprintf("Thread TID %d is not waiting on an event\n", tid);
+		return EPERM;
+	}
+
+	evqueue = (ev_queue_t *) list_head(&events_list);
+
+	while (evqueue) {
+		if (evqueue->threadid == tid) {
+			evqueue->threadid = THREAD_TID_INVALID;
+			return (EOK);
+		}
+		evqueue = (ev_queue_t *) evqueue->header.next;
+	}
+
+	kerrprintf("TID %d is not watching any events queue.\n", tid);
+	return (EINVAL);
 }
 
 static void dump_internal(ev_queue_t * evqueue)
