@@ -18,12 +18,16 @@
  */
 
 #include <string.h>
+#include <errno.h>
 #include <diegos/interrupts.h>
 #include <diegos/kernel.h>
 #include <diegos/delays.h>
 
 #include "kprintf.h"
 #include "platform_include.h"
+
+extern STATUS malloc_init(const void *heapstart, const void *heapend);
+extern STATUS iomalloc_init(const void *start, const void *end);
 
 static const char DiegOS_banner[] = "DiegOS operating system release 1.0";
 
@@ -73,9 +77,29 @@ void DiegOS(void)
 	 * hardware running headless.
 	 * In case you run drivers, CALL the methods stop and done before exiting the
 	 * function.
+	 * Remember that libraries are not initialized yet, you cannot use malloc(),
+	 * printf() or any other system call.
 	 */
 	platform_init();
 
+	/*
+	 * Init memory allocators.
+	 * Get heap and I/O memory area from platform code.
+	 */
+	total_memory(&mem_size);
+	cacheable_memory(&heap_start, &heap_size);
+	io_memory(&iomem_start, &iomem_size);
+
+	/*
+	 * Complete memory allocators initialization.
+	 * Cannot print out anything at this stage.
+	 */
+	if (EOK != malloc_init((const void *)heap_start, (const void *)(heap_start + heap_size))) {
+		kernel_done();
+	}
+	if (EOK != iomalloc_init((const void *)iomem_start, (const void *)(iomem_start + iomem_size))) {
+		kernel_done();
+	}
 	/*
 	 * Disable interrupts.
 	 */
@@ -92,9 +116,6 @@ void DiegOS(void)
 
 	kmsgprintf("%s\n\n", DiegOS_banner);
 
-	total_memory(&mem_size);
-	cacheable_memory(&heap_start, &heap_size);
-	io_memory(&iomem_start, &iomem_size);
 #if 0
 	kmsgprintf("        | Text   | Data   | BSS    | Heap   | I/O\n");
 	kmsgprintf("--------+--------+--------+--------+--------+--------\n");

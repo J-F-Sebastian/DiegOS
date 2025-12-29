@@ -128,9 +128,6 @@ static int drivers_list_init(void)
 	return (EOK);
 }
 
-extern STATUS malloc_init(const void *heapstart, const void *heapend);
-extern STATUS iomalloc_init(const void *start, const void *end);
-
 void platform_init()
 {
 	void *heap_base;
@@ -142,9 +139,6 @@ void platform_init()
 	io_memory(&io_base, &io_size);
 	mtrr_configure((uintptr_t) heap_base, heap_size, MTRR_TYPE_WB);
 	mtrr_configure((uintptr_t) io_base, io_size, MTRR_TYPE_UC);
-
-	(void)malloc_init((const void *)heap_base, (const void *)(heap_base + heap_size));
-	(void)iomalloc_init((const void *)io_base, (const void *)(io_base + io_size));
 
 	/*
 	 * Init interrupts, all PIC lines are disabled
