@@ -241,3 +241,31 @@ void resume_on_io_wait()
 	bitmap_for_each_set(thread_ids, BITMAPLEN(DIEGOS_MAX_THREADS), resumecb, NULL);
 	unlock();
 }
+
+int cancel_io_waits(uint8_t tid)
+{
+	struct wait_queue_int *wq_int;
+	struct wait_queue_item *wq_item;
+	list_node *ptr, *temp;
+
+	lock();
+	ptr = list_head(&wait_queues);
+	while (ptr) {
+		wq_int = (struct wait_queue_int *) ptr;
+		temp = list_head(wq_int->wq);
+		while (temp) {
+			wq_item = (struct wait_queue_item *) temp;
+			if (wq_item->tid == tid) {
+				list_remove(wq_int->wq, &wq_item->header);
+				chunks_pool_free(wait_queue_items, wq_item);
+				break;
+			}
+			temp = temp->next;
+		}
+		ptr = ptr->next;
+	}
+	bitmap_clear(thread_ids, tid);
+	unlock();
+
+	return EOK;
+}

@@ -57,4 +57,6 @@ int io_wait_remove(struct wait_queue_item *item, wait_queue_t * wq);
 
 void resume_on_io_wait(void);
 
+int cancel_io_waits(uint8_t tid);
+
 #endif				// IO_WAITS_PRIVATE_H_INCLUDED
