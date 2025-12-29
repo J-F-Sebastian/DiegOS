@@ -77,7 +77,7 @@ struct VBEInfoBlock {
 					   only if Cap bit 3 set */
 	char reserved[216];
 	char OEMscratchpad[256];
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 struct ModeInfoBlock {
 	uint16_t ModeAttributes;
@@ -128,7 +128,7 @@ struct ModeInfoBlock {
 	uint8_t LinRsvdFieldPosition;
 	uint32_t MaxPixelClock;
 	char reserved3[189];
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 struct XGAInfoBlock {
 	char signature[4];
@@ -137,6 +137,6 @@ struct XGAInfoBlock {
 	uint32_t flags;
 	uint16_t adptNum;
 	char reserved[240];
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 #endif

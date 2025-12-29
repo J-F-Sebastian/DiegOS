@@ -601,7 +601,7 @@ static unsigned uart_status(unsigned unitno)
 	return (0);
 }
 
-static short uart_poll(unsigned unitno, poll_table_t * table)
+static short uart_poll(unsigned unitno, poll_table_t *table)
 {
 	short ret = 0;
 

@@ -498,7 +498,7 @@ static void set_palette(unsigned index, palette_t pal)
 	out_byte(VGA_DAC_DATA, b);
 }
 
-static void set_palette_all(const palette_t * pal)
+static void set_palette_all(const palette_t *pal)
 {
 	unsigned index;
 

@@ -73,7 +73,7 @@ static inline void send_command(uint8_t cmd)
 	out_byte(i8042_CMD_PORT, cmd);
 }
 
-static inline void read_command(uint8_t * cmd)
+static inline void read_command(uint8_t *cmd)
 {
 	kbd_r_wait(1000);
 	*cmd = in_byte(i8042_CMD_PORT);
@@ -85,7 +85,7 @@ static inline void send_data(uint8_t data)
 	out_byte(i8042_DATA_PORT, data);
 }
 
-static inline void read_data(uint8_t * data)
+static inline void read_data(uint8_t *data)
 {
 	kbd_r_wait(1000);
 	*data = in_byte(i8042_DATA_PORT);
@@ -260,7 +260,7 @@ static unsigned kbd_status(unsigned unitno)
 	return (0);
 }
 
-static short kbd_poll(unsigned unitno, poll_table_t * table)
+static short kbd_poll(unsigned unitno, poll_table_t *table)
 {
 	short ret = 0;
 
@@ -422,7 +422,7 @@ static unsigned mse_status(unsigned unitno)
 	return (0);
 }
 
-static short mse_poll(unsigned unitno, poll_table_t * table)
+static short mse_poll(unsigned unitno, poll_table_t *table)
 {
 	short ret = 0;
 

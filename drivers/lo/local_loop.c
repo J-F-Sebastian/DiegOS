@@ -132,7 +132,7 @@ static int lo_peak(unsigned *bsize, unsigned items, unsigned unitno)
 	return (EOK);
 }
 
-static short lo_poll(unsigned unitno, poll_table_t * table)
+static short lo_poll(unsigned unitno, poll_table_t *table)
 {
 	short ret = 0;
 
