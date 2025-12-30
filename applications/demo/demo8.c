@@ -36,7 +36,7 @@ static void timer2(void *a)
 
 static void demo_thread_entry(void)
 {
-	unsigned i = 0;
+	//unsigned i = 0;
 
 	timer_t *alm = timer_create("testalm", 123, TRUE, timer1, NULL);
 	timer_t *alm2 = timer_create("testalm2", 253, TRUE, timer2, NULL);
@@ -46,10 +46,12 @@ static void demo_thread_entry(void)
 
 	timers_dump(NULL);
 
-	while (++i < 30) {
-		sleep(1);
-	}
+	//while (++i < 30) {
+	//	sleep(1);
+	//}
+	sleep(30);
 
+	timers_dump(NULL);
 	timer_done(alm);
 	timer_done(alm2);
 	timers_dump(NULL);
