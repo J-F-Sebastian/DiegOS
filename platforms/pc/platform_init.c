@@ -44,6 +44,7 @@
 #include <libs/iomalloc.h>
 #include "../../drivers/i8042/i8042.h"
 #include "../../drivers/LAPIC/lapic.h"
+#include "../../drivers/VESA/vesa.h"
 
 /*
  * Hardcoded values for calibration
@@ -122,6 +123,14 @@ static int drivers_list_init(void)
 		return (ENODEV);
 
 	dev = device_create(&i8042_mouse_drv, 0);
+	if (!dev)
+		return (ENODEV);
+
+	dev = device_create(&lo_drv, 0);
+	if (!dev)
+		return (ENODEV);
+
+	dev = device_create(&vesa_drv, 0);
 	if (!dev)
 		return (ENODEV);
 
