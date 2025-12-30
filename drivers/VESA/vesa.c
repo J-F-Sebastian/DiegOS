@@ -68,18 +68,19 @@ static int vesa_init(unsigned unitno)
 	regs16_t regs;
 	uint16_t *ptr, es, di;
 	unsigned modecount = 0;
+	void *buffer = real_buffer();
 
 	if (unitno) {
 		return ENXIO;
 	}
 
-	strncpy(vesa_info.signature, "VBE2", sizeof(vesa_info.signature));
+	strcpy(buffer, "VBE2");
 	regs.ax = 0x4F00;
 	/*
 	 * GCC will complain about unaligned pointers to packed structures.
 	 * Well I do not get the issue here, but the compiler is always right.
 	 */
-	prot_to_seg_ofs(&vesa_info, &es, &di);
+	prot_to_seg_ofs(buffer, &es, &di);
 	regs.es = es;
 	regs.di = di;
 	int86(0x10, &regs);
@@ -87,6 +88,8 @@ static int vesa_init(unsigned unitno)
 	if (0x004F != regs.ax) {
 		return ENXIO;
 	}
+
+	memcpy(&vesa_info, buffer, sizeof(vesa_info));
 
 	kdrvprintf("VESA Version %d.%d Video memory %u MBytes\n",
 		   vesa_info.version >> 8, vesa_info.version & 0xFF, vesa_info.videomem64k >> 4);
@@ -456,7 +459,7 @@ static void load_all_palette(uint8_t rgb[])
 {
 	regs16_t regs;
 	uint16_t es, di;
-	uint8_t *ptr = (uint8_t *) real_buffer();
+	uint8_t *ptr = (uint8_t *) real_buffer() + sizeof(struct VBEInfoBlock)*2 + sizeof(struct ModeInfoBlock);
 
 	regs.ax = 0x4F09;
 	regs.bx = 0;
@@ -549,26 +552,28 @@ static int set_resolution(unsigned W, unsigned H, unsigned depth, int loose)
 	uint16_t *cursor = vesa_mode_list;
 	uint16_t mode, es, di;
 	regs16_t regs;
+	void *buffer = real_buffer();
 
 	if (depth != 8)
 		return ENXIO;
 
 	while (*cursor != 0xFFFF) {
 		mode = *cursor++ & 0x1FF;
+		/* Request for linear frame buffer support */
 		mode |= (1 << 14);
 		regs.ax = 0x4F01;
-		/* Request for linear frame buffer support */
 		regs.cx = mode;
 		/*
 		 * GCC will complain about unaligned pointers to packed structures.
 		 * Well I do not get the issue here, but the compiler is always right.
 		 */
-		prot_to_seg_ofs(&vesa_gmode, &es, &di);
+		prot_to_seg_ofs(buffer, &es, &di);
 		regs.es = es;
 		regs.di = di;
 		int86(0x10, &regs);
 		if (regs.ax != 0x004F)
 			continue;
+		memcpy(&vesa_gmode, buffer, sizeof(vesa_gmode));
 		if (0x81 != (vesa_gmode.ModeAttributes & 0x81))
 			continue;
 		if (vesa_gmode.BitsPerPixel != depth)
