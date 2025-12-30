@@ -24,8 +24,8 @@
 #include <diegos/kernel.h>
 #include <errno.h>
 #include <unistd.h>
-// DEMO TEST !!!!
-#include "../../drivers/VGA/vga.h"
+
+static grafics_driver_t	*vga_drv = NULL;
 
 unsigned W = 8, H = 16;
 
@@ -43,7 +43,7 @@ void gv_desktop(uint8_t color, const uint8_t *pattern)
 	point_t b = { 639, 479 };
 
 	if (!pattern) {
-		vga_drv.filled_rectangle_fn(a, b, color);
+		vga_drv->filled_rectangle_fn(a, b, color);
 	} else {
 
 	}
@@ -69,7 +69,7 @@ void gv_frame(point_t a, point_t b, const char *title, uint8_t colors[])
 	if (titlelen > 78) {
 		titlelen = 78;
 	}
-	if ((b.x - a.x) < titlelen * 8) {
+	if ((size_t)(b.x - a.x) < titlelen * 8) {
 		titlelen = (b.x - a.x) / 8;
 	}
 
@@ -77,14 +77,14 @@ void gv_frame(point_t a, point_t b, const char *title, uint8_t colors[])
 	buffer[0] = ' ';
 	buffer[titlelen + 1] = ' ';
 	buffer[titlelen + 2] = '\0';
-	vga_drv.write_text_bg_fn(a, colors[1], colors[0], buffer);
+	vga_drv->write_text_bg_fn(a, colors[1], colors[0], buffer);
 	a.y += H;
-	vga_drv.rectangle_fn(a, b, 2, colors[2]);
+	vga_drv->rectangle_fn(a, b, 2, colors[2]);
 	a.x += 2;
 	a.y += 2;
 	b.x -= 2;
 	b.y -= 2;
-	vga_drv.filled_rectangle_fn(a, b, colors[3]);
+	vga_drv->filled_rectangle_fn(a, b, colors[3]);
 }
 
 /*
@@ -119,7 +119,7 @@ void gv_textbox(point_t a, point_t b, const char *text, uint8_t colors[],
 	}
 	a.x += kerning;
 
-	while ((textlen > linemax) && (a.y + linesp < b.y)) {
+	while ((textlen > linemax) && (a.y + (int)linesp < b.y)) {
 		/*
 		 * Set the maximum line length to be copied for this run,
 		 * and break the text at space characters. It should be at
@@ -153,9 +153,9 @@ void gv_textbox(point_t a, point_t b, const char *text, uint8_t colors[],
 		}
 		a.x += kerning;
 		if (backg) {
-			vga_drv.write_text_bg_fn(a, colors[1], colors[0], buffer);
+			vga_drv->write_text_bg_fn(a, colors[1], colors[0], buffer);
 		} else {
-			vga_drv.write_text_fn(a, colors[0], buffer);
+			vga_drv->write_text_fn(a, colors[0], buffer);
 		}
 		text += linelen;
 		textlen -= linelen;
@@ -165,22 +165,24 @@ void gv_textbox(point_t a, point_t b, const char *text, uint8_t colors[],
 		textlen--;
 	}
 
-	if (textlen && (a.y + linesp < b.y)) {
+	if (textlen && (a.y + (int)linesp < b.y)) {
 		if (alignment == 1) {
 			a.x += ((b.x - a.x) - textlen * 8) / 2;
 		} else if (alignment == 2) {
 			a.x += ((b.x - a.x) - textlen * 8) - 1;
 		}
 		if (backg) {
-			vga_drv.write_text_bg_fn(a, colors[1], colors[0], text);
+			vga_drv->write_text_bg_fn(a, colors[1], colors[0], text);
 		} else {
-			vga_drv.write_text_fn(a, colors[0], text);
+			vga_drv->write_text_fn(a, colors[0], text);
 		}
 	}
 }
 
+#if 0
 static const char txt[] = "Testo di prova per spaziatura,"
     "variabile con salto di riga senza uscire dal " "box frame.";
+#endif
 
 static void demo_thread_entry(void)
 {
@@ -190,11 +192,10 @@ static void demo_thread_entry(void)
 	uint8_t colors3[] = { 0, 14, 14, 9 };
 	uint8_t color4[] = { 8, 8 };
 
-	vga_drv.init_fn();
 	W = 8;
 	H = 16;
 
-	vga_drv.set_font_fn(NULL, W, H);
+	vga_drv->set_font_fn(NULL, W, H);
 	gv_desktop(12, NULL);
 #if 0
 	a.x = 10;
@@ -262,6 +263,14 @@ static void demo_thread_entry(void)
 void platform_run(void)
 {
 	uint8_t pid;
+ 	device_t *vga_dev = NULL;
 
+	vga_dev = device_lookup("vesa", 0);
+	if (!vga_dev) {
+		printf("VGA device not found!\n");
+		return;
+	}
+	vga_drv = vga_dev->gdrv;
+	vga_drv->set_res_fn(1024, 768, 8, TRUE);
 	thread_create("VGADemo", THREAD_PRIO_NORMAL, demo_thread_entry, 0, 8192, &pid);
 }
