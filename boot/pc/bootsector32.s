@@ -63,14 +63,8 @@
 ;   |       0x00007E00      |
 ;   |          ....         |
 ;   |          ....         |
-;
-;     ~~~~~~~~~~~~~~~~~~~~~     FREE FOR 32-BIT STACK (DiegOS init ONLY !!!)
-;                               (29184 Bytes)
 ;   |          ....         |
-;   |          ....         |
-;   |          ....         |
-;   |          ....         |
-;   +-----------------------+   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
+;   +-----------------------+
 ;   |       0x00010000      |
 ;   |          ....         |   ISA DMA BUFFER 1
 ;   |          ....         |
@@ -124,8 +118,9 @@
 ;   |          ....         |
 ;   +-----------------------+
 ;   |       0x00100000      |
-;   |                       |   HI 64Kb
-;   +-----------------------+
+;   |          ....         |   HI 64Kb
+;   |          ....         |
+;   +-----------------------+   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
 ;   |       0x00110000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;     ~~~~~~~~~~~~~~~~~~~~~
 ;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS TEXT, DATA, HEAP, FREE MEMORY
@@ -138,7 +133,7 @@
 BYTESPERSEC     EQU 512
 RAM_START       EQU 0x0600
 STACK16_START	EQU 0x7000
-STACK32_START   EQU 0x00010000
+STACK32_START   EQU 0x00110000
 DIEGOS_START    EQU 0x00110000
 DIEGOS_LOAD     EQU 0x00010000
 
