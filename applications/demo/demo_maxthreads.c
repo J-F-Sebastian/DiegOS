@@ -32,72 +32,44 @@ static mutex_t *mutex = NULL;
 
 static void demo_thread_entry(void)
 {
-	//int i;
-	//ev_queue_t *evt = event_init_queue(NULL);
-	//mutex_t *newm = thread_create_mutex(NULL);
-	//barrier_t *bar = barrier_create(NULL,NULL);
-	//alarm_t *alm = alarm_create(NULL, my_thread_id(),10000,TRUE,evt);
 	char *ehehe = malloc(4000);
 
 	memset(ehehe, 96, 4000);
 	ehehe[3999] = 0;
-	unsigned t = 0;
+	uint8_t t = 0;
 
-	while (TRUE) {
-		//thread_lock_mutex(mutex);
-#if 0
-		if (rand() % 16 == my_thread_id()) {
-			printf("My thread is %s and I am waiting\n", my_thread_name());
-			//thread_delay(3000);
-		} else {
-			printf("%s\n", ehehe);
-			//printf("My thread is %s\n",my_thread_name());
-		}
+	while (t < my_thread_id() + 5) {
+		thread_lock_mutex(mutex);
 
-		//i = rand()%5000;
-		//i = 0;
-		//printf("My thread is %s and I am waiting for %dms\n",my_thread_name(),i);
-		//thread_delay(i);
-		if (thread_mutex_is_locked(newm)) {
-			printf("Is locked\n");
+		if (thread_mutex_is_locked(mutex)) {
+			printf("%s is locked\n", my_thread_name());
 		}
-		if (barrier_open(bar)) {
-			//printf("Is open\n");
-		}
-		if (alarm_update(alm, my_thread_id(), TRUE)) {
-		}
-		//i = rand()%5;
-//        i = 1;
-//        printf("My thread is %s and I am waiting for %ds\n",my_thread_name(),i);
-		//sleep(i);
-//        if (my_thread_pid()<21) {
-//            mdelay(i*1000);
-//        } else if (my_thread_pid()<41) {
-//            udelay(i*1000000);
-//        } else {
-//            ndelay(i*1000000);
-//        }
+		//thread_delay(250);
+		//sleep(1);
+		thread_suspend();
 
-		//thread_unlock_mutex(mutex);
+		thread_unlock_mutex(mutex);
+
+		//		thread_suspend();
 		if (my_thread_id() == 19) {
 			threads_dump();
-			thread_delay(3000);
+			//thread_delay(3000);
 			mutexes_dump();
-			thread_delay(3000);
+			//thread_delay(3000);
 			barrier_dump(NULL);
-			thread_delay(3000);
+			//thread_delay(3000);
 			alarm_dump(NULL);
-			thread_delay(3000);
+			//thread_delay(3000);
 			event_dump(NULL);
-			thread_delay(3000);
+			//thread_delay(3000);
 		}
-#endif
-		mdelay(1000);
-		udelay(1000);
-		ndelay(1000);
-		printf("Counting %u\n", t++);
-		//thread_suspend();
+
+		//mdelay(1000);
+		//udelay(1000);
+		//ndelay(1000);
+		printf("Counting %s %u\n", my_thread_name(), t++);
 	}
+	free(ehehe);
 }
 
 void platform_run(void)
@@ -114,6 +86,6 @@ void platform_run(void)
 
 		retcode = thread_create(name, THREAD_PRIO_NORMAL, demo_thread_entry, 0, 4096, &pid);
 		i++;
-		break;
 	} while (retcode);
+	printf("Created %u threads\n", i - 1);
 }
