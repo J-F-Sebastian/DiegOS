@@ -56,15 +56,21 @@
 ;   |       0x00000E50      |
 ;   |          ....         |
 ;   |          ....         |
-;   |          ....         |   Stack for real-mode interrupts
-;   |          ....         |   handling.
+;   |          ....         |   FREE FOR 16-BIT STACK (25008 Bytes)
 ;   |          ....         |
 ;   |          ....         |
 ;   |          ....         |
 ;   +-----------------------+
-;   |       0x0000FDF0      |   16-bit Interrupts handling
-;   |          ....         |   code and data relocated
-;   |          ....         |   to 0xFDF0 (MUST BE less than 512 bytes)
+;   |       0x00007000      |   16-BIT STACK START (GROWS TO LOWER ADDRESSES)
+;   |          ....         |   UNUSED (3072 Bytes)
+;   +-----------------------+
+;   |       0x00007C00      |   BOOT CODE ENTRY point (16-BIT REAL MODE)
+;   |          ....         |   (512 Bytes)
+;   +-----------------------+
+;   |       0x00007E00      |
+;   |          ....         |
+;   |          ....         |
+;   |          ....         |
 ;   +-----------------------+
 ;   |       0x00010000      |
 ;   |          ....         |   ISA DMA BUFFER 1
@@ -82,7 +88,7 @@
 ;   |          ....         |   ISA DMA BUFFER 4
 ;   |          ....         |
 ;   +-----------------------+
-;   |       0x00050000      |   16-bit real-mode interrupts buffer (64KByte)
+;   |       0x00050000      |   16-bit interrupts buffer (64 KBytes)
 ;   |          ....         |
 ;   |          ....         |
 ;   +-----------------------+
@@ -119,8 +125,9 @@
 ;   |          ....         |
 ;   +-----------------------+
 ;   |       0x00100000      |
-;   |                       |   HI 64Kb
-;   +-----------------------+
+;   |          ....         |   HI 64Kb
+;   |          ....         |
+;   +-----------------------+   32-BIT STACK START (GROWS TO LOWER ADDRESSES)
 ;   |       0x00110000      |   DiegOS ENTRY POINT (32-BIT PROTECTED MODE)
 ;     ~~~~~~~~~~~~~~~~~~~~~
 ;     ~~~~~~~~~~~~~~~~~~~~~     DiegOS TEXT, DATA, HEAP, FREE MEMORY
