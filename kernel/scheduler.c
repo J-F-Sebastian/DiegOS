@@ -458,7 +458,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 {
 	thread_t *ptr, *ptr2;
 
-	if (THREAD_TID_IDLE == running->tid) {
+	if ((THREAD_TID_IDLE == running->tid) || (THREAD_TID_TMRS == running->tid)) {
 		return (FALSE);
 	}
 
