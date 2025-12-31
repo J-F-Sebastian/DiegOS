@@ -20,9 +20,12 @@
 #ifndef MUTEX_DATA_H_INCLUDED
 #define MUTEX_DATA_H_INCLUDED
 
+#include <libs/cbuffers.h>
+
 struct mutex {
 	list_node header;
-	queue_inst wait_queue;
+	struct cbuffer thread_ids;
+	uint8_t ids_buffer[DIEGOS_MAX_THREADS];
 	uint8_t locker_tid;
 	char name[16];
 };

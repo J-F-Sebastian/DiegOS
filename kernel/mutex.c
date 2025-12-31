@@ -56,10 +56,8 @@ struct mutex *init_mutex(const char *name)
 	}
 	tmp->locker_tid = THREAD_TID_INVALID;
 
-	if (EOK != queue_init(&(tmp->wait_queue))) {
-		free(tmp);
-		return (NULL);
-	}
+	cbuffer_init(&tmp->thread_ids, DIEGOS_MAX_THREADS);
+	memset(tmp->ids_buffer, THREAD_TID_INVALID, sizeof(tmp->ids_buffer));
 
 	if (EOK != list_prepend(&mutexes_list, &tmp->header)) {
 		free(tmp);
@@ -76,6 +74,10 @@ BOOL done_mutex(struct mutex *mtx)
 	}
 
 	if (THREAD_TID_INVALID != mtx->locker_tid) {
+		return (FALSE);
+	}
+
+	if (!cbuffer_is_empty(&mtx->thread_ids)) {
 		return (FALSE);
 	}
 
@@ -112,12 +114,14 @@ BOOL lock_mutex(uint8_t tid, struct mutex *mtx)
 		return (TRUE);
 	}
 
-	if (EOK != queue_enqueue(&mtx->wait_queue, &ptr->header)) {
-		kprintf("Could not set %d in wait queue\n", tid);
+	if (cbuffer_free_space(&mtx->thread_ids) == 0) {
 		return (FALSE);
-	} else {
-		return (TRUE);
 	}
+
+	mtx->ids_buffer[mtx->thread_ids.tail] = tid;
+	cbuffer_add(&mtx->thread_ids);
+
+	return (TRUE);
 }
 
 BOOL unlock_mutex(uint8_t tid, struct mutex *mtx)
@@ -132,13 +136,21 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx)
 		return (FALSE);
 	}
 
-	if (queue_count(&mtx->wait_queue)) {
-
-		if (EOK != queue_dequeue(&mtx->wait_queue, (queue_node **) & ptr)) {
-			kprintf("could not get waiting thread\n");
-			return (FALSE);
+	if (cbuffer_is_empty(&mtx->thread_ids) == FALSE) {
+		/*
+		 * Clean up cancelled threads
+		 */
+		while (mtx->ids_buffer[mtx->thread_ids.head] == THREAD_TID_INVALID) {
+			cbuffer_remove(&mtx->thread_ids);
+			if (cbuffer_is_empty(&mtx->thread_ids)) {
+				break;
+			}
 		}
+	}
 
+	if (cbuffer_is_empty(&mtx->thread_ids) == FALSE) {
+		ptr = get_thread(mtx->ids_buffer[mtx->thread_ids.head]);
+		cbuffer_remove(&mtx->thread_ids);
 		mtx->locker_tid = ptr->tid;
 	} else {
 		mtx->locker_tid = THREAD_TID_INVALID;
@@ -155,7 +167,6 @@ BOOL mutex_is_locked(struct mutex *mtx)
 
 int cancel_wait_on_mutex(uint8_t tid)
 {
-	thread_t *ptr;
 	unsigned i;
 	struct mutex *curr = list_head(&mutexes_list);
 
@@ -163,24 +174,14 @@ int cancel_wait_on_mutex(uint8_t tid)
 		if (curr->locker_tid == tid) {
 			return (unlock_mutex(tid, curr)) ? (EOK) : (EPERM);
 		}
-
-		i = queue_count(&curr->wait_queue);
-		while (i--) {
-
-			ptr = (thread_t *) queue_head(&curr->wait_queue);
-
-			if (ptr->tid == tid) {
-				if (EOK != queue_dequeue(&curr->wait_queue, (queue_node **) & ptr)) {
-					kprintf("could not remove TID %d from mutex wait queue\n",
-						tid);
-					return (EPERM);
+		else if (!cbuffer_is_empty(&curr->thread_ids)) {
+			for (i = curr->thread_ids.head;
+			     i != curr->thread_ids.tail;
+			     i = (i + 1) % curr->thread_ids.bufsize) {
+				if (curr->ids_buffer[i] == tid) {
+					curr->ids_buffer[i] = THREAD_TID_INVALID;
+					return (EOK);
 				}
-				return (EOK);
-			}
-
-			if (EOK != queue_roll(&curr->wait_queue)) {
-				kerrprintf("failed rolling wait queue\n");
-				return EPERM;
 			}
 		}
 		curr = (struct mutex *)curr->header.next;
