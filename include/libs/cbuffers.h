@@ -40,7 +40,7 @@
  *
  * while (!cbuffer_is_empty(&mybuf)) {
  *    printf("%c",bytes[mybuf.head]);
- *    cbuffer_sub(&mybuf);
+ *    cbuffer_remove(&mybuf);
  * }
  *
  *
