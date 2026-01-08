@@ -29,6 +29,11 @@ int open(const char *filename, int flags, int perms)
 {
 	unsigned fd, flg;
 
+	if (!filename) {
+		errno = EINVAL;
+		return (-1);
+	}
+
 	/*
 	 * Only devices right now!
 	 */
