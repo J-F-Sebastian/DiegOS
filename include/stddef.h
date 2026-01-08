@@ -32,4 +32,6 @@ typedef char wchar_t;		/* type expanded character set */
 #define NULL (void *)0
 #endif				// NULL
 
+#define offsetof(type, ident)   ((size_t) (unsigned long) &((type *)0)->ident)
+
 #endif				/* _STDDEF_H */
