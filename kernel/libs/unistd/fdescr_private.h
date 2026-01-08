@@ -26,8 +26,11 @@
 #define FD_MAX (OPEN_MAX)
 
 enum {
+	/* File is a device */
 	FD_DATA_IS_RAW = (1 << 0),
+	/* File is a regular file */
 	FD_DATA_IS_FILE = (1 << 1),
+	/* File is a socket */
 	FD_DATA_IS_SOCK = (1 << 2),
 	FD_DATA_IS_INUSE = (1 << 3),
 	FD_DATA_IS_R = (1 << 4),
