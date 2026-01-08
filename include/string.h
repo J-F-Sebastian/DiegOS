@@ -31,6 +31,10 @@ char *strcat(char *_s1, const char *_s2);
 char *strchr(const char *_s, int _c);
 int strncmp(const char *_s1, const char *_s2, size_t _n);
 int strcmp(const char *_s1, const char *_s2);
+int strnicmp(const char *_s1, const char *_s2, size_t _n);
+int stricmp(const char *_s1, const char *_s2);
+#define strncasecmp strnicmp
+#define strcasecmp stricmp
 int strcoll(const char *_s1, const char *_s2);
 char *strcpy(char *_s1, const char *_s2);
 size_t strcspn(const char *_s1, const char *_s2);
