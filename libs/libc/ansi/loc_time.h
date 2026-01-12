@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+ #include <time.h>
+
 /* The starting year in struct tm */
 #define	YEAR0		(2000)
 /* The EPOCH is January 1st 2015 00:00:00 AM */
@@ -27,11 +29,14 @@
 #define	SECS_DAY	(24L * SECS_HOUR)
 #define	LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
 #define	YEARSIZE(year)	(LEAPYEAR(year) ? 366 : 365)
+#define ABB_LEN 3
 
 extern long int timezone;
 extern long int dst_off;
 extern int daylight;
 extern char *tzname[2];
+extern const char *time_days[];
+extern const char *time_months[];
 extern const int days_per_month[2][12];
 
 /*

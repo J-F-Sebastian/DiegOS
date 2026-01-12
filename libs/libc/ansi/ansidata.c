@@ -17,11 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include	<ctype.h>
-#include	<time.h>
-#include	<stdlib.h>
-#include	<string.h>
-
 #include	"loc_time.h"
 
 #define	RULE_LEN	120
@@ -30,6 +25,31 @@
 long timezone = 0;
 long dst_off = 60 * 60;
 int daylight = 0;
+
+const char *time_days[] = {
+	"Sunday",
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday"
+};
+
+const char *time_months[] = {
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December"
+};
 
 const int days_per_month[2][12] = {
 	/* non-leap year */
