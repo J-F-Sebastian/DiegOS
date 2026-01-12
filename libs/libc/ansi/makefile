@@ -11,7 +11,8 @@ OBJS = strcpy.o strncpy.o strcat.o strncat.o strcmp.o strncmp.o\
 	islower.o isprint.o ispunct.o isspace.o isupper.o isxdigit.o\
 	errlist.o getenv.o assert.o clock.o asctime.o difftime.o\
 	time.o ctime.o localtime.o mktime.o tzset.o ansidata.o\
-	ext_comp.o progname.o convtime.o gmtime.o
+	ext_comp.o progname.o convtime.o gmtime.o strftime.o\
+	localeconv.o setlocale.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
