@@ -45,7 +45,7 @@ export CXX = g++ -ffreestanding -fno-stack-protector -fno-exceptions -nostdinc -
 export AS = $(CC) -xassembler
 export ASCC = $(CC) -xassembler-with-cpp
 export LN = ld --oformat binary -eDiegOS -static
-export AR = ar cr
+export AR = ar cr --thin
 
 # OBJPREFIX is used to identify the derived objects of the selected CPU+PLATFORM
 # combine. Derived objects are stored in folder named after OBJPREFIX.
