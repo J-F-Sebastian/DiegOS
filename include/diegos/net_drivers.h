@@ -28,6 +28,10 @@ typedef struct net_driver {
 	 */
 	driver_header_t cmn;
 	/*
+	 * Unit number to be used with the driver
+	 */
+	unsigned unitno;
+	/*
 	 * Interface name
 	 */
 	char ifname[DRV_NAME_LEN + 1];

@@ -58,14 +58,14 @@ typedef struct net_interface {
  * the newly created device.
  *
  * PARAMETERS IN
- * net_driver_t *inst - a pointer to a driver interface; the driver must be capable
- *                  of handling the unit number found in the parameter unit.
+ * net_driver_t *inst - a pointer to a driver interface instance.
+ * unsigned unitno    - the unit number to be used with the driver.
  *
  * RETURNS
  * A valid pointer to a new interface object in case of success, NULL in any other
  * case.
  */
-net_interface_t *net_interface_create(net_driver_t * inst);
+net_interface_t *net_interface_create(net_driver_t * inst, unsigned unitno);
 
 /*
  * net_interface_lookup_name() retrieves a pointer to an interface.

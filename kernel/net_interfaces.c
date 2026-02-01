@@ -123,7 +123,7 @@ void start_net_interfaces_lib(void)
  * Public section
  */
 
-net_interface_t *net_interface_create(net_driver_t *inst)
+net_interface_t *net_interface_create(net_driver_t *inst, unsigned unitno)
 {
 	net_interface_t *temp;
 	tree_node_t *node, *node2;
@@ -131,6 +131,12 @@ net_interface_t *net_interface_create(net_driver_t *inst)
 
 	if (!inst) {
 		return (NULL);
+	}
+
+	if (inst->cmn.init_fn) {
+		if (inst->cmn.init_fn(unitno)) {
+			return (NULL);
+		}
 	}
 
 	temp = chunks_pool_zalloc(interfaces_pool);
@@ -151,7 +157,7 @@ net_interface_t *net_interface_create(net_driver_t *inst)
 	}
 
 	node->ni = node2->ni = temp;
-	/*node->ni = temp; */
+	temp->unit = unitno;
 	temp->drv = inst;
 	temp->mtu = temp->drv->mtu;
 	temp->ifindex = ifindex_counter++;
