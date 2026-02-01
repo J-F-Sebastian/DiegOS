@@ -27,6 +27,7 @@
 #include <diegos/delays.h>
 #include <diegos/devices.h>
 #include <diegos/drivers.h>
+#include <diegos/net_interfaces.h>
 
 #include "../../kernel/platform_include.h"
 #include <platform/i8259.h>
@@ -126,17 +127,17 @@ static int drivers_list_init(void)
 	if (!dev)
 		return (ENODEV);
 
-	dev = device_create(&lo_drv, 0);
-	if (!dev)
-		return (ENODEV);
-
 	dev = device_create(&vesa_drv, 0);
 	if (!dev)
 		return (ENODEV);
 
-	dev = device_create(&rtl8139_drv, 0);
-	if (!dev)
+	if (!net_interface_create(&lo_drv, 0)) {
 		return (ENODEV);
+	}
+
+	if (!net_interface_create(&rtl8139_drv, 0)) {
+		return (ENODEV);
+	}
 
 	return (EOK);
 }
