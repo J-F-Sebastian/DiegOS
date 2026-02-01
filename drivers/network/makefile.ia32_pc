@@ -1,0 +1,9 @@
+include $(WSROOT)/build/makefiles/makefile.master
+
+all:
+	cd rtl8139 && make all
+	$(AR) $(OBJPREFIX)_network.a rtl8139/$(OBJPREFIX)/rtl8139.o
+
+clean:
+	cd rtl8139 && make clean
+	rm -rf *.a
