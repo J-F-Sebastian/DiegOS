@@ -31,7 +31,8 @@
 #include "../../kernel/platform_include.h"
 #include <platform/i8259.h>
 #include "../devices/keyboard.h"
-//#include <../ia32/ints_private.h"
+#include <libs/pci_lib.h>
+#include <libs/iomalloc.h>
 #include <processor/ports.h>
 #include <processor/apic.h>
 #include <processor/mtrr.h>
@@ -40,11 +41,10 @@
 #include "../../drivers/i8253/i8253.h"
 #include "../../drivers/i82371SB/82371SB.h"
 #include "../../drivers/lo/local_loop.h"
-#include <libs/pci_lib.h>
-#include <libs/iomalloc.h>
 #include "../../drivers/i8042/i8042.h"
 #include "../../drivers/LAPIC/lapic.h"
 #include "../../drivers/VESA/vesa.h"
+#include "../../drivers/network/rtl8139/rtl8139.h"
 
 /*
  * Hardcoded values for calibration
@@ -131,6 +131,10 @@ static int drivers_list_init(void)
 		return (ENODEV);
 
 	dev = device_create(&vesa_drv, 0);
+	if (!dev)
+		return (ENODEV);
+
+	dev = device_create(&rtl8139_drv, 0);
 	if (!dev)
 		return (ENODEV);
 
