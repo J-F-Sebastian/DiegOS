@@ -133,9 +133,9 @@ net_interface_t *net_interface_create(net_driver_t *inst)
 		return (NULL);
 	}
 
-	temp = chunks_pool_malloc(interfaces_pool);
-	node = chunks_pool_malloc(tree_node_pool);
-	node2 = chunks_pool_malloc(tree_node_pool);
+	temp = chunks_pool_zalloc(interfaces_pool);
+	node = chunks_pool_zalloc(tree_node_pool);
+	node2 = chunks_pool_zalloc(tree_node_pool);
 
 	if (!(temp && node && node2)) {
 		if (temp) {
