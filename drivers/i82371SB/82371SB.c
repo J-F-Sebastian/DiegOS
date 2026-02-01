@@ -63,7 +63,7 @@ static int i82371sb_init(unsigned unitno)
 	return (ENXIO);
 }
 
-int i82371sb_start(unsigned unitno)
+static int i82371sb_start(unsigned unitno)
 {
 	if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
 		return (ENXIO);
@@ -72,7 +72,7 @@ int i82371sb_start(unsigned unitno)
 	return EOK;
 }
 
-int i82371sb_stop(unsigned unitno)
+static int i82371sb_stop(unsigned unitno)
 {
 	if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
 		return (ENXIO);
@@ -81,7 +81,7 @@ int i82371sb_stop(unsigned unitno)
 	return EOK;
 }
 
-int i82371sb_done(unsigned unitno)
+static int i82371sb_done(unsigned unitno)
 {
 	if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
 		return (ENXIO);
