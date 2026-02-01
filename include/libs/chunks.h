@@ -45,6 +45,8 @@ chunks_pool_t *chunks_pool_create(const char *name,
  */
 void *chunks_pool_malloc(chunks_pool_t * pool);
 
+void *chunks_pool_zalloc(chunks_pool_t * pool);
+
 /*
  * Return a chunk to the pool
  */

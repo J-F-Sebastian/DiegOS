@@ -191,6 +191,17 @@ void *chunks_pool_malloc(chunks_pool_t *pool)
 	return (ptr->bufstart);
 }
 
+void *chunks_pool_zalloc(chunks_pool_t *pool)
+{
+	void *ptr;
+
+	ptr = chunks_pool_malloc(pool);
+	if (ptr) {
+		memset(ptr, 0, pool->size);
+	}
+	return (ptr);
+}
+
 void chunks_pool_free(chunks_pool_t *pool, void *ptr)
 {
 	pool_array_t *cur;
