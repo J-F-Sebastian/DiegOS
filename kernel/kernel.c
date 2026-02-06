@@ -40,6 +40,7 @@
 #include "devices_private.h"
 #include "net_interfaces_private.h"
 #include "drivers_private.h"
+#include "network_private.h"
 #include "poll_private.h"
 #include "platform_include.h"
 
@@ -55,6 +56,7 @@ static const char *messages2[] = { "cannot init threads",
 	"cannot init barriers",
 	"cannot init I/O waits",
 	"cannot init poll",
+	"cannot init network buffers",
 	"cannot init drivers",
 	"cannot init devices",
 	"cannot init interfaces"
@@ -74,6 +76,7 @@ static const initlibfn libs_init_array[] = { init_thread_lib,
 	init_barriers_lib,
 	init_io_wait_lib,
 	init_poll_lib,
+	init_network_lib,
 	init_drivers_lib,
 	init_devices_lib,
 	init_net_interfaces_lib
