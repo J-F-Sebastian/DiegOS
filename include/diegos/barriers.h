@@ -41,6 +41,7 @@ typedef struct barrier barrier_t;
 
 /*
  * Create a barrier providing a name (optional).
+ * The barrier is closed upon creation.
  *
  * PARAMETERS IN
  * const char *name - barrier name, can be NULL
@@ -79,7 +80,7 @@ int barrier_done(barrier_t * barrier);
 int barrier_open(barrier_t * barrier);
 
 /*
- * Sets a barrier state to open.
+ * Sets a barrier state to close.
  *
  * PARAMETERS IN
  * barrier_t *barrier - barrier handle
