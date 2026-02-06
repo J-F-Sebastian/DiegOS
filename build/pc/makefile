@@ -32,6 +32,7 @@ ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../kernel/libs/unistd/$(OBJPREFIX)_libunistd.a \
 	../../kernel/libs/iomemory/$(OBJPREFIX)_libiomemory.a \
 	../../kernel/$(OBJPREFIX)_kernel.a \
+	../../network/$(OBJPREFIX)_network.a \
 	../../platforms/$(PLATFORM)/$(PLATFORM).a \
 	../../platforms/$(CPU)/$(CPU).a \
 	../../drivers/$(OBJPREFIX)_drivers.a \
@@ -44,6 +45,7 @@ all: mbr.bin bootsect.bin
 	cd ../../platforms/$(CPU) && $(MAKE) all
 	cd ../../platforms/$(PLATFORM) && $(MAKE) all
 	cd ../../kernel && $(MAKE) all
+	cd ../../network && $(MAKE) all
 	cd ../../libs && $(MAKE) all
 	cd ../../drivers && $(MAKE) -f makefile.$(OBJPREFIX) all
 	cd ../../devices && $(MAKE) -f makefile.$(OBJPREFIX) all
@@ -60,6 +62,7 @@ clean: prepclean
 	cd ../../platforms/$(CPU) && $(MAKE) clean
 	cd ../../platforms/$(PLATFORM) && $(MAKE) clean
 	cd ../../kernel && $(MAKE) clean
+	cd ../../network && $(MAKE) clean
 	cd ../../libs && $(MAKE) clean
 	cd ../../drivers && $(MAKE) -f makefile.$(OBJPREFIX) clean
 	cd ../../devices && $(MAKE) -f makefile.$(OBJPREFIX) clean
