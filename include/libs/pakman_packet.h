@@ -20,6 +20,8 @@
 #ifndef _PAKMAN_PACKET_H_
 #define _PAKMAN_PACKET_H_
 
+#include <stdint.h>
+
 /*
  * a packet is composed as follows
  *
