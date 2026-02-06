@@ -46,7 +46,9 @@ enum {
 	DRV_IS_BLOCK = (1 << 17),
 	DRV_IS_NET = (1 << 18),
 	DRV_IS_TXT_UI = (1 << 19),
-	DRV_IS_GFX_UI = (1 << 20)
+	DRV_IS_GFX_UI = (1 << 20),
+	DRV_ST_MASK = 0x0000FFFF,
+	DRV_IS_MASK = 0xFFFF0000
 };
 
 typedef struct driver_header {
