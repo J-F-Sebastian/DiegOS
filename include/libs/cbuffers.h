@@ -43,13 +43,26 @@
  *    cbuffer_remove(&mybuf);
  * }
  *
+ *     +-----------------+
+ *     |                 |
+ *     +-----------------+
+ *     |        O - - - -|- - - > HEAD    removing items moves HEAD to TAIL
+ *     +-----------------+
+ *     |                 |         |
+ *     +-----------------+         |
+ *     |                 |         V
+ *     +-----------------+
+ *     |        O - - - -|- - - > TAIL    adding items move TAIL to the back of HEAD
+ *     +-----------------+
+ *     |                 |
+ *     +-----------------+
+ *     |                 |
+ *     +-----------------+
+ *     |                 |
+ *     +-----------------+
+ *     |                 |
+ *     +-----------------+
  *
- *  While reading INTO THE BUFFER
- * head ------- tail ---> ...
- *
- * While writing FROM THE BUFFER
- *
- *  ... head ---> tail
  */
 
 struct cbuffer {
@@ -115,6 +128,9 @@ inline void cbuffer_remove_n(struct cbuffer *cbuf, unsigned n)
 		cbuf->head -= cbuf->bufsize;
 }
 
+/*
+ * Cannot be less than 1
+ */
 inline unsigned cbuffer_free_space(struct cbuffer *cbuf)
 {
 	if (cbuf->head <= cbuf->tail) {
@@ -124,6 +140,9 @@ inline unsigned cbuffer_free_space(struct cbuffer *cbuf)
 	}
 }
 
+/*
+ * Cannot be more than cbuf->bufsize - 1
+ */
 inline unsigned cbuffer_in_use(struct cbuffer *cbuf)
 {
 	if (cbuf->head <= cbuf->tail) {
@@ -133,6 +152,10 @@ inline unsigned cbuffer_in_use(struct cbuffer *cbuf)
 	}
 }
 
+
+/*
+ * The buffer is empty when head and tail are equal
+ */
 inline BOOL cbuffer_is_empty(struct cbuffer *cbuf)
 {
 	return (cbuf->head == cbuf->tail) ? TRUE : FALSE;
