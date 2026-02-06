@@ -134,7 +134,8 @@ inline void cbuffer_remove_n(struct cbuffer *cbuf, unsigned n)
 inline unsigned cbuffer_free_space(struct cbuffer *cbuf)
 {
 	if (cbuf->head <= cbuf->tail) {
-		return (cbuf->head + cbuf->bufsize - cbuf->tail - 1);
+		/*return (cbuf->bufsize - (cbuf->tail - cbuf->head) - 1);*/
+		return (cbuf->bufsize - cbuf->tail + cbuf->head - 1);
 	} else {
 		return (cbuf->head - cbuf->tail - 1);
 	}
@@ -152,6 +153,13 @@ inline unsigned cbuffer_in_use(struct cbuffer *cbuf)
 	}
 }
 
+/*
+ * the buffer is full when tail + 1 equals head (wrapped)
+ */
+inline BOOL cbuffer_is_full(struct cbuffer *cbuf)
+{
+	return (cbuffer_free_space(cbuf) == 1) ? TRUE : FALSE;
+}
 
 /*
  * The buffer is empty when head and tail are equal
