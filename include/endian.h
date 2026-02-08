@@ -34,6 +34,8 @@
 #ifndef _SYS_ENDIAN_H_
 #define _SYS_ENDIAN_H_
 
+#include <stdint.h>
+
 /*
  * Definitions for byte order, according to byte significance from low
  * address to high.
@@ -48,19 +50,20 @@
 #if _BYTE_ORDER == _LITTLE_ENDIAN
 #define _QUAD_HIGHWORD 1
 #define _QUAD_LOWWORD 0
-#endif
-
-#if _BYTE_ORDER == _BIG_ENDIAN
+#elif _BYTE_ORDER == _BIG_ENDIAN
 #define _QUAD_HIGHWORD 0
 #define _QUAD_LOWWORD 1
+#else
+#error "select endianness !!!"
 #endif
 
-#define	swapl(x)	((x << 24) & \
-                    ((x << 8) & 0x00FF0000U) & \
-                    ((x >> 8) & 0x0000FF00U) & \
-                    (x >> 24))
+inline uint32_t swapl(uint32_t x) {
+	return ((x << 24) | ((x << 8) & 0x00FF0000U) | ((x >> 8) & 0x0000FF00U) | ((x >> 24) & 0x000000FFU));
+}
 
-#define	swaps(x)	((x << 8) & (x >> 8))
+inline uint16_t swaps(uint16_t x) {
+	return ((x << 8) | (x >> 8));
+}
 
 #define SWAPL(x)    (x=swapl(x))
 
