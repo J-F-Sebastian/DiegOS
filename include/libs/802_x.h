@@ -43,6 +43,8 @@
 #define ETHERTYPE_PPPoE_S	0x8864
 #define ETHERTYPE_SVLAN		0x88A8
 
+#pragma pack(push, 1)
+
 /*
  * Ethernet encoded 802.3 MAC address.
  * the union is reliable for size computation.
@@ -54,9 +56,6 @@ typedef union ieee_addr {
 
 /*
  * Ethernet encoded 802.3 MAC header.
- * The structure is NOT reliable for size computation
- * due to possible padding bytes by the compiler.
- * The structure is not packed.
  */
 struct ieee_802_3_hdr {
 	ieee_addr_u src;
@@ -66,9 +65,6 @@ struct ieee_802_3_hdr {
 
 /*
  * Ethernet encoded 802.1Q MAC header.
- * The structure is NOT reliable for size computation
- * due to possible padding bytes by the compiler.
- * The structure is not packed.
  */
 struct ieee_802_3q_hdr {
 	ieee_addr_u src;
@@ -79,6 +75,26 @@ struct ieee_802_3q_hdr {
 	uint16_t tci;
 	uint16_t type;
 };
+
+/*
+ * Ethernet encoded 802.1ad MAC header.
+ * This is the "Double Tag" or "Q-in-Q" frame.
+ */
+struct ieee_802_1ad_hdr {
+	ieee_addr_u src;
+	ieee_addr_u dst;
+	/* Tag Protocol Identifier */
+	uint16_t tpid_svlan;
+	/* Tag Control Information */
+	uint16_t tci_svlan;
+	/* Tag Protocol Identifier */
+	uint16_t tpid_cvlan;
+	/* Tag Control Information */
+	uint16_t tci_cvlan;
+	uint16_t type;
+};
+
+#pragma pack(pop)
 
 inline void copy_ieee_addr(const ieee_addr_u *src, ieee_addr_u *dst)
 {
