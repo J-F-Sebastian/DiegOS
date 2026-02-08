@@ -22,7 +22,9 @@
 #include <diegos/barriers.h>
 #include <libs/cbuffers.h>
 #include <libs/pakman.h>
+#include <libs/802_x.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -176,6 +178,41 @@ void netbuf_wait()
 	if (EOK != wait_for_barrier(netb))
 		fprintf(stderr, "%s failed wait_for_barrier\n", __FUNCTION__);
 
-	if (barrier_close(netb))
+	if (EOK != barrier_close(netb))
 		fprintf(stderr, "%s failed barrier_close\n", __FUNCTION__);
+}
+
+int netbuf_copy_eth(const void *src, struct packet *pkt, unsigned bytes)
+{
+	struct ieee_802_1ad_hdr *ptrqinq;
+	struct ieee_802_3q_hdr *ptrvlan;
+	struct ieee_802_3_hdr *ptr;
+
+	if (!src || !pkt || !bytes)
+		return (EINVAL);
+
+	memcpy(pkt->data, src, bytes);
+
+	ptrqinq = (struct ieee_802_1ad_hdr *)pkt->data;
+	ptrvlan = (struct ieee_802_3q_hdr *)pkt->data;
+	ptr = (struct ieee_802_3_hdr *)pkt->data;
+
+	pkt->data_payload_start = pkt->data;
+
+	// fprintf(stderr, "%#4.4X.%#4.4X.%#4.4X\n", ntohs(ptrqinq->dst.macw[0]), ntohs(ptrqinq->dst.macw[1]), ntohs(ptrqinq->dst.macw[2]));
+	// fprintf(stderr, "%#4.4X.%#4.4X.%#4.4X\n", ntohs(ptrqinq->src.macw[0]), ntohs(ptrqinq->src.macw[1]), ntohs(ptrqinq->src.macw[2]));
+	// fprintf(stderr, "%#4.4X\n", ntohs(ptrqinq->tpid_svlan));
+	if (htons(ETHERTYPE_SVLAN) == ptrqinq->tpid_svlan) {
+		pkt->data_payload_cursor = (void *)(ptrqinq + 1);
+	}
+	else if (htons(ETHERTYPE_8021Q) == ptrvlan->tpid) {
+		pkt->data_payload_cursor = (void *)(ptrvlan + 1);
+	}
+	else {
+		pkt->data_payload_cursor = (void *)(ptr + 1);
+	}
+
+	pkt->data_payload_size = bytes;
+
+	return (EOK);
 }

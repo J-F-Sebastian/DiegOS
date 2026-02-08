@@ -178,6 +178,29 @@ int netbuf_process_in(struct packet **pkt);
  */
 int netbuf_process_out(struct packet **pkt, net_interface_t **intf);
 
+/*
+ * Wait for processing.
+ * The function will suspend any calling thread until a driver or an application
+ * add a packet to IN or OUT queues by means of netbuf_in() or netbuf_out().
+ * The function will not suspend if IN or OUT queues have packets available for
+ * processing.
+ */
+
 void netbuf_wait(void);
+
+/*
+ * Copy data from an ethernet frame stored in a buffer to a packet structure.
+ * Pointers in packet structure are updated accordingly to the type of packet.
+ *
+ * PARAMETERS IN
+ * const void *src - the source buffer carrying the ethernet frame
+ * struct packet *pkt - the packet structure to be updated
+ * unsigned bytes - the amount of data in the source buffer
+ *
+ * RETURNS
+ * EOK success
+ * EINVAL src or pkt or bytes are null
+ */
+int netbuf_copy_eth(const void *src, struct packet *pkt, unsigned bytes);
 
 #endif
