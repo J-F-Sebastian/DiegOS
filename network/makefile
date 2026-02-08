@@ -1,6 +1,6 @@
 include $(WSROOT)/build/makefiles/makefile.master
 
-OBJS = net_buffers.o
+OBJS = net_buffers.o net_stats.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
 
