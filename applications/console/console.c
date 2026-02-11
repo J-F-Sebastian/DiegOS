@@ -45,7 +45,7 @@ static void console_logout(void);
 static void print_time(void);
 
 BEGIN_ALT_COMMAND(show)
-    ALT_COMMAND(interfaces, "network interfaces")
+    ALT_COMMAND_FUNC0(interfaces, "network interfaces", netif_dump)
     ALT_COMMAND_FUNC0(threads, "system threads", threads_dump)
     ALT_COMMAND_FUNC0(scheduler, "scheduler", sched_dump)
     ALT_COMMAND_FUNC0(mutexes, "system mutexes", mutexes_dump)
