@@ -26,6 +26,7 @@ STATICLIST=../../kernel/$(OBJPREFIX)_diegos.a
 
 ARLIST=../../applications/console/$(OBJPREFIX)_app.a \
 	../../applications/demo/$(OBJPREFIX)_app.a \
+	../../applications/network/$(OBJPREFIX)_app.a \
 	../../kernel/libs/$(OBJPREFIX)_libkernel.a \
 	../../kernel/libs/time/$(OBJPREFIX)_libkerneltime.a \
 	../../kernel/libs/pci/$(OBJPREFIX)_libpci.a \
@@ -52,6 +53,7 @@ all: mbr.bin bootsect.bin
 	cd ../../fat && $(MAKE) all
 	cd ../../applications/console && $(MAKE) all
 	cd ../../applications/demo && $(MAKE) all
+	cd ../../applications/network && $(MAKE) all
 	$(LD) --gc-sections -static -m elf_i386 -T diegos.ld -nostdlib -o DiegOS.elf $(STATICLIST) --start-group $(ARLIST) --end-group
 	objcopy -S DiegOS.elf DiegOS.stripped.elf
 	objcopy -O binary DiegOS.stripped.elf DiegOS.bin
@@ -69,6 +71,7 @@ clean: prepclean
 	cd ../../fat && $(MAKE) clean
 	cd ../../applications/console && $(MAKE) clean
 	cd ../../applications/demo && $(MAKE) clean
+	cd ../../applications/network && $(MAKE) clean
 	rm -f *.o *.bin *.img *.elf
 
 mbr.bin:
