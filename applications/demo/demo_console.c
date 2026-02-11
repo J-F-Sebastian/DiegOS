@@ -20,8 +20,10 @@
 #include <diegos/kernel.h>
 
 #include "../console/console.h"
+#include "../network/network_core.h"
 
 void platform_run(void)
 {
+	network_run();
 	console_run();
 }
