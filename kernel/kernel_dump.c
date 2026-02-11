@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <diegos/kernel_dump.h>
 #include <diegos/barriers.h>
+#include <diegos/net_interfaces.h>
 
 #include "threads.h"
 #include "scheduler.h"
@@ -33,7 +34,7 @@ void threads_dump()
 	uint32_t i;
 	thread_t *ptr;
 
-	printf("\n--- THREADS TABLE ----------------------------\n\n");
+	printf("\n--- THREADS TABLE ----------------------------------------------\n\n");
 	printf("%-15s   %3s   %6s   %s\n", "THREAD NAME", "TID", "STACK", "STATE");
 	printf("______________________________________________\n");
 	for (i = 0; i < DIEGOS_MAX_THREADS; i++) {
@@ -43,7 +44,7 @@ void threads_dump()
 			       ptr->name, ptr->tid, ptr->stack_size, state2str(ptr->state));
 		}
 	}
-	printf("----------------------------------------------\n\n");
+	printf("-----------------------------------------------------------------\n\n");
 }
 
 void mutexes_dump()
@@ -92,4 +93,19 @@ void diegos_dump()
 void sched_dump()
 {
 	scheduler_dump();
+}
+
+void netif_dump()
+{
+	net_interface_t *itf = net_interface_first();
+
+        printf("\n--- NETWORK INTERFACES TABLE ------------------------------------\n");
+        while (itf) {
+		printf("_________________________________________________________________\n");
+                printf("\n%6s: Type: %#4.4X, Flags: %#X, IfIndex: %d\n", itf->name, itf->type, itf->flags, itf->ifindex);
+		printf("        Operational State: %d, Link mode: %d\n", itf->operstate, itf->link_mode);
+		printf("        MTU: %d\n", itf->mtu);
+		itf = net_interface_next(itf);
+        }
+	printf("\n-----------------------------------------------------------------\n");
 }

@@ -32,4 +32,6 @@ void diegos_dump(void);
 
 void sched_dump(void);
 
+void netif_dump(void);
+
 #endif
