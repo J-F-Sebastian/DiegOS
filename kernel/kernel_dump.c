@@ -22,6 +22,7 @@
 #include <diegos/barriers.h>
 
 #include "threads.h"
+#include "scheduler.h"
 #include "mutex_private.h"
 #include "platform_include.h"
 
@@ -86,4 +87,9 @@ void diegos_dump()
 	printf("Total RAM Size .....: %d MBytes\n", mem_size / MBYTE);
 	printf("Heap Memory Size ...: %d KBytes\n", heap_size / KBYTE);
 	printf("I/O Memory Size ....: %d KBytes\n", iomem_size / KBYTE);
+}
+
+void sched_dump()
+{
+	scheduler_dump();
 }

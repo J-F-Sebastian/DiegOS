@@ -30,4 +30,6 @@ void threads_check(void);
 
 void diegos_dump(void);
 
+void sched_dump(void);
+
 #endif
