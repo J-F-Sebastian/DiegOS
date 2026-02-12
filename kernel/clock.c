@@ -87,6 +87,7 @@ static void clock_int_handler(void)
 BOOL clock_init(void)
 {
 	uint32_t params[3] = { 0, 0, 0 };
+	uint32_t comp;
 	unsigned i;
 
 	for (i = 0; i < NELEMENTS(callbacks); i++) {
@@ -114,7 +115,11 @@ BOOL clock_init(void)
 	if (EOK != clock->cmn->ioctrl_fn(&mode, CLK_SET_MODE, 0))
 		return (FALSE);
 
-	period = kernel_time_get_value(1000 / DEFAULT_CLOCK_RES, &sys_ticks);
+	comp = 1000 / DEFAULT_CLOCK_RES;
+	if ((1000 % DEFAULT_CLOCK_RES) >= (DEFAULT_CLOCK_RES / 2))
+		comp += 1;
+
+	period = kernel_time_get_value(comp, &sys_ticks);
 
 	if (EOK != clock->cmn->ioctrl_fn(&period, CLK_SET_PERIOD, 0))
 		return (FALSE);
@@ -253,7 +258,7 @@ uint64_t clock_get_milliseconds(void)
 
 void clock_set_boot_seconds(unsigned seconds)
 {
-	boot_ticks = (uint64_t) seconds *DEFAULT_CLOCK_RES;
+	boot_ticks = (uint64_t) seconds * DEFAULT_CLOCK_RES;
 }
 
 unsigned clock_get_boot_seconds(void)
