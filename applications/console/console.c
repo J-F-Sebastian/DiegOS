@@ -47,6 +47,7 @@ static void print_time(void);
 BEGIN_ALT_COMMAND(show)
     ALT_COMMAND(interfaces, "network interfaces")
     ALT_COMMAND_FUNC0(threads, "system threads", threads_dump)
+    ALT_COMMAND_FUNC0(scheduler, "scheduler", sched_dump)
     ALT_COMMAND_FUNC0(mutexes, "system mutexes", mutexes_dump)
     ALT_COMMAND_FUNC0(barriers, "system barriers", barriers_dump)
     ALT_COMMAND_FUNC0(system, "DiegOS memory layout", diegos_dump)
