@@ -24,20 +24,16 @@ char *strnstr(const char *cs, const char *ct, size_t len)
 {
 	const size_t len2 = strlen(ct);
 
-	if (!len2 || !cs)
-	{
+	if (!len2 || !cs) {
 		return ((char *)cs);
 	}
 
-	if (len2 < len)
-	{
+	if (len2 < len) {
 		len = len2;
 	}
 
-	while ((*cs != *ct) || (strncmp(cs, ct, len)))
-	{
-		if (*cs++ == '\0')
-		{
+	while ((*cs != *ct) || (strncmp(cs, ct, len))) {
+		if (*cs++ == '\0') {
 			return ((char *)NULL);
 		}
 	}

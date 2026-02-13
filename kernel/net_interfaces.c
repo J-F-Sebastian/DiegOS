@@ -84,10 +84,7 @@ static int cmpfnif(const rbtree_node_t *a, const rbtree_node_t *b)
 BOOL init_net_interfaces_lib()
 {
 	tree_node_pool = chunks_pool_create("Intf tree",
-					    CACHE_ALN,
-					    sizeof(tree_node_t),
-					    2 * 8,
-					    2 * 8);
+					    CACHE_ALN, sizeof(tree_node_t), 2 * 8, 2 * 8);
 
 	if (!tree_node_pool) {
 		return (FALSE);

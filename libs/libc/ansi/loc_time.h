@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- #include <time.h>
+#include <time.h>
 
 /* The starting year in struct tm */
 #define	YEAR0		(2000)

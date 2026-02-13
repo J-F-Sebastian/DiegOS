@@ -49,8 +49,7 @@
  * Ethernet encoded 802.3 MAC address.
  * the union is reliable for size computation.
  */
-typedef union ieee_addr
-{
+typedef union ieee_addr {
 	uint8_t mac[MAC_ADDR_SIZE];
 	uint16_t macw[MAC_ADDR_SIZE / 2];
 } ieee_addr_u;
@@ -58,8 +57,7 @@ typedef union ieee_addr
 /*
  * Ethernet encoded 802.3 MAC header.
  */
-struct ieee_802_3_hdr
-{
+struct ieee_802_3_hdr {
 	ieee_addr_u src;
 	ieee_addr_u dst;
 	uint16_t type;
@@ -68,8 +66,7 @@ struct ieee_802_3_hdr
 /*
  * Ethernet encoded 802.1Q MAC header.
  */
-struct ieee_802_3q_hdr
-{
+struct ieee_802_3q_hdr {
 	ieee_addr_u src;
 	ieee_addr_u dst;
 	/* Tag Protocol Identifier */
@@ -83,8 +80,7 @@ struct ieee_802_3q_hdr
  * Ethernet encoded 802.1ad MAC header.
  * This is the "Double Tag" or "Q-in-Q" frame.
  */
-struct ieee_802_1ad_hdr
-{
+struct ieee_802_1ad_hdr {
 	ieee_addr_u src;
 	ieee_addr_u dst;
 	/* Tag Protocol Identifier */
@@ -111,17 +107,13 @@ inline BOOL cmp_ieee_addr(const ieee_addr_u *src, const ieee_addr_u *dst)
 {
 	return (((dst->macw[0] == src->macw[0]) &&
 		 (dst->macw[1] == src->macw[1]) && (dst->macw[2] == src->macw[2]))
-		    ? TRUE
-		    : FALSE);
+		? TRUE : FALSE);
 }
 
 inline BOOL is_broadcast_ieee_addr(const ieee_addr_u *addr)
 {
-	return ((addr->macw[0] == 0xFFFF) &&
-		(addr->macw[1] == 0xFFFF) &&
-		(addr->macw[2] == 0xFFFF))
-		   ? TRUE
-		   : FALSE;
+	return ((addr->macw[0] == 0xFFFF) && (addr->macw[1] == 0xFFFF) && (addr->macw[2] == 0xFFFF))
+	    ? TRUE : FALSE;
 }
 
 /*
@@ -170,16 +162,14 @@ inline BOOL is_broadcast_ieee_addr(const ieee_addr_u *addr)
 inline BOOL is_multicast_ieee_addr(const ieee_addr_u *addr)
 {
 	return ((addr->mac[0] == 0x01) &&
-		(addr->mac[1] == 0x00) &&
-		(addr->mac[2] == 0x5E)) ? TRUE : FALSE;
+		(addr->mac[1] == 0x00) && (addr->mac[2] == 0x5E)) ? TRUE : FALSE;
 }
 
 inline BOOL is_multicast_ipv4_ieee_addr(const ieee_addr_u *addr)
 {
 	return ((addr->mac[0] == 0x01) &&
 		(addr->mac[1] == 0x00) &&
-		(addr->mac[2] == 0x5E) &&
-		(addr->mac[3] < 0x7F)) ? TRUE : FALSE;
+		(addr->mac[2] == 0x5E) && (addr->mac[3] < 0x7F)) ? TRUE : FALSE;
 }
 
 inline BOOL is_multicast_mpls_ieee_addr(const ieee_addr_u *addr)
@@ -187,8 +177,7 @@ inline BOOL is_multicast_mpls_ieee_addr(const ieee_addr_u *addr)
 	return ((addr->mac[0] == 0x01) &&
 		(addr->mac[1] == 0x00) &&
 		(addr->mac[2] == 0x5E) &&
-		(addr->mac[3] > 0x7F) &&
-		(addr->mac[3] < 0x90)) ? TRUE : FALSE;
+		(addr->mac[3] > 0x7F) && (addr->mac[3] < 0x90)) ? TRUE : FALSE;
 }
 
 #endif

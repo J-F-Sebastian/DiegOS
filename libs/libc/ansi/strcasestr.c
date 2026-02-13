@@ -25,15 +25,12 @@ char *strcasestr(const char *cs, const char *ct)
 {
 	const size_t len = strlen(ct);
 
-	if (!len || !cs)
-	{
+	if (!len || !cs) {
 		return ((char *)cs);
 	}
 
-	while ((tolower(*cs) != tolower(*ct)) || (strncasecmp(cs, ct, len)))
-	{
-		if (*cs++ == '\0')
-		{
+	while ((tolower(*cs) != tolower(*ct)) || (strncasecmp(cs, ct, len))) {
+		if (*cs++ == '\0') {
 			return ((char *)NULL);
 		}
 	}

@@ -76,7 +76,7 @@ enum rx_packet_hdr_status {
 struct rx_packet_hdr {
 	uint16_t status;
 	uint16_t pkt_len;
-	uint8_t	data[FRAME_SIZE - 4];
+	uint8_t data[FRAME_SIZE - 4];
 };
 
 #pragma pack(pop)
@@ -88,10 +88,10 @@ static char *rx_buffer = NULL;
 static unsigned rx_cur_address = 0;
 static unsigned rx_ring_offset = 0;
 
-static pci_bus_device_t *instance =  NULL;
+static pci_bus_device_t *instance = NULL;
 
 static const uint16_t vid_did[] = {
-	 0x10ec, 0x8139,
+	0x10ec, 0x8139,
 };
 
 static uint16_t rtl_port = 0;
@@ -134,8 +134,7 @@ static void rtl_init_config_info(void)
 
 	tcr = in_dword(rtl_port + RL_TCR);
 
-	switch(tcr & (RL_TCR_HWVER_AM | RL_TCR_HWVER_BM))
-	{
+	switch (tcr & (RL_TCR_HWVER_AM | RL_TCR_HWVER_BM)) {
 	case RL_TCR_HWVER_RTL8139:
 		model_name = models[0];
 		break;
@@ -178,8 +177,7 @@ static void rtl_init_config_info(void)
 		rom_size = ROMs[cfg0 & 0x7];
 	else
 		rom_size = ROMs[6];
-	
-	
+
 }
 
 static void rtl_print_config_info(void)
@@ -192,8 +190,9 @@ static void rtl_print_config_info(void)
 	//cfg3 = in_byte(rtl_port + RL_CONFIG3);
 	//cfg4 = in_byte(rtl_port + RL_CONFIG4);
 
-	kdrvprintf("Detected Realtek %s with %s (PCI Rev ID: 0x%02x)\n", model_name, rom_size, rev_id);
-	
+	kdrvprintf("Detected Realtek %s with %s (PCI Rev ID: 0x%02x)\n", model_name, rom_size,
+		   rev_id);
+
 }
 
 static void rtl_config_rx(void)
@@ -215,8 +214,7 @@ static void rtl_config_rx(void)
 	 */
 	if (rtl8139_drv.ifflags & IFF_PROMISC)
 		rcr |= RL_RCR_AB | RL_RCR_AM | RL_RCR_AAP;
-	else
-	{
+	else {
 		if (rtl8139_drv.ifflags & IFF_BROADCAST)
 			rcr |= RL_RCR_AB;
 		if (rtl8139_drv.ifflags & (IFF_MULTICAST | IFF_ALLMULTI))
@@ -225,7 +223,7 @@ static void rtl_config_rx(void)
 	rcr |= RL_RCR_APM;
 	out_dword(rtl_port + RL_RCR, rcr);
 
-	out_dword(rtl_port + RL_RBSTART, (uintptr_t)(rx_buffer));
+	out_dword(rtl_port + RL_RBSTART, (uintptr_t) (rx_buffer));
 	rx_cur_address = 0;
 	rx_ring_offset = 0;
 }
@@ -242,19 +240,13 @@ static void rtl_config_tx(void)
 	 * standard interframe gap, 1024 DMA bytes MAX,
 	 * append CRC (a.k.a. FCS).
 	 */
-	tcr &= RL_TCR_RES0 |
-	       RL_TCR_RES1 |
-	       RL_TCR_RES2 |
-	       RL_TCR_RES3;
+	tcr &= RL_TCR_RES0 | RL_TCR_RES1 | RL_TCR_RES2 | RL_TCR_RES3;
 
-	tcr |= RL_TCR_IFG_STD |
-	       RL_TCR_MXDMA_1024 |
-	       RL_TCR_CRC;
+	tcr |= RL_TCR_IFG_STD | RL_TCR_MXDMA_1024 | RL_TCR_CRC;
 
 	out_dword(rtl_port + RL_TCR, tcr);
 
-	for (i = RL_TSD0; i < RL_TSD0 + 16; i += 4)
-	{
+	for (i = RL_TSD0; i < RL_TSD0 + 16; i += 4) {
 		tsd = in_dword(rtl_port + i);
 		/*
 		 * Keep reserved bits and OWN bit
@@ -263,7 +255,7 @@ static void rtl_config_tx(void)
 		/*
 		 * Set early TX threshold to 1024 bytes
 		 */
-		tsd = (1024/32) << RL_TSD_ERTXTH_S;
+		tsd = (1024 / 32) << RL_TSD_ERTXTH_S;
 		out_dword(rtl_port + i, tsd);
 	}
 }
@@ -271,7 +263,7 @@ static void rtl_config_tx(void)
 static void rtl_set_interrupt_mask(void)
 {
 	uint16_t mask;
-	
+
 	mask = in_word(rtl_port + RL_IMR);
 
 	/*
@@ -281,22 +273,17 @@ static void rtl_set_interrupt_mask(void)
 	mask &= RL_IMR_RES;
 
 	mask |= RL_IMR_ROK |
-		RL_IMR_RER |
-		RL_IMR_TOK |
-		RL_IMR_TER |
-		RL_IMR_RXOVW |
-		RL_IMR_PUN |
-		RL_IMR_FOVW |
-		RL_IMR_TIMEOUT |
-		RL_IMR_SERR;
-	
+	    RL_IMR_RER |
+	    RL_IMR_TOK |
+	    RL_IMR_TER | RL_IMR_RXOVW | RL_IMR_PUN | RL_IMR_FOVW | RL_IMR_TIMEOUT | RL_IMR_SERR;
+
 	out_word(rtl_port + RL_IMR, mask);
 }
 
 static void rtl_clear_interrupt_mask(void)
 {
 	uint16_t mask;
-	
+
 	mask = in_word(rtl_port + RL_IMR);
 
 	/*
@@ -304,7 +291,7 @@ static void rtl_clear_interrupt_mask(void)
 	 * disable all interrupts.
 	 */
 	mask &= RL_IMR_RES;
-	
+
 	out_word(rtl_port + RL_IMR, mask);
 }
 
@@ -317,11 +304,10 @@ static void rtl_clear_rx(void)
 	cr = in_byte(rtl_port + RL_CR);
 	cr &= ~RL_CR_RE;
 	out_byte(rtl_port + RL_CR, cr);
-	while ((in_byte(rtl_port + RL_CR) & RL_CR_RE) && timeout--)
-	{
+	while ((in_byte(rtl_port + RL_CR) & RL_CR_RE) && timeout--) {
 		udelay(100);
 	}
-	
+
 	if (in_byte(rtl_port + RL_CR) & RL_CR_RE)
 		kdrvprintf("cannot disable receiver");
 
@@ -336,21 +322,19 @@ static void rtl_receive_packets(void)
 	unsigned pkt_len;
 	unsigned status;
 	struct packet *pkt;
-	
-	while (((in_byte(rtl_port + RL_CR) & RL_CR_BUFE) == 0))
-	{
+
+	while (((in_byte(rtl_port + RL_CR) & RL_CR_BUFE) == 0)) {
 		rx_pkt = (struct rx_packet_hdr *)(rx_buffer + rx_ring_offset);
 		pkt_len = rx_pkt->pkt_len;
 		status = rx_pkt->status;
 
-		kdrvprintf("rtl8139: received packet of length %u, status=0x%04x\n", pkt_len, status);
+		kdrvprintf("rtl8139: received packet of length %u, status=0x%04x\n", pkt_len,
+			   status);
 
 		/* Check for errors */
-		if (status & RX_HDR_ROK)
-		{
+		if (status & RX_HDR_ROK) {
 			/* Allocate a packet structure */
-			if (netbuf_get(&pkt, pkt_len))
-			{
+			if (netbuf_get(&pkt, pkt_len)) {
 				kdrvprintf("rtl8139: cannot allocate packet buffer\n");
 				rtl_clear_rx();
 				return;
@@ -359,14 +343,13 @@ static void rtl_receive_packets(void)
 			/* Copy data to the packet structure */
 			netbuf_copy_eth(rx_pkt->data, pkt, pkt_len);
 			/* Pass the packet to the network stack */
-			if (netbuf_in(pkt))
-			{
+			if (netbuf_in(pkt)) {
 				kdrvprintf("rtl8139: stop!\n");
 				rtl_clear_rx();
 				return;
 			}
 		}
-		
+
 		/* Update the current buffer read pointer */
 		rx_cur_address += (pkt_len + 4 + 3) & (~3);
 		rx_ring_offset += (pkt_len + 4 + 3) & (~3);
@@ -383,25 +366,21 @@ static void rtl_interrupts(uint16_t isr)
 {
 	BOOL link_up, was_link_up;
 
-	if (isr & RL_ISR_ROK)
-	{
+	if (isr & RL_ISR_ROK) {
 		kdrvprintf("rtl8139: received packet\n");
 		rtl_receive_packets();
 	}
 
-	if (isr & RL_ISR_RER)
-	{
+	if (isr & RL_ISR_RER) {
 		kdrvprintf("rtl8139: receive error\n");
 	}
 
-	if (isr & RL_ISR_RXOVW)
-	{
+	if (isr & RL_ISR_RXOVW) {
 		kdrvprintf("rtl8139: receive buffer overflow\n");
 		rtl_clear_rx();
 	}
 
-	if (isr & RL_ISR_PUN)
-	{
+	if (isr & RL_ISR_PUN) {
 		isr &= ~RL_ISR_PUN;
 
 		/* 
@@ -410,15 +389,11 @@ static void rtl_interrupts(uint16_t isr)
 		 */
 		link_up = (in_byte(rtl_port + RL_MSR) & RL_MSR_LINKB) ? FALSE : TRUE;
 		was_link_up = (rtl8139_drv.ifflags & IFF_UP) ? TRUE : FALSE;
-		if (link_up != was_link_up)
-		{
-			if (!link_up)
-			{
+		if (link_up != was_link_up) {
+			if (!link_up) {
 				kdrvprintf("rtl8139: link down\n");
 				rtl8139_drv.ifflags &= ~IFF_UP;
-			}
-			else
-			{
+			} else {
 				kdrvprintf("rtl8139: link up\n");
 				rtl8139_drv.ifflags |= IFF_UP;
 			}
@@ -426,28 +401,23 @@ static void rtl_interrupts(uint16_t isr)
 		}
 	}
 
-	if (isr & RL_ISR_FOVW)
-	{
+	if (isr & RL_ISR_FOVW) {
 		kdrvprintf("rtl8139: FIFO overflow\n");
 	}
 
-	if (isr & RL_ISR_TIMEOUT)
-	{
+	if (isr & RL_ISR_TIMEOUT) {
 		kdrvprintf("rtl8139: transmit timeout\n");
 	}
 
-	if (isr & RL_ISR_SERR)
-	{
+	if (isr & RL_ISR_SERR) {
 		kdrvprintf("rtl8139: system error\n");
 	}
 
-	if (isr & RL_ISR_TOK)
-	{
+	if (isr & RL_ISR_TOK) {
 		kdrvprintf("rtl8139: transmit OK\n");
 	}
 
-	if (isr & RL_ISR_TER)
-	{
+	if (isr & RL_ISR_TER) {
 		kdrvprintf("rtl8139: transmit error\n");
 	}
 }
@@ -471,74 +441,75 @@ static BOOL rtl_int_handler(void)
 static void mii_print_techab(uint16_t techab)
 {
 	int fs, ft;
-	char message[128] = {0};
+	char message[128] = { 0 };
 
-	if ((techab & MII_ANA_SEL_M) != MII_ANA_SEL_802_3)
-	{
+	if ((techab & MII_ANA_SEL_M) != MII_ANA_SEL_802_3) {
 		kdrvprintf("strange selector 0x%x, value 0x%x\n",
-			   techab & MII_ANA_SEL_M,
-			   (techab & MII_ANA_TAF_M) >> MII_ANA_TAF_S);
+			   techab & MII_ANA_SEL_M, (techab & MII_ANA_TAF_M) >> MII_ANA_TAF_S);
 		return;
 	}
 
-	fs= 1;
-	if (techab & (MII_ANA_100T4 | MII_ANA_100TXFD | MII_ANA_100TXHD))
-	{
+	fs = 1;
+	if (techab & (MII_ANA_100T4 | MII_ANA_100TXFD | MII_ANA_100TXHD)) {
 		strcat(message, "100 Mbps: ");
-		fs= 0;
-		ft= 1;
-		if (techab & MII_ANA_100T4)
-		{
+		fs = 0;
+		ft = 1;
+		if (techab & MII_ANA_100T4) {
 			strcat(message, "T4");
-			ft= 0;
+			ft = 0;
 		}
-		if (techab & (MII_ANA_100TXFD | MII_ANA_100TXHD))
-		{
+		if (techab & (MII_ANA_100TXFD | MII_ANA_100TXHD)) {
 			if (!ft)
 				strcat(message, ", ");
-			ft= 0;
+			ft = 0;
 			strcat(message, "TX-");
-			switch(techab & (MII_ANA_100TXFD|MII_ANA_100TXHD))
-			{
-			case MII_ANA_100TXFD:	strcat(message, "FD"); break;
-			case MII_ANA_100TXHD:	strcat(message, "HD"); break;
-			default:		strcat(message, "FD/HD"); break;
+			switch (techab & (MII_ANA_100TXFD | MII_ANA_100TXHD)) {
+			case MII_ANA_100TXFD:
+				strcat(message, "FD");
+				break;
+			case MII_ANA_100TXHD:
+				strcat(message, "HD");
+				break;
+			default:
+				strcat(message, "FD/HD");
+				break;
 			}
 		}
 	}
-	if (techab & (MII_ANA_10TFD | MII_ANA_10THD))
-	{
+	if (techab & (MII_ANA_10TFD | MII_ANA_10THD)) {
 		if (!fs)
 			strcat(message, ", ");
 		strcat(message, "10 Mbps: ");
-		fs= 0;
+		fs = 0;
 		strcat(message, "T-");
-		switch(techab & (MII_ANA_10TFD|MII_ANA_10THD))
-		{
-		case MII_ANA_10TFD:	strcat(message, "FD"); break;
-		case MII_ANA_10THD:	strcat(message, "HD"); break;
-		default:		strcat(message, "FD/HD"); break;
+		switch (techab & (MII_ANA_10TFD | MII_ANA_10THD)) {
+		case MII_ANA_10TFD:
+			strcat(message, "FD");
+			break;
+		case MII_ANA_10THD:
+			strcat(message, "HD");
+			break;
+		default:
+			strcat(message, "FD/HD");
+			break;
 		}
 	}
-	if (techab & MII_ANA_PAUSE_SYM)
-	{
+	if (techab & MII_ANA_PAUSE_SYM) {
 		if (!fs)
 			strcat(message, ", ");
-		fs= 0;
+		fs = 0;
 		strcat(message, "pause(SYM)");
 	}
-	if (techab & MII_ANA_PAUSE_ASYM)
-	{
+	if (techab & MII_ANA_PAUSE_ASYM) {
 		if (!fs)
 			strcat(message, ", ");
-		fs= 0;
+		fs = 0;
 		strcat(message, "pause(ASYM)");
 	}
-	if (techab & MII_ANA_TAF_RES)
-	{
+	if (techab & MII_ANA_TAF_RES) {
 		if (!fs)
 			strcat(message, ", ");
-		fs= 0;
+		fs = 0;
 		char temp[32];
 		snprintf(temp, sizeof(temp), "0x%x", (techab & MII_ANA_TAF_RES) >> MII_ANA_TAF_S);
 		strcat(message, temp);
@@ -549,98 +520,112 @@ static void mii_print_techab(uint16_t techab)
 static void mii_print_stat_speed(uint16_t stat, uint16_t extstat)
 {
 	int fs, ft;
-	char message[128] = {0};
+	char message[128] = { 0 };
 
-	fs= 1;
-	if (stat & MII_STATUS_EXT_STAT)
-	{
+	fs = 1;
+	if (stat & MII_STATUS_EXT_STAT) {
 		if (extstat & (MII_ESTAT_1000XFD | MII_ESTAT_1000XHD |
-			MII_ESTAT_1000TFD | MII_ESTAT_1000THD))
-		{
+			       MII_ESTAT_1000TFD | MII_ESTAT_1000THD)) {
 			strcat(message, "1000 Mbps: ");
-			fs= 0;
-			ft= 1;
-			if (extstat & (MII_ESTAT_1000XFD | MII_ESTAT_1000XHD))
-			{
-				ft= 0;
+			fs = 0;
+			ft = 1;
+			if (extstat & (MII_ESTAT_1000XFD | MII_ESTAT_1000XHD)) {
+				ft = 0;
 				strcat(message, "X-");
-				switch(extstat &
-					(MII_ESTAT_1000XFD|MII_ESTAT_1000XHD))
-				{
-				case MII_ESTAT_1000XFD:	strcat(message, "FD"); break;
-				case MII_ESTAT_1000XHD:	strcat(message, "HD"); break;
-				default:		strcat(message, "FD/HD"); break;
+				switch (extstat & (MII_ESTAT_1000XFD | MII_ESTAT_1000XHD)) {
+				case MII_ESTAT_1000XFD:
+					strcat(message, "FD");
+					break;
+				case MII_ESTAT_1000XHD:
+					strcat(message, "HD");
+					break;
+				default:
+					strcat(message, "FD/HD");
+					break;
 				}
 			}
-			if (extstat & (MII_ESTAT_1000TFD | MII_ESTAT_1000THD))
-			{
+			if (extstat & (MII_ESTAT_1000TFD | MII_ESTAT_1000THD)) {
 				if (!ft)
 					strcat(message, ", ");
-				ft= 0;
+				ft = 0;
 				strcat(message, "T-");
-				switch(extstat &
-					(MII_ESTAT_1000TFD|MII_ESTAT_1000THD))
-				{
-				case MII_ESTAT_1000TFD:	strcat(message, "FD"); break;
-				case MII_ESTAT_1000THD:	strcat(message, "HD"); break;
-				default:		strcat(message, "FD/HD"); break;
+				switch (extstat & (MII_ESTAT_1000TFD | MII_ESTAT_1000THD)) {
+				case MII_ESTAT_1000TFD:
+					strcat(message, "FD");
+					break;
+				case MII_ESTAT_1000THD:
+					strcat(message, "HD");
+					break;
+				default:
+					strcat(message, "FD/HD");
+					break;
 				}
 			}
 		}
 	}
 	if (stat & (MII_STATUS_100T4 |
-		MII_STATUS_100XFD | MII_STATUS_100XHD |
-		MII_STATUS_100T2FD | MII_STATUS_100T2HD))
-	{
+		    MII_STATUS_100XFD | MII_STATUS_100XHD |
+		    MII_STATUS_100T2FD | MII_STATUS_100T2HD)) {
 		if (!fs)
 			strcat(message, ", ");
-		fs= 0;
+		fs = 0;
 		strcat(message, "100 Mbps: ");
-		ft= 1;
-		if (stat & MII_STATUS_100T4)
-		{
+		ft = 1;
+		if (stat & MII_STATUS_100T4) {
 			strcat(message, "T4");
-			ft= 0;
+			ft = 0;
 		}
-		if (stat & (MII_STATUS_100XFD | MII_STATUS_100XHD))
-		{
+		if (stat & (MII_STATUS_100XFD | MII_STATUS_100XHD)) {
 			if (!ft)
 				strcat(message, ", ");
-			ft= 0;
+			ft = 0;
 			strcat(message, "TX-");
-			switch(stat & (MII_STATUS_100XFD|MII_STATUS_100XHD))
-			{
-			case MII_STATUS_100XFD:	strcat(message, "FD"); break;
-			case MII_STATUS_100XHD:	strcat(message, "HD"); break;
-			default:		strcat(message, "FD/HD"); break;
+			switch (stat & (MII_STATUS_100XFD | MII_STATUS_100XHD)) {
+			case MII_STATUS_100XFD:
+				strcat(message, "FD");
+				break;
+			case MII_STATUS_100XHD:
+				strcat(message, "HD");
+				break;
+			default:
+				strcat(message, "FD/HD");
+				break;
 			}
 		}
-		if (stat & (MII_STATUS_100T2FD | MII_STATUS_100T2HD))
-		{
+		if (stat & (MII_STATUS_100T2FD | MII_STATUS_100T2HD)) {
 			if (!ft)
 				strcat(message, ", ");
-			ft= 0;
+			ft = 0;
 			strcat(message, "T2-");
-			switch(stat & (MII_STATUS_100T2FD|MII_STATUS_100T2HD))
-			{
-			case MII_STATUS_100T2FD:	strcat(message, "FD"); break;
-			case MII_STATUS_100T2HD:	strcat(message, "HD"); break;
-			default:		strcat(message, "FD/HD"); break;
+			switch (stat & (MII_STATUS_100T2FD | MII_STATUS_100T2HD)) {
+			case MII_STATUS_100T2FD:
+				strcat(message, "FD");
+				break;
+			case MII_STATUS_100T2HD:
+				strcat(message, "HD");
+				break;
+			default:
+				strcat(message, "FD/HD");
+				break;
 			}
 		}
 	}
-	if (stat & (MII_STATUS_10FD | MII_STATUS_10HD))
-	{
+	if (stat & (MII_STATUS_10FD | MII_STATUS_10HD)) {
 		if (!fs)
 			strcat(message, ", ");
 		strcat(message, "10 Mbps: ");
-		fs= 0;
+		fs = 0;
 		strcat(message, "T-");
-		switch(stat & (MII_STATUS_10FD|MII_STATUS_10HD))
-		{
-		case MII_STATUS_10FD:	strcat(message, "FD"); break;
-		case MII_STATUS_10HD:	strcat(message, "HD"); break;
-		default:		strcat(message, "FD/HD"); break;
+		switch (stat & (MII_STATUS_10FD | MII_STATUS_10HD)) {
+		case MII_STATUS_10FD:
+			strcat(message, "FD");
+			break;
+		case MII_STATUS_10HD:
+			strcat(message, "HD");
+			break;
+		default:
+			strcat(message, "FD/HD");
+			break;
 		}
 	}
 	kdrvprintf("%s\n", message);
@@ -654,13 +639,12 @@ static void rtl_link_status(void)
 	uint16_t mii_ctrl, mii_status, mii_ana, mii_anlpa, mii_ane, mii_extstat;
 	uint8_t msr;
 	int link_up;
-	char message[64] = {0};
+	char message[64] = { 0 };
 
 	msr = in_byte(rtl_port + RL_MSR);
-	link_up= !(msr & RL_MSR_LINKB);
+	link_up = !(msr & RL_MSR_LINKB);
 
-	if (!link_up)
-	{
+	if (!link_up) {
 		kdrvprintf("%s: link down\n", rtl8139_drv.cmn.name);
 		return;
 	}
@@ -674,34 +658,36 @@ static void rtl_link_status(void)
 
 	strcat(message, rtl8139_drv.ifname);
 
-	if (mii_ctrl & (MII_CTRL_LB|MII_CTRL_PD|MII_CTRL_ISO))
-	{
+	if (mii_ctrl & (MII_CTRL_LB | MII_CTRL_PD | MII_CTRL_ISO)) {
 		strcat(message, "PHY:");
-		if (mii_ctrl & MII_CTRL_LB)
-		{
+		if (mii_ctrl & MII_CTRL_LB) {
 			strcat(message, " loopback mode");
 		}
-		if (mii_ctrl & MII_CTRL_PD)
-		{
+		if (mii_ctrl & MII_CTRL_PD) {
 			strcat(message, " powered down");
 		}
-		if (mii_ctrl & MII_CTRL_ISO)
-		{
+		if (mii_ctrl & MII_CTRL_ISO) {
 			strcat(message, " isolated");
 		}
 		kdrvprintf("%s %s\n", rtl8139_drv.cmn.name, message);
 		return;
 	}
 
-	if (!(mii_ctrl & MII_CTRL_ANE))
-	{
+	if (!(mii_ctrl & MII_CTRL_ANE)) {
 		strcat(message, " manual config: ");
-		switch(mii_ctrl & (MII_CTRL_SP_LSB|MII_CTRL_SP_MSB))
-		{
-		case MII_CTRL_SP_10:	strcat(message, "10 Mbps"); break;
-		case MII_CTRL_SP_100:	strcat(message, "100 Mbps"); break;
-		case MII_CTRL_SP_1000:	strcat(message, "1000 Mbps"); break;
-		case MII_CTRL_SP_RES:	strcat(message, "reserved speed"); break;
+		switch (mii_ctrl & (MII_CTRL_SP_LSB | MII_CTRL_SP_MSB)) {
+		case MII_CTRL_SP_10:
+			strcat(message, "10 Mbps");
+			break;
+		case MII_CTRL_SP_100:
+			strcat(message, "100 Mbps");
+			break;
+		case MII_CTRL_SP_1000:
+			strcat(message, "1000 Mbps");
+			break;
+		case MII_CTRL_SP_RES:
+			strcat(message, "reserved speed");
+			break;
 		}
 		if (mii_ctrl & MII_CTRL_DM)
 			strcat(message, ", full duplex");
@@ -714,22 +700,17 @@ static void rtl_link_status(void)
 	mii_print_stat_speed(mii_status, mii_extstat);
 
 	if (!(mii_status & MII_STATUS_ANC))
-		kdrvprintf("%s: auto-negotiation not complete\n",
-		    rtl8139_drv.ifname);
+		kdrvprintf("%s: auto-negotiation not complete\n", rtl8139_drv.ifname);
 	if (mii_status & MII_STATUS_RF)
 		kdrvprintf("%s: remote fault detected\n", rtl8139_drv.ifname);
-	if (!(mii_status & MII_STATUS_ANA))
-	{
-		kdrvprintf("%s: local PHY has no auto-negotiation ability\n",
-			rtl8139_drv.ifname);
+	if (!(mii_status & MII_STATUS_ANA)) {
+		kdrvprintf("%s: local PHY has no auto-negotiation ability\n", rtl8139_drv.ifname);
 	}
 	if (!(mii_status & MII_STATUS_LS))
 		kdrvprintf("%s: link down\n", rtl8139_drv.ifname);
 	if (mii_status & MII_STATUS_JD)
-		kdrvprintf("%s: jabber condition detected\n",
-		    rtl8139_drv.ifname);
-	if (!(mii_status & MII_STATUS_EC))
-	{
+		kdrvprintf("%s: jabber condition detected\n", rtl8139_drv.ifname);
+	if (!(mii_status & MII_STATUS_EC)) {
 		kdrvprintf("%s: no extended register set\n", rtl8139_drv.ifname);
 		goto resspeed;
 	}
@@ -741,21 +722,19 @@ static void rtl_link_status(void)
 
 	if (mii_ane & MII_ANE_PDF)
 		kdrvprintf("%s: parallel detection fault\n", rtl8139_drv.ifname);
-	if (!(mii_ane & MII_ANE_LPANA))
-	{
+	if (!(mii_ane & MII_ANE_LPANA)) {
 		kdrvprintf("%s: link-partner does not support auto-negotiation\n",
-			rtl8139_drv.ifname);
+			   rtl8139_drv.ifname);
 		goto resspeed;
 	}
 
 	kdrvprintf("%s: remote cap.: ", rtl8139_drv.ifname);
 	mii_print_techab(mii_anlpa);
-resspeed:
+ resspeed:
 
 	kdrvprintf("link up at %d Mbps, ", (msr & RL_MSR_SPEED_10) ? 10 : 100);
 	kdrvprintf("%s duplex\n", ((mii_ctrl & MII_CTRL_DM) ? "full" : "half"));
 }
-
 
 static void rtl_reset_hw(void)
 {
@@ -783,10 +762,9 @@ static int rtl_init(unsigned unitno)
 		return (ENXIO);
 	}
 
-	for (i = 0; i < NELEMENTS(vid_did); i += 2)
-	{
+	for (i = 0; i < NELEMENTS(vid_did); i += 2) {
 		instance = pci_bus_find_device(vid_did[i], vid_did[i + 1], NULL);
-	
+
 		if (instance) {
 
 			/*
@@ -803,23 +781,21 @@ static int rtl_init(unsigned unitno)
 				   instance->bus,
 				   instance->device,
 				   instance->function,
-				   instance->vendorid,
-				   instance->deviceid,
-				   "Realtek RTL8139");
+				   instance->vendorid, instance->deviceid, "Realtek RTL8139");
 
 			addr = pci_create_bdf(instance->bus, instance->device, instance->function);
-		   	/* Enable bus mastering if necessary. */
+			/* Enable bus mastering if necessary. */
 			pci_read_config_reg16(addr, 4, &cr);
-	
+
 			if (!(cr & COMMAND_BUS_MASTER))
 				pci_write_config_reg16(addr, 4, cr | COMMAND_BUS_MASTER);
 
-
-			kdrvprintf("using I/O address %p, IRQ %d,%d\n", rtl_port, instance->int_pin, instance->int_line);
+			kdrvprintf("using I/O address %p, IRQ %d,%d\n", rtl_port, instance->int_pin,
+				   instance->int_line);
 
 			rtl_init_config_info();
 			rtl_print_config_info();
-			
+
 			/*
 			 * Interrupts need to be relocated following the x86 DiegOS mapping.
 			 * This could be done directly in the PCI library code, but for the sake
@@ -834,7 +810,7 @@ static int rtl_init(unsigned unitno)
 			 */
 			out_byte(rtl_port + RL_9346CR, RL_9346CR_EEM_CONFIG);
 			out_dword(rtl_port + RL_IDR, 0x04050607);
-			out_dword(rtl_port + RL_IDR+4, 0x00000203);
+			out_dword(rtl_port + RL_IDR + 4, 0x00000203);
 			out_byte(rtl_port + RL_9346CR, RL_9346CR_EEM_NORMAL);
 
 			return (EOK);
@@ -914,12 +890,10 @@ static int rtl_done(unsigned unitno)
 	return (EOK);
 }
 
-
 static unsigned rtl_status(unsigned unitno)
 {
 	return (status);
 }
-
 
 net_driver_t rtl8139_drv = {
 	.cmn = {
@@ -941,7 +915,6 @@ net_driver_t rtl8139_drv = {
 	.rx_multi_fn = NULL,
 	.rx_peak_fn = NULL
 };
-
 
 /*
  * $PchId: ne2000.c,v 1.4 1996/01/19 23:30:34 philip Exp $

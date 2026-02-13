@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-static grafics_driver_t	*vga_drv = NULL;
+static grafics_driver_t *vga_drv = NULL;
 
 unsigned W = 8, H = 16;
 
@@ -263,7 +263,7 @@ static void demo_thread_entry(void)
 void platform_run(void)
 {
 	uint8_t pid;
- 	device_t *vga_dev = NULL;
+	device_t *vga_dev = NULL;
 
 	vga_dev = device_lookup("vesa", 0);
 	if (!vga_dev) {

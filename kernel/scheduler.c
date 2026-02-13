@@ -667,12 +667,13 @@ void scheduler_dump()
 	for (i = 0; i < NELEMENTS(ready_queues); i++) {
 		printf("priority %d: %d threads\n", i, queue_count(&ready_queues[i]));
 		if (queue_count(&ready_queues[i])) {
-			printf("%-3s   %-15s   %-8s   %s\n", "TID", "THREAD NAME", "STATE", "FLAGS");
+			printf("%-3s   %-15s   %-8s   %s\n", "TID", "THREAD NAME", "STATE",
+			       "FLAGS");
 			printf("______________________________________________\n");
 			thread_t *ptr = queue_head(&ready_queues[i]);
 			while (ptr) {
 				printf("%-3d %-15s %-8s %s\n", ptr->tid,
-					ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+				       ptr->name, state2str(ptr->state), flags2str(ptr->flags));
 				ptr = (thread_t *) ptr->header.next;
 			}
 		}
@@ -682,12 +683,13 @@ void scheduler_dump()
 
 	printf("%d threads\n", queue_count(&delay_queue));
 	if (queue_count(&delay_queue)) {
-		printf("%-3s   %-4s   %-15s   %-8s   %s\n", "TID", "PRIO", "THREAD NAME", "STATE", "FLAGS");
+		printf("%-3s   %-4s   %-15s   %-8s   %s\n", "TID", "PRIO", "THREAD NAME", "STATE",
+		       "FLAGS");
 		printf("______________________________________________________\n");
 		thread_t *ptr = queue_head(&delay_queue);
 		while (ptr) {
 			printf("%-3d %-3d %-15s %-8s %s\n", ptr->tid, ptr->priority,
-					ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			       ptr->name, state2str(ptr->state), flags2str(ptr->flags));
 			ptr = (thread_t *) ptr->header.next;
 		}
 	}
@@ -696,12 +698,13 @@ void scheduler_dump()
 
 	printf("%d threads\n", queue_count(&wait_queue));
 	if (queue_count(&wait_queue)) {
-		printf("%-3s   %-4s   %-15s   %-8s   %s\n", "TID", "PRIO", "THREAD NAME", "STATE", "FLAGS");
+		printf("%-3s   %-4s   %-15s   %-8s   %s\n", "TID", "PRIO", "THREAD NAME", "STATE",
+		       "FLAGS");
 		printf("______________________________________________________\n");
 		thread_t *ptr = queue_head(&wait_queue);
 		while (ptr) {
 			printf("%-3d %-3d %-15s %-8s %s\n", ptr->tid, ptr->priority,
-					ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			       ptr->name, state2str(ptr->state), flags2str(ptr->flags));
 			ptr = (thread_t *) ptr->header.next;
 		}
 	}
@@ -710,12 +713,13 @@ void scheduler_dump()
 
 	printf("%d threads\n", queue_count(&dead_queue));
 	if (queue_count(&dead_queue)) {
-		printf("%-3s   %-4s   %-15s   %-8s   %s\n", "TID", "PRIO", "THREAD NAME", "STATE", "FLAGS");
+		printf("%-3s   %-4s   %-15s   %-8s   %s\n", "TID", "PRIO", "THREAD NAME", "STATE",
+		       "FLAGS");
 		printf("______________________________________________________\n");
 		thread_t *ptr = queue_head(&dead_queue);
 		while (ptr) {
 			printf("%-3d %-3d %-15s %-8s %s\n", ptr->tid, ptr->priority,
-					ptr->name, state2str(ptr->state), flags2str(ptr->flags));
+			       ptr->name, state2str(ptr->state), flags2str(ptr->flags));
 			ptr = (thread_t *) ptr->header.next;
 		}
 	}

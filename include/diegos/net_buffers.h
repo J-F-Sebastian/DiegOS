@@ -87,7 +87,7 @@ int netbuf_init(unsigned bytes, unsigned packets);
  * EINVAL if pkt is NULL or bytes is zero
  * EOK success
  */
- int netbuf_get(struct packet **pkt, unsigned bytes);
+int netbuf_get(struct packet **pkt, unsigned bytes);
 
 /*
  * Returns a packet to the network buffer, making it free.
@@ -144,7 +144,7 @@ int netbuf_in(struct packet *pkt);
  * ENOBUFS if the queue is full
  * EINVAL if pkt is NULL or intf is NULL
  */
-int netbuf_out(struct packet *pkt, net_interface_t *intf);
+int netbuf_out(struct packet *pkt, net_interface_t * intf);
 
 /*
  * Retrieve a packet from the IN queue.
@@ -176,7 +176,7 @@ int netbuf_process_in(struct packet **pkt);
  * EAGAIN the IN queue is empty
  * EINVAL pkt is NULL
  */
-int netbuf_process_out(struct packet **pkt, net_interface_t **intf);
+int netbuf_process_out(struct packet **pkt, net_interface_t ** intf);
 
 /*
  * Wait for processing.

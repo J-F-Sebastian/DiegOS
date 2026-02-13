@@ -99,13 +99,15 @@ void netif_dump()
 {
 	net_interface_t *itf = net_interface_first();
 
-        printf("\n--- NETWORK INTERFACES TABLE ------------------------------------\n");
-        while (itf) {
+	printf("\n--- NETWORK INTERFACES TABLE ------------------------------------\n");
+	while (itf) {
 		printf("_________________________________________________________________\n");
-                printf("\n%6s: Type: %#4.4X, Flags: %#X, IfIndex: %d\n", itf->name, itf->type, itf->flags, itf->ifindex);
-		printf("        Operational State: %d, Link mode: %d\n", itf->operstate, itf->link_mode);
+		printf("\n%6s: Type: %#4.4X, Flags: %#X, IfIndex: %d\n", itf->name, itf->type,
+		       itf->flags, itf->ifindex);
+		printf("        Operational State: %d, Link mode: %d\n", itf->operstate,
+		       itf->link_mode);
 		printf("        MTU: %d\n", itf->mtu);
 		itf = net_interface_next(itf);
-        }
+	}
 	printf("\n-----------------------------------------------------------------\n");
 }

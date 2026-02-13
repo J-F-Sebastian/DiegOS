@@ -28,5 +28,5 @@
 
 BOOL init_network_lib()
 {
-        return (netbuf_init(1024*1024, 2048)) ? FALSE : TRUE;
+	return (netbuf_init(1024 * 1024, 2048)) ? FALSE : TRUE;
 }

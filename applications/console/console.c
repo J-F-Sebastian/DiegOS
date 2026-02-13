@@ -69,8 +69,7 @@ CREATE_ALTERNATE(root)
 #define TIMER_STAGE3    (TIMER_STAGE2 + 30)
 static const char *timeout_msg[] = {
 	"\n *** [%s] Login session has been idle for 30 seconds\n",
-	"\n *** [%s] Login session has been idle for 1 minute"
-	" and will time out in 30 seconds\n",
+	"\n *** [%s] Login session has been idle for 1 minute" " and will time out in 30 seconds\n",
 	"\n *** [%s] Login session timed out\n"
 };
 

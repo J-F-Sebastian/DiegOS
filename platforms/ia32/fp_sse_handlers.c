@@ -34,14 +34,14 @@ static long context_valid[BITMAPLEN(DIEGOS_MAX_THREADS)] = { 0 };
 /*
  * Must be aligned to 16 bytes
  */
-static char simd_context[DIEGOS_MAX_THREADS][512] __attribute__ ((aligned(16)));
+static char simd_context[DIEGOS_MAX_THREADS][512] __attribute__((aligned(16)));
 
 #elif defined(ENABLE_FP)
 /*
  * There is no real requirement for alignment in case of FP as we are using
  * fsave/frstor but doubles are natually aligned to 8...
  */
-static char fp_context[DIEGOS_MAX_THREADS][108] __attribute__ ((aligned(8)));
+static char fp_context[DIEGOS_MAX_THREADS][108] __attribute__((aligned(8)));
 #endif
 
 void exc_handler_fp(void)

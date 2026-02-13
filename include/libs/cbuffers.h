@@ -134,7 +134,7 @@ inline void cbuffer_remove_n(struct cbuffer *cbuf, unsigned n)
 inline unsigned cbuffer_free_space(struct cbuffer *cbuf)
 {
 	if (cbuf->head <= cbuf->tail) {
-		/*return (cbuf->bufsize - (cbuf->tail - cbuf->head) - 1);*/
+		/*return (cbuf->bufsize - (cbuf->tail - cbuf->head) - 1); */
 		return (cbuf->bufsize - cbuf->tail + cbuf->head - 1);
 	} else {
 		return (cbuf->head - cbuf->tail - 1);

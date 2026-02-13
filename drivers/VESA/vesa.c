@@ -459,7 +459,9 @@ static void load_all_palette(uint8_t rgb[])
 {
 	regs16_t regs;
 	uint16_t es, di;
-	uint8_t *ptr = (uint8_t *) real_buffer() + sizeof(struct VBEInfoBlock)*2 + sizeof(struct ModeInfoBlock);
+	uint8_t *ptr =
+	    (uint8_t *) real_buffer() + sizeof(struct VBEInfoBlock) * 2 +
+	    sizeof(struct ModeInfoBlock);
 
 	regs.ax = 0x4F09;
 	regs.bx = 0;

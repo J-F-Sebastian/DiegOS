@@ -42,8 +42,7 @@ int netstats_update_rx(struct net_stats *ns, unsigned bytes)
 
 int netstats_update_tx(struct net_stats *ns, unsigned bytes)
 {
-	if (ns && bytes)
-	{
+	if (ns && bytes) {
 		ns->tx_bytes += bytes;
 		ns->tx_packets++;
 		return EOK;
@@ -58,8 +57,7 @@ int netstats_update_rx_err(struct net_stats *ns, unsigned bytes, enum net_stats_
 		ns->rx_packets++;
 		ns->rx_err_packets++;
 
-		switch (err)
-		{
+		switch (err) {
 		case NETSTATS_RUNT:
 			ns->rx_runt_packets++;
 			break;
@@ -70,7 +68,7 @@ int netstats_update_rx_err(struct net_stats *ns, unsigned bytes, enum net_stats_
 			ns->rx_crc_err_packets++;
 			break;
 		case NETSTATS_OTHER:
-		/* FALLTHRU */
+			/* FALLTHRU */
 		default:
 			break;
 		}

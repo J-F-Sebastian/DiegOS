@@ -50,7 +50,7 @@ static void demo_thread_entry(void)
 
 		thread_unlock_mutex(mutex);
 
-		//		thread_suspend();
+		//              thread_suspend();
 		if (my_thread_id() == 19) {
 			threads_dump();
 			//thread_delay(3000);
@@ -63,7 +63,6 @@ static void demo_thread_entry(void)
 			event_dump(NULL);
 			//thread_delay(3000);
 		}
-
 		//mdelay(1000);
 		//udelay(1000);
 		//ndelay(1000);

@@ -32,8 +32,7 @@ static barrier_t *netb = NULL;
 static pakman *packet_manager = NULL;
 static struct cbuffer in_cb, out_cb;
 static struct packet **in_queue;
-static struct my_out
-{
+static struct my_out {
 	struct packet *pkt;
 	net_interface_t *itf;
 } *out_queue;
@@ -57,7 +56,7 @@ int netbuf_init(unsigned bytes, unsigned packets)
 	cbuffer_init(&in_cb, packets);
 	cbuffer_init(&out_cb, packets);
 
-	if (EOK!= init_pakman(bytes, packets, &packet_manager))	{
+	if (EOK != init_pakman(bytes, packets, &packet_manager)) {
 		free(in_queue);
 		free(out_queue);
 		return ENOMEM;
@@ -204,11 +203,9 @@ int netbuf_copy_eth(const void *src, struct packet *pkt, unsigned bytes)
 	// fprintf(stderr, "%#4.4X\n", ntohs(ptrqinq->tpid_svlan));
 	if (htons(ETHERTYPE_SVLAN) == ptrqinq->tpid_svlan) {
 		pkt->data_payload_cursor = (void *)(ptrqinq + 1);
-	}
-	else if (htons(ETHERTYPE_8021Q) == ptrvlan->tpid) {
+	} else if (htons(ETHERTYPE_8021Q) == ptrvlan->tpid) {
 		pkt->data_payload_cursor = (void *)(ptrvlan + 1);
-	}
-	else {
+	} else {
 		pkt->data_payload_cursor = (void *)(ptr + 1);
 	}
 

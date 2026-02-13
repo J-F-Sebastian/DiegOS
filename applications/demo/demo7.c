@@ -24,7 +24,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-
 static void demo_thread_entry(void)
 {
 #if 1
@@ -51,7 +50,7 @@ static void demo_thread_entry(void)
 	}
 
 	for (i = 0; i < 16; i++) {
-		vga_drv->rectangle_fn(a, b, 5, i*3);
+		vga_drv->rectangle_fn(a, b, 5, i * 3);
 		a.x += 5;
 		a.y += 5;
 		b.x -= 5;

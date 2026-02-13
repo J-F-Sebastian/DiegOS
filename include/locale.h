@@ -35,8 +35,8 @@ struct lconv {
 	char *grouping;		/* ""  */
 	char *int_curr_symbol;	/* ""  */
 	char *currency_symbol;	/* ""  */
-	char *mon_decimal_point;/* ""  */
-	char *mon_thousands_sep;/* ""  */
+	char *mon_decimal_point;	/* ""  */
+	char *mon_thousands_sep;	/* ""  */
 	char *mon_grouping;	/* ""  */
 	char *positive_sign;	/* ""  */
 	char *negative_sign;	/* ""  */

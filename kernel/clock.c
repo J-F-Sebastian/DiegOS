@@ -258,7 +258,7 @@ uint64_t clock_get_milliseconds(void)
 
 void clock_set_boot_seconds(unsigned seconds)
 {
-	boot_ticks = (uint64_t) seconds * DEFAULT_CLOCK_RES;
+	boot_ticks = (uint64_t) seconds *DEFAULT_CLOCK_RES;
 }
 
 unsigned clock_get_boot_seconds(void)

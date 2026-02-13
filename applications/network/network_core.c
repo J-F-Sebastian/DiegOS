@@ -35,20 +35,17 @@ static int network_core_process_in(struct packet *pkt)
 	/*
 	 * We support only untagged ethernet frames for now!
 	 */
-	switch ((int)ntohs(ptr->type))
-	{
+	switch ((int)ntohs(ptr->type)) {
 	case ETHERTYPE_IP:
 		fprintf(stderr, "IP packet\n");
 		break;
 	case ETHERTYPE_ARP:
 		fprintf(stderr, "ARP packet\n");
 		hdr = (struct arp_header *)pkt->data_payload_cursor;
-		fprintf(stderr, " hw space %#X prot space %#X\n HW len %d prot len %d\n opcode %d\n",
-			ntohs(hdr->hw_address_space),
-			ntohs(hdr->prot_address_space),
-			hdr->hw_address_len,
-			hdr->prot_address_len,
-			ntohs(hdr->opcode));
+		fprintf(stderr,
+			" hw space %#X prot space %#X\n HW len %d prot len %d\n opcode %d\n",
+			ntohs(hdr->hw_address_space), ntohs(hdr->prot_address_space),
+			hdr->hw_address_len, hdr->prot_address_len, ntohs(hdr->opcode));
 
 		break;
 	case ETHERTYPE_RARP:
@@ -71,27 +68,22 @@ static void network_core_main_entry(void)
 
 	printf("Network core version %s\n", __NET_CORE_VER__);
 
-	while (TRUE)
-	{
+	while (TRUE) {
 		netbuf_wait();
 
 		keepon = TRUE;
-		while (keepon)
-		{
+		while (keepon) {
 			fprintf(stderr, "Packet\n");
 			in = netbuf_process_in(&pkt);
-			if (EOK == in)
-			{
-				if (EOK != network_core_process_in(pkt))
-				{
+			if (EOK == in) {
+				if (EOK != network_core_process_in(pkt)) {
 					printf("Unknown packet!\n");
 				}
 				netbuf_put(pkt);
 			}
 
 			out = netbuf_process_out(&pkt, &intf);
-			if (EOK == out)
-			{
+			if (EOK == out) {
 				netbuf_put(pkt);
 			}
 
@@ -110,7 +102,8 @@ void network_run(void)
 	uint8_t pid;
 	BOOL retcode;
 
-	retcode = thread_create("network", THREAD_PRIO_HIGH, network_core_main_entry, 0, 16 * 1024, &pid);
+	retcode =
+	    thread_create("network", THREAD_PRIO_HIGH, network_core_main_entry, 0, 16 * 1024, &pid);
 
 	assert(TRUE == retcode);
 }

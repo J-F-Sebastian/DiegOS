@@ -57,11 +57,14 @@
 #error "select endianness !!!"
 #endif
 
-inline uint32_t swapl(uint32_t x) {
-	return ((x << 24) | ((x << 8) & 0x00FF0000U) | ((x >> 8) & 0x0000FF00U) | ((x >> 24) & 0x000000FFU));
+inline uint32_t swapl(uint32_t x)
+{
+	return ((x << 24) | ((x << 8) & 0x00FF0000U) | ((x >> 8) & 0x0000FF00U) |
+		((x >> 24) & 0x000000FFU));
 }
 
-inline uint16_t swaps(uint16_t x) {
+inline uint16_t swaps(uint16_t x)
+{
 	return ((x << 8) | (x >> 8));
 }
 

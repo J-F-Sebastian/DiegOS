@@ -31,7 +31,7 @@ static unsigned exitcbnum = 0;
 
 int atexit(void (*func)(void))
 {
-	if(exitcbnum == NEXITS) {
+	if (exitcbnum == NEXITS) {
 		return ENOMEM;
 	}
 	exitcbfn[exitcbnum++] = func;

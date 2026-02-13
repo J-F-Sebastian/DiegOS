@@ -22,8 +22,7 @@
 
 #include <stdint.h>
 
-enum net_stats_err
-{
+enum net_stats_err {
 	NETSTATS_RUNT,
 	NETSTATS_LONG,
 	NETSTATS_CRC,
@@ -33,8 +32,7 @@ enum net_stats_err
 	NETSTATS_OTHER
 };
 
-struct net_stats
-{
+struct net_stats {
 	/*
 	 * Total bytes transmitted
 	 */
