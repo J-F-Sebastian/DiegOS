@@ -46,6 +46,7 @@ char *strpbrk(const char *_s1, const char *_s2);
 char *strrchr(const char *_s, int _c);
 size_t strspn(const char *_s1, const char *_s2);
 char *strstr(const char *_s1, const char *_s2);
+char *strcasestr(const char *_cs, const char *_ct);
 char *strtok(char *_s1, const char *_s2);
 char *strtok_r(char *_s1, const char *_s2, char **saveptr);
 
