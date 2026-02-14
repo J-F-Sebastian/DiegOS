@@ -78,14 +78,14 @@ uint32_t kernel_time_get_value(uint32_t msecs, const struct time_util *tu)
 	if (!msecs || !tu)
 		return 0;
 
-	uint32_t retval = msecs * tu->cntr_ticks_per_msecs_int;
-	uint32_t fract = msecs * tu->cntr_ticks_per_msecs_fract;
+	uint64_t retval = msecs * tu->cntr_ticks_per_msecs_int;
+	uint64_t fract = msecs * tu->cntr_ticks_per_msecs_fract;
 	/* rounding fract */
-	fract += 500UL;
-	fract /= 1000UL;
+	fract += 500ULL;
+	fract /= 1000ULL;
 	retval += fract;
 
-	return (kernel_time_adjust_range(retval, tu));
+	return (kernel_time_adjust_range((uint32_t)retval, tu));
 }
 
 int kernel_time_get_minmax_msecs(uint32_t msecs[], const struct time_util *tu)
@@ -93,8 +93,8 @@ int kernel_time_get_minmax_msecs(uint32_t msecs[], const struct time_util *tu)
 	if (!msecs || !tu)
 		return EINVAL;
 
-	msecs[0] = 1000UL * tu->min_counter / tu->base_counter;
-	msecs[1] = 1000UL * tu->max_counter / tu->base_counter;
+	msecs[0] = 1000ULL * tu->min_counter / tu->base_counter;
+	msecs[1] = 1000ULL * tu->max_counter / tu->base_counter;
 
 	return (EOK);
 }
