@@ -31,6 +31,8 @@ mutex_t *thread_create_mutex(const char *name);
 
 void thread_lock_mutex(mutex_t * mtx);
 
+void thread_lock_mutex_timed(mutex_t * mtx, unsigned msecs);
+
 void thread_unlock_mutex(mutex_t * mtx);
 
 BOOL thread_mutex_is_locked(mutex_t * mtx);

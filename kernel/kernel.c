@@ -361,6 +361,27 @@ void thread_lock_mutex(mutex_t *mtx)
 	}
 }
 
+void thread_lock_mutex_timed(mutex_t *mtx, unsigned msecs)
+{
+	thread_t *prev, *next;
+	BOOL is_locked;
+
+	if (!mtx) {
+		return;
+	}
+
+	prev = scheduler_running_thread();
+
+	is_locked = mutex_is_locked(mtx);
+
+	if (lock_mutex(prev->tid, mtx) && is_locked) {
+		scheduler_wait_thread(THREAD_FLAG_WAIT_MUTEX, msecs);
+		schedule_thread();
+		next = scheduler_running_thread();
+		switch_context(&prev->context, next->context);
+	}
+}
+
 void thread_unlock_mutex(mutex_t *mtx)
 {
 	uint8_t ptid;
