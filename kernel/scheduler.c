@@ -299,39 +299,12 @@ static inline uint32_t peek_top_expiration(void)
 void schedule_thread()
 {
 	unsigned i = 0;
-	uint32_t new_delay = SCHED_DELAY_MAX;
+
+	update_schedule();
 
 	/*
-	 * Wait queue management, update waiting threads state
-	 */
-	resume_on_events();
-	resume_on_barriers();
-	resume_on_io_wait();
-	resume_on_poll();
-
-	/*
-	 * Wait queue management, fill in the ready queues if needed
-	 */
-	if (queue_count(&wait_queue)) {
-		schedule_waiting();
-		//if (queue_count(&wait_queue)) {
-		//      new_delay = peek_top_expiration();
-		//}
-	}
-
-	/*
-	 * delayed queue management, fill in the ready queues if needed
-	 */
-	if (queue_count(&delay_queue)) {
-		schedule_delayed();
-		if (queue_count(&delay_queue)) {
-			new_delay = peek_top_expiration();
-		}
-	}
-	if (FALSE == clock_set_period(new_delay, CLK_INST_SCHEDULER)) {
-		kerrprintf("Clock device failed in %s\n", __FUNCTION__);
-	}
-
+	* Select the next thread to run, starting from the highest priority.
+	*/
 	while (i < NELEMENTS(ready_queues)) {
 		if (queue_count(&ready_queues[i])) {
 			if (new_runner(i)) {
