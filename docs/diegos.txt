@@ -27,7 +27,7 @@
 \frontmatter
 \begin{document}
 \subject{Documentation}
-\title{DiegOS}
+\title{{\color{Cerulean}DiegOS}}
 \subtitle{Design and Implementation of a minimalistic Operating System}
 \author{Diego Gallizioli}
 \date{\today}
@@ -55,15 +55,16 @@ information contained herein.}
 \tableofcontents
 
 \mainmatter
-\chapter{Foreword}
+\chapter{Introduction}
 \section*{Inheritance and other inspirations}
 I approached the world of computing when I was 8 years old.
-Back at the time information technology was seen as the future and was
+
+Back at that time information technology was seen as the future and was
 represented as a kind of magic, something that could not be easily understood 
-ot raught but rather was to be discovered.
+or taught in schools but rather was to be discovered.
 Lots of movies used computer science as a subject to create stunning stories
 where young guys (just like me!) experienced unbelievable adventures after
-discovering new hidden powers while hacking stuff; not to mention the fact
+discovering new hidden powers while hacking stuff, not to mention the fact
 that most of the offices seen in movies were filled with computers, no matter
 what they could be used for, they were giving answers: finding clues, finding
 people, finding informations.
@@ -87,6 +88,7 @@ But then one day a friend of mine paid a visit to me and lent me a fabulous
 gadget: a cartridge running a Pascal compiler, along with a technical manual
 covering the C64 internals and the assembler for the processor and the sprites
 technology... and lots more.
+
 Then I turned 15 when I asked for a more powerful computer: my intense desire was
 to explore the unknown universe of the then innovative AMIGA
 platform, but to have access to that machine, I'd had to explain to my father my
@@ -147,14 +149,13 @@ Last but not least, writing software requires patience. Resilience to failure. A
 Acknowledge of success when new code runs the way it should.
 Fighting anger and frustration when things just don't go.
 Tolerance with the "Muggles" not willing to see the magic running under the hood.
-And finally understanding of the true nature of software: vacuity. Because all software of any kind under any form is
+Finally, writing software requires understanding of the true nature of software: vacuity.
+Because all software of any kind under any form is
 essentially an abstract algorithm performing elementary actions faster than
 our mind could.
-The creator of all software \textbf{is} our mind, but \textbf{no software can replace} our mind.
+The creator of all software \textbf{is} our mind, but \textbf{no software can replace} our mind.\footnote{Now in 2025 it seems that \textbf{AI} will prove me wrong.}
 
-Still they both are ephemeral, abstract.
-I leave to the reader an abstract taken from \quote{The Heart Sutra},
-my favourite lecture when in need of wiseness.
+I leave to the reader an abstract taken from \textit{The Heart Sutra}, my favourite lecture when in need of wiseness.
 
 I hope you will enjoy my software.
 
@@ -175,8 +176,7 @@ There is no ignorance and no elimination of ignorance and so on up to no aging a
 Likewise, there is no suffering, origin, cessation, or path; there is no wisdom, no attainment, and even no non-attainment.''}
 \vfill
 
-\mainmatter
-\chapter{Architecture}
+\chapter{The Architecture}
 \dictum[C.A.R. Hoare, The 1980 ACM Turing Award Lecture]{
 There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies and the other way is to make it so complicated that there are no obvious deficiencies.
 }
@@ -192,7 +192,10 @@ This kind of design is not innovative, it resembles most embedded OS available
 online, or what are commonly known as realtime OS.
 
 The hardware abstration is implemented with a well defined virtual interface
-{\color{Cerulean}\textbf{DiegOS}} is designed to be configurable, and the first confguration step is
+architecture commonly known as \textbf{HAL} or Hardware Abstraction Layer.
+
+{\color{Cerulean}\textbf{DiegOS}} is designed to be configurable, and the
+first configuration step is
 the definition of a tuple (processor, platform) which instructs the code and
 the compiler on what to do with very specific aspects of the hardware, like
 context switching or interrupt handling.
@@ -200,22 +203,28 @@ context switching or interrupt handling.
 \subsection{Overview}
 Using a bottom-up perspective the system is split into 3 layers
 
-\begin{enumerate}
-\item kernel layer composed by the kernel and the drivers
-\item libraries layer composed by libraries
-\item application layer composed by user space code
-\end{enumerate}
+\begin{center}
+    \renewcommand{\arraystretch}{2}
+    \begin{tabular}{| c | c || l |}
+    \hline
+    1 & Kernel & Layer composed by the kernel and the drivers \\ \hline
+    2 & Libraries & Layer composed by libraries \\ \hline
+    3 & Application & Layer composed by user space code \\
+    \hline
+    \end{tabular}
+\end{center}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\columnwidth]{diegos_layers}
+    \caption{The DiegOS layers structure}
 \end{figure}
 
 the \textbf{kernel} is composed of several items like a mutex manager to coordinate
 concurrency between threads, an alarm manager to implement timers, an event manager
-to exchange messages between threads, barriers, spin locks, I/O support for drivers.
+to exchange messages between threads, barriers, spin locks, \textbf{I/O} support for drivers.
 The inner part of the core is all about thread management and is not directly exposed
-to other modules, a specific kernel API is provided to access these components
+to other modules, a specific kernel API can be used to access those components
 from applications.
 
 Along with the \textbf{kernel} come the \textbf{drivers} which --- as the name
@@ -226,25 +235,35 @@ first abstraction stage, from hardware to software.
 
 The middle layer is occupied by \textbf{libraries}, any kind of API or utility
 which can be used by both the kernel and the applications.
-They are logically above the first layer as they abstract algorithms and data
-structures from raw memory, file access, network connections.
+They are logically above the first layer as they implement an abstraction for algorithms
+ and data structures to use raw memory, files or network connections.
+
+In {\color{Cerulean}\textbf{DiegOS}} both the kernel and the applications can
+use public functions exposed by the library layer.
 In a more restrictive design the kernel would never share code or data with
 applications, and this was the starting point also for {\color{Cerulean}\textbf{DiegOS}}, until it became
-clear that code was bloating and memory footprint was growing due to duplication
-in kernel and library codebases. In order to avoid these situations a compromise
-was decided, share code but not data.
+clear that code segregation was bloating the kernel and memory footprint was growing due to duplication
+in kernel and library codebases.
+
+In order to keep the binary size as small as possible a compromise is put in
+place, which is, to share code --- and not data --- between kernel and
+applications.
 
 The top layer is occupied by \textbf{applications} which are the actual
 portion of the code written by developers to do something useful. Although
 \textit{applications} recalls user space processes there is no concept of user and 
 kernel space in {\color{Cerulean}\textbf{DiegOS}}, applications are just code linked to the OS but using the 
 APIs offered by the kernel and the libraries.
+
 Still, applications are not allowed to call the kernel's internals directly.
+The kernel is an indipendent item and need to be isolated as much as possible.
+
+The following sections provide further details for each layer.
 
 \subsection{Layer 1: The kernel}
 Going a bit deeper into details, the \textbf{kernel} is composed by 4 specific
 items: the \textbf{scheduler}, the \textbf{system clock manager}, the
-\textbf{kernel interface} and the \textbf{threads synchronization APIs}.
+the \textbf{threads synchronization APIs} and the \textbf{kernel interface}.
 
 The \textbf{scheduler} is in charge of selecting a running thread among all
 available threads in the system; the implemented algorithm is a priority list
@@ -471,7 +490,7 @@ specific routine in charge of servicing the interrupt.\\
 The operating system or any driver will then just need to map interrupts,
 register callbacks, and run.
 
-\section{build system}
+\section{The Build System}
 The code base of {\color{Cerulean}\textbf{DiegOS}} builds using makefiles and the make tool, no ancillary
 tool is required apart for a C-language toolchain.\\
 Any toolchain can be deployed and used to compile and build {\color{Cerulean}\textbf{DiegOS}},
@@ -496,7 +515,12 @@ strings passed to the compiler.
 Again, while there are smarter solutions, this is a simple one and will not let the
 system become too complex.
 
-\chapter{System}
+\chapter{The System}
+\dictum[Dave Cutler]{
+Little did I know that I would be fortunate enough to develop several
+operating systems in my lifetime; developing one is a rare opportunity for
+anyone.
+}
 The kernel, the libraries, the applications, they are all parts of a whole
 system. A system with a well defined target: start applications and make them
 run in a steady environment.
@@ -517,11 +541,17 @@ of the hardware.
 
 Seldom the \textit{boot loader} will not load the operating system, but rather a \textit{second-stage loader} which will load
 and execute the operating system; this latter kind of executable is also known as \textit{monitor} and is capable
-of breaking and resuming the boot process, perform diagnostics, support early stage debugging
-for the purpose of debugging the initialization of the kernel, and allow selecting the binary to be loaded and run.
+of breaking and resuming the boot process, perform diagnostics, support early stage debugging.
 
-In {\color{Cerulean}\textbf{DiegOS}} the system loader is usually integrated into the OS binary, so that the OS will init
-the bare minimum hardware, read the content of the remaining binary into memory, and then continue with the execution.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\columnwidth]{boot_loader}
+    \caption{The booting process}
+\end{figure}
+
+In {\color{Cerulean}\textbf{DiegOS}} the system loader is usually integrated into the OS binary header, so that the \texttt{SoC}
+will execute the binary --- either from memory or from ROM --- and the first instructions executed will be the loader, which will init
+the bare minimum hardware, read the content of the remaining binary into memory, and then continue with the execution of the kernel.
 This implies that the hardware platform should be able to execute from a storage device\footnote{An internal or external ROM,
 a flash memory device, a hard disk.} and then jump to RAM.
 This also implies that the processor should be able to bootstrap from storage, or in other words, it should be able to access
@@ -529,7 +559,6 @@ storage in hardware with no software intervention.
 
 Some platforms follow a more structured approach where the \textit{boot loader} is an indipendent executable running alone as
 a bare metal application.
-
 
 \section{The boot code}
 The boot code belongs to the booting stage and it's ultimate goal is to
@@ -598,7 +627,7 @@ is not expected to happen.\footnote{No Operating System returns to the boot
 code after shutting down.}
 \end{enumerate}
 
-\section{System initialization}
+\section{System Initialization}
 Initialization is split into a set of function calls, acting on both hardware and
 software. 
 \begin{itemize}
@@ -622,7 +651,7 @@ at user's will.
 \item Run the kernel, this actually roll the ball and kicks the scheduler.
 \end{itemize}
 
-\section{The kernel}
+\section{The Kernel}
 The core functionalities of {\color{Cerulean}\textbf{DiegOS}} are enclosed in this library.
 The kernel is a single instance, single processor component; it does not
 support any kind of memory protection, and it is expecting to be able to access the
@@ -642,9 +671,10 @@ and this is not a goal for {\color{Cerulean}\textbf{DiegOS}}.
 \begin{figure}
     \centering
     \includegraphics[width=0.8\columnwidth]{kernel_handsketched}
+    \caption{The kernel}
 \end{figure}
 
-\section{Kernel services}
+\section{Kernel Services}
 The kernel offers the following services: a thread scheduler, a thread management API, 
 an alarm API, events queueing and dispatching, mutexes, barriers, I/O waiting and spin locks.\\
 Alarms, Events and Mutexes are all managed services, meaning that an owning thread
@@ -659,66 +689,11 @@ Threads can be suspended, halted, delayed, and removed\footnote{Removal means th
 thread will be killed.} but at least one thread must be ready to run at any time
 \footnote{This is the Idle thread, which cannot be killed.}.
 
-% Define block styles
-\tikzstyle{idle} = [rectangle, draw, fill=TealBlue, 
-    text width=5em, text centered,node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{norm} = [rectangle, draw, fill=Cerulean, 
-    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{high} = [rectangle, draw, fill=Goldenrod, 
-    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{rt} = [rectangle, draw, fill=Magenta, 
-    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{idle1} = [rectangle, draw, fill=TealBlue!50, 
-    text width=5em, text centered,node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{norm1} = [rectangle, draw, fill=Cerulean!50, 
-    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{high1} = [rectangle, draw, fill=Goldenrod!1, 
-    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{r1t} = [rectangle, draw, fill=Magenta!1, 
-    text width=5em, text centered, node distance=3cm, rounded corners, minimum height=6em]
-\tikzstyle{line} = [draw, -latex']
-\tikzstyle{run} = [circle, draw, fill=BurntOrange, 
-    text width=5em, text centered, node distance=4cm,  minimum height=5em]
-
 \begin{figure}
-\centering
-\begin{tikzpicture}[node distance = 3cm, outer sep=auto, inner sep=1em, thick]
-  % Place nodes
-\node [run] (run) {Running Thread};
-\node [idle, , below left of=run, node distance=5cm] (idle) {IDLE};
-\node [idle1, below of=idle] (idle1) {thread 1};
-\node [idle1, below of=idle1] (idle2) {thread 2};
-\node [idle1, below of=idle2] (idlen) {thread N};
-\node [norm, right of=idle, node distance=3cm] (norm) {NORMAL};
-\node [norm1, below of=norm, node distance=3cm] (norm1) {thread 1};
-\node [norm1, below of=norm1, node distance=3cm] (norm2) {thread 2};
-\node [norm1, below of=norm2, node distance=3cm] (normn) {thread M};
-\node [high, right of=norm, node distance=3cm] (high) {HIGH};
-\node [high, below of=high, node distance=3cm] (high1) {thread 1};
-\node [high, below of=high1, node distance=3cm] (highn) {thread O};
-\node [rt, right of=high, node distance=3cm] (rt) {REALTIME};
-\node [rt, below of=rt, node distance=3cm] (rt1) {thread P};
-
-   % Draw edges
- \path [line, dashed] (idle) --  (run);
- \path [line, dashed] (norm.north) -- (run);
- \path [line, dashed] (high.north) -- (run);
- \path [line, dashed] (rt.north) -- (run);
- \path [line, ultra thick] (norm) -- (idle);
- \path [line, ultra thick] (high) -- (norm);
- \path [line, ultra thick] (rt) -- (high);
- \path [line] (idle) -- (idle1);
- \path [line] (idle1) -- (idle2);
- \path [line] (idle2) -- (idlen);
- \path [line] (norm) -- (norm1);
- \path [line] (norm1) -- (norm2);
- \path [line] (norm2) -- (normn);
- \path [line] (high) -- (high1);
- \path [line] (high1) -- (highn);
- \path [line] (rt) -- (rt1);
- \end{tikzpicture}
- \caption{The scheduler}
- \end{figure}
+    \centering
+    \includegraphics[width=0.8\columnwidth]{the_scheduler}
+    \caption{The cooperative scheduler}
+\end{figure}
 
 The scheduler is designed to manage the threads' finite state machine and select 
 the running thread by using a priority queue schema. There are four
@@ -940,7 +915,7 @@ typedef struct driver_header {
 
 \end{lstlisting}
 
-\section{File system}
+\section{The File System}
 
 \section{Libraries}
 
@@ -958,15 +933,19 @@ front ends, interfaces, databases, applications.
 
 \section{Drivers interface}
 
-\chapter{File System architecture}
+\chapter{The File System architecture}
+\lipsum
 
-\chapter{Networking infrastructure}
+\chapter{The Networking infrastructure}
+\lipsum
 
 \chapter{The System Console}
+\lipsum
 
-\chapter{Debug infrastructure}
+\chapter{The Debug Infrastructure}
+\lipsum
 
-\chapter{Kernel implementation}
+\chapter{The Kernel Implementation}
 \subsection{Recommendations and other suggestions}
 The core functionalities are very simple: spawn a number of execution threads, run all
 of them one by one, interrupts \textbf{cannot and must not} invoke a context switch,
