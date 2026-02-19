@@ -5,4 +5,4 @@ all:
 	pslatex diegos.txt
 
 clean:
-	rm -f *.pdf diegos.toc diegos.log diegos.aux
+	rm -f *.pdf diegos.toc *.log diegos.aux
