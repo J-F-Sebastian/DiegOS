@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <diegos/kernel.h>
 #include <diegos/kernel_ticks.h>
 #include <diegos/mutexes.h>
@@ -340,34 +341,18 @@ mutex_t *thread_create_mutex(const char *name)
 	return (tmp);
 }
 
-void thread_lock_mutex(mutex_t *mtx)
+int thread_lock_mutex(mutex_t *mtx)
 {
-	thread_t *prev, *next;
-	BOOL is_locked;
-
-	if (!mtx) {
-		return;
-	}
-
-	prev = scheduler_running_thread();
-
-	is_locked = mutex_is_locked(mtx);
-
-	if (lock_mutex(prev->tid, mtx) && is_locked) {
-		scheduler_wait_thread(THREAD_FLAG_WAIT_MUTEX, 0);
-		schedule_thread();
-		next = scheduler_running_thread();
-		switch_context(&prev->context, next->context);
-	}
+	return thread_lock_mutex_timed(mtx, 0);
 }
 
-void thread_lock_mutex_timed(mutex_t *mtx, unsigned msecs)
+int thread_lock_mutex_timed(mutex_t *mtx, unsigned msecs)
 {
 	thread_t *prev, *next;
 	BOOL is_locked;
 
 	if (!mtx) {
-		return;
+		return (EINVAL);
 	}
 
 	prev = scheduler_running_thread();
@@ -379,16 +364,22 @@ void thread_lock_mutex_timed(mutex_t *mtx, unsigned msecs)
 		schedule_thread();
 		next = scheduler_running_thread();
 		switch_context(&prev->context, next->context);
+		if (msecs) {
+			return (mutex_is_locked_by_me(mtx)) ? (EOK) : (ETIMEDOUT);
+		}
+		return (EOK);
 	}
+
+	return (EBUSY);
 }
 
-void thread_unlock_mutex(mutex_t *mtx)
+int thread_unlock_mutex(mutex_t *mtx)
 {
 	uint8_t ptid;
 	thread_t *prev;
 
 	if (!mtx) {
-		return;
+		return (EINVAL);
 	}
 
 	if (unlock_mutex(my_thread_id(), mtx)) {
@@ -398,7 +389,11 @@ void thread_unlock_mutex(mutex_t *mtx)
 		if (prev) {
 			scheduler_resume_thread(THREAD_FLAG_WAIT_MUTEX, ptid);
 		}
+
+		return (EOK);
 	}
+
+	return (EPERM);
 }
 
 BOOL thread_mutex_is_locked(mutex_t *mtx)
@@ -406,17 +401,20 @@ BOOL thread_mutex_is_locked(mutex_t *mtx)
 	return (mutex_is_locked(mtx));
 }
 
-void thread_destroy_mutex(mutex_t *mtx)
+int thread_destroy_mutex(mutex_t *mtx)
 {
 	if (!mtx) {
-		return;
+		return (EINVAL);
 	}
 
 	if (thread_mutex_is_locked(mtx)) {
-		return;
+		return (EBUSY);
 	}
 
 	if (!done_mutex(mtx)) {
 		kerrprintf("Cannot destroy Mutex %s\n", ((struct mutex *)mtx)->name);
+		return (EINVAL);
 	}
+
+	return (EOK);
 }

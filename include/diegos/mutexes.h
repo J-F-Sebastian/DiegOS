@@ -25,18 +25,81 @@
 typedef struct mutex mutex_t;
 
 /*
- * mutexes management
+ * Create a new mutex with the specified name.
+ *
+ * PARAMETERS IN
+ * const char *name - the name of the mutex, for debugging purposes.
+ *
+ * RETURNS
+ * a pointer to the created mutex, or NULL on failure.
  */
 mutex_t *thread_create_mutex(const char *name);
 
-void thread_lock_mutex(mutex_t * mtx);
+/*
+ * Locks a mutex.
+ *
+ * PARAMETERS IN
+ * mutex_t *mtx - the mutex to be locked.
+ *
+ * RETURNS
+ * EOK on success
+ * EINVAL if the mutex is invalid
+ * EBUSY if the thread has already locked the mutex
+ */
+int thread_lock_mutex(mutex_t * mtx);
 
-void thread_lock_mutex_timed(mutex_t * mtx, unsigned msecs);
+/*
+ * Locks a mutex.
+ * If the mutex is already locked, the thread will be blocked until
+ * the mutex is unlocked or the timeout expires.
+ *
+ * PARAMETERS IN
+ * mutex_t *mtx - the mutex to be locked.
+ * unsigned msecs - the timeout in milliseconds, if 0, the thread will wait indefinitely.
+ *
+ * RETURNS
+ * EOK on success
+ * EINVAL if the mutex is invalid
+ * EBUSY if the thread has already locked the mutex
+ * ETIMEDOUT if the timeout expires before the mutex is locked
+ */
+int thread_lock_mutex_timed(mutex_t * mtx, unsigned msecs);
 
-void thread_unlock_mutex(mutex_t * mtx);
+/*
+ * Unlocks a mutex.
+ *
+ * PARAMETERS IN
+ * mutex_t *mtx - the mutex to be unlocked.
+ *
+ * RETURNS
+ * EOK on success
+ * EINVAL if the mutex is invalid
+ * EPERM if the thread does not own the mutex
+ */
+int thread_unlock_mutex(mutex_t * mtx);
 
+/*
+ * Checks if a mutex is locked.
+ *
+ * PARAMETERS IN
+ * mutex_t *mtx - the mutex to be checked.
+ *
+ * RETURNS
+ * TRUE if the mutex is locked, FALSE if it is unlocked or invalid.
+ */
 BOOL thread_mutex_is_locked(mutex_t * mtx);
 
-void thread_destroy_mutex(mutex_t * mtx);
+/*
+ * Destroys a mutex.
+ *
+ * PARAMETERS IN
+ * mutex_t *mtx - the mutex to be destroyed.
+ *
+ * RETURNS
+ * EOK on success
+ * EINVAL if the mutex is invalid
+ * EBUSY if the mutex is currently locked by any thread
+ */
+int thread_destroy_mutex(mutex_t * mtx);
 
 #endif				// MUTEXES_H_INCLUDED
