@@ -420,7 +420,7 @@ BOOL scheduler_resume_thread(uint32_t flags, uint8_t tid)
 		return (FALSE);
 	}
 
-	ptr->flags &= ~check;
+	ptr->flags &= ~THREAD_MASK_WAIT;
 	ptr->state = THREAD_READY;
 	ptr->delay = 0;
 
@@ -434,6 +434,8 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 	if ((THREAD_TID_IDLE == running->tid) || (THREAD_TID_TMRS == running->tid)) {
 		return (FALSE);
 	}
+
+	msecs += clock_get_milliseconds();
 
 	ptr = queue_head(&delay_queue);
 	if (!ptr || (msecs < ptr->delay)) {
@@ -455,6 +457,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 		}
 	}
 
+	running->flags &= ~THREAD_MASK_WAIT;
 	running->flags |= THREAD_FLAG_WAIT_TIMEOUT;
 	running->state = THREAD_WAITING;
 	running->delay = msecs;
@@ -479,9 +482,15 @@ BOOL scheduler_wait_thread(uint32_t flags, uint64_t msecs)
 	}
 
 	flags &= THREAD_MASK_EVENTS;
+	running->flags &= ~THREAD_MASK_WAIT;
 	running->flags |= flags;
 	running->state = THREAD_WAITING;
-	running->delay = msecs;
+	if (msecs) {
+		running->delay = clock_get_milliseconds() + msecs;
+		running->flags |= THREAD_FLAG_WAIT_TIMEOUT;
+	} else {
+		running->delay = 0;
+	}
 
 	return (TRUE);
 }
