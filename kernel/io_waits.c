@@ -65,14 +65,14 @@ int thread_io_wait_init(wait_queue_t *wq)
 	return EOK;
 }
 
-static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
+static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags, unsigned msecs)
 {
 	struct wait_queue_item *temp;
 	thread_t *prev, *next;
 	int retcode = EOK;
 
 	if (!wq) {
-		return EINVAL;
+		return (EINVAL);
 	}
 
 	lock();
@@ -80,7 +80,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 	temp = chunks_pool_malloc(wait_queue_items);
 	if (!temp) {
 		unlock();
-		return EPERM;
+		return (EPERM);
 	}
 
 	temp->flags = flags;
@@ -89,7 +89,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 	} else {
 		chunks_pool_free(wait_queue_items, temp);
 		unlock();
-		return EINVAL;
+		return (EINVAL);
 	}
 
 	retcode = list_append(wq, &temp->header);
@@ -98,33 +98,53 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags)
 		list_remove(wq, &temp->header);
 		chunks_pool_free(wait_queue_items, temp);
 		unlock();
-		return EPERM;
+		return (EPERM);
 	}
 
 	prev = scheduler_running_thread();
 
-	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION, 0)) {
+	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION, msecs)) {
 		kerrprintf("TID %u Cannot wait for I/O\n", prev);
 		list_remove(wq, &temp->header);
 		chunks_pool_free(wait_queue_items, temp);
 		unlock();
-		return EPERM;
+		return (EPERM);
 	}
 
 	unlock();
 
 	schedule_thread();
-
 	next = scheduler_running_thread();
-
 	switch_context(&prev->context, next->context);
 
-	return EOK;
+	retcode = EOK;
+	// This should defitively be improved
+	if (msecs) {
+		lock();
+		if (list_count(wq)) {
+			temp = list_head(wq);
+			while (temp) {
+				if (temp->tid == scheduler_running_tid()) {
+					retcode = ETIMEDOUT;
+					break;
+				}
+				temp = (struct wait_queue_item *)temp->header.next;
+			}
+		}
+		unlock();
+	}
+
+	return (retcode);
 }
 
 int thread_io_wait(wait_queue_t *wq)
 {
-	return (thread_io_wait_internal(wq, IO_WAIT_DEFAULT));
+	return (thread_io_wait_internal(wq, IO_WAIT_DEFAULT, 0));
+}
+
+int thread_io_wait_timed(wait_queue_t *wq, unsigned msecs)
+{
+	return (thread_io_wait_internal(wq, IO_WAIT_DEFAULT, msecs));
 }
 
 int thread_io_resume(wait_queue_t *wq)
@@ -150,7 +170,7 @@ int thread_io_resume(wait_queue_t *wq)
 	}
 	unlock();
 
-	return EOK;
+	return (EOK);
 }
 
 /*
