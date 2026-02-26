@@ -38,10 +38,12 @@ BOOL init_mutex_lib(void);
 
 /*
  * Initialize a new mutex.
+ *
  * PARAMETERS IN
  * const char *name - name of the mutex, optional. If no name is provided,
  *                    a default willb e generated.
- * RETURN VALUES
+ *
+ * RETURNS
  * TRUE success.
  * FALSE any other case.
  */
@@ -49,9 +51,11 @@ struct mutex *init_mutex(const char *name);
 
 /*
  * Terminate a mutex.
+ *
  * PARAMETERS IN
  * struct mutex *mtx - the mutex to be locked.
- * RETURN VALUES
+ *
+ * RETURNS
  * TRUE success.
  * FALSE any other case.
  */
@@ -62,6 +66,7 @@ BOOL done_mutex(struct mutex *mtx);
  * other threads trying the same will be put in a wait FIFO queue.
  * A thread can call lock_mutex multiple times before releasing the lock;
  * calls other than the first are no-op.
+ *
  * PARAMETERS IN
  * uint8_t tid - the TID of the locking thread.
  * struct mutex *mtx - the mutex to be locked.
@@ -80,14 +85,28 @@ BOOL lock_mutex(uint8_t tid, struct mutex *mtx);
 BOOL unlock_mutex(uint8_t tid, struct mutex *mtx);
 
 /*
- * Test if a mutex is locked. this function should be used to poll a mutex
+ * Test if a mutex is locked by any thread.
+ * This function should be used to poll a mutex
  * status without incurring in suspension.
- * RETURN VALUES
+ *
+ * RETURNS
  * TRUE the mutex is locked.
  * FALSE the mutex is unlocked.
  */
 BOOL mutex_is_locked(struct mutex *mtx);
 
+/*
+ * Cancel the wait on a mutex for a specific thread.
+ * This function is called when a thread is terminated or when it is
+ * explicitly cancelled by another thread.
+ *
+ * PARAMETERS IN
+ * uint8_t tid - the TID of the thread to be cancelled.
+ *
+ * RETURNS
+ * 0 if the cancellation was successful.
+ * -1 if the cancellation failed.
+ */
 int cancel_wait_on_mutex(uint8_t tid);
 
 /*
