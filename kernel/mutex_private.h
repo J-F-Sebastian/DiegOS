@@ -78,6 +78,7 @@ BOOL lock_mutex(uint8_t tid, struct mutex *mtx);
  * thread found in the waiting queue is woken up and given a new lock
  * on the mutex.
  * If the waiting queue is empty, the mutex is unlocked.
+ *
  * PARAMETERS IN
  * uint8_t tid - the TID of the locking thread.
  * struct mutex *mtx - the mutex to be locked.
@@ -94,6 +95,15 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx);
  * FALSE the mutex is unlocked.
  */
 BOOL mutex_is_locked(struct mutex *mtx);
+
+/*
+ * Test if a mutex is locked by the caller thread.
+ *
+ * RETURNS
+ * TRUE the mutex is locked.
+ * FALSE the mutex is unlocked.
+ */
+BOOL mutex_is_locked_by_me(struct mutex *mtx);
 
 /*
  * Cancel the wait on a mutex for a specific thread.

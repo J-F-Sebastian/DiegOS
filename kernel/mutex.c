@@ -24,6 +24,7 @@
 #include <libs/list.h>
 
 #include "threads.h"
+#include "scheduler.h"
 #include "mutex_private.h"
 #include "kprintf.h"
 
@@ -162,6 +163,12 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx)
 BOOL mutex_is_locked(struct mutex *mtx)
 {
 	return ((mtx && (THREAD_TID_INVALID != mtx->locker_tid))
+		? (TRUE) : (FALSE));
+}
+
+BOOL mutex_is_locked_by_me(struct mutex *mtx)
+{
+	return ((mtx && (scheduler_running_tid() == mtx->locker_tid))
 		? (TRUE) : (FALSE));
 }
 
