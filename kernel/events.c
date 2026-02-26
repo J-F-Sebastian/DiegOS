@@ -174,13 +174,17 @@ void event_free(event_t *ev)
 	}
 }
 
-void wait_for_events(ev_queue_t *evqueue)
+int wait_for_events(ev_queue_t *evqueue)
+{
+	return wait_for_events_timed(evqueue, 0);
+}
+
+int wait_for_events_timed(ev_queue_t *evqueue, unsigned msecs)
 {
 	thread_t *prev, *next;
 
 	if (!evqueue) {
-		errno = EINVAL;
-		return;
+		return (EINVAL);
 	}
 
 	prev = scheduler_running_thread();
@@ -188,26 +192,25 @@ void wait_for_events(ev_queue_t *evqueue)
 	if (evqueue->threadid != prev->tid) {
 		kerrprintf("TID %d is already watching %s for events.\n",
 			   evqueue->threadid, evqueue->name);
-		return;
+		return (EPERM);
 	}
 
 	if (queue_count(&evqueue->msgqueue)) {
 		kerrprintf("events queue %s has events!\n", evqueue->name);
-		return;
+		return (EOK);
 	}
 
-	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_EVENT, 0)) {
+	if (!scheduler_wait_thread(THREAD_FLAG_WAIT_EVENT, msecs)) {
 		kerrprintf("Cannot wait for events TID %u\n", prev);
-		return;
+		return (EPERM);
 	}
 
 	bitmap_set(thread_ids, prev->tid);
-
 	schedule_thread();
-
 	next = scheduler_running_thread();
-
 	switch_context(&prev->context, next->context);
+
+	return (queue_count(&evqueue->msgqueue) ? EOK : ETIMEDOUT);
 }
 
 BOOL init_events_lib()

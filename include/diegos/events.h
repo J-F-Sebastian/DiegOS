@@ -151,12 +151,38 @@ void event_free(event_t * ev);
  * Suspend thread execution until one or more events are stored in the queue.
  * After at least one event is queued, the listening thread is woken up.
  * Suspension is NOT timed.
+ * If the events queue has already events, the thread is NOT suspended and
+ * the function returns immediately.
  *
  * PARAMETERS IN
  * ev_queue_t *evqueue - pointer to a events queue object
  *
+ * RETURNS
+ * EOK in case of success
+ * EINVAL if evqueue is NULL
+ * EPERM if the thread cannot be set to wait state
  */
-void wait_for_events(ev_queue_t * evqueue);
+int wait_for_events(ev_queue_t * evqueue);
+
+/*
+ * Suspend thread execution until one or more events are stored in the queue
+ * or the timeout expires.
+ * After at least one event is queued, the listening thread is woken up.
+ * If the timer expires the thread is woken up even if no event is queued.
+ * If the events queue has already events, the thread is NOT suspended and
+ * the function returns immediately.
+ *
+ * PARAMETERS IN
+ * ev_queue_t *evqueue - pointer to a events queue object
+ * unsigned msecs - the timeout in milliseconds, if 0, the thread will wait indefinitely.
+ *
+ * RETURNS
+ * EOK in case of success
+ * EINVAL if evqueue is NULL
+ * EPERM if the thread cannot be set to wait state
+ * ETIMEDOUT if the timeout expires before any event is queued
+ */
+int wait_for_events_timed(ev_queue_t * evqueue, unsigned msecs);
 
 /*
  * Print to stderr the specified events queue's configuration and status.
