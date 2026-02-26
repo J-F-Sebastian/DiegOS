@@ -101,6 +101,27 @@ static queue_inst wait_queue = {
 	.counter = 0
 };
 
+static uint32_t new_delay_wq = SCHED_DELAY_MAX;
+static uint32_t new_delay_dq = SCHED_DELAY_MAX;
+
+/*
+ * Compute remaining delay for a thread.
+ * The output parameter is updated only if the thread delay is greater than
+ * the current time and less than the current new delay.
+ * nd is updated only if the remaining delay is not null and the same is lesser
+ * than nd.
+ * Calling this function repeatedly updates nd to be the minimum remaining delay for
+ * the threads involved.
+ */
+static inline void update_new_delay(uint64_t now, thread_t *ptr, uint32_t *nd)
+{
+	if (ptr->delay > now) {
+		if (ptr->delay - now < *nd) {
+			*nd = ptr->delay - now;
+		}
+	}
+}
+
 /*
  * Perform house keeping, destroying dead threads waiting
  * in the dead queue (the green mile !).
@@ -191,10 +212,14 @@ static void schedule_waiting(void)
 	uint64_t expiration = clock_get_milliseconds();
 	thread_t *ptr, *temp;
 	unsigned i;
+	queue_inst *rqueue;
+
+	new_delay_wq = SCHED_DELAY_MAX;
 
 	i = queue_count(&wait_queue);
 	while (i--) {
 		ptr = queue_head(&wait_queue);
+		rqueue = ready_queues + ptr->priority;
 
 		switch (ptr->state) {
 		case THREAD_WAITING:
@@ -207,21 +232,23 @@ static void schedule_waiting(void)
 				} else {
 					temp->state = THREAD_DEAD;
 				}
-			} else if ((ptr->flags & THREAD_FLAG_WAIT_TIMEOUT)
-				   && (ptr->delay <= expiration)) {
-				if (EOK != queue_dequeue(&wait_queue, (queue_node **) & temp)) {
-					kerrprintf("failed extracting TID %d from wait queue\n",
-						   ptr->tid);
-				} else {
-					if (!scheduler_resume_thread
-					    (temp->flags & THREAD_MASK_EVENTS, temp->tid)) {
-						kerrprintf("failed resuming TID %d\n", temp->tid);
-					} else if (EOK !=
-						   queue_enqueue(&ready_queues[temp->priority],
-								 &temp->header)) {
-						kerrprintf("failed moving TID %d to ready queue\n",
-							   temp->tid);
+			} else if (ptr->flags & THREAD_FLAG_WAIT_TIMEOUT) {
+				if (ptr->delay <= expiration) {
+					if (EOK != queue_dequeue(&wait_queue, (queue_node **) & temp)) {
+						kerrprintf("failed extracting TID %d from wait queue\n",
+							   ptr->tid);
+					} else {
+						if (!scheduler_resume_thread
+						(temp->flags & THREAD_MASK_EVENTS, temp->tid)) {
+							kerrprintf("failed resuming TID %d\n", temp->tid);
+						} else if (EOK !=
+							queue_enqueue(rqueue, &temp->header)) {
+							kerrprintf("failed moving TID %d to ready queue\n",
+								   temp->tid);
+						}
 					}
+				} else {
+					update_new_delay(expiration, ptr, &new_delay_wq);
 				}
 			}
 			break;
@@ -230,9 +257,13 @@ static void schedule_waiting(void)
 			if (EOK != queue_dequeue(&wait_queue, (queue_node **) & temp)) {
 				kerrprintf("failed extracting TID %d from wait queue\n", ptr->tid);
 			} else if (EOK !=
-				   queue_enqueue(&ready_queues[temp->priority], &temp->header)) {
+				   queue_enqueue(rqueue, &temp->header)) {
 				kerrprintf("failed moving TID %d to ready queue\n", temp->tid);
 			}
+			break;
+
+		default:
+			kerrprintf("TID %d in wrong state %d in wait queue\n", ptr->tid, ptr->state);
 			break;
 		}
 
@@ -258,6 +289,8 @@ static void schedule_delayed(void)
 	thread_t *ptr = queue_head(&delay_queue);
 	thread_t *temp;
 
+	new_delay_dq = SCHED_DELAY_MAX;
+
 	while (ptr && (ptr->delay <= expiration)) {
 		if (EOK != queue_dequeue(&delay_queue, (queue_node **) & temp)) {
 			kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
@@ -279,21 +312,8 @@ static void schedule_delayed(void)
 		}
 		ptr = queue_head(&delay_queue);
 	}
-}
 
-/*
- * Peek at the top expiration time in the delay queue.
- * In case the delay is longer than SCHED_DELAY_MAX,
- * return SCHED_DELAY_MAX.
- */
-static inline uint32_t peek_top_expiration(void)
-{
-	thread_t *ptr = queue_head(&delay_queue);
-	uint64_t now = clock_get_milliseconds();
-	uint64_t retval;
-
-	retval = (ptr->delay > now) ? (ptr->delay - now) : 0;
-	return (retval < SCHED_DELAY_MAX) ? (uint32_t) retval : SCHED_DELAY_MAX;
+	update_new_delay(expiration , ptr, &new_delay_dq);
 }
 
 void schedule_thread()
@@ -350,10 +370,13 @@ void update_schedule()
 	 */
 	if (queue_count(&delay_queue)) {
 		schedule_delayed();
-		if (queue_count(&delay_queue)) {
-			new_delay = peek_top_expiration();
-		}
 	}
+
+	if (new_delay_dq < new_delay_wq)
+		new_delay = new_delay_dq;
+	else
+		new_delay = new_delay_wq;
+
 	if (FALSE == clock_set_period(new_delay, CLK_INST_SCHEDULER)) {
 		kerrprintf("Clock device failed in %s\n", __FUNCTION__);
 	}
