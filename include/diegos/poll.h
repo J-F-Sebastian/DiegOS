@@ -80,10 +80,12 @@ typedef struct poll_table poll_table_t;
  *
  * RETURNS
  * EINVAL if ufds is NULL or nfds is 0 or greater than the maximum open files.
- * EAGAIN if the operation cannot be performed due to resources starvation
+ * ENOMEM if the operation cannot be performed due to resources starvation
  * ENOSYS if poll cannot be performed by one of the underlying drivers.
  * EPERM if the thread cannot be suspended to wait for completion.
- * EOK if the operation completed successfully.
+ * ETIMEDOUT if the timeout expired before any event could happen.
+ * A positive value which is the number of elements in ufds whose revents
+ * fields have been set to a nonzero value (indicating an event or an error).
  */
 int poll(struct pollfd ufds[], unsigned nfds, int timeout);
 

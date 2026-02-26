@@ -93,6 +93,8 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 	fd_data_t *cursor;
 	thread_t *prev, *next;
 	short events;
+	uint64_t to;
+	int retvalue = 0;
 
 	if (!ufds || !nfds || (nfds > OPEN_MAX)) {
 		return EINVAL;
@@ -101,13 +103,13 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 	newtable = chunks_pool_malloc(poll_tables);
 
 	if (!newtable) {
-		return EAGAIN;
+		return ENOMEM;
 	}
 
 	if ((EOK != list_prepend(&poll_table_list, &newtable->header)) ||
 	    (EOK != queue_init(&newtable->table))) {
 		chunks_pool_free(poll_tables, newtable);
-		return EAGAIN;
+		return ENOMEM;
 	}
 
 	newtable->signalled = 0;
@@ -130,10 +132,11 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 		}
 	}
 
-	if (!newtable->signalled) {
+	if (!newtable->signalled && (timeout != 0)) {
+		to = (timeout < 0) ? 0 : timeout;
 		prev = scheduler_running_thread();
 
-		if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION, 0)) {
+		if (!scheduler_wait_thread(THREAD_FLAG_WAIT_COMPLETION, to)) {
 			kerrprintf("TID %u Cannot wait for poll\n", prev);
 			cleanup(newtable);
 			return EPERM;
@@ -155,12 +158,15 @@ int poll(struct pollfd ufds[], unsigned nfds, int timeout)
 			}
 			ufds[i].events = events;
 			ufds[i].events &= ufds[i].revents;
+			if (ufds[i].events) {
+				retvalue++;
+			}
 		}
 	}
 
 	cleanup(newtable);
 
-	return EOK;
+	return (retvalue) ? retvalue : ETIMEDOUT;
 }
 
 int poll_network(struct pollfd ufds[], unsigned nfds, int timeout)
