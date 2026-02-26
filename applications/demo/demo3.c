@@ -50,7 +50,7 @@ static void demo_thread_entry(void)
 				printf("SKIP\n");
 			}
 		}
-		printf("Going to wait PID %d\n", my_thread_id());
+		printf("Going to wait TID %d\n", my_thread_id());
 	}
 	printf("Going going gone!!!\n");
 	thread_terminate();
@@ -82,7 +82,7 @@ static void demo_thread_entry2(void)
 		if (EOK != event_put(events, evt, free)) {
 			printf("FAILURE 2 !!!\n");
 		}
-		printf("Going to delay PID %d\n", my_thread_id());
+		printf("Going to delay TID %d\n", my_thread_id());
 	}
 	printf("Going going gone!!!\n");
 	running = 0;

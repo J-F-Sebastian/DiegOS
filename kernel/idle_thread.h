@@ -24,7 +24,7 @@
  * Idle thread entry point.
  * The idle thread will enter an infinite loop performing a
  * call to a power save function and then suspending.
- * The idle thread PID value is 0.
+ * The idle thread TID value is 0.
  * The idle thread CANNOT be killed, CANNOT be terminated,
  * CANNOT wait.
  * The idle priority is the lowest possible, so the idle thread

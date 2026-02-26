@@ -162,7 +162,7 @@ static inline void house_keeping(void)
 			}
 		} else {
 			if (EOK != queue_enqueue(&dead_queue, &temp->header)) {
-				kerrprintf("tid %d is lost dead!\n", temp->tid);
+				kerrprintf("TID %d is lost dead!\n", temp->tid);
 			}
 		}
 		--i;
@@ -182,7 +182,7 @@ static inline BOOL new_runner(unsigned q)
 		if (temp->flags & THREAD_FLAG_TERMINATE) {
 
 			if (EOK != queue_enqueue(&dead_queue, &temp->header)) {
-				kerrprintf("failed killing PID %d\n", temp->tid);
+				kerrprintf("failed killing TID %d\n", temp->tid);
 			} else {
 				temp->state = THREAD_DEAD;
 			}
@@ -228,7 +228,7 @@ static void schedule_waiting(void)
 					kerrprintf("failed extracting TID %d from wait queue\n",
 						   ptr->tid);
 				} else if (EOK != queue_enqueue(&dead_queue, &temp->header)) {
-					kerrprintf("failed killing PID %d\n", temp->tid);
+					kerrprintf("failed killing TID %d\n", temp->tid);
 				} else {
 					temp->state = THREAD_DEAD;
 				}
@@ -293,7 +293,7 @@ static void schedule_delayed(void)
 
 	while (ptr && (ptr->delay <= expiration)) {
 		if (EOK != queue_dequeue(&delay_queue, (queue_node **) & temp)) {
-			kerrprintf("failed resuming delayed PID %u\n", ptr->tid);
+			kerrprintf("failed resuming delayed TID %u\n", ptr->tid);
 			/*
 			 * Break the loop as much probably the data structure is
 			 * corrupted, probably an assert or abort would be better
@@ -410,7 +410,7 @@ BOOL scheduler_init()
 BOOL scheduler_suspend_thread()
 {
 	if (EOK != queue_enqueue(&ready_queues[running->priority], &running->header)) {
-		kerrprintf("failed suspending PID %d\n", running->tid);
+		kerrprintf("failed suspending TID %d\n", running->tid);
 		return (FALSE);
 	}
 
@@ -463,7 +463,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 	ptr = queue_head(&delay_queue);
 	if (!ptr || (msecs < ptr->delay)) {
 		if (EOK != queue_insert(&delay_queue, &running->header, NULL)) {
-			kerrprintf("failed delaying PID %d\n", running->tid);
+			kerrprintf("failed delaying TID %d\n", running->tid);
 			return (FALSE);
 		}
 	} else {
@@ -475,7 +475,7 @@ BOOL scheduler_delay_thread(uint64_t msecs)
 			ptr = (thread_t *) ptr->header.next;
 		}
 		if (EOK != queue_insert(&delay_queue, &running->header, &ptr->header)) {
-			kerrprintf("failed delaying PID %d\n", running->tid);
+			kerrprintf("failed delaying TID %d\n", running->tid);
 			return (FALSE);
 		}
 	}
@@ -500,7 +500,7 @@ BOOL scheduler_wait_thread(uint32_t flags, uint64_t msecs)
 	}
 
 	if (EOK != queue_enqueue(&wait_queue, &running->header)) {
-		kerrprintf("failed waiting PID %d\n", running->tid);
+		kerrprintf("failed waiting TID %d\n", running->tid);
 		return (FALSE);
 	}
 
@@ -530,7 +530,7 @@ BOOL scheduler_add_thread(uint8_t tid)
 	retcode = queue_enqueue(&ready_queues[ptr->priority], &ptr->header);
 
 	if (EOK != retcode) {
-		kerrprintf("failed scheduling PID %d\n", tid);
+		kerrprintf("failed scheduling TID %d\n", tid);
 	}
 
 	return ((EOK == retcode) ? (TRUE) : (FALSE));
@@ -561,7 +561,7 @@ BOOL scheduler_remove_thread(uint8_t tid)
 	case THREAD_RUNNING:
 		ptr->state = THREAD_DEAD;
 		if (EOK != queue_enqueue(&dead_queue, &ptr->header)) {
-			kerrprintf("failed killing PID %d\n", tid);
+			kerrprintf("failed killing TID %d\n", tid);
 			return (FALSE);
 		}
 		break;
@@ -570,21 +570,21 @@ BOOL scheduler_remove_thread(uint8_t tid)
 		switch (ptr->flags & THREAD_MASK_WAIT) {
 		case THREAD_FLAG_WAIT_EVENT:
 			if (EOK != cancel_wait_for_events(tid)) {
-				kerrprintf("failed killing PID %d\n", tid);
+				kerrprintf("failed killing TID %d\n", tid);
 				return (FALSE);
 			}
 			break;
 
 		case THREAD_FLAG_WAIT_BARRIER:
 			if (EOK != cancel_wait_for_barrier(tid)) {
-				kerrprintf("failed killing PID %d\n", tid);
+				kerrprintf("failed killing TID %d\n", tid);
 				return (FALSE);
 			}
 			break;
 
 		case THREAD_FLAG_WAIT_COMPLETION:
 			if (EOK != cancel_io_waits(tid)) {
-				kerrprintf("failed killing PID %d\n", tid);
+				kerrprintf("failed killing TID %d\n", tid);
 				return (FALSE);
 			}
 			break;
@@ -599,12 +599,12 @@ BOOL scheduler_remove_thread(uint8_t tid)
 			 * as if they were running threads.
 			 */
 			if (EOK != cancel_wait_on_mutex(tid)) {
-				kerrprintf("failed killing PID %d\n", tid);
+				kerrprintf("failed killing TID %d\n", tid);
 				return (FALSE);
 			} else {
 				ptr->state = THREAD_DEAD;
 				if (EOK != queue_enqueue(&dead_queue, &ptr->header)) {
-					kerrprintf("failed killing PID %d\n", tid);
+					kerrprintf("failed killing TID %d\n", tid);
 					return (FALSE);
 				}
 			}
