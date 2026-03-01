@@ -164,9 +164,11 @@ static void console_main_entry(void)
 	}
 
 	event_t *ev = (event_t *) malloc(sizeof(*ev));
-	ev->classid = CLASS_THREAD;
-	ev->eventid = 0xdead;
-	event_put(events, ev, free);
+	if (ev) {
+		ev->classid = CLASS_THREAD;
+		ev->eventid = 0xdead;
+		event_put(events, ev, free);
+	}
 
 	tmptime = time(NULL);
 	printf("\n *** [%s] Session terminated\n", ctime(&tmptime));
