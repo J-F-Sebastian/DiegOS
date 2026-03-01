@@ -267,13 +267,17 @@ static void do_write()
 	putchar('\n');
 	buffer = malloc(len);
 
-	for (i = 0; i < len; i++)
-		buffer[i] = ('0' + i % 16);
+	if (buffer) {
+		for (i = 0; i < len; i++)
+			buffer[i] = ('0' + i % 16);
 
-	if (FAT_write(&vol, path, offset, buffer, len, &wrtlen))
-		printf("* WRITE ERROR %d\n", wrtlen);
+		if (FAT_write(&vol, path, offset, buffer, len, &wrtlen))
+			printf("* WRITE ERROR %d\n", wrtlen);
 
-	free(buffer);
+		free(buffer);
+	} else {
+		printf("* ERROR: CANNOT ALLOCATE BUFFER\n");
+	}
 }
 
 static void do_read()
