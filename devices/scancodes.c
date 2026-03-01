@@ -68,15 +68,15 @@ static const char *codepages[] = {
 };
 
 enum KBDSTATUS {
-	KBD_LSHIFT = (1 << 31),
-	KBD_RSHIFT = (1 << 30),
-	KBD_LCTRL = (1 << 27),
-	KBD_RCTRL = (1 << 26),
-	KBD_LALT = (1 << 23),
-	KBD_RALT = (1 << 22),
-	KBD_CAPSLOCK = (1 << 15),
-	KBD_NUMLOCK = (1 << 14),
-	KBD_SCRLOCK = (1 << 13)
+	KBD_LSHIFT = (1UL << 31),
+	KBD_RSHIFT = (1UL << 30),
+	KBD_LCTRL = (1UL << 27),
+	KBD_RCTRL = (1UL << 26),
+	KBD_LALT = (1UL << 23),
+	KBD_RALT = (1UL << 22),
+	KBD_CAPSLOCK = (1UL << 15),
+	KBD_NUMLOCK = (1UL << 14),
+	KBD_SCRLOCK = (1UL << 13)
 };
 
 static unsigned codepage = US;
