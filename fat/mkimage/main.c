@@ -74,6 +74,19 @@ int main(int argc, char *argv[])
 	bs = calloc(1, strlen(&argv[i][0]) + 1);
 	os = calloc(1, strlen(&argv[i + 2][0]) + 1);
 	img = calloc(1, strlen(&argv[i + 4][0]) + 1);
+
+	if (!bs || !os || !img) {
+		printf("ERROR: CANNOT ALLOCATE MEMORY\n");
+		if (bs)
+			free(bs);
+		if (os)
+			free(os);
+		if (img)
+			free(img);
+
+		return -1;
+	}
+
 	strncpy(bs, &argv[i][0], strlen(&argv[i][0]));
 	strncpy(os, &argv[i + 2][0], strlen(&argv[i + 2][0]));
 	strncpy(img, &argv[i + 4][0], strlen(&argv[i + 4][0]));

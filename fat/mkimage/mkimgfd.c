@@ -72,7 +72,9 @@ int mkimgfd(const char *image, const char *bootsec, const char *diegos)
 	}
 
 	fseek(bootsector, 62, SEEK_SET);
-	retcode = fread(buffer.bootcode, sizeof(buffer.bootcode) + 2, 1, bootsector);
+	/* retcode = fread(buffer.bootcode, sizeof(buffer.bootcode) + 2, 1, bootsector); */
+	/* keep cppcheck happy */
+	retcode = fread((char *)&buffer + 62, sizeof(buffer.bootcode) + 2, 1, bootsector);
 	fclose(bootsector);
 
 	if (retcode != 1) {
@@ -94,6 +96,7 @@ int mkimgfd(const char *image, const char *bootsec, const char *diegos)
 	*(short *)(buffer.BPB_RsvdSecCnt) = temp;
 
 	if (disk_write(ctx, 0, 1, (char *)&buffer)) {
+		fclose(os);
 		disk_done(ctx);
 		return -1;
 	}
