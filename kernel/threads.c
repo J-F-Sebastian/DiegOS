@@ -121,9 +121,12 @@ uint8_t init_thread(const char *name,
 
 BOOL done_thread(uint8_t tid)
 {
+	char name[THREAD_NAME_MAX + 1];
 	thread_t *th = get_thread(tid);
 
 	if (th) {
+		strncpy(name, th->name, THREAD_NAME_MAX);
+		name[THREAD_NAME_MAX] = 0;
 		if (th->flags & THREAD_FLAG_REL_STACK) {
 			free(th->stack);
 		}
@@ -131,7 +134,7 @@ BOOL done_thread(uint8_t tid)
 		memset(th, 0, sizeof(*th));
 		th->tid = THREAD_TID_INVALID;
 		--thread_num;
-		kprintf("TID %u killed\n", tid);
+		kprintf("TID %u [%s] killed\n", tid, name);
 		return (TRUE);
 	}
 
