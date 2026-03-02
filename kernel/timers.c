@@ -305,11 +305,12 @@ void timers_thread_entry(void)
 
 	while (EOK == wait_for_barrier(bar)) {
 
+		lock();
+
 		if (!list_count(&timers_list)) {
+			unlock();
 			continue;
 		}
-
-		lock();
 
 		cursor = list_head(&timers_list);
 
