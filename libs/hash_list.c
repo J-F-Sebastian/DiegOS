@@ -131,10 +131,14 @@ int hash_list_del(hash_list_inst_t *list, hash_t hash)
 	hash_list_item_t *cursor, *prev;
 
 	if (!list) {
-		return EINVAL;
+		return (EINVAL);
 	}
 
 	cursor = list->list + (hash % list->hash_size);
+	if (!cursor)
+	{
+		return (EGENERIC);
+	}
 
 	/*
 	 * No folding is a special case
@@ -142,7 +146,7 @@ int hash_list_del(hash_list_inst_t *list, hash_t hash)
 	if ((cursor->hash == hash) && !cursor->next) {
 		cursor->data = NULL;
 		cursor->hash = 0;
-		return EOK;
+		return (EOK);
 	}
 
 	prev = cursor;
@@ -154,13 +158,13 @@ int hash_list_del(hash_list_inst_t *list, hash_t hash)
 				free(cursor);
 				prev->next = NULL;
 			}
-			return EOK;
+			return (EOK);
 		}
 		prev = cursor;
 		cursor = cursor->next;
 	}
 
-	return EGENERIC;
+	return (EGENERIC);
 }
 
 /*
