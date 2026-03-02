@@ -333,8 +333,11 @@ int formatted_scan(FILE *stream, const char *format, va_list ap)
 		case 'c':
 			if (!(flags & WIDTHSPEC))
 				width = 1;
-			if (!(flags & NO_ASSIGN))
+			if (!(flags & NO_ASSIGN)) {
 				str = va_arg(ap, char *);
+				if (!str)
+					return (done);
+			}
 			if (!width)
 				return (done);
 
@@ -356,8 +359,11 @@ int formatted_scan(FILE *stream, const char *format, va_list ap)
 		case 's':
 			if (!(flags & WIDTHSPEC))
 				width = 0xffff;
-			if (!(flags & NO_ASSIGN))
+			if (!(flags & NO_ASSIGN)) {
 				str = va_arg(ap, char *);
+				if (!str)
+					return (done);
+			}
 			if (!width)
 				return (done);
 
