@@ -38,18 +38,11 @@ BOOL init_thread_lib()
 		return (FALSE);
 	}
 
-	thread_storage =
-	    (thread_t *) malloc(DIEGOS_MAX_THREADS * sizeof(*thread_storage) + CACHE_ALN);
+	thread_storage = (thread_t *) malloc(DIEGOS_MAX_THREADS * sizeof(*thread_storage));
 	if (!thread_storage) {
 		return (FALSE);
 	}
 
-	/*
-	 * We are loosing pointers here, it is voluntary as no one will ever
-	 * claim memory back, unless you reboot/reset/reload, and in that case
-	 * anything will be cleared out.
-	 */
-	thread_storage = (thread_t *) ALNC((uintptr_t) thread_storage);
 	memset(thread_storage, 0, DIEGOS_MAX_THREADS * sizeof(*thread_storage));
 
 	for (i = 0; i < DIEGOS_MAX_THREADS; i++) {
