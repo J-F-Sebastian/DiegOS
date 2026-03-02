@@ -313,7 +313,9 @@ static void schedule_delayed(void)
 		ptr = queue_head(&delay_queue);
 	}
 
-	update_new_delay(expiration , ptr, &new_delay_dq);
+	if (ptr) {
+		update_new_delay(expiration, ptr, &new_delay_dq);
+	}
 }
 
 void schedule_thread()
