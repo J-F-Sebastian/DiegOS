@@ -24,6 +24,20 @@
 
 void system_parser_init(const struct alternates *root);
 
-void system_parser(const char *buffer, unsigned bufsize);
+/*
+ * Parse the input buffer and execute the corresponding command, if any.
+ * The buffer is not null-terminated, but the size is given as a parameter.
+ *
+ * PARAMETERS IN
+ * const char *buffer: the input buffer to parse
+ * unsigned bufsize: the size of the input buffer
+ *
+ * RETURNS
+ *
+ * EOK on success, the parsed string matches a true command and the command was executed successfully.
+ * EINVAL if the input buffer is invalid (e.g., null pointer, zero size).
+ * EILSEQ if the input buffer contains an unrecognized command or an invalid command format.
+ */
+int system_parser(const char *buffer, unsigned bufsize);
 
 #endif				// SYSTEM_PARSER_H_INCLUDED

@@ -62,7 +62,7 @@ void system_parser_init(const struct alternates *root)
 	system_root = root;
 }
 
-void system_parser(const char *buffer, unsigned bufsize)
+int system_parser(const char *buffer, unsigned bufsize)
 {
 	char buffer2[128];
 	char *token = NULL, *saveptr = NULL;
@@ -70,13 +70,13 @@ void system_parser(const char *buffer, unsigned bufsize)
 	const struct alt_command *cmd = NULL;
 
 	if (!buffer || !bufsize) {
-		return;
+		return (EINVAL);
 	}
 
 	strncpy(buffer2, buffer, sizeof(buffer2));
 	token = strtok_r(buffer2, " ", &saveptr);
 	if (!token)
-		return;
+		return (EILSEQ);
 
 	while (token && cmdchain) {
 		if (token[0] == '\t') {
@@ -94,13 +94,14 @@ void system_parser(const char *buffer, unsigned bufsize)
 						if (fn)
 							fn();
 					}
-					return;
+					return (EOK);
 				}
 			} else {
 				system_parser_print_help(cmdchain, -1U);
-				puts("SYNTAX ERROR !!!");
-				return;
+				return (EOK);
 			}
 		}
 	}
+
+	return (EOK);
 }
