@@ -19,6 +19,7 @@
 
 #include	<stdio.h>
 #include	<stdlib.h>
+#include	<errno.h>
 #include	"loc_incl.h"
 
 int setvbuf(FILE *stream, char *buf, int mode, size_t size)
@@ -26,23 +27,29 @@ int setvbuf(FILE *stream, char *buf, int mode, size_t size)
 	int retval = 0;
 
 	if ((mode != _IOFBF) && (mode != _IOLBF) && (mode != _IONBF)) {
+		errno = EINVAL;
 		return EOF;
 	}
 
 	if (stream->buffer && stream_testflags(stream, IOBUF_RELBUF)) {
 		free(stream->buffer);
+		stream->bufptr = stream->buffer = NULL;
+		stream->bufsize = 0;
 	}
 
-	stream_clearflags(stream, (IOBUF_NBUF | IOBUF_LBUF));
+	stream_clearflags(stream, (IOBUF_NBUF | IOBUF_LBUF | IOBUF_FBUF));
 
 	if (buf && (size <= 0)) {
+		errno = EINVAL;
 		retval = EOF;
 	}
 	if (!buf && (mode != _IONBF)) {
 		if ((size <= 0) || (buf = (char *)malloc(size)) == NULL) {
+			errno = ENOMEM;
 			retval = EOF;
+		} else {
+			stream_setflags(stream, IOBUF_RELBUF);
 		}
-		stream_setflags(stream, IOBUF_RELBUF);
 	}
 
 	stream->buffer = buf;
