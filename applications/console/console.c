@@ -91,14 +91,14 @@ static void print_input_help (void)
 
 static void print_banner(void)
 {
-	puts("\n==================\n");
-	puts("\n\nDiegOS version 1.0\n");
-	puts("==================\n");
-	puts("Copyright (C) 2012-2025  Diego Gallizioli\n");
+	puts("\n____________________");
+	puts("  DiegOS version 1.0");
+	puts("====================\n");
+	puts("Copyright (C) 2012-2025\nDiego Gallizioli\n");
 	puts("This program comes with ABSOLUTELY NO WARRANTY.");
 	puts("This is free software, and you are welcome to redistribute it");
 	puts("under certain conditions.");
-	puts("\n");
+	puts("-------------------\n\n");
 }
 
 static void print_time(void)
