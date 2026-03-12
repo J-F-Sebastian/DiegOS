@@ -127,6 +127,10 @@ static void console_main_entry(void)
 			retval = poll(&waitinp, 1, 0);
 			retval = getchar();
 			timeout = 0;
+			if (buffer_head == sizeof(buffer) - 1)
+			{
+				continue;
+			}
 			if (isprint(retval)) {
 				buffer[buffer_head++] = (char)retval;
 				putchar(retval);
