@@ -24,33 +24,36 @@
 
 int setvbuf(FILE *stream, char *buf, int mode, size_t size)
 {
-	int retval = 0;
-
 	if ((mode != _IOFBF) && (mode != _IOLBF) && (mode != _IONBF)) {
 		errno = EINVAL;
-		return EOF;
+		return (EOF);
+	}
+
+	if (buf && (size <= 0)) {
+		errno = EINVAL;
+		return (EOF);
+	}
+
+	if (!buf && (mode != _IONBF)) {
+		if (size <= 0) {
+			errno = EINVAL;
+			return (EOF);
+		}
+		else if ((buf = (char *)malloc(size)) == NULL) {
+			errno = ENOMEM;
+			return (EOF);
+		}
+		mode |= IOBUF_RELBUF;
 	}
 
 	if (stream->buffer && stream_testflags(stream, IOBUF_RELBUF)) {
 		free(stream->buffer);
 		stream->bufptr = stream->buffer = NULL;
 		stream->bufsize = 0;
+		stream_clearflags(stream, IOBUF_RELBUF);
 	}
 
 	stream_clearflags(stream, (IOBUF_NBUF | IOBUF_LBUF | IOBUF_FBUF));
-
-	if (buf && (size <= 0)) {
-		errno = EINVAL;
-		retval = EOF;
-	}
-	if (!buf && (mode != _IONBF)) {
-		if ((size <= 0) || (buf = (char *)malloc(size)) == NULL) {
-			errno = ENOMEM;
-			retval = EOF;
-		} else {
-			stream_setflags(stream, IOBUF_RELBUF);
-		}
-	}
 
 	stream->buffer = buf;
 	stream->count = 0;
@@ -58,5 +61,5 @@ int setvbuf(FILE *stream, char *buf, int mode, size_t size)
 	stream->bufptr = stream->buffer;
 	stream->bufsize = size;
 
-	return (retval);
+	return (EOK);
 }
