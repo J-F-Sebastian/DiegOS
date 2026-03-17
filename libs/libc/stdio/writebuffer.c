@@ -25,13 +25,16 @@ int writebuffer(int c, FILE *stream)
 	size_t count;
 
 	/*
-	 * Save the char in the buffer
+	 * Save the char in the buffer.
+	 * NOTE: This function IS REQUESTED TO BE USED INTERNALLY
+	 * TO LIBC ONLY.
+	 * stream->count is ASSUMED TO BE not 0 at all times when
+	 * entering this function.
 	 */
-	if (stream->count) {
-		--stream->count;
-		*stream->bufptr++ = (char)c;
-	} else {
+	--stream->count;
+	*stream->bufptr++ = (char)c;
 
+	if (!stream->count) {
 		if (fileno(stream) < 0) {
 			stream_setflags(stream, IOBUF_ERROR);
 			return (EOF);
@@ -45,15 +48,13 @@ int writebuffer(int c, FILE *stream)
 		}
 
 		count = stream->validsize - stream->count;
-		stream->count = stream->validsize - 1;
+		stream->count = stream->validsize;
 		stream->bufptr = stream->buffer;
 
 		if (write(fileno(stream), stream->buffer, count) != (ssize_t) count) {
-			*stream->bufptr++ = (char)c;
 			stream_setflags(stream, IOBUF_ERROR);
 			return (EOF);
 		}
-		*stream->bufptr++ = (char)c;
 	}
 
 	return (c);
