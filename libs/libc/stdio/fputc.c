@@ -74,7 +74,7 @@ int fputc(int c, FILE *stream)
 	 * Fourth stage: process buffers
 	 */
 	if (stream_lbuf(stream)) {
-		return writebufferl(c, stream);
+		return (writebufferl(c, stream));
 	} else {
 		return (writebuffer(c, stream));
 	}
