@@ -121,7 +121,6 @@ static void console_main_entry(void)
 
 	while (console_is_on) {
 		printf("# ");
-		fflush(stdout);
 		buffer_head = 0;
 		while (cmd_typein && (buffer_head < sizeof(buffer))) {
 			retval = poll(&waitinp, 1, 0);
@@ -157,7 +156,6 @@ static void console_main_entry(void)
 					break;
 				}
 			}
-			fflush(stdout);
 		}
 
 		puts("\r");
@@ -176,6 +174,7 @@ static void console_main_entry(void)
 
 	tmptime = time(NULL);
 	printf("\n *** [%s] Session terminated\n", ctime(&tmptime));
+	fflush(stdout);
 	thread_terminate();
 }
 
