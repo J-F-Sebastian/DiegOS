@@ -1,6 +1,6 @@
 include $(WSROOT)/build/makefiles/makefile.master
 
-OBJS = vesa.o vga_fonts.o
+OBJS = vesa.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
