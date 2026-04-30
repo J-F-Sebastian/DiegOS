@@ -31,6 +31,7 @@
 #include "vesa.h"
 #include "vesa_private.h"
 #include "vga_fonts.h"
+#include "vga_palettes.h"
 
 /* Frame buffer pointers */
 static volatile uint8_t *frame_buffer = NULL;
@@ -42,6 +43,7 @@ static struct ModeInfoBlock vesa_gmode;
 static uint16_t *vesa_mode_list = NULL;
 static const uint8_t *g_font = NULL;
 static unsigned W, H, max_offset;
+static palette_t palette[256];
 
 static inline void swap(int *a, int *b)
 {
@@ -69,6 +71,7 @@ static int vesa_init(unsigned unitno)
 	uint16_t *ptr, es, di;
 	unsigned modecount = 0;
 	void *buffer = real_buffer();
+	unsigned i;
 
 	if (unitno) {
 		return ENXIO;
@@ -113,6 +116,12 @@ static int vesa_init(unsigned unitno)
 		ptr = real_to_prot(vesa_info.VESAmodesptr);
 		memcpy(vesa_mode_list, ptr, modecount * sizeof(uint16_t));
 	}
+
+	for (i = 0; i < 16; i++) {
+		palette[i] = vga_get_palette(VGA_PAL_WIN)[i];
+	}
+	memset(palette + 16, 0, sizeof(palette) - (16 * sizeof(palette[0])));
+
 	return (EOK);
 }
 
@@ -428,46 +437,44 @@ static void vesa_write_bgtext(point_t a, unsigned bg, unsigned c, const char *st
 	}
 }
 
-static void load_palette(unsigned index, uint8_t rgb[])
+static void load_palette(unsigned index, const palette_t *pal)
 {
-#if 0
 	regs16_t regs;
+	uint16_t es, di;
 	uint8_t *ptr = (uint8_t *) real_buffer();
 
 	if (index > 255)
 		return;
 
 	regs.ax = 0x4F09;
-	regs.bx = 2;
+	regs.bx = 0;
 	regs.cx = 1;
 	regs.dx = (uint16_t) index;
-	ptr[0] = rgb[0];
-	ptr[1] = rgb[1];
-	ptr[2] = rgb[2];
+	ptr[0] = pal->blue;
+	ptr[1] = pal->green;
+	ptr[2] = pal->red;
 	ptr[3] = 0;
-	prot_to_seg_ofs(ptr, &regs.es, &regs.di);
-	int86(0x10, &regs);
-#else
-	out_byte(0x3c8, index + 8);
-	out_byte(0x3c9, rgb[0]);
-	out_byte(0x3c9, rgb[1]);
-	out_byte(0x3c9, rgb[2]);
-#endif
-}
 
-static void load_all_palette(uint8_t rgb[])
-{
-	regs16_t regs;
-	uint16_t es, di;
-	uint8_t *ptr =
-	    (uint8_t *) real_buffer() + sizeof(struct VBEInfoBlock) * 2 +
-	    sizeof(struct ModeInfoBlock);
+	if ((vesa_info.capabilities & 1) == 0)
+	{
+		/*
+		 *  can use only 6 bits per channel
+		 */
+		ptr[0] >>= 2;
+		ptr[1] >>= 2;
+		ptr[2] >>= 2;
 
-	regs.ax = 0x4F09;
-	regs.bx = 0;
-	regs.cx = 256;
-	regs.dx = 0;
-	memcpy(ptr, rgb, 256 * 3);
+		/*
+		 * Rounding
+		 */
+		if ((pal->red & 3) > 1)
+			ptr[2]++;
+		if ((pal->green & 3) > 1)
+			ptr[1]++;
+		if ((pal->blue & 3) > 1)
+			ptr[0]++;
+	}
+
 	/*
 	 * GCC will complain about unaligned pointers to packed structures.
 	 * Well I do not get the issue here, but the compiler is always right.
@@ -478,12 +485,142 @@ static void load_all_palette(uint8_t rgb[])
 	int86(0x10, &regs);
 }
 
-static void store_palette(unsigned index, uint8_t rgb[])
+static void load_all_palette(const palette_t *pal)
 {
+	regs16_t regs;
+	uint16_t es, di;
+	uint8_t *ptr = (uint8_t *) real_buffer();
+	uint8_t *w = ptr;
+	const palette_t *r = pal;
+
+	for (unsigned i = 0; i < 256; i++, w+= 4, r++)
+	{
+		w[0] = r->blue;
+		w[1] = r->green;
+		w[2] = r->red;
+		w[3] = r->alpha;
+
+		if ((vesa_info.capabilities & 1) == 0)
+		{
+			/*
+			*  can use only 6 bits per channel
+			*/
+			w[0] >>= 2;
+			w[1] >>= 2;
+			w[2] >>= 2;
+
+			/*
+			* Rounding
+			*/
+			if ((r->red & 3) > 1)
+				w[2]++;
+			if ((r->green & 3) > 1)
+				w[1]++;
+			if ((r->blue & 3) > 1)
+				w[0]++;
+		}
+	}
+
+	regs.ax = 0x4F09;
+	regs.bx = 0;
+	regs.cx = 256;
+	regs.dx = 0;
+
+	/*
+	 * GCC will complain about unaligned pointers to packed structures.
+	 * Well I do not get the issue here, but the compiler is always right.
+	 */
+	prot_to_seg_ofs(ptr, &es, &di);
+	regs.es = es;
+	regs.di = di;
+	int86(0x10, &regs);
 }
 
-static void store_all_palette(uint8_t rgb[])
+static void store_palette(unsigned index, palette_t *pal)
 {
+	regs16_t regs;
+	uint16_t es, di;
+	uint8_t *ptr = (uint8_t *) real_buffer();
+	uint8_t *r = ptr;
+
+	regs.ax = 0x4F09;
+	regs.bx = 1;
+	regs.cx = 256;
+	regs.dx = 0;
+	/*
+	 * GCC will complain about unaligned pointers to packed structures.
+	 * Well I do not get the issue here, but the compiler is always right.
+	 */
+	prot_to_seg_ofs(ptr, &es, &di);
+	regs.es = es;
+	regs.di = di;
+	int86(0x10, &regs);
+
+	if (regs.ax != 0x4F00)
+	{
+		return;
+	}
+
+	pal->blue = r[0];
+	pal->green = r[1];
+	pal->red = r[2];
+	pal->alpha = r[3];
+
+	if ((vesa_info.capabilities & 1) == 0)
+	{
+		/*
+		*  can use only 6 bits per channel
+		*/
+		pal->blue <<= 2;
+		pal->green <<= 2;
+		pal->red <<= 2;
+	}
+}
+
+static void store_all_palette(palette_t *pal)
+{
+	regs16_t regs;
+	uint16_t es, di;
+	uint8_t *ptr = (uint8_t *) real_buffer();
+	palette_t *w = pal;
+	uint8_t *r = ptr;
+
+	regs.ax = 0x4F09;
+	regs.bx = 1;
+	regs.cx = 256;
+	regs.dx = 0;
+	/*
+	 * GCC will complain about unaligned pointers to packed structures.
+	 * Well I do not get the issue here, but the compiler is always right.
+	 */
+	prot_to_seg_ofs(ptr, &es, &di);
+	regs.es = es;
+	regs.di = di;
+	int86(0x10, &regs);
+
+	if (regs.ax != 0x4F00)
+	{
+		kdrvprintf("No johnny\n");
+		return;
+	}
+
+	for (unsigned i = 0; i < 256; i++, w++, r += 3)
+	{
+		w->blue = r[0];
+		w->green = r[1];
+		w->red = r[2];
+		w->alpha = r[3];
+
+		if ((vesa_info.capabilities & 1) == 0)
+		{
+			/*
+			*  can use only 6 bits per channel
+			*/
+			w->blue <<= 2;
+			w->green <<= 2;
+			w->red <<= 2;
+		}
+	}
 }
 
 static void draw_sprite(point_t a, uint8_t sprite[], unsigned W, unsigned H, unsigned color)
@@ -596,17 +733,28 @@ static int set_resolution(unsigned W, unsigned H, unsigned depth, int loose)
 		frame_buffer32 = (uint32_t *) vesa_gmode.PhysAddress;
 		max_offset = vesa_gmode.LinBytesPerScanLine * vesa_gmode.YResolution;
 		/*
-		 * DAC can be set to 8 bit per pixel
+		 * DAC can be set to 8 bit per channel if bit 0 is set.
+		 * If the enabling of the 8 bit per channel fails, clear the capabilities bit.
 		 */
-		//  if (vesa_info.capabilities & 1)
-		//  {
-		//      regs.ax = 0x4F08;
-		//      regs.bx = 0x0800;
-		//      int86(0x10, &regs);
-		//      assert((regs.bx & 0xFF00) == 0x0800);
-		//}
+		if (vesa_info.capabilities & 1)
+		{
+			regs.ax = 0x4F08;
+			regs.bx = 0x0800;
+			int86(0x10, &regs);
+			if ((regs.bx & 0xFF00) != 0x0800)
+			{
+				vesa_info.capabilities &= ~1;
+			}
+			else
+			{
+				kdrvprintf("DAC set to 8 bit per channel mode\n");
+				load_all_palette(palette);
+			}
+		}
+
 		return EOK;
 	}
+
 	return ENOTSUP;
 }
 

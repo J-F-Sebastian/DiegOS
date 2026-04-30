@@ -464,47 +464,47 @@ static void vga_write_bgtext_wm2(point_t a, unsigned bg, unsigned c, const char 
 	}
 }
 
-static void vga_load_palette(unsigned index, uint8_t rgb[])
+static void vga_load_palette(unsigned index, const palette_t *pal)
 {
 	if (index < VGA_NUM_DAC_PALS) {
 		out_byte(VGA_DAC_WRITE_INDEX, index + 8);
-		out_byte(VGA_DAC_DATA, rgb[0]);
-		out_byte(VGA_DAC_DATA, rgb[1]);
-		out_byte(VGA_DAC_DATA, rgb[2]);
+		out_byte(VGA_DAC_DATA, pal->red);
+		out_byte(VGA_DAC_DATA, pal->green);
+		out_byte(VGA_DAC_DATA, pal->blue);
 	}
 }
 
-static void vga_load_all_palette(uint8_t rgb[])
+static void vga_load_all_palette(const palette_t *pal)
 {
 	unsigned i;
 
 	for (i = 0; i < VGA_NUM_DAC_PALS; i++) {
 		out_byte(VGA_DAC_WRITE_INDEX, i + 8);
-		out_byte(VGA_DAC_DATA, rgb[i * 3]);
-		out_byte(VGA_DAC_DATA, rgb[i * 3 + 1]);
-		out_byte(VGA_DAC_DATA, rgb[i * 3 + 2]);
+		out_byte(VGA_DAC_DATA, pal[i].red);
+		out_byte(VGA_DAC_DATA, pal[i].green);
+		out_byte(VGA_DAC_DATA, pal[i].blue);
 	}
 }
 
-static void vga_store_palette(unsigned index, uint8_t rgb[])
+static void vga_store_palette(unsigned index, palette_t *pal)
 {
 	if (index < VGA_NUM_DAC_PALS) {
 		out_byte(VGA_DAC_READ_INDEX, index + 8);
-		rgb[0] = in_byte(VGA_DAC_DATA);
-		rgb[1] = in_byte(VGA_DAC_DATA);
-		rgb[2] = in_byte(VGA_DAC_DATA);
+		pal->red = in_byte(VGA_DAC_DATA);
+		pal->green = in_byte(VGA_DAC_DATA);
+		pal->blue = in_byte(VGA_DAC_DATA);
 	}
 }
 
-static void vga_store_all_palette(uint8_t rgb[])
+static void vga_store_all_palette(palette_t *pal)
 {
 	unsigned i;
 
 	for (i = 0; i < VGA_NUM_DAC_PALS; i++) {
 		out_byte(VGA_DAC_READ_INDEX, i + 8);
-		rgb[i * 3] = in_byte(VGA_DAC_DATA);
-		rgb[i * 3 + 1] = in_byte(VGA_DAC_DATA);
-		rgb[i * 3 + 2] = in_byte(VGA_DAC_DATA);
+		pal[i].red = in_byte(VGA_DAC_DATA);
+		pal[i].green = in_byte(VGA_DAC_DATA);
+		pal[i].blue = in_byte(VGA_DAC_DATA);
 	}
 }
 

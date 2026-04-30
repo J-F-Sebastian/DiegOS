@@ -32,7 +32,7 @@ typedef struct point {
 } point_t;
 
 typedef struct palette {
-	uint8_t red, green, blue;
+	uint8_t red, green, blue, alpha;
 } palette_t;
 
 typedef struct text_ui_driver {
@@ -142,27 +142,23 @@ typedef struct grafics_ui_driver {
 	 */
 	void (*write_text_bg_fn)(point_t a, unsigned bgcolor, unsigned color, const char *text);
 	/*
-	 * Load a palette color at index <index>, rgb array is indexed as
-	 * RED, GREEN, BLUE
+	 * Load a color at palette index <index> into the graphics device
 	 */
-	void (*load_palette_fn)(unsigned index, uint8_t rgb[]);
+	void (*load_palette_fn)(unsigned index, const palette_t *pal);
 	/*
-	 * Load all palette colors, rgb array is indexed as RED, GREEN, BLUE and
-	 * must carry a sequence as long as the palette size
+	 * Load all colors into the graphics device palette (can be 16 or 256 colors)
 	 */
-	void (*load_all_palette_fn)(uint8_t rgb[]);
-
+	void (*load_all_palette_fn)(const palette_t *pal);
 	/*
-	 * Store a palette color at index <index>, rgb array is indexed as
-	 * RED, GREEN, BLUE
+	 * Store a color from palette index <index> into the provided palette structure
+	 * pointer
 	 */
-	void (*store_palette_fn)(unsigned index, uint8_t rgb[]);
+	void (*store_palette_fn)(unsigned index, palette_t *pal);
 	/*
-	 * Store all palette colors, rgb array is indexed as RED, GREEN, BLUE and
-	 * must carry a sequence as long as the palette size
+	 * Store all colors from the graphics device palette into the provided palette structure
+	 * pointer (can be 16 or 256 colors)
 	 */
-	void (*store_all_palette_fn)(uint8_t rgb[]);
-
+	void (*store_all_palette_fn)(palette_t *pal);
 	/*
 	 * Draw a sprite; the source data is a bitmap whose size is WxH, W must be
 	 * a multiple of 8. Only 1s are written to video.
