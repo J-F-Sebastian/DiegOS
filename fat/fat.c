@@ -209,7 +209,7 @@ static int FAT_search_DIR_entry(struct FATVolume *vol,
 
 	contcluster = cluster = vol->PB.RootClus;
 	do {
-		found = 0;
+		found = -1;
 		len = FAT_parse_directory(directory, dirlen, &startpos, &endpos);
 		if (!len || (len > sizeof(entryfound.entry.DIR_Name)))
 			return -1;
@@ -299,7 +299,7 @@ static int FAT_directory_is_void(struct FATVolume *vol, struct FAT *dir)
 		if (diskReadC(vol, sector, vol->buffer))
 			return -1;
 
-		while (entry < entry + limit) {
+		while (entry < (struct FAT *)vol->buffer + limit) {
 			if (entry->DIR_Name[0] != DIR_ENTRY_FREE) {
 				return (entry->DIR_Name[0] == DIR_ENTRY_LAST_FREE) ? 0 : -1;
 			}
