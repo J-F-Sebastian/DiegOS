@@ -27,13 +27,13 @@
 uint16_t FAT_get_cluster_from_table(struct FATVolume *vol, uint16_t N)
 {
 	if (!vol || !vol->FAT)
-		return (uint16_t) - 1U;
+		return (uint16_t) ~0;
 
 	if (N < vol->FATSize) {
 		return vol->FAT[N];
 	}
 
-	return (uint16_t) - 1U;
+	return (uint16_t) ~0;
 }
 
 int FAT_set_cluster_into_table(struct FATVolume *vol, uint16_t N, uint16_t val)
