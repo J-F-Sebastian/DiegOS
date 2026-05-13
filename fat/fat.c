@@ -23,6 +23,10 @@
 #include <ctype.h>
 #include <limits.h>
 
+#ifndef PATH_MAX
+#define PATH_MAX 260
+#endif
+
 #include "disk_access.h"
 #include "fat_internals.h"
 #include "fat_names.h"
