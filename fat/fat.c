@@ -343,7 +343,7 @@ static int FAT_clear_cluster_chain(struct FATVolume *vol, struct FAT *entry)
 	while (!FAT_cluster_isEOC(N)) {
 		cluster = FAT_get_cluster_from_table(vol, N);
 
-		if (FAT_set_cluster_into_table(vol, N, DIR_ENTRY_FREE))
+		if (FAT_set_cluster_into_table(vol, N, (uint16_t)DIR_ENTRY_FREE))
 			return -1;
 
 		N = cluster;
@@ -433,14 +433,15 @@ int FAT_mount(void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol)
 
 	vol->FirstDataSector = bpb->ResvdSecCnt + (bpb->NumFATs * bpb->FATSz16);
 	vol->DataSectors = bpb->TotSec - (bpb->ResvdSecCnt + (bpb->NumFATs * bpb->FATSz16));
-	vol->CountOfClusters = vol->DataSectors / bpb->SecPerClus;
+	vol->CountOfClusters = (uint16_t) (vol->DataSectors / bpb->SecPerClus);
 	vol->FATSize = (uint16_t) (vol->CountOfClusters + 2);
 	vol->FATEntriesPerSec = vol->PB.BytsPerSec / sizeof(struct FAT);
 	vol->BytesPerCluster = vol->PB.BytsPerSec * vol->PB.SecPerClus;
 	vol->FAT = malloc(bpb->FATSz16 * bpb->BytsPerSec);
 	if (!vol->FAT) {
 		memset(bpb, 0, sizeof(*bpb));
-		vol->DataSectors = vol->CountOfClusters = vol->FirstDataSector = 0;
+		vol->DataSectors = vol->FirstDataSector = 0;
+		vol->CountOfClusters = 0;
 		vol->FATSize = 0;
 		vol->FATEntriesPerSec = 0;
 		return -1;
@@ -451,7 +452,8 @@ int FAT_mount(void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol)
 		memset(bpb, 0, sizeof(*bpb));
 		free(vol->FAT);
 		vol->FAT = NULL;
-		vol->DataSectors = vol->CountOfClusters = vol->FirstDataSector = 0;
+		vol->DataSectors = vol->FirstDataSector = 0;
+		vol->CountOfClusters = 0;
 		vol->FATSize = 0;
 		vol->FATEntriesPerSec = 0;
 		return -1;
@@ -464,7 +466,8 @@ int FAT_mount(void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol)
 		vol->FAT = NULL;
 		vol->buffer = NULL;
 		vol->FAT = 0;
-		vol->DataSectors = vol->CountOfClusters = vol->FirstDataSector = 0;
+		vol->DataSectors = vol->FirstDataSector = 0;
+		vol->CountOfClusters = 0;
 		vol->FATSize = 0;
 		vol->FATEntriesPerSec = 0;
 		return -1;
