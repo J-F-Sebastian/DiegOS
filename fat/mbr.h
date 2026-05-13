@@ -27,7 +27,7 @@
 /* Alternative OS Development Partition Standard */
 #define PART_AOPDS   0x7F
 
-#pragma pack(1)
+#pragma pack(push, 1)
 struct MBR_partition_entry {
 	char status;
 	/*
@@ -56,7 +56,7 @@ struct MBR {
 	 */
 	char boot_signature[2];
 };
-#pragma pack(0)
+#pragma pack(pop)
 
 /**
  * @brief MBR_read access the Master Boot Record found on disk pointed by ctx.
