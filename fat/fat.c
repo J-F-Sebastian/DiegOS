@@ -942,8 +942,16 @@ int FAT_delete_entry(struct FATVolume *vol, const char *entryname)
 
 	entry.entry.DIR_Name[0] = DIR_ENTRY_FREE;
 
-	return (FAT_write_DIR_entry(vol, &entry) ||
-		FAT_clear_cluster_chain(vol, &entry.entry) || FAT_write_FAT_table(vol));
+	if (FAT_write_DIR_entry(vol, &entry))
+		return -1;
+
+	if (FAT_clear_cluster_chain(vol, &entry.entry))
+		return -1;
+
+	if (FAT_write_FAT_table(vol))
+		return -1;
+
+	return 0;
 }
 
 static void FAT_print_statistics(struct FAT_statistics *stats)
