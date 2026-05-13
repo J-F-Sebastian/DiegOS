@@ -143,12 +143,12 @@ int FAT_format(void *ctx, struct FATPartition *part)
 		k = part->startsector + newvolume.PB.ResvdSecCnt;
 		k += j * newvolume.PB.FATSz16;
 		memset(buffer, 0, geom.bytes_per_sector);
-		buffer[0] = (char)0x00;
-		buffer[1] = (char)0xFF;
-		buffer[2] = (char)0xFF;
-		buffer[3] = (char)0xFF;
-		buffer[newvolume.PB.RootClus * 2] = (char)0xFF;
-		buffer[newvolume.PB.RootClus * 2 + 1] = (char)0xFF;
+		buffer[0] = '\x00';
+		buffer[1] = '\xFF';
+		buffer[2] = '\xFF';
+		buffer[3] = '\xFF';
+		buffer[newvolume.PB.RootClus * 2] = '\xFF';
+		buffer[newvolume.PB.RootClus * 2 + 1] = '\xFF';
 		if (disk_write(ctx, k++, 1, buffer))
 			goto terminate;
 
