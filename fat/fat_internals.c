@@ -61,7 +61,7 @@ int FAT_check_DIR_entry(struct FAT *entry)
 	if (entry->DIR_Name[0] == 0)
 		return 0;
 
-	if (entry->DIR_Name[0] != (char)DIR_ENTRY_FREE) {
+	if (entry->DIR_Name[0] != DIR_ENTRY_FREE) {
 		/* Found a file, a directory, or a link */
 		if ((entry->DIR_Attr & mask) != mask) {
 			return 1;
@@ -168,9 +168,9 @@ int FAT_update_statistics(struct FATVolume *vol, struct FAT *buffer, struct FAT_
 		return -1;
 
 	for (i = 0; i < vol->FATEntriesPerSec * vol->PB.SecPerClus; i++, buffer++) {
-		if (buffer->DIR_Name[0] == (char)DIR_ENTRY_FREE)
+		if (buffer->DIR_Name[0] == DIR_ENTRY_FREE)
 			totavail++;
-		else if (buffer->DIR_Name[0] == (char)DIR_ENTRY_LAST_FREE)
+		else if (buffer->DIR_Name[0] == DIR_ENTRY_LAST_FREE)
 			break;
 		else {
 			if (buffer->DIR_Attr & ATTR_LINK)

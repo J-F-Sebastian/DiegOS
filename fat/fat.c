@@ -120,14 +120,13 @@ static uint16_t FAT_lookup_FAT_table(struct FATVolume *vol, struct FAT *entry, u
 static unsigned FAT_search_loop(const char *name, struct FAT *buffer, unsigned FATEntries)
 {
 	unsigned i = 0;
-	size_t namelen = strlen(name);
 
 	for (i = 0; i < FATEntries; i++) {
-		if (buffer[i].DIR_Name[0] == (char)DIR_ENTRY_FREE)
+		if (buffer[i].DIR_Name[0] == DIR_ENTRY_FREE)
 			continue;
-		if (buffer[i].DIR_Name[0] == (char)DIR_ENTRY_LAST_FREE)
+		if (buffer[i].DIR_Name[0] == DIR_ENTRY_LAST_FREE)
 			return FATEntries;
-		if (strncmp(buffer[i].DIR_Name, name, namelen) == 0)
+		if (strncmp(buffer[i].DIR_Name, name, DIR_NAMELEN) == 0)
 			break;
 	}
 
@@ -141,14 +140,14 @@ static unsigned FAT_search_loop(const char *name, struct FAT *buffer, unsigned F
  */
 static unsigned FAT_search_free_loop(const char *name, struct FAT *buffer, unsigned FATEntries)
 {
+	(void)name;
 	unsigned i = 0;
 
 	for (i = 0; i < FATEntries; i++) {
-		if ((buffer[i].DIR_Name[0] == (char)DIR_ENTRY_FREE) ||
-		    (buffer[i].DIR_Name[0] == (char)DIR_ENTRY_LAST_FREE)) {
+		if ((buffer[i].DIR_Name[0] == DIR_ENTRY_FREE) ||
+		    (buffer[i].DIR_Name[0] == DIR_ENTRY_LAST_FREE)) {
 			break;
 		}
-
 	}
 
 	return i;
@@ -301,8 +300,8 @@ static int FAT_directory_is_void(struct FATVolume *vol, struct FAT *dir)
 			return -1;
 
 		while (entry < entry + limit) {
-			if (entry->DIR_Name[0] != (char)DIR_ENTRY_FREE) {
-				return (entry->DIR_Name[0] == (char)DIR_ENTRY_LAST_FREE) ? 0 : -1;
+			if (entry->DIR_Name[0] != DIR_ENTRY_FREE) {
+				return (entry->DIR_Name[0] == DIR_ENTRY_LAST_FREE) ? 0 : -1;
 			}
 			++entry;
 		}
@@ -941,7 +940,7 @@ int FAT_delete_entry(struct FATVolume *vol, const char *entryname)
 			return -1;
 	}
 
-	entry.entry.DIR_Name[0] = (char)DIR_ENTRY_FREE;
+	entry.entry.DIR_Name[0] = DIR_ENTRY_FREE;
 
 	return (FAT_write_DIR_entry(vol, &entry) ||
 		FAT_clear_cluster_chain(vol, &entry.entry) || FAT_write_FAT_table(vol));

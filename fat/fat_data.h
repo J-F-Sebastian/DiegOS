@@ -98,8 +98,8 @@ struct FAT_time_stamp {
 	uint32_t hours:5;
 };
 
-#define DIR_ENTRY_FREE      (0xE5)
-#define DIR_ENTRY_LAST_FREE (0x00)
+#define DIR_ENTRY_FREE      ('\xE5')
+#define DIR_ENTRY_LAST_FREE ('\x00')
 
 #define ATTR_READ_ONLY  0x01
 #define ATTR_HIDDEN     0x02

@@ -83,7 +83,7 @@ void FAT_print_entry(struct FAT *entry)
 
 	if (!entry ||
 	    (entry->DIR_Name[0] == DIR_ENTRY_LAST_FREE) ||
-	    (entry->DIR_Name[0] == (char)DIR_ENTRY_FREE))
+	    (entry->DIR_Name[0] == DIR_ENTRY_FREE))
 		return;
 
 	date = &entry->DIR_CrtDate;
