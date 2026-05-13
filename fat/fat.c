@@ -856,7 +856,7 @@ int FAT_modify_entry_attr(struct FATVolume *vol, const char *entryname, uint8_t 
 		return -1;
 
 	/* clear and set attributes */
-	result.entry.DIR_Attr &= ~attributes;
+	result.entry.DIR_Attr &= ~allowed;
 	result.entry.DIR_Attr |= attributes;
 
 	return FAT_write_DIR_entry(vol, &result);
