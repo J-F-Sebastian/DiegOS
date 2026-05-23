@@ -31,6 +31,13 @@
 #define RES_SECTORS  1U
 /* default to 2 FATs */
 #define NUM_FATS     2U
+/*
+ * Higher values are possible but not recommended
+ * unless the storage media is very large, files are very large,
+ * or the storage media will perform better with larger clusters.
+ * This holds true for NAND flash, where the erase block size is
+ * usually 128k or 256k.
+ */
 #define MAX_CLUS_SIZE 32768U
 
 static uint8_t compute_secperclus(uint16_t bytes_per_sector, uint32_t sectors)

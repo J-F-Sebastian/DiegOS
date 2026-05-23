@@ -49,9 +49,11 @@ struct FAT_statistics {
  * @brief FAT_FSoC computes the first sector on disk where the cluster N starts.
  * It converts clusters to starting sectors.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param N cluster number
  *
+ * RETURNS
  * @return sector number
  */
 static inline uint32_t FAT_FSoC(struct FATVolume *vol, uint32_t N)
@@ -60,21 +62,31 @@ static inline uint32_t FAT_FSoC(struct FATVolume *vol, uint32_t N)
 }
 
 /**
- * @brief FAT_get_cluster_from_table returns the cluster values stored in the FAT table at position N
+ * @brief FAT_get_cluster_from_table returns the cluster value stored in the FAT table at position N.
+ * Since the FAT is stored in memory as an array of 16 bit unsigned integers, the cluster value is
+ * the value in array at position N.
+ * If N is out of range the return value is ~0 (0xFFFF).
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param N FAT table index
  *
+ * RETURNS
  * @return cluster number
  */
 uint16_t FAT_get_cluster_from_table(struct FATVolume *vol, uint16_t N);
 
 /**
  * @brief FAT_set_cluster_into_table write the value val into FAT table at cluster index N.
+ * Since the FAT is stored in memory as an array of 16 bit unsigned integers, the cluster value is
+ * the value in array at position N.
+ * If N is out of range no value is set.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param N FAT table index
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -83,9 +95,11 @@ int FAT_set_cluster_into_table(struct FATVolume *vol, uint16_t N, uint16_t val);
 /**
  * @brief FAT_set_EOC_into_table writes the EOC value into FAT table at cluster index N.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param N FAT table index
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -94,8 +108,10 @@ int FAT_set_EOC_into_table(struct FATVolume *vol, uint16_t N);
 /**
  * @brief FAT_check_DIR_entry checks if a FAT entry is valid, void, or invalid.
  *
+ * PARAMETERS IN
  * @param entry pointer to a FAT directory structure
  *
+ * RETURNS
  * @return 1 if the FAT entry is a valid entry
  * @return 0 if the FAT entry is a void entry
  * @return -1 if the FAT entry is an invalid entry
@@ -105,19 +121,24 @@ int FAT_check_DIR_entry(struct FAT *entry);
 /**
  * @brief FAT_check_attrib checks if attributes are coherent and valid.
  *
+ * PARAMETERS IN
  * @param attributes a bitmap of FAT directory entry attributes
  *
+ * RETURNS
  * @return 0 if the FAT attributes are valid
  * @return -1 if the FAT attributes are not valid
  */
 int FAT_check_attrib(uint8_t attributes);
+
 /**
  * @brief FAT_get_free_cluster_from_table returns a free cluster number, or 0 if there are
  * no free clusters available.
  * NOTE: available clusters starts at index 2.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  *
+ * RETURNS
  * @return cluster number on success, range is [2, FATSize]
  * @return 0 on failure
  */
@@ -126,9 +147,11 @@ uint16_t FAT_get_free_cluster_from_table(struct FATVolume *vol);
 /**
  * @brief FAT_update_timestamps update the date and time stamps of a FAT directory structure.
  *
+ * PARAMETERS IN
  * @param entry pointer to a FAT directory structure
  * @param flags a combination of FAT_TS_ flags to update the corresponding timestamp
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -142,13 +165,17 @@ int FAT_update_timestamps(struct FAT *entry, int flags);
  * Counters are updated only, i.e. new values are added to the values found in stats, to gather
  * statistics in a meaningful manner the FAT_statistics structure should be initialized to all 0s.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param buffer memory buffer storing one cluster
+ *
+ * PARAMETERS OUT
  * @param stats pointer to statistics
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
 int FAT_update_statistics(struct FATVolume *vol, struct FAT *buffer, struct FAT_statistics *stats);
 
-#endif				// FAT_INTERNALS_H
+#endif

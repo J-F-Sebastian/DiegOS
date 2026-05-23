@@ -30,10 +30,12 @@
  * It is a responsibility of the caller to get a context from the disk_access API before
  * mounting a FAT volume.
  *
+ * PARAMETERS IN
  * @param ctx a context provided by disk_access to read from and write to the storage media
  * @param firstSecOnDisk the first sector on storage with FAT data
  * @param vol output structure filled with volume informations
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -42,8 +44,10 @@ int FAT_mount(void *ctx, uint32_t first_sec_on_disk, struct FATVolume *vol);
 /**
  * @brief FAT_unmount unmounts a FAT file system. Flags and data in vol are cleared accordingly.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -54,10 +58,12 @@ int FAT_unmount(struct FATVolume *vol);
  * by filling entry.
  * entryname is a standard file name path, it can point to either a file or a directory.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  * @param entry FAT entry return value
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -73,10 +79,12 @@ int FAT_get_entry(struct FATVolume *vol, const char *entryname, struct FAT *entr
  * in the root directory and cannot be combined with other flags.
  * ATTR_DIRECTORY identifies directories rather than files.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  * @param file attributes ATTR_*
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -88,10 +96,12 @@ int FAT_create_entry(struct FATVolume *vol, const char *entryname, uint8_t attri
  * The attribute is set to ATTR_LINK and the link is set to point to entryname.
  * linkname and entryname must be full path names.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param linkname standard path name string
  * @param entryname standard path name string
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -109,10 +119,12 @@ int FAT_create_link(struct FATVolume *vol, const char *linkname, const char *ent
  *
  * Links and volume ID are not editable.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  * @param attributes ATTR_*
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -126,10 +138,12 @@ int FAT_modify_entry_attr(struct FATVolume *vol, const char *entryname, uint8_t 
  * Timestamps are updated accordingly.
  * Any entry (except for the volume name) can be renamed.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  * @param newname new name for this entry
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -140,9 +154,11 @@ int FAT_rename_entry(struct FATVolume *vol, const char *entryname, const char *n
  * clusters to the file system.
  * Can be applied only to files, not read-only and not hidden.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -157,9 +173,11 @@ int FAT_truncate_entry(struct FATVolume *vol, const char *entryname);
  * If the entry is a link the link will not be followed, i.e. the link itself will
  * be deleted but not the entry it points at.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -174,13 +192,17 @@ int FAT_delete_entry(struct FATVolume *vol, const char *entryname);
  * this: the file is shorter than buflen bytes, the remaining bytes from offset are less than
  * buflen, an error was encountered.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  * @param offset offset in bytes from the beginning if the file
  * @param buffer pointer to a memory buffer
  * @param buflen size of the memory area pointed by buffer
+ *
+ * PARAMETERS OUT
  * @param readlen the actual number of bytes copied into buffer
  *
+ * RETURNS
  * @return 0 on success
  * @return -ERR on failure
  */
@@ -197,14 +219,19 @@ int FAT_read(struct FATVolume *vol,
  * this: the file is shorter than buflen bytes, the remaining bytes from offset are less than
  * buflen, an error was encountered.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param entryname standard path name string
  * @param offset offset in bytes from the beginning if the file
  * @param buffer pointer to a memory buffer
  * @param buflen size of the memory area pointed by buffer
+ *
+ * PARAMETERS OUT
  * @param writelen the actual number of bytes copied into the file
  *
- * @return
+ * RETURNS
+ * @return 0 on success
+ * @return -1 on error
  */
 int FAT_write(struct FATVolume *vol,
 	      const char *entryname,
@@ -213,9 +240,11 @@ int FAT_write(struct FATVolume *vol,
 /**
  * @brief FAT_list prints in a nice textual fashion the contents of a directory.
  *
+ * PARAMETERS IN
  * @param vol volume structure
  * @param directory standard path name string
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -224,13 +253,17 @@ int FAT_list(struct FATVolume *vol, const char *directory);
 /**
  * @brief FAT_available computes the remaining clusters and bytes in the user data area.
  *
+ * PARAMETERS IN
  * @param vol volume structure
+ *
+ * PARAMETERS OUT
  * @param bytes returned available bytes
  * @param clusters returned available clusters
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
 int FAT_available(struct FATVolume *vol, uint32_t * bytes, uint16_t * clusters);
 
-#endif				// FAT_H
+#endif

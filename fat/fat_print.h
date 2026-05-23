@@ -26,6 +26,7 @@
  * @brief FAT_print_PB print to standard output the contents of the Parameter Block
  * pointed to by PB
  *
+ * PARAMETERS IN
  * @param PB pointer to a ParameterBlock structure
  */
 void FAT_print_PB(struct ParameterBlock *PB);
@@ -34,6 +35,7 @@ void FAT_print_PB(struct ParameterBlock *PB);
  * @brief FAT_print_Volume print to standard output the properties of the FAT Volume
  * pointed to by vol
  *
+ * PARAMETERS IN
  * @param vol pointer to a FATVolume structure
  */
 void FAT_print_Volume(struct FATVolume *vol);
@@ -41,6 +43,7 @@ void FAT_print_Volume(struct FATVolume *vol);
 /**
  * @brief FAT_print_FAT dump to standard output the contents of the FAT table
  *
+ * PARAMETERS IN
  * @param vol pointer to a FATVolume structure
  */
 void FAT_print_FAT(struct FATVolume *vol);
@@ -49,6 +52,7 @@ void FAT_print_FAT(struct FATVolume *vol);
  * @brief FAT_print_entry prints to standard output the contents of the FAT directory entry
  * pointed by entry.
  *
+ * PARAMETERS IN
  * @param entry pointer to a FAT directory structure
  */
 void FAT_print_entry(struct FAT *entry);
@@ -59,6 +63,7 @@ void FAT_print_entry(struct FAT *entry);
  * the size of a cluster is defined at mount time.
  * This function is obviously used to list to video the contents of a directory.
  *
+ * PARAMETERS IN
  * @param vol pointer to a FATVolume structure
  * @param buffer pointer to a cluster-wide buffer of FAT directory structures
  * @return 0 on success
@@ -66,4 +71,4 @@ void FAT_print_entry(struct FAT *entry);
  */
 int FAT_print_loop(struct FATVolume *vol, struct FAT *buffer);
 
-#endif				// FAT_PRINT_H
+#endif

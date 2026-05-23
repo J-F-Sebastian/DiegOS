@@ -26,9 +26,19 @@
  * A FAT16.1 file system volume is composed of 3 basic regions,
  * which are laid out in this order on the volume:
  *
- * 0 – Reserved Region
- * 1 – FAT Region
- * 2 – File and Directory Data Region
+ * 0 - Reserved Region
+ * 1 - FAT Region
+ * 2 - File and Directory Data Region
+ *
+ * File names are 39 bytes long, and the directory entry is 64 bytes long,
+ * so we can store 4 entries in a sector of 512 bytes.
+ * Attributes include read-only, hidden, system, volume ID, directory and link.
+ * The volume name is stored in a special entry with attribute ATTR_VOLUME_ID.
+ * Timestamps are stored in the directory entry, and they are updated on file
+ * access, creation and write.
+ * Resolution for timestamps is 1ms, and the date is relative to midnight 1/1/2000.
+ * File size is a 32 bit unsigned value, so the maximum file size is 4GB.
+ * File names are case insensitive, and they are stored in upper case in the directory entry.
  */
 
 /*
@@ -61,22 +71,58 @@
 
 #pragma pack(1)
 struct ParameterBlock {
+	/*
+	 * The OEM name, a string padded with spaces
+	 */
 	char OEMName[8];
+	/*
+	 * Bytes per sector
+	 */
 	uint16_t BytsPerSec;
+	/*
+	 * Sectors per cluster
+	 */
 	uint8_t SecPerClus;
+	/*
+	 * Number of FATs in FAT region
+	 */
 	uint8_t NumFATs;
+	/*
+	 * Reserved sectors
+	 */
 	uint16_t ResvdSecCnt;
+	/*
+	 * Size of one FAT in sectors
+	 */
 	uint16_t FATSz16;
 	/* 16 bytes */
+	/*
+	 * Hidden sectors
+	 */
 	uint32_t HiddSec;
+	/*
+	 * Total sectors
+	 */
 	uint32_t TotSec;
+	/*
+	 * Volume ID or Serial Number
+	 */
 	uint32_t VolID;
 	uint32_t Flags;
 	/* 32 bytes */
+	/*
+	 * Volume label, a string padded with spaces
+	 */
 	char VolLab[16];
 	/* 48 bytes */
+	/*
+	 * File system type, a string padded with spaces
+	 */
 	char FilSysType[8];
 	/* 56 bytes */
+	/*
+	 * Root directory cluster, the first cluster of the root directory, usually 2
+	 */
 	uint16_t RootClus;
 	/* 58 bytes */
 };
@@ -133,7 +179,7 @@ struct FAT {
 
 struct FATVolume {
 	struct ParameterBlock PB;
-	/* in-memory copy of the FAT */
+	/* in-memory copy of the FAT (one FAT) */
 	uint16_t *FAT;
 	/* in-memory buffer to read or write clusters - and sectors */
 	char *buffer;
@@ -165,4 +211,4 @@ struct FATVolume {
 	uint16_t lastFreeFATEntry;
 };
 
-#endif				// FAT_DATA_H
+#endif
