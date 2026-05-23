@@ -157,7 +157,7 @@ struct FAT_time_stamp {
 /* Update the same define in fat_names.c if you change the definition of struct FAT !!! */
 #define DIR_NAMELEN     39
 struct FAT {
-	char DIR_Name[39];
+	char DIR_Name[DIR_NAMELEN];
 	uint8_t DIR_Attr;
 	/* 40 Bytes */
 	uint16_t DIR_FstClus;
