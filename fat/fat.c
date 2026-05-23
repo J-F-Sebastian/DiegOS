@@ -1047,7 +1047,7 @@ int FAT_read(struct FATVolume *vol,
 	 *      +----------+----------+----------+---------+
 	 *           ^                             ^
 	 *           |                             |
-	 *        Offset ---------------------- buflen
+	 *        offset ---------------------- buflen
 	 *
 	 * Given a random offset the buffer to be copied can span clusters
 	 * and may require partial copies if the offset is not aligned to the cluster size or
@@ -1084,7 +1084,7 @@ int FAT_read(struct FATVolume *vol,
 		sector = FAT_FSoC(vol, cluster);
 	}
 
-	while (buflen > vol->BytesPerCluster) {
+	while (buflen >= vol->BytesPerCluster) {
 		if (!FAT_cluster_isReadable(cluster)) {
 			/* EIO or EOK */
 			if (FAT_cluster_isEOC(cluster))
@@ -1097,6 +1097,7 @@ int FAT_read(struct FATVolume *vol,
 			return -1;
 		/* EIO */
 
+		memcpy(buffer, vol->buffer, vol->BytesPerCluster);
 		*readlen += vol->BytesPerCluster;
 		buffer += vol->BytesPerCluster;
 		buflen -= vol->BytesPerCluster;
@@ -1230,7 +1231,7 @@ int FAT_write(struct FATVolume *vol,
 	 *      +----------+----------+----------+---------+
 	 *           ^                             ^
 	 *           |                             |
-	 *        Offset ---------------------- buflen
+	 *        offset ---------------------- buflen
 	 *
 	 * Given a random offset the buffer to be written can span clusters
 	 * and may require partial copies if the offset is not aligned to the cluster size or
@@ -1277,7 +1278,8 @@ int FAT_write(struct FATVolume *vol,
 		sector = FAT_FSoC(vol, cluster);
 	}
 
-	while (buflen > vol->BytesPerCluster) {
+	while (buflen >= vol->BytesPerCluster) {
+		memcpy(vol->buffer, buffer, vol->BytesPerCluster);
 		if (diskWriteC(vol, sector, buffer)) {
 			/* EIO */
 			FAT_write_update_on_disk(appended, filepos, vol, &search);
@@ -1289,8 +1291,7 @@ int FAT_write(struct FATVolume *vol,
 		buflen -= vol->BytesPerCluster;
 		*writelen = origbuflen - buflen;
 		if (!buflen) {
-			FAT_write_update_on_disk(appended, filepos, vol, &search);
-			return 0;
+			break;
 		}
 
 		appended = FAT_write_get_next(cluster, vol, &cluster);
