@@ -45,6 +45,27 @@ int MBR_read(void *ctx, struct MBR *mbr)
 	return 0;
 }
 
+int MBR_write(void *ctx, const struct MBR *mbr)
+{
+	struct disk_geometry geom;
+	char *buf;
+
+	if (disk_get_geometry(ctx, &geom))
+		return -1;
+
+	buf = malloc(geom.bytes_per_sector);
+	memcpy(buf, mbr, sizeof(*mbr));
+
+	if (disk_write(ctx, 0, 1, buf))
+	{
+		free(buf);
+		return -1;
+	}
+
+	free(buf);
+	return 0;
+}
+
 void MBR_list(struct MBR *mbr)
 {
 	unsigned i;
