@@ -77,7 +77,7 @@ int FAT_build_DIR_name(const char *name, size_t len, char *output)
 			output[0] = '\0';
 			return -1;
 		}
-		output[pos] = name[pos];
+		output[pos] = (char)toupper(name[pos]);
 		pos++;
 	}
 
