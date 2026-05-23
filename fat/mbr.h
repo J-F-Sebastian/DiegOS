@@ -63,9 +63,13 @@ struct MBR {
  * ctx is a disk access context as returned by the disk access API.
  * On failure the contents of mbr are unchanged.
  *
+ * PARAMETERS IN
  * @param ctx disk access API context
+ *
+ * PARAMETERS OUT
  * @param mbr pointer to a Master Boot Record data structure
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
@@ -77,20 +81,24 @@ int MBR_read(void *ctx, struct MBR *mbr);
  * On failure the contents of mbr MIGHT BE PERMANENTLY CHANGED !!!
  * DANGER: CORRUPTING OR CHANGING THE MBR OF A DISK WILL RESULT IN A POSSIBLE DATA LOSS !!!
  *
+ * PARAMETERS IN
  * @param ctx disk access API context
  * @param mbr pointer to a Master Boot Record data structure
  *
+ * RETURNS
  * @return 0 on success
  * @return -1 on error
  */
-int MBR_write(void *ctx, struct MBR *mbr);
+int MBR_write(void *ctx, const struct MBR *mbr);
 
 /**
  * @brief MBR_get_active_partition returns the index of the partition in the MBR with the Active
  * Partition flags set. If no partition is flagged as Active, the function returns -1.
  *
+ * PARAMETERS IN
  * @param mbr pointer to a Master Boot Record data structure
  *
+ * RETURNS
  * @return a partition index with range [0, 3] on success
  * @return -1 on error
  */
@@ -115,4 +123,4 @@ int MBR_get_partition_entry(struct MBR *mbr, int partnum, struct MBR_partition_e
  */
 void MBR_list(struct MBR *mbr);
 
-#endif				// MBR_H
+#endif

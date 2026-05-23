@@ -48,12 +48,16 @@ struct disk_geometry {
  * The context returned by disk_init() will be used when calling any other API in this interface,
  * so it must be internally supported.
  *
+ * PARAMETERS IN
  * @param dev a C string specifing which device (disk, CD, mmc, NAND flash, NOR flash...)
  *            need to be initialized and set up for further read&write.
+ *
+ * PARAMETERS OUT
  * @param ctx A context storing informations to be used by all other API calls to address the
  *            proper physical device.
  *            The API store an opaque pointer in *ctx, the caller must not be aware of its contents.
  *
+ * RETURNS
  * @return 0 in case of success
  * @return -1 in case of error
  */
@@ -65,8 +69,10 @@ int disk_init(const char *dev, void **ctx);
  * after this call the context cannot be used anymore.
  * A call to disk_init() is required to get a new valid context.
  *
+ * PARAMETERS IN
  * @param ctx A valid context as returned by disk_init()
  *
+ * RETURNS
  * @return 0 in case of success
  * @return -1 in case of error
  */
@@ -76,9 +82,13 @@ int disk_done(void *ctx);
  * @brief disk_get_geometry returns a basic media geometry description in geom; the returned
  * values are the number of bytes per sector and the total number of accessible sectors.
  *
+ * PARAMETERS IN
  * @param ctx A context returned by disk_init()
+ *
+ * PARAMETERS OUT
  * @param geom A pointer to a struct disk_geometry structure
  *
+ * RETURNS
  * @return 0 in case of success
  * @return -1 in case of error
  */
@@ -91,11 +101,15 @@ int disk_get_geometry(void *ctx, struct disk_geometry *geom);
  * return an error.
  * The destination buffer is managed by the caller and must sized properly.
  *
+ * PARAMETERS IN
  * @param ctx A context returned by disk_init()
  * @param sec Starting sector, its contents will be read into buf
  * @param numsec Number of sectors to be read, must be greater than 0
+ *
+ * PARAMETERS OUT
  * @param buf Destination buffer
  *
+ * RETURNS
  * @return 0 in case of success
  * @return -1 in case of error
  */
@@ -108,14 +122,16 @@ int disk_read(void *ctx, unsigned sec, unsigned numsec, char *buf);
  * return an error.
  * The source buffer is managed by the caller and must sized properly.
  *
+ * PARAMETERS IN
  * @param ctx A context returned by disk_init()
  * @param sec Starting sector, its contents will be overwritten
  * @param numsec Number of sectors to be written, must be greater than 0
  * @param buf Source buffer
  *
+ * RETURNS
  * @return 0 in case of success
  * @return -1 in case of error
  */
-int disk_write(void *ctx, unsigned sec, unsigned numsec, char *buf);
+int disk_write(void *ctx, unsigned sec, unsigned numsec, const char *buf);
 
-#endif				// DISK_ACCESS_H
+#endif

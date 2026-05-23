@@ -130,7 +130,7 @@ int disk_read(void *ctx, unsigned sec, unsigned numsec, char *buf)
 	return (numsec != fread(buf, mctx->geom.bytes_per_sector, numsec, mctx->disk));
 }
 
-int disk_write(void *ctx, unsigned sec, unsigned numsec, char *buf)
+int disk_write(void *ctx, unsigned sec, unsigned numsec, const char *buf)
 {
 	struct my_context *mctx = (struct my_context *)ctx;
 	unsigned retval;

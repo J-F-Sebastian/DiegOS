@@ -45,7 +45,7 @@ int BPB_read(void *ctx, struct BPB *bpb)
 	return 0;
 }
 
-int BPB_write(void *ctx, struct BPB *bpb)
+int BPB_write(void *ctx, const struct BPB *bpb)
 {
 	struct disk_geometry geom;
 	char *buf;
