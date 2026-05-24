@@ -194,30 +194,24 @@ static int FAT_dir_foreach(struct FATVolume *vol,
 static int FAT_search_DIR_entry(struct FATVolume *vol,
 				const char *directory, struct FAT_direntry_search_result *result)
 {
-	char name[DIR_NAMELEN];
+	char *name;
 	size_t dirlen;
-	size_t startpos = 0;
-	size_t endpos = 0;
-	size_t len = 0;
-	int found = 0;
+	int found = -1;
 	uint16_t cluster, contcluster;
 	struct FAT_direntry_search_result entryfound;
+	struct FAT_split_directory splitdir;
 
 	dirlen = strlen(directory);
 	if (!dirlen || (dirlen > FILENAME_MAX))
 		return -1;
 
 	contcluster = cluster = vol->PB.RootClus;
-	do {
-		found = -1;
-		len = FAT_parse_directory(directory, dirlen, &startpos, &endpos);
-		if (!len || (len > sizeof(entryfound.entry.DIR_Name)))
-			return -1;
 
-		FAT_build_DIR_name(directory + startpos, len, name);
-		if (!name[0])
-			return -1;
+	if (FAT_parse_directory(directory, dirlen, &splitdir))
+		return -1;
 
+	name = splitdir.splits;
+	while (splitdir.numsplits--) {
 		while (!FAT_cluster_isEOC(cluster)) {
 			found = FAT_dir_foreach(vol, name, cluster, &entryfound, FAT_search_loop);
 			if (!found)
@@ -229,19 +223,20 @@ static int FAT_search_DIR_entry(struct FATVolume *vol,
 		if (found) {
 			return -1;
 		}
-		if (endpos == dirlen) {
-			entryfound.container = contcluster;
-			*result = entryfound;
-			return 0;
-		}
-		if ((entryfound.entry.DIR_Attr & ATTR_DIRECTORY) == 0)
+
+		if ((splitdir.numsplits) && ((entryfound.entry.DIR_Attr & ATTR_DIRECTORY) == 0)) {
+			free(splitdir.splits);
 			return -1;
+		}
 
 		contcluster = cluster = entryfound.entry.DIR_FstClus;
-		startpos = endpos;
-	} while (startpos < dirlen);
+		name += DIR_NAMELEN;
+	}
 
-	return -1;
+	free(splitdir.splits);
+	entryfound.container = contcluster;
+	*result = entryfound;
+	return 0;
 }
 
 /*

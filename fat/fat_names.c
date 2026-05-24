@@ -19,6 +19,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "fat_names.h"
 
@@ -34,25 +35,63 @@ static inline int check(const char chk)
 		((chk >= 0x5B) && (chk <= 0x5D)) || (chk == 0x7C));
 }
 
-size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t *startpos, size_t *endpos)
+int FAT_parse_directory(const char *directory, size_t dirlen, struct FAT_split_directory *split_dir)
 {
-	while (*startpos < dirlen) {
-		if (directory[*startpos] == '\\')
+	size_t startpos = 0, endpos = 0;
+	unsigned split_num = 0;
+	unsigned split_max = 8;
+
+	/*
+	 * CAUTION !!! If you forgot to release memory allocated to splits, you are leaking memory.
+	 * You MUST release memory only if the return value is 0.
+	 */
+	split_dir->splits = malloc(split_max * DIR_NAMELEN);
+	if (!split_dir->splits)
+		return -1;
+
+	while (startpos < dirlen) {
+		while ((startpos < dirlen) && (directory[startpos] == '\\'))
+			startpos++;
+
+		if (startpos == dirlen)
 			break;
-		(*startpos)++;
+
+		endpos = startpos + 1;
+		while ((endpos < dirlen) && (directory[endpos] != '\\'))
+			endpos++;
+
+		if ((endpos - startpos) > DIR_NAMELEN)
+		{
+			free(split_dir->splits);
+			split_dir->splits = NULL;
+			split_dir->numsplits = 0;
+			return -1;
+		}
+
+		if (FAT_build_DIR_name(directory + startpos, endpos - startpos, &split_dir->splits[split_num*DIR_NAMELEN]))
+		{
+			free(split_dir->splits);
+			split_dir->splits = NULL;
+			split_dir->numsplits = 0;
+			return -1;
+		}
+
+		if (++split_num == split_max) {
+			split_max += 8;
+			char *new_splits = realloc(split_dir->splits, split_max * DIR_NAMELEN);
+			if (!new_splits) {
+				free(split_dir->splits);
+				split_dir->splits = NULL;
+				split_dir->numsplits = 0;
+				return -1;
+			}
+			split_dir->splits = new_splits;
+		}
+		startpos = endpos + 1;
 	}
 
-	if (*startpos == dirlen)
-		return 0;
-
-	*startpos += 1;
-	*endpos = *startpos + 1;
-	while (*endpos < dirlen) {
-		if (directory[*endpos] == '\\')
-			break;
-		(*endpos)++;
-	}
-	return (*endpos - *startpos);
+	split_dir->numsplits = split_num;
+	return 0;
 }
 
 size_t FAT_parse_directory_last(const char *directory, size_t dirlen)
@@ -90,7 +129,8 @@ int FAT_build_DIR_name(const char *name, size_t len, char *output)
 
 int FAT_make_path_relative(const char *filename, const char *relto, char *output)
 {
-	size_t startrelto, endrelto, reltolen, reltochunk;
+	size_t reltolen;
+	struct FAT_split_directory splitdir;
 
 	if (!filename || !relto || !output)
 		return -1;
@@ -104,24 +144,20 @@ int FAT_make_path_relative(const char *filename, const char *relto, char *output
 	}
 
 	reltolen = strlen(relto);
-	startrelto = 0;
 
 	/*
 	 * add a step back '..' for each not-common folder, and break at the end of
 	 * the relto path.
 	 */
-	do {
-		reltochunk = FAT_parse_directory(relto, reltolen, &startrelto, &endrelto);
-		if (reltochunk) {
-			strcpy(output, "..\\");
-			output += 3;
-		} else
-			break;
+	if (FAT_parse_directory(relto, reltolen, &splitdir))
+		return -1;
 
-		endrelto = startrelto;
+	while (splitdir.numsplits--) {
+		strcpy(output, "..\\");
+		output += 3;
+	}
 
-	} while (1);
-
+	free(splitdir.splits);
 	strcat(output, filename);
 	return 0;
 }

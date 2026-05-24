@@ -28,22 +28,31 @@
 #include <stddef.h>
 #include <stdint.h>
 
+struct FAT_split_directory {
+        char  *splits;
+        size_t numsplits;
+};
+
 /**
  * @brief FAT_parse_directory parse a standard path string and split it in chunks, returning
- * in startpos and endpos the limits of the chunk.
+ * the split directory names in split_dir->splits and the number of splits in split_dir->numsplits.
+ * The returned string is null on failure.
+ * The caller is responsible for releasing the memory allocated to split_dir->splits, if the return value is 0.
+ * splitdir->splits is a contiguous buffer of split_dir->numsplits * DIR_NAMELEN bytes, where each split name
+ * is stored in a DIR_NAMELEN byte chunk.
  *
  * PARAMETERS IN
  * @param directory a string representing a path name
  * @param dirlen length of the string pointed by directory
  *
  * PARAMETERS OUT
- * @param startpos starting position of the chunk
- * @param endpos ending position of the chunk
+ * @param split_dir pointer to the structure containing the split directory names and their count
  *
  * RETURNS
- * @return length of the chunk in bytes
+ * @return 0 on success
+ * @return -1 on failure
  */
-size_t FAT_parse_directory(const char *directory, size_t dirlen, size_t *startpos, size_t *endpos);
+int FAT_parse_directory(const char *directory, size_t dirlen, struct FAT_split_directory *split_dir);
 
 /**
  * @brief FAT_parse_directory_last parse a standard path string and returns the position
