@@ -111,7 +111,7 @@ int MBR_get_active_partition(struct MBR *mbr)
 
 	for (i = 0, cursor = mbr->partitions; i < 4; i++, cursor++) {
 		/* Active partition status is 0x80 */
-		if (cursor->status == '\0x80')
+		if (cursor->status == '\x80')
 			break;
 	}
 
