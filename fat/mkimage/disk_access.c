@@ -124,7 +124,7 @@ int disk_read(void *ctx, unsigned sec, unsigned numsec, char *buf)
 	return -1;
 }
 
-int disk_write(void *ctx, unsigned sec, unsigned numsec, char *buf)
+int disk_write(void *ctx, unsigned sec, unsigned numsec, const char *buf)
 {
 	struct my_context *mctx = (struct my_context *)ctx;
 	unsigned retval;
