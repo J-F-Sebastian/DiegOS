@@ -22,9 +22,27 @@
 
 #include <stdint.h>
 
+/*
+ *	Bit # 	Mask 	Abbreviation 	Description 	        Category 	SET 	                CLEAR
+ *	0 	0x0001 	CF 	        Carry flag 	        Status 	        CY (Carry) 	        NC (No Carry)
+ *	2 	0x0004 	PF 	        Parity flag 	        Status 	        PE (Parity Even) 	PO (Parity Odd)
+ *	4 	0x0010 	AF 	        Auxiliary Carry flag 	Status 	        AC (Auxiliary Carry) 	NA (No Auxiliary Carry)
+ *	6 	0x0040 	ZF 	        Zero flag 	        Status   	ZR (Zero) 	        NZ (Not Zero)
+ *	7 	0x0080 	SF 	        Sign flag 	        Status 	        NG (Negative)    	PL (Positive)
+ *	8 	0x0100 	TF 	        Trap flag (single step)	Control
+ *	9 	0x0200 	IF 	        Interrupt enable flag 	Control 	EI (Enable Interrupt) 	DI (Disable Interrupt)
+ *	10 	0x0400 	DF 	        Direction flag 	        Control 	DN (Down) 	        UP (Up)
+ *	11 	0x0800 	OF 	        Overflow flag 	        Status  	OV (Overflow)   	NV (Not Overflow)
+ *	12–13 	0x3000 	IOPL 	        I/O privilege level
+ *        	                        (286+ only), always
+ *					all-1s on 8086 and 186 	System
+ * 	14 	0x4000 	NT 	        Nested task flag (286+ only),
+ *        	                        always 1 on 8086 and 186System
+*/
+
 typedef struct __attribute__((packed)) {
 	uint16_t di, si, bp, sp, bx, dx, cx, ax;
-	uint16_t gs, fs, es, ds, eflags;
+	uint16_t gs, fs, es, ds, flags;
 } regs16_t;
 
 inline void prot_to_seg_ofs(void *prot, uint16_t *seg, uint16_t *ofs)
