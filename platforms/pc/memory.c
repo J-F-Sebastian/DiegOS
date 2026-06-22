@@ -34,7 +34,7 @@ void cacheable_memory(void **base, unsigned long *size)
 	/*
 	 * is carry bit set?
 	 */
-	if (regs.eflags & 1) {
+	if (regs.flags & 1) {
 		*base = NULL;
 		*size = 0;
 		return;
@@ -69,7 +69,7 @@ void io_memory(void **base, unsigned long *size)
 	/*
 	 * is carry bit set?
 	 */
-	if (regs.eflags & 1) {
+	if (regs.flags & 1) {
 		*base = NULL;
 		*size = 0;
 		return;
@@ -105,7 +105,7 @@ void total_memory(unsigned long *size)
 	/*
 	 * is carry bit set?
 	 */
-	if (regs.eflags & 1) {
+	if (regs.flags & 1) {
 		*size = 0;
 		return;
 	}
