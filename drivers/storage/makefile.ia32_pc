@@ -1,0 +1,9 @@
+include $(WSROOT)/build/makefiles/makefile.master
+
+all:
+	cd floppy && make all
+	$(AR) $(OBJPREFIX)_storage.a floppy/$(OBJPREFIX)/fdc.o
+
+clean:
+	cd floppy && make clean
+	rm -rf *.a
