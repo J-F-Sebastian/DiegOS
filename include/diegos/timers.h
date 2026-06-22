@@ -20,6 +20,8 @@
 #ifndef _TIMERS_H_
 #define _TIMERS_H_
 
+#include <types_common.h>
+
 typedef struct timer timer_t;
 typedef void (*tmr_cb)(void *);
 
@@ -36,7 +38,7 @@ typedef void (*tmr_cb)(void *);
 /*
  * Create a timer providing a name (optional), the expire period in
  * milliseconds, the recursiveness, the callback to invoke on expiration and the
- * context of the callack (parameter passed to the callback).
+ * context of the callback (parameter passed to the callback).
  * Once the timer is set, it will invoke the callback on expiration; if the
  * timer is recursive, it will automatically re-arm.
  *
@@ -60,8 +62,12 @@ timer_t *timer_create(const char *name, unsigned millisecs, BOOL recursive, tmr_
  * timer_t *tmr - the timer to be set
  * BOOL start   - if start is TRUE the timer will be set and counting; if start
  *                is false the timer will be stopped and set to inactive.
+ *
+ * RETURNS
+ * EINVAL if tmr is not a valid pointer
+ * EOK in any other case.
  */
-void timer_set(timer_t * tmr, BOOL start);
+int timer_set(timer_t * tmr, BOOL start);
 
 /*
  * Update the period duration and recursiveness of a timer.
@@ -75,7 +81,26 @@ void timer_set(timer_t * tmr, BOOL start);
  * EINVAL if tmr is not a valid pointer or millisecs is 0.
  * EOK in any other case.
  */
-int alarm_update(timer_t * tmr, unsigned millisecs, BOOL recursive);
+int timer_update(timer_t * tmr, unsigned millisecs, BOOL recursive);
+
+/*
+ * Update the callback and argument of a timer callback.
+ * The callback and the argument cannot be updated while the timer is running.
+ * If the timer is running, the function will return EBUSY.
+ * NOTE: if the timer is set to be recursive you need to stop the timer,
+ * update the callback and argument, and then start the timer again.
+ *
+ * PARAMETERS IN
+ * timer_t *tmr       - The timer handle
+ * tmr_cb cb          - the new callback
+ * void *arg          - the new callback argument
+ *
+ * RETURNS
+ * EINVAL if tmr or cb are NULL
+ * EBUSY if the timer is running
+ * EOK in case of success
+ */
+int timer_update_cb(timer_t * tmr, tmr_cb cb, void *arg);
 
 /*
  * Remove a timer.

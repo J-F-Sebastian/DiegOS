@@ -172,11 +172,10 @@ timer_t *timer_create(const char *name, unsigned millisecs, BOOL recursive, tmr_
 	return (ptr);
 }
 
-void timer_set(timer_t *tmr, BOOL start)
+int timer_set(timer_t *tmr, BOOL start)
 {
 	if (!tmr) {
-		errno = EINVAL;
-		return;
+		return (EINVAL);
 	}
 
 	lock();
@@ -196,6 +195,8 @@ void timer_set(timer_t *tmr, BOOL start)
 	}
 
 	unlock();
+
+	return (EOK);
 }
 
 int timer_update(timer_t *tmr, unsigned millisecs, BOOL recursive)
@@ -222,6 +223,29 @@ int timer_update(timer_t *tmr, unsigned millisecs, BOOL recursive)
 		tmr->flags |= TMR_RECURSIVE;
 	} else if (!recursive && (tmr->flags & TMR_RECURSIVE)) {
 		tmr->flags &= ~TMR_RECURSIVE;
+	}
+
+	unlock();
+
+	return (EOK);
+}
+
+int timer_update_cb(timer_t *tmr, tmr_cb cb, void *arg)
+{
+	if (!tmr || !cb) {
+		return (EINVAL);
+	}
+
+	lock();
+
+	if (tmr->flags & TMR_TRIGGERED) {
+		unlock();
+		return (EBUSY);
+	}
+
+	if (cb != tmr->cb || arg != tmr->arg) {
+		tmr->cb = cb;
+		tmr->arg = arg;
 	}
 
 	unlock();
