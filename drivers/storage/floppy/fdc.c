@@ -64,8 +64,6 @@
  * work.
  */
 
-#define REALLY_SLOW_IO
-#define FLOPPY_IRQ 6
 #define FLOPPY_DMA 2
 
 #include <stdint.h>
@@ -235,7 +233,7 @@ struct floppy_struct *base_type[4];
  * User-provided type information. current_type points to
  * the respective entry of this array.
  */
-struct floppy_struct user_params[4];
+//struct floppy_struct user_params[4];
 
 static int floppy_sizes[] = {
     MAX_DISK_SIZE, MAX_DISK_SIZE, MAX_DISK_SIZE, MAX_DISK_SIZE,
@@ -266,12 +264,12 @@ static int keep_data[4] = {0, 0, 0, 0};
  * disk changes.
  * Also used to enable/disable printing of overrun warnings.
  */
-static int ftd_msg[4] = {0, 0, 0, 0};
+//static int ftd_msg[4] = {0, 0, 0, 0};
 
 /* Prevent "aliased" accesses. */
 
-static int fd_ref[4] = {0, 0, 0, 0};
-static int fd_device[4] = {0, 0, 0, 0};
+//static int fd_ref[4] = {0, 0, 0, 0};
+//static int fd_device[4] = {0, 0, 0, 0};
 
 /* Synchronization of FDC access. */
 static volatile int format_status = FORMAT_NONE, fdc_busy = 0;
@@ -335,7 +333,8 @@ static void redo_fd_request(void);
  */
 #define NO_TRACK 255
 
-static unsigned int changed_floppies = 0, fake_change = 0;
+//static unsigned int changed_floppies = 0, fake_change = 0;
+static unsigned int changed_floppies = 0;
 
 enum {
 	INITIAL_RESET = (1 << 0),
@@ -757,7 +756,7 @@ static void rw_interrupt(void)
 		}
 		else if (ST1 & ST1_OR)
 		{
-			if (ftd_msg[ST0 & ST0_DS])
+			//if (ftd_msg[ST0 & ST0_DS])
 				kdrvprintf("Over/Underrun - retrying\n");
 			/* could continue from where we stopped, but ... */
 			bad = 0;
@@ -824,7 +823,7 @@ static void rw_interrupt(void)
 	{
 		int drive = CURRENT->dev;
 
-		if (ftd_msg[drive])
+		//if (ftd_msg[drive])
 			kdrvprintf("Auto-detected floppy type %s in fd%d\n",
 			       floppy->name, drive);
 		current_type[drive] = floppy;
@@ -1105,7 +1104,8 @@ static void floppy_ready(void)
 		}
 		else
 		{
-			if (ftd_msg[current_drive] && current_type[current_drive] != NULL)
+			//if (ftd_msg[current_drive] && current_type[current_drive] != NULL)
+			if (current_type[current_drive] != NULL)
 				kdrvprintf("Disk type is undefined after disk "
 				       "change in fd%d\n",
 				       current_drive);
