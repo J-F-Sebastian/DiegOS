@@ -100,18 +100,6 @@ struct request {
 
 void (*do_floppy)(void) = NULL;
 
-static unsigned int changed_floppies = 0, fake_change = 0;
-
-static int initial_reset_flag = 0;
-static int need_configure = 1; /* for 82077 */
-static int recalibrate = 0;
-static int reset = 0;
-static int recover = 0; /* recalibrate immediately after resetting */
-static int seek = 0;
-
-static uint8_t current_DOR = DOR_RESET | DOR_DMA;
-static uint8_t running = 0;
-
 #define TYPE(x) ((x) >> 2)
 #define DRIVE(x) ((x) & 0x03)
 
@@ -347,7 +335,32 @@ static void redo_fd_request(void);
  */
 #define NO_TRACK 255
 
+static unsigned int changed_floppies = 0, fake_change = 0;
+
+enum {
+	INITIAL_RESET = (1 << 0),
+	NEED_CONFIGURE = (1 << 1),
+	RECALIBRATE = (1 << 2),
+	RESET = (1 << 3),
+	RECOVER = (1 << 4),
+	SEEK = (1 << 5),
+	READ_TRACK = (1 << 6)
+};
+
+#if 0
+static int initial_reset_flag = 0;
+static int need_configure = 1; /* for 82077 */
+static int recalibrate = 0;
+static int reset = 0;
+static int recover = 0; /* recalibrate immediately after resetting */
+static int seek = 0;
 static int read_track = 0; /* flag to indicate if we want to read entire track */
+#endif
+
+static unsigned fdc_flags = NEED_CONFIGURE;
+
+static uint8_t running = 0;
+static uint8_t current_DOR = DOR_RESET | DOR_DMA;
 static int buffer_track = -1;
 static int buffer_drive = -1;
 static int cur_spec1 = -1;
@@ -399,7 +412,7 @@ static void floppy_select(unsigned int nr)
 		floppy_ready();
 		return;
 	}
-	seek = 1;
+	fdc_flags |= SEEK;
 	current_track = NO_TRACK;
 	current_DOR &= 0xFC;
 	current_DOR |= current_drive;
@@ -505,7 +518,7 @@ int floppy_change(struct buffer_head *bh)
 	{
 		buffer_track = -1;
 		changed_floppies &= ~mask;
-		recalibrate = 1;
+		fdc_flags |= RECALIBRATE;
 		return 1;
 	}
 	if (!bh)
@@ -522,7 +535,7 @@ int floppy_change(struct buffer_head *bh)
 	if (changed_floppies & mask)
 	{
 		changed_floppies &= ~mask;
-		recalibrate = 1;
+		fdc_flags |= RECALIBRATE;
 		return 1;
 	}
 	return 0;
@@ -543,7 +556,7 @@ static void setup_DMA(void)
 		count = 1024;
 	}
 
-	if (read_track)	{
+	if (fdc_flags & READ_TRACK)	{
 		/* mark buffer-track bad, in case all this fails.. */
 		buffer_drive = buffer_track = -1;
 		count = floppy->sect * floppy->head * 512;
@@ -569,7 +582,7 @@ static void output_byte(char byte)
 	int counter;
 	uint8_t status;
 
-	if (reset)
+	if (fdc_flags & RESET)
 		return;
 	for (counter = 0; counter < 10000; counter++)
 	{
@@ -581,7 +594,7 @@ static void output_byte(char byte)
 		}
 	}
 	current_track = NO_TRACK;
-	reset = 1;
+	fdc_flags |= RESET;
 	kdrvprintf("Unable to send byte to FDC\n");
 }
 
@@ -589,7 +602,7 @@ static int result(void)
 {
 	int i = 0, counter, status;
 
-	if (reset)
+	if (fdc_flags & RESET)
 		return -1;
 	for (counter = 0; counter < 10000; counter++)
 	{
@@ -608,7 +621,7 @@ static int result(void)
 			reply_buffer[i++] = in_byte(FDC_DATA);
 		}
 	}
-	reset = 1;
+	fdc_flags |= RESET;
 	current_track = NO_TRACK;
 	kdrvprintf("Getstatus times out\n");
 	return -1;
@@ -624,7 +637,7 @@ static void bad_flp_intr(void)
 	else if (!CURRENT)
 	{
 		kdrvprintf("no current request\n");
-		reset = recalibrate = 1;
+		fdc_flags |= RESET | RECALIBRATE;
 		return;
 	}
 	else
@@ -634,9 +647,9 @@ static void bad_flp_intr(void)
 		request_done(0);
 	}
 	if (errors > MAX_ERRORS / 2)
-		reset = 1;
+		fdc_flags |= RESET;
 	else
-		recalibrate = 1;
+		fdc_flags |= RECALIBRATE;
 }
 
 /* Set perpendicular mode as required, based on data rate, if supported.
@@ -658,7 +671,7 @@ static void perpendicular_mode(uint8_t rate)
 			else
 			{
 				kdrvprintf("Invalid data rate for perpendicular mode!\n");
-				reset = 1;
+				fdc_flags |= RESET;
 			}
 		}
 		else
@@ -669,7 +682,7 @@ static void perpendicular_mode(uint8_t rate)
 		if (rate & 0x40)
 		{
 			kdrvprintf("perpendicular mode not supported by this FDC.\n");
-			reset = 1;
+			fdc_flags |= RESET;
 		}
 	}
 } /* perpendicular_mode */
@@ -682,14 +695,14 @@ static void perpendicular_mode(uint8_t rate)
  */
 static void configure_fdc_mode(void)
 {
-	if (need_configure && (fdc_version == FDC_TYPE_82077))
+	if ((fdc_flags & NEED_CONFIGURE) && (fdc_version == FDC_TYPE_82077))
 	{
 		/* Enhanced version with FIFO & vertical recording. */
 		output_byte(FD_CONFIGURE);
 		output_byte(0);
 		output_byte(0x1A); /* FIFO on, polling off, 10 byte threshold */
 		output_byte(0);	   /* precompensation from track 0 upwards */
-		need_configure = 0;
+		fdc_flags &= ~NEED_CONFIGURE;
 		kdrvprintf("FIFO enabled\n");
 	}
 	if (cur_spec1 != floppy->spec1)
@@ -712,7 +725,7 @@ static void tell_sector(int nr)
 	if (nr != 7)
 	{
 		kdrvprintf(" -- FDC reply errror");
-		reset = 1;
+		fdc_flags |= RESET;
 	}
 	else
 		kdrvprintf(": track %d, head %d, sector %d", reply_buffer[3],
@@ -818,7 +831,7 @@ static void rw_interrupt(void)
 		floppy_sizes[drive] = floppy->size >> 1;
 		probing = 0;
 	}
-	if (read_track)
+	if (fdc_flags & READ_TRACK)
 	{
 		buffer_track = seek_track;
 		buffer_drive = current_drive;
@@ -847,7 +860,7 @@ void setup_rw_floppy(void)
 	output_byte(command);
 	if (command != FD_FORMAT)
 	{
-		if (read_track)
+		if (fdc_flags & READ_TRACK)
 		{
 			output_byte(current_drive);
 			output_byte(track);
@@ -874,7 +887,7 @@ void setup_rw_floppy(void)
 		output_byte(floppy->fmt_gap);
 		output_byte(FD_FILL_BYTE);
 	}
-	if (reset)
+	if (fdc_flags & RESET)
 		redo_fd_request();
 }
 
@@ -890,7 +903,7 @@ static void seek_interrupt(void)
 	if (result() != 2 || (ST0 & 0xF8) != 0x20 || ST1 != seek_track)
 	{
 		kdrvprintf("seek failed\n");
-		recalibrate = 1;
+		fdc_flags |= RECALIBRATE;
 		bad_flp_intr();
 		redo_fd_request();
 		return;
@@ -906,17 +919,21 @@ static void seek_interrupt(void)
  */
 static void transfer(void)
 {
-	read_track = (command == FD_READ) && (CURRENT_ERRORS < 4) &&
-		     (floppy->sect <= MAX_BUFFER_SECTORS);
+	if ((command == FD_READ) && (CURRENT_ERRORS < 4) &&
+		     (floppy->sect <= MAX_BUFFER_SECTORS)) {
+		fdc_flags |= READ_TRACK;
+	} else {
+		fdc_flags &= ~READ_TRACK;
+	}
 
 	configure_fdc_mode();
 
-	if (reset)
+	if (fdc_flags & RESET)
 	{
 		redo_fd_request();
 		return;
 	}
-	if (!seek)
+	if (!(fdc_flags & SEEK))
 	{
 		setup_rw_floppy();
 		return;
@@ -924,12 +941,12 @@ static void transfer(void)
 
 	do_floppy = seek_interrupt;
 	output_byte(FD_SEEK);
-	if (read_track)
+	if (fdc_flags & READ_TRACK)
 		output_byte(current_drive);
 	else
 		output_byte((head << 2) | current_drive);
 	output_byte(seek_track);
-	if (reset)
+	if (fdc_flags & RESET)
 		redo_fd_request();
 }
 
@@ -944,7 +961,7 @@ static void recal_interrupt(void)
 	output_byte(FD_SENSEI);
 	current_track = NO_TRACK;
 	if (result() != 2 || (ST0 & 0xE0) == 0x60)
-		reset = 1;
+		fdc_flags |= RESET;
 	/* Recalibrate until track 0 is reached. Might help on some errors. */
 	if ((ST0 & 0x10) == 0x10)
 		recalibrate_floppy(); /* FIXME: should limit nr of recalibrates */
@@ -958,19 +975,19 @@ static void unexpected_floppy_interrupt(void)
 	output_byte(FD_SENSEI);
 	kdrvprintf("unexpected interrupt\n");
 	if (result() != 2 || (ST0 & 0xE0) == 0x60)
-		reset = 1;
+		fdc_flags |= RESET;
 	else
-		recalibrate = 1;
+		fdc_flags |= RECALIBRATE;
 }
 
 static void recalibrate_floppy(void)
 {
-	recalibrate = 0;
+	fdc_flags &= ~RECALIBRATE;
 	current_track = 0;
 	do_floppy = recal_interrupt;
 	output_byte(FD_RECALIBRATE);
 	output_byte(head << 2 | current_drive);
-	if (reset)
+	if (fdc_flags & RESET)
 		redo_fd_request();
 }
 
@@ -990,19 +1007,19 @@ static void reset_interrupt(void)
 	output_byte(cur_spec1); /* hut etc */
 	output_byte(6);		/* Head load time =6ms, DMA */
 	configure_fdc_mode();	/* reprogram fdc */
-	if (initial_reset_flag)
+	if (fdc_flags & INITIAL_RESET)
 	{
-		initial_reset_flag = 0;
-		recalibrate = 1;
-		reset = 0;
+		fdc_flags &= ~INITIAL_RESET;
+		fdc_flags |= RECALIBRATE;
+		fdc_flags &= ~RESET;
 		return;
 	}
-	if (!recover)
+	if (!(fdc_flags & RECOVER))
 		redo_fd_request();
 	else
 	{
 		recalibrate_floppy();
-		recover = 0;
+		fdc_flags &= ~RECOVER;
 	}
 }
 
@@ -1014,13 +1031,12 @@ static void reset_floppy(void)
 	int i;
 
 	do_floppy = reset_interrupt;
-	reset = 0;
+	fdc_flags &= ~RESET;
 	current_track = NO_TRACK;
 	cur_spec1 = -1;
 	cur_rate = -1;
-	recalibrate = 1;
-	need_configure = 1;
-	if (!initial_reset_flag)
+	fdc_flags |= RECALIBRATE | NEED_CONFIGURE;
+	if (!(fdc_flags & INITIAL_RESET))
 		kdrvprintf("Reset-floppy called\n");
 	lock();
 	out_byte(FDC_DOR, current_DOR & ~0x04);
@@ -1035,7 +1051,7 @@ static void floppy_shutdown(void)
 	lock();
 	do_floppy = NULL;
 	request_done(0);
-	recover = 1;
+	fdc_flags |= RECOVER;
 	reset_floppy();
 	unlock();
 	redo_fd_request();
@@ -1099,7 +1115,7 @@ static void floppy_ready(void)
 		/* Forcing the drive to seek makes the "media changed" condition go away.
 		 * There should be a cleaner solution for that ...
 		 */
-		if (!reset && !recalibrate)
+		if (!(fdc_flags & (RESET | RECALIBRATE)))
 		{
 			if (current_track && current_track != NO_TRACK)
 				do_floppy = shake_zero;
@@ -1110,12 +1126,12 @@ static void floppy_ready(void)
 			return;
 		}
 	}
-	if (reset)
+	if (fdc_flags & RESET)
 	{
 		reset_floppy();
 		return;
 	}
-	if (recalibrate)
+	if (fdc_flags & RECALIBRATE)
 	{
 		recalibrate_floppy();
 		return;
@@ -1178,7 +1194,7 @@ repeat:
 				//panic("block not locked");
 		//}
 	}
-	seek = 0;
+	fdc_flags &= ~SEEK;
 	probing = 0;
 	device = CURRENT_DEVICE;
 	if (device > 3)
@@ -1264,7 +1280,7 @@ repeat:
 			memcpy(buffer_area, CURRENT->buffer, BLOCK_SIZE);
 	}
 	if (seek_track != current_track)
-		seek = 1;
+		fdc_flags |= SEEK;
 	sector++;
 	timer_set(motor_off_timer[current_drive], FALSE);
 	floppy_on(current_drive);
@@ -1502,7 +1518,7 @@ static void floppy_release(struct inode *inode, struct file *filp)
 static void ignore_interrupt(void)
 {
 	kdrvprintf("weird interrupt ignored (%d)\n", result());
-	reset = 1;
+	fdc_flags &= ~RESET;
 	CLEAR_INTR; /* ignore only once */
 }
 
@@ -1591,7 +1607,7 @@ static int fdc_init(unsigned unitno)
 
 	if (fdc_version == FDC_TYPE_STD)
 	{
-		initial_reset_flag = 1;
+		fdc_flags |= INITIAL_RESET;
 		reset_floppy();
 	}
 
