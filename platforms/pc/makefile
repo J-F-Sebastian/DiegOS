@@ -1,6 +1,6 @@
 include $(WSROOT)/build/makefiles/makefile.master
 
-OBJS = platform_init.o i8259.o memory.o
+OBJS = platform_init.o i8259.o memory.o BIOS.o
 
 OBJSO = $(addprefix $(OBJPREFIX)/, $(OBJS))
  
