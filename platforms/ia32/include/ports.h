@@ -20,6 +20,8 @@
 #ifndef _PORTS_H_
 #define _PORTS_H_
 
+#include <stdint.h>
+
 extern uint8_t in_byte(const uint16_t portno);
 extern uint16_t in_word(const uint16_t portno);
 extern uint32_t in_dword(const uint16_t portno);
