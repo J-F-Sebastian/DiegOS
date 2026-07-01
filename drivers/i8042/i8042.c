@@ -97,7 +97,7 @@ static BOOL kbd_interrupt(void)
 
 	/* If the queue is full, drop it !!! */
 	if (cbuffer_free_space(&kbd_rx_cbuf)) {
-		kbd_rx_buf[kbd_rx_cbuf.tail] = readval;
+		kbd_rx_buf[kbd_rx_cbuf.write] = readval;
 		cbuffer_add(&kbd_rx_cbuf);
 	}
 
@@ -243,7 +243,7 @@ static int kbd_read(void *buf, unsigned bytes, unsigned unitno)
 
 	count = bytes;
 	while (!cbuffer_is_empty(&kbd_rx_cbuf) && count) {
-		*dest++ = kbd_rx_buf[kbd_rx_cbuf.head];
+		*dest++ = kbd_rx_buf[kbd_rx_cbuf.read];
 		cbuffer_remove(&kbd_rx_cbuf);
 		--count;
 	}
@@ -309,7 +309,7 @@ static BOOL mse_interrupt(void)
 
 	/* If the queue is full, drop it !!! */
 	if (cbuffer_free_space(&mse_rx_cbuf)) {
-		mse_rx_buf[mse_rx_cbuf.tail] = in_byte(i8042_DATA_PORT);
+		mse_rx_buf[mse_rx_cbuf.write] = in_byte(i8042_DATA_PORT);
 		cbuffer_add(&mse_rx_cbuf);
 	}
 
