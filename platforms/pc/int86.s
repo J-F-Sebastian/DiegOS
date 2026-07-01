@@ -330,22 +330,62 @@ section .text
 
 	int86_end:                                 ; end marker (so we can copy the code)
 
+
 ; The 16 bit stack is reused in 32-bit word as a static buffer to
 ; be used with interrupts-BIOS calls
 ; C Prototype:
-; void *real_buffer (void);
-global real_buffer, _real_buffer
+; void *int86_real_buffer (void);
+global int86_real_buffer, _int86_real_buffer
 
-real_buffer:
-_real_buffer:
+int86_real_buffer:
+_int86_real_buffer:
 mov eax, 0x50000
 ret
 
 ; C Prototype:
-; unsigned real_buffer_size (void);
-global real_buffer_size, _real_buffer_size
+; unsigned int86_real_buffer_size (void);
+global int86_real_buffer_size, _int86_real_buffer_size
 
-real_buffer_size:
-_real_buffer_size:
+int86_real_buffer_size:
+_int86_real_buffer_size:
 mov eax, 0x10000
+ret
+
+; on entry, stack looks like this:
+;      4(esp)  ->              idx
+;       (esp)  ->              return address
+
+; C Prototype:
+; void *ISA_DMA_real_buffer (unsigned idx);
+global ISA_DMA_real_buffer, _ISA_DMA_real_buffer
+
+ISA_DMA_real_buffer:
+_ISA_DMA_real_buffer:
+mov ecx, [esp + 4]
+cmp ecx, $4
+jae out_of_range
+mov eax, 0x10000
+mul ecx
+ret
+out_of_range:
+xor eax, eax
+ret
+
+; on entry, stack looks like this:
+;      4(esp)  ->              idx
+;       (esp)  ->              return address
+
+; C Prototype:
+; unsigned ISA_DMA_real_buffer_size (unsigned idx);
+global ISA_DMA_real_buffer_size, _ISA_DMA_real_buffer_size
+
+ISA_DMA_real_buffer_size:
+_ISA_DMA_real_buffer_size:
+mov ecx, [esp + 4]
+cmp ecx, $4
+jae out_of_range2
+mov eax, 0x10000
+ret
+out_of_range2:
+xor eax, eax
 ret
