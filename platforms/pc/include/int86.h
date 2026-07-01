@@ -76,8 +76,12 @@ inline void *real_to_prot(const void *real)
 
 extern void int86(unsigned char intnum, regs16_t * regs);
 
-extern void *real_buffer(void);
+extern void *int86_real_buffer(void);
 
-extern unsigned real_buffer_size(void);
+extern unsigned int86_real_buffer_size(void);
+
+extern void *ISA_DMA_real_buffer(unsigned idx);
+
+extern unsigned ISA_DMA_real_buffer_size(unsigned idx);
 
 #endif

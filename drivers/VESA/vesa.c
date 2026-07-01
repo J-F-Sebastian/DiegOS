@@ -68,7 +68,7 @@ static int vesa_init(unsigned unitno)
 	regs16_t regs;
 	uint16_t *ptr, es, di;
 	unsigned modecount = 0;
-	void *buffer = real_buffer();
+	void *buffer = int86_real_buffer();
 
 	if (unitno) {
 		return ENXIO;
@@ -460,7 +460,7 @@ static void load_all_palette(uint8_t rgb[])
 	regs16_t regs;
 	uint16_t es, di;
 	uint8_t *ptr =
-	    (uint8_t *) real_buffer() + sizeof(struct VBEInfoBlock) * 2 +
+	    (uint8_t *) int86_real_buffer() + sizeof(struct VBEInfoBlock) * 2 +
 	    sizeof(struct ModeInfoBlock);
 
 	regs.ax = 0x4F09;
@@ -554,7 +554,7 @@ static int set_resolution(unsigned W, unsigned H, unsigned depth, int loose)
 	uint16_t *cursor = vesa_mode_list;
 	uint16_t mode, es, di;
 	regs16_t regs;
-	void *buffer = real_buffer();
+	void *buffer = int86_real_buffer();
 
 	if (depth != 8)
 		return ENXIO;
