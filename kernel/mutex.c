@@ -119,7 +119,7 @@ BOOL lock_mutex(uint8_t tid, struct mutex *mtx)
 		return (FALSE);
 	}
 
-	mtx->ids_buffer[mtx->thread_ids.tail] = tid;
+	mtx->ids_buffer[mtx->thread_ids.write] = tid;
 	cbuffer_add(&mtx->thread_ids);
 
 	return (TRUE);
@@ -141,7 +141,7 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx)
 		/*
 		 * Clean up cancelled threads
 		 */
-		while (mtx->ids_buffer[mtx->thread_ids.head] == THREAD_TID_INVALID) {
+		while (mtx->ids_buffer[mtx->thread_ids.read] == THREAD_TID_INVALID) {
 			cbuffer_remove(&mtx->thread_ids);
 			if (cbuffer_is_empty(&mtx->thread_ids)) {
 				break;
@@ -150,7 +150,7 @@ BOOL unlock_mutex(uint8_t tid, struct mutex *mtx)
 	}
 
 	if (cbuffer_is_empty(&mtx->thread_ids) == FALSE) {
-		ptr = get_thread(mtx->ids_buffer[mtx->thread_ids.head]);
+		ptr = get_thread(mtx->ids_buffer[mtx->thread_ids.read]);
 		cbuffer_remove(&mtx->thread_ids);
 		mtx->locker_tid = ptr->tid;
 	} else {
@@ -181,8 +181,8 @@ int cancel_wait_on_mutex(uint8_t tid)
 		if (curr->locker_tid == tid) {
 			return (unlock_mutex(tid, curr)) ? (EOK) : (EPERM);
 		} else if (!cbuffer_is_empty(&curr->thread_ids)) {
-			for (i = curr->thread_ids.head;
-			     i != curr->thread_ids.tail; i = (i + 1) % curr->thread_ids.bufsize) {
+			for (i = curr->thread_ids.read;
+			     i != curr->thread_ids.write; i = (i + 1) % curr->thread_ids.bufsize) {
 				if (curr->ids_buffer[i] == tid) {
 					curr->ids_buffer[i] = THREAD_TID_INVALID;
 					return (EOK);

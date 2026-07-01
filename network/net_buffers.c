@@ -109,7 +109,7 @@ int netbuf_in(struct packet *pkt)
 	if (cbuffer_is_full(&in_cb))
 		return ENOBUFS;
 
-	in_queue[in_cb.tail] = pkt;
+	in_queue[in_cb.write] = pkt;
 
 	cbuffer_add(&in_cb);
 
@@ -129,8 +129,8 @@ int netbuf_out(struct packet *pkt, net_interface_t *intf)
 	if (cbuffer_is_full(&out_cb))
 		return ENOBUFS;
 
-	out_queue[out_cb.tail].pkt = pkt;
-	out_queue[out_cb.tail].itf = intf;
+	out_queue[out_cb.write].pkt = pkt;
+	out_queue[out_cb.write].itf = intf;
 
 	cbuffer_add(&out_cb);
 
@@ -148,7 +148,7 @@ int netbuf_process_in(struct packet **pkt)
 		return EAGAIN;
 	}
 
-	*pkt = in_queue[in_cb.head];
+	*pkt = in_queue[in_cb.read];
 
 	cbuffer_remove(&in_cb);
 
@@ -164,8 +164,8 @@ int netbuf_process_out(struct packet **pkt, net_interface_t **intf)
 		return EAGAIN;
 	}
 
-	*pkt = out_queue[out_cb.head].pkt;
-	*intf = out_queue[out_cb.head].itf;
+	*pkt = out_queue[out_cb.read].pkt;
+	*intf = out_queue[out_cb.read].itf;
 
 	cbuffer_remove(&out_cb);
 

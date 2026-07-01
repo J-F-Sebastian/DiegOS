@@ -191,7 +191,7 @@ static void uart_handle_recv_data_fifo(void)
 		 * then the second half of the algorithm will not be performed.
 		 */
 		while (rx_count--) {
-			rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
+			rx_buf[rx_cbuf.write] = read_register(COM1, RBR);
 			cbuffer_add(&rx_cbuf);
 		}
 
@@ -203,7 +203,7 @@ static void uart_handle_recv_data_fifo(void)
 			rx_count = buffer_left;
 			retval = read_register(COM1, LSR);
 			while (rx_count-- && (retval & LSR_DR)) {
-				rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
+				rx_buf[rx_cbuf.write] = read_register(COM1, RBR);
 				cbuffer_add(&rx_cbuf);
 				retval = read_register(COM1, LSR);
 			}
@@ -223,7 +223,7 @@ static void uart_handle_recv_data_timeout(void)
 	 */
 	retval = read_register(COM1, LSR);
 	while (buffer_left-- && (retval & LSR_DR)) {
-		rx_buf[rx_cbuf.tail] = read_register(COM1, RBR);
+		rx_buf[rx_cbuf.write] = read_register(COM1, RBR);
 		cbuffer_add(&rx_cbuf);
 		retval = read_register(COM1, LSR);
 	}
@@ -241,7 +241,7 @@ static void uart_handle_tx_data(void)
 	unsigned buffer = TX_SEQ_MAX;
 
 	while (buffer-- && !cbuffer_is_empty(&tx_cbuf)) {
-		write_register(COM1, THR, tx_buf[tx_cbuf.head]);
+		write_register(COM1, THR, tx_buf[tx_cbuf.read]);
 		cbuffer_remove(&tx_cbuf);
 	}
 
@@ -427,7 +427,6 @@ static int uart_done(unsigned unitno)
 static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 {
 	unsigned copy_bytes;
-	unsigned buffer_space;
 	int retval = 0;
 
 	if (!buf || unitno) {
@@ -446,25 +445,17 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 		(void)thread_io_wait(&wq_w);
 	}
 
-	buffer_space = cbuffer_free_space(&tx_cbuf);
-
 	/*
 	 * Trim the amount of bytes to be copied into the buffer.
 	 * If the buffer cannot accomodate a single run length, either
 	 * for the size or because of the buffer roll-over, the while
 	 * loop will continue to the end.
 	 */
-	if (bytes > buffer_space) {
-		copy_bytes = buffer_space;
-	} else {
+	copy_bytes = cbuffer_free_space_trim(&tx_cbuf);
+	if (bytes < copy_bytes) {
 		copy_bytes = bytes;
 	}
-
-	if (tx_cbuf.tail + copy_bytes >= BUF_SIZE) {
-		copy_bytes = BUF_SIZE - tx_cbuf.tail;
-	}
-
-	memcpy(tx_buf + tx_cbuf.tail, buf, copy_bytes);
+	memcpy(tx_buf + tx_cbuf.write, buf, copy_bytes);
 	cbuffer_add_n(&tx_cbuf, copy_bytes);
 	retval += copy_bytes;
 	buf += copy_bytes;
@@ -478,19 +469,11 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 			(void)thread_io_wait(&wq_w);
 		}
 
-		buffer_space = cbuffer_free_space(&tx_cbuf);
-
-		if (bytes > buffer_space) {
-			copy_bytes = buffer_space;
-		} else {
+		copy_bytes = cbuffer_free_space_trim(&tx_cbuf);
+		if (bytes < copy_bytes) {
 			copy_bytes = bytes;
 		}
-
-		if (tx_cbuf.tail + copy_bytes >= BUF_SIZE) {
-			copy_bytes = BUF_SIZE - tx_cbuf.tail;
-		}
-
-		memcpy(tx_buf + tx_cbuf.tail, buf, copy_bytes);
+		memcpy(tx_buf + tx_cbuf.write, buf, copy_bytes);
 		cbuffer_add_n(&tx_cbuf, copy_bytes);
 		retval += copy_bytes;
 		buf += copy_bytes;
@@ -505,7 +488,6 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 {
 	unsigned copy_bytes;
-	unsigned ret_copy_bytes = 0;
 
 	if (!buf || unitno) {
 		return (EINVAL);
@@ -519,24 +501,14 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 		(void)thread_io_wait(&wq_r);
 	}
 
-	copy_bytes = cbuffer_in_use(&rx_cbuf);
-	if (bytes >= copy_bytes) {
-		ret_copy_bytes = copy_bytes;
-	} else {
-		ret_copy_bytes = bytes;
+	copy_bytes = cbuffer_in_use_trim(&rx_cbuf);
+	if (bytes < copy_bytes) {
+		copy_bytes = bytes;
 	}
-
-	copy_bytes = ret_copy_bytes;
-	if (rx_cbuf.head + copy_bytes >= BUF_SIZE) {
-		memcpy(buf, rx_buf + rx_cbuf.head, BUF_SIZE - rx_cbuf.head);
-		copy_bytes -= BUF_SIZE - rx_cbuf.head;
-		buf += BUF_SIZE - rx_cbuf.head;
-		cbuffer_remove_n(&rx_cbuf, BUF_SIZE - rx_cbuf.head);
-	}
-	memcpy(buf, rx_buf + rx_cbuf.head, copy_bytes);
+	memcpy(buf, rx_buf + rx_cbuf.read, copy_bytes);
 	cbuffer_remove_n(&rx_cbuf, copy_bytes);
 
-	return (ret_copy_bytes);
+	return (copy_bytes);
 }
 
 static int uart_ioctrl(void *data, unsigned opcode, unsigned unitno)
