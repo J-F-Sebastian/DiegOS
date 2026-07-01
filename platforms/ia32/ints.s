@@ -71,14 +71,14 @@ cmpb	$8, %cl
 jae	enable_8		/* enable irq >= 8 at the slave 8259*/
 
 enable_0:
-inb	    $INT_CTLMASK
+inb	$INT_CTLMASK
 andb	%ah, %al
 outb	$INT_CTLMASK		/* clear bit at master 8259*/
 sti
 ret
 
 enable_8:
-inb	    $INT2_CTLMASK
+inb	$INT2_CTLMASK
 andb	%ah, %al
 outb	$INT2_CTLMASK		/* clear bit at slave 8259*/
 sti
@@ -102,22 +102,22 @@ cmpb	$8, %cl
 jae	disable_8		/* disable irq >= 8 at the slave 8259*/
 
 disable_0:
-inb	    $INT_CTLMASK
+inb	$INT_CTLMASK
 testb	%ah, %al
-jnz	    dis_already		/* already disabled?*/
-orb	    %ah, %al
+jnz	dis_already		/* already disabled?*/
+orb	%ah, %al
 outb	$INT_CTLMASK		/* set bit at master 8259*/
-mov	    $1, %eax		/* disabled by this function*/
+mov	$1, %eax		/* disabled by this function*/
 sti
 ret
 
 disable_8:
 inb	$INT2_CTLMASK
 testb	%ah, %al
-jnz	    dis_already		/* already disabled?*/
-orb	    %ah, %al
+jnz	dis_already		/* already disabled?*/
+orb	%ah, %al
 outb	$INT2_CTLMASK		/* set bit at slave 8259*/
-mov	    $1, %eax		/* disabled by this function*/
+mov	$1, %eax		/* disabled by this function*/
 sti
 ret
 
