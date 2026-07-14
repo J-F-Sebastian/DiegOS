@@ -91,7 +91,7 @@ BOOL init_devices_lib()
 void start_devices_lib()
 {
 	device_int_t *ptr = list_head(&device_list);
-	int ui = FALSE;
+	static int ui = FALSE;
 	unsigned counter = 0;
 
 	/*
@@ -100,16 +100,13 @@ void start_devices_lib()
 	while (ptr) {
 		switch (ptr->dv.header.type) {
 		case DEV_TYPE_CHAR:
+			/* FALLTHRU */
+		case DEV_TYPE_BLOCK:
 			if (ptr->dv.cmn->start_fn(ptr->dv.header.unitno)) {
 				kerrprintf("Failed starting %s\n", ptr->dv.header.name);
 			} else {
 				counter++;
 			}
-			break;
-
-		case DEV_TYPE_BLOCK:
-			kerrprintf("BLOCK devices not supported yet.\n");
-			kerrprintf("Skipped starting %s\n", ptr->dv.header.name);
 			break;
 
 		case DEV_TYPE_TXT_UI:
