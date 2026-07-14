@@ -42,7 +42,11 @@ enum DEVICE_TYPE {
 	/*
 	 * Device is a text video card
 	 */
-	DEV_TYPE_TXT_UI
+	DEV_TYPE_TXT_UI,
+	/*
+	 * Maximum device type
+	 */
+	DEV_TYPE_MAX
 };
 
 /*
@@ -203,6 +207,64 @@ device_t *device_lookup(const char *drvname, unsigned unitno);
  * NULL in any other case.
  */
 device_t *device_lookup_name(const char *devname);
+
+/*
+ * device_get_first() retrieves a pointer to the first device in list.
+ *
+ * PARAMETERS IN/OUT
+ * uint64_t *search - the browse context, initialized by the callee.
+ *                    Caller must not modify the structure and does not need
+ *                    to initialize it.
+ *
+ * RETURNS
+ * A valid pointer to an existing device object in case of success,
+ * NULL in any other case.
+ */
+device_t *device_get_first(uint64_t *search);
+
+/*
+ * device_get_first_of_type() retrieves a pointer to the first device in list
+ * of the specified type.
+ *
+ * PARAMETERS IN/OUT
+ * uint64_t *search - the browse context, initialized by the callee.
+ *                    Caller must not modify the structure and does not need
+ *                    to initialize it.
+ *
+ * PARAMETERS IN
+ * unsigned type - the device type to search for, from enum DEVICE_TYPE.
+ *                 DEV_TYPE_MAX is a valid value, in this case the first device of any type is returned.
+ *
+ * RETURNS
+ * A valid pointer to an existing device object in case of success,
+ * NULL in any other case.
+ */
+device_t *device_get_first_of_type(uint64_t *search, unsigned type);
+
+/*
+ * device_get_next() retrieves a pointer to the device next to the one passed in parameter search.
+ * If a device type is specified in the search structure, only devices of that type will be returned.
+ *
+ * PARAMETERS IN
+ * uint64_t *search - the browse context, initialized by device_get_first() or device_get_first_of_type().
+ *
+ * RETURNS
+ * A valid pointer to an existing device object in case of success,
+ * NULL in any other case.
+ */
+device_t *device_get_next(uint64_t *search);
+
+/*
+ * device_get_count() returns the number of devices of the specified type.
+ *
+ * PARAMETERS IN
+ * unsigned type - the device type to count, from enum DEVICE_TYPE.
+ * 	           DEV_TYPE_MAX is a valid value, in this case the total number of devices is returned.
+ *
+ * RETURNS
+ * The number of devices of the specified type.
+ */
+unsigned device_get_count(unsigned type);
 
 /*
  * Perform writing to devices. If the driver support suspending (blocking)
