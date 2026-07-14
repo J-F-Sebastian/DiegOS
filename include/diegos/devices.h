@@ -106,6 +106,7 @@ typedef struct device {
 		void *drv;
 		driver_header_t *cmn;
 		char_driver_t *cdrv;
+		block_driver_t *bdrv;
 		text_driver_t *tdrv;
 		grafics_driver_t *gdrv;
 		net_driver_t *ndrv;
