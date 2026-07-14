@@ -33,7 +33,14 @@ typedef struct device_int {
 	device_t dv;
 } device_int_t;
 
+struct device_search {
+	device_int_t *current;
+	unsigned type;
+};
+
 static LIST_STATIC_INIT(device_list);
+
+static unsigned devices_count[DEV_TYPE_MAX] = { 0 };
 
 static device_int_t *lookup_name(const char *name)
 {
@@ -219,6 +226,8 @@ device_t *device_create(const void *inst, unsigned unitno)
 
 	kmsgprintf("Created device %s\n", temp);
 
+	devices_count[type]++;
+
 	return (&tmp->dv);
 }
 
@@ -271,6 +280,107 @@ device_t *device_lookup_name(const char *devname)
 	retval = lookup_name(devname);
 
 	return ((retval) ? (&retval->dv) : (NULL));
+}
+
+device_t *device_get_first(uint64_t *search)
+{
+	device_int_t *retval;
+	struct device_search *search_ptr = (struct device_search *)search;
+
+	if (!search) {
+		errno = EINVAL;
+		return (NULL);
+	}
+
+	retval = list_head(&device_list);
+
+	search_ptr->current = retval;
+	search_ptr->type = DEV_TYPE_MAX;
+
+	return ((retval) ? (&retval->dv) : (NULL));
+}
+
+device_t *device_get_first_of_type(uint64_t *search, unsigned type)
+{
+	device_int_t *retval;
+	struct device_search *search_ptr = (struct device_search *)search;
+
+	if (!search) {
+		errno = EINVAL;
+		return (NULL);
+	}
+
+	if (type >= DEV_TYPE_MAX) {
+		errno = EINVAL;
+		return (NULL);
+	}
+
+	retval = list_head(&device_list);
+
+	if (type == DEV_TYPE_MAX) {
+		search_ptr->current = retval;
+		search_ptr->type = type;
+		return ((retval) ? (&retval->dv) : (NULL));
+	}
+
+	while (retval) {
+		if (retval->dv.header.type == type) {
+			search_ptr->current = retval;
+			search_ptr->type = type;
+			return (&retval->dv);
+		}
+		retval = (device_int_t *) retval->header.next;
+	}
+
+	search_ptr->current = NULL;
+	search_ptr->type = type;
+
+	return (NULL);
+}
+
+device_t *device_get_next(uint64_t *search)
+{
+	device_int_t *retval;
+	struct device_search *search_ptr = (struct device_search *)search;
+
+	if (!search) {
+		errno = EINVAL;
+		return (NULL);
+	}
+
+	if (search_ptr->current == NULL) {
+		return (NULL);
+	}
+
+	if (search_ptr->type != DEV_TYPE_MAX) {
+		while (search_ptr->current) {
+			retval = (device_int_t *) search_ptr->current->header.next;
+			if (!retval) {
+				search_ptr->current = NULL;
+				return (NULL);
+			}
+			if (retval->dv.header.type == search_ptr->type) {
+				search_ptr->current = retval;
+				return (&retval->dv);
+			}
+			search_ptr->current = retval;
+		}
+		return (NULL);
+	} else {
+		retval = (device_int_t *) search_ptr->current->header.next;
+		search_ptr->current = retval;
+		return ((retval) ? (&retval->dv) : (NULL));
+	}
+}
+
+unsigned device_get_count(unsigned type)
+{
+	if (type > DEV_TYPE_MAX) {
+		errno = EINVAL;
+		return (0);
+	}
+
+	return ((type < DEV_TYPE_MAX) ? devices_count[type] : list_count(&device_list));
 }
 
 int device_io_tx(device_t *dev, const char *buf, size_t bytes)
