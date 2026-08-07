@@ -370,7 +370,7 @@ static int uart_start(unsigned unitno)
 	}
 
 	if ((EOK != thread_io_wait_init(&wq_w)) || (EOK != thread_io_wait_init(&wq_r))) {
-		return (EPERM);
+		return (EGENERIC);
 	}
 
 	flags &= ~DRV_STATUS_STOP;
