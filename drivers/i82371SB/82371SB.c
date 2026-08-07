@@ -42,20 +42,74 @@ static const char *names[] = {
 	"82371AB PIIX3 Power Management"
 };
 
+static unsigned status[] = {
+	DRV_STATUS_RUN | DRV_IS_CHAR,
+	DRV_STATUS_RUN | DRV_IS_BLOCK,
+	DRV_STATUS_RUN | DRV_IS_NET,
+	DRV_STATUS_RUN | DRV_IS_CHAR
+};
+
+/*
+ * The driver accepts and supports 4 units corresponding to 4 device
+ * functions
+ *
+ * ISA Bridge
+ * IDE Interface
+ * USB Host
+ * PM
+ */
 static int i82371sb_init(unsigned unitno)
 {
+	uint16_t value = 0;
+
 	if (unitno >= NELEMENTS(devid)) {
 		return (ENXIO);
+	}
+
+	if (instance[unitno]) {
+		return (EPERM);
 	}
 
 	instance[unitno] = pci_bus_find_device(i82371SB_VID, devid[unitno], NULL);
 
 	if (instance[unitno]) {
-		kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n",
-			   instance[unitno]->bus,
-			   instance[unitno]->device,
-			   instance[unitno]->function,
-			   instance[unitno]->vendorid, instance[unitno]->deviceid, names[unitno]);
+		/*
+		 * Read the PCICMD register
+		 */
+		pci_read_config_reg16(pci_create_bdf
+				      (instance[unitno]->bus, instance[unitno]->device,
+				       instance[unitno]->function), 4, &value);
+
+		switch (unitno) {
+		case 0:
+			/* ISA Bridge */
+			/* FALLTHRU */
+		case 3:
+			/* Power Management */
+			kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n",
+				   instance[unitno]->bus,
+				   instance[unitno]->device,
+				   instance[unitno]->function,
+				   instance[unitno]->vendorid,
+				   instance[unitno]->deviceid, names[unitno]);
+			break;
+
+		case 1:
+			/* IDE Interface */
+			/* FALLTHRU */
+		case 2:
+			/* USB Host */
+			kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n\t\tports %s - Bus Master %s\n",
+				   instance[unitno]->bus,
+				   instance[unitno]->device,
+				   instance[unitno]->function,
+				   instance[unitno]->vendorid,
+				   instance[unitno]->deviceid,
+				   names[unitno],
+				   (value & 1) ? "enabled" : "disabled",
+				   (value & 4) ? "enabled" : "disabled");
+			break;
+		}
 
 		return (EOK);
 	}
@@ -65,29 +119,41 @@ static int i82371sb_init(unsigned unitno)
 
 static int i82371sb_start(unsigned unitno)
 {
-	if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
+	if (unitno >= NELEMENTS(devid)) {
 		return (ENXIO);
 	}
 
-	return EOK;
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EOK);
 }
 
 static int i82371sb_stop(unsigned unitno)
 {
-	if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
+	if (unitno >= NELEMENTS(devid)) {
 		return (ENXIO);
 	}
 
-	return EOK;
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EOK);
 }
 
 static int i82371sb_done(unsigned unitno)
 {
-	if ((unitno >= NELEMENTS(devid)) || !instance[unitno]) {
+	if (unitno >= NELEMENTS(devid)) {
 		return (ENXIO);
 	}
 
-	return EOK;
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EOK);
 }
 
 static unsigned i82371sb_status(unsigned unitno)
@@ -95,7 +161,7 @@ static unsigned i82371sb_status(unsigned unitno)
 	if (unitno >= NELEMENTS(devid)) {
 		return 0;
 	}
-	return (DRV_STATUS_RUN | DRV_IS_CHAR);
+	return (status[unitno]);
 }
 
 char_driver_t i82371sb_drv = {
