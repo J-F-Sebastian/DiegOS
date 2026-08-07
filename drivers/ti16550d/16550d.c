@@ -312,14 +312,8 @@ static int uart_init(unsigned unitno)
 		return (ENXIO);
 	}
 
-	tx_buf = calloc(1, BUF_SIZE);
-	if (!tx_buf)
-		return ENOMEM;
-
-	rx_buf = calloc(1, BUF_SIZE);
-	if (!rx_buf) {
-		free(tx_buf);
-		return ENOMEM;
+	if (flags & DRV_ST_MASK) {
+		return (EPERM);
 	}
 
 	/* Start detecting the device */
@@ -335,8 +329,23 @@ static int uart_init(unsigned unitno)
 		return (EGENERIC);
 	}
 
+	tx_buf = calloc(1, BUF_SIZE);
+	rx_buf = calloc(1, BUF_SIZE);
+
+	if (!(tx_buf && rx_buf)) {
+		if (tx_buf) {
+			free(tx_buf);
+		}
+		if (rx_buf) {
+			free(rx_buf);
+		}
+		return (ENOMEM);
+	}
+
 	cbuffer_init(&tx_cbuf, BUF_SIZE);
 	cbuffer_init(&rx_cbuf, BUF_SIZE);
+
+	flags |= DRV_STATUS_INIT;
 
 	return (EOK);
 }
@@ -365,15 +374,16 @@ static int uart_start(unsigned unitno)
 		return (ENXIO);
 	}
 
-	if (flags & DRV_STATUS_RUN) {
-		return (EOK);
+	if (((flags & DRV_ST_MASK) != DRV_STATUS_INIT) &&
+	    ((flags & DRV_ST_MASK) != DRV_STATUS_STOP)) {
+		return (EPERM);
 	}
 
 	if ((EOK != thread_io_wait_init(&wq_w)) || (EOK != thread_io_wait_init(&wq_r))) {
 		return (EPERM);
 	}
 
-	flags &= ~DRV_STATUS_STOP;
+	flags &= ~DRV_ST_MASK;
 	flags |= DRV_STATUS_RUN;
 
 	write_register(COM1, LCR, LCR_VAL);
@@ -397,11 +407,11 @@ static int uart_stop(unsigned unitno)
 		return (ENXIO);
 	}
 
-	if (flags & DRV_STATUS_STOP) {
-		return (EOK);
+	if ((flags & DRV_ST_MASK) != DRV_STATUS_RUN) {
+		return (EPERM);
 	}
 
-	flags &= ~DRV_STATUS_RUN;
+	flags &= ~DRV_ST_MASK;
 	flags |= DRV_STATUS_STOP;
 
 	write_register(COM1, IER, IER_VAL);
@@ -417,9 +427,14 @@ static int uart_done(unsigned unitno)
 		return (ENXIO);
 	}
 
+	if ((flags & DRV_ST_MASK) != DRV_STATUS_STOP) {
+		return (EPERM);
+	}
+
 	free(tx_buf);
 	free(rx_buf);
-	flags = DRV_STATUS_DONE;
+	flags &= ~DRV_ST_MASK;
+	flags |= DRV_STATUS_DONE;
 
 	return (del_int_cb(UART_IVT));
 }
@@ -433,6 +448,12 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 		return (ENXIO);
 	}
 
+	if ((flags & DRV_STATUS_RUN) == 0) {
+		return (EPERM);
+	} else if (flags & DRV_WRITING) {
+		return (EAGAIN);
+	}
+
 	if (!buf) {
 		return (EINVAL);
 	}
@@ -440,6 +461,8 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 	if (!bytes) {
 		return (EOK);
 	}
+
+	flags |= DRV_WRITING;
 
 	/*
 	 * Wait for some room in the buffer, avoid copying
@@ -486,6 +509,8 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 		enable_uart_tx();
 	}
 
+	flags &= ~DRV_WRITING;
+
 	return (retval);
 }
 
@@ -497,6 +522,12 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 		return (ENXIO);
 	}
 
+	if ((flags & DRV_STATUS_RUN) == 0) {
+		return (EPERM);
+	} else if (flags & DRV_READING) {
+		return (EAGAIN);
+	}
+
 	if (!buf) {
 		return (EINVAL);
 	}
@@ -504,6 +535,8 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 	if (!bytes) {
 		return (EOK);
 	}
+
+	flags |= DRV_READING;
 
 	while (cbuffer_is_empty(&rx_cbuf)) {
 		(void)thread_io_wait(&wq_r);
@@ -515,6 +548,8 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 	}
 	memcpy(buf, rx_buf + rx_cbuf.read, copy_bytes);
 	cbuffer_remove_n(&rx_cbuf, copy_bytes);
+
+	flags &= ~DRV_READING;
 
 	return (copy_bytes);
 }
