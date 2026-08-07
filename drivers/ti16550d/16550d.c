@@ -362,7 +362,7 @@ static int uart_start(unsigned unitno)
 	const uint8_t IER_VAL = (IER_ERBFI | IER_ELSI | IER_EDSSI);
 
 	if (unitno) {
-		return (EINVAL);
+		return (ENXIO);
 	}
 
 	if (flags & DRV_STATUS_RUN) {
@@ -394,7 +394,7 @@ static int uart_stop(unsigned unitno)
 	const uint8_t IER_VAL = (IER_ERBFI | IER_ETBEI | IER_ELSI | IER_EDSSI);
 
 	if (unitno) {
-		return (EINVAL);
+		return (ENXIO);
 	}
 
 	if (flags & DRV_STATUS_STOP) {
@@ -429,7 +429,11 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 	unsigned copy_bytes;
 	int retval = 0;
 
-	if (!buf || unitno) {
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!buf) {
 		return (EINVAL);
 	}
 
@@ -489,7 +493,11 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 {
 	unsigned copy_bytes;
 
-	if (!buf || unitno) {
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!buf) {
 		return (EINVAL);
 	}
 
@@ -516,6 +524,10 @@ static int uart_ioctrl(void *data, unsigned opcode, unsigned unitno)
 	uint8_t temp;
 	unsigned *decode = (unsigned *)data;
 	unsigned i;
+
+	if (unitno) {
+		return (ENXIO);
+	}
 
 	if (!data) {
 		return (EINVAL);
