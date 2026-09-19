@@ -164,6 +164,58 @@ static unsigned i82371sb_status(unsigned unitno)
 	return (status[unitno]);
 }
 
+static short i82371sb_poll(unsigned unitno, poll_table_t * table)
+{
+	if (unitno >= NELEMENTS(devid)) {
+		return (ENXIO);
+	}
+
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_ioctrl(void *arg, unsigned cmd, unsigned unitno)
+{
+	if (unitno >= NELEMENTS(devid)) {
+		return (ENXIO);
+	}
+
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_write(const void *buf, unsigned *bytes, unsigned unitno)
+{
+	if (unitno >= NELEMENTS(devid)) {
+		return (ENXIO);
+	}
+
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EIO);
+}
+
+static int i82371sb_read(void *buf, unsigned *bytes, unsigned unitno)
+{
+	if (unitno >= NELEMENTS(devid)) {
+		return (ENXIO);
+	}
+
+	if (!instance[unitno]) {
+		return (EACCES);
+	}
+
+	return (EIO);
+}
+
 char_driver_t i82371sb_drv = {
 	.cmn = {
 		.name = "PIIX3",
@@ -171,12 +223,13 @@ char_driver_t i82371sb_drv = {
 		.start_fn = i82371sb_start,
 		.stop_fn = i82371sb_stop,
 		.done_fn = i82371sb_done,
-		.ioctrl_fn = NULL,
+		.ioctrl_fn = i82371sb_ioctrl,
 		.status_fn = i82371sb_status,
-		.poll_fn = NULL}
+		.poll_fn = i82371sb_poll
+	}
 	,
-	.write_fn = NULL,
-	.read_fn = NULL,
+	.write_fn = i82371sb_write,
+	.read_fn = i82371sb_read,
 	.write_multi_fn = NULL,
 	.read_multi_fn = NULL
 };
