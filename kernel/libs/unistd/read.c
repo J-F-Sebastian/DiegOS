@@ -38,16 +38,17 @@ ssize_t read(int fd, void *buf, size_t n)
 
 	if (fdarray[fd].flags & FD_DATA_IS_RAW) {
 		do {
-			retcode = device_io_rx(fdarray[fd].rawdev, (char *)buf, n);
+			retcode = device_io_rx(fdarray[fd].rawdev, (char *)buf, &n);
 		} while (retries-- && (retcode == EAGAIN));
-		if (retcode < EOK) {
-			errno = EIO;
-			return (-1);
-		}
 	} else {
 		errno = EINVAL;
 		return (-1);
 	}
 
-	return ((ssize_t) retcode);
+	if (retcode < EOK) {
+		errno = EIO;
+		return (-1);
+	}
+
+	return ((ssize_t) n);
 }

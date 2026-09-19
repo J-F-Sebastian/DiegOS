@@ -30,13 +30,43 @@ typedef struct char_driver {
 	 */
 	driver_header_t cmn;
 	/*
-	 * Write function, the data buffer pointed by buf will be output to the device
+	 * Write function, the data buffer pointed by buf will be output to the device.
+	 *
+	 * PARAMETERS IN
+	 * const void *buf - pointer to the data buffer to be written
+	 * unsigned *bytes - pointer to the number of bytes to be written
+	 * unsigned unitno - device unit number
+	 *
+	 * PARAMETERS OUT
+	 * unsigned *bytes - pointer to the number of bytes actually written
+	 *
+	 * RETURNS
+	 * EOK in case the transfer is successful
+	 * ENXIO in case the unitno is not supported
+	 * EINVAL in case the buffer is NULL
+	 * EAGAIN in case the device is busy and cannot accept more data
+	 * EPERM in case the device is not ready to accept data
 	 */
-	int (*write_fn)(const void *buf, unsigned bytes, unsigned unitno);
+	int (*write_fn)(const void *buf, unsigned *bytes, unsigned unitno);
 	/*
-	 * Read function, the data buffer pointed by buf will be written with data
+	 * Read function, the data buffer pointed by buf will be written with data.
+	 *
+	 * PARAMETERS IN
+	 * void *buf - pointer to the data buffer to be filled with data read from the device
+	 * unsigned *bytes - pointer to the number of bytes to be read
+	 * unsigned unitno - device unit number
+	 *
+	 * PARAMETERS OUT
+	 * unsigned *bytes - pointer to the number of bytes actually read
+	 *
+	 * RETURNS
+	 * EOK in case the transfer is successful
+	 * ENXIO in case the unitno is not supported
+	 * EINVAL in case the buffer is NULL
+	 * EAGAIN in case the device is busy and cannot provide more data
+	 * EPERM in case the device is not ready to accept data
 	 */
-	int (*read_fn)(void *buf, unsigned bytes, unsigned unitno);
+	int (*read_fn)(void *buf, unsigned *bytes, unsigned unitno);
 	/*
 	 * Multi Write function, the data buffer list pointed by buf
 	 * will be output to the device

@@ -35,5 +35,5 @@ void kputb(char *buffer, unsigned bytes)
 		}
 	}
 
-	outdev->cdrv->write_fn(buffer, bytes, 0);
+	outdev->cdrv->write_fn(buffer, &bytes, 0);
 }
