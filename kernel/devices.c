@@ -24,12 +24,21 @@
 #include <errno.h>
 #include <diegos/kernel.h>
 #include <diegos/devices.h>
+#include <diegos/mutexes.h>
 
 #include "kprintf.h"
 #include "devices_private.h"
 
+#define BLKRQMAXSIZE 16
+
 typedef struct device_int {
 	list_node header;
+	/*
+	 * Alloc for block devices only, used to call R/W and R/W multi
+	 */
+	struct block_request *rq;
+	unsigned rq_size;
+	mutex_t *rq_mutex;
 	device_t dv;
 } device_int_t;
 
@@ -206,7 +215,7 @@ device_t *device_create(const void *inst, unsigned unitno)
 		return (NULL);
 	}
 
-	tmp = calloc(sizeof(*tmp), 1);
+	tmp = calloc(1, sizeof(*tmp));
 
 	if (!tmp) {
 		kerrprintf("Out of memory for device %s\n", temp);
@@ -217,6 +226,23 @@ device_t *device_create(const void *inst, unsigned unitno)
 	tmp->dv.header.unitno = unitno;
 	tmp->dv.header.type = type;
 	tmp->dv.drv = (void *)inst;
+
+	if (type == DEV_TYPE_BLOCK) {
+		tmp->rq = calloc(BLKRQMAXSIZE, sizeof(struct block_request));
+		if (!tmp->rq) {
+			kerrprintf("Out of memory for device %s block request\n", temp);
+			free(tmp);
+			return (NULL);
+		}
+		tmp->rq_size = 0;
+		tmp->rq_mutex = thread_create_mutex(NULL);
+		if (!tmp->rq_mutex) {
+			kerrprintf("Failed to initialize mutex for device %s\n", temp);
+			free(tmp->rq);
+			free(tmp);
+			return (NULL);
+		}
+	}
 
 	if (EOK != insert_device(tmp)) {
 		kerrprintf("Device %s failed list insertion\n", temp);
@@ -385,38 +411,70 @@ unsigned device_get_count(unsigned type)
 
 int device_io_tx(device_t *dev, const char *buf, size_t *bytes)
 {
+	device_int_t *cntr;
 	int retcode;
 
 	if (!dev || !dev->drv || !buf || !bytes) {
 		return (EINVAL);
 	}
 
-	if (dev->header.type != DEV_TYPE_CHAR) {
+	if ((dev->header.type != DEV_TYPE_CHAR) && (dev->header.type != DEV_TYPE_BLOCK)) {
 		return (EPERM);
 	}
 
-	/*
-	 * The two loops are identical except for the function call
-	 * servicing the write operation.
-	 * They are split - though redundant - for performance reasons.
-	 */
-	if (dev->header.write_fn) {
-		retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
-		if (retcode > 0) {
-			return (retcode);
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (dev->header.type == DEV_TYPE_CHAR) {
+		if (dev->header.write_fn) {
+			retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
 		} else {
-			return (EIO);
+			retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
 		}
 	} else {
-		retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
-		if (retcode > 0) {
-			return (retcode);
-		} else {
-			return (EIO);
-		}
+		cntr->rq[0].buffer = (void *)buf;
+		cntr->rq[0].bytes = *bytes;
+		cntr->rq[0].disk = dev->header.unitno;
+		cntr->rq[0].cmd = 1;	/* WRITE */
+		cntr->rq[0].errors = 0;
+		retcode = dev->bdrv->write_fn((block_request_t *)cntr->rq, dev->header.unitno);
+		*bytes = cntr->rq[0].bytes;
 	}
 
-	return (cbytes);
+	return (retcode);
+}
+
+int device_io_rx(device_t *dev, char *buf, size_t *bytes)
+{
+	device_int_t *cntr;
+	int retcode;
+
+	if (!dev || !dev->drv || !buf || !bytes) {
+		return (EINVAL);
+	}
+
+	if ((dev->header.type != DEV_TYPE_CHAR) && (dev->header.type != DEV_TYPE_BLOCK)) {
+		return (EPERM);
+	}
+
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (dev->header.type == DEV_TYPE_CHAR) {
+		if (dev->header.read_fn) {
+			retcode = dev->header.read_fn(buf, bytes, dev->cdrv, dev->header.unitno);
+		} else {
+			retcode = dev->cdrv->read_fn(buf, bytes, dev->header.unitno);
+		}
+	} else {
+		cntr->rq[0].buffer = (void *)buf;
+		cntr->rq[0].bytes = *bytes;
+		cntr->rq[0].disk = dev->header.unitno;
+		cntr->rq[0].cmd = 0;	/* READ */
+		cntr->rq[0].errors = 0;
+		retcode = dev->bdrv->read_fn((struct block_request *)cntr->rq, dev->header.unitno);
+		*bytes = cntr->rq[0].bytes;
+	}
+
+	return (retcode);
 }
 
 int device_io_rx(device_t *dev, char *buf, size_t bytes)
