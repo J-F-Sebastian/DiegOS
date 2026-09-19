@@ -560,6 +560,78 @@ static int uart_read(void *buf, unsigned *bytes, unsigned unitno)
 	return (EOK);
 }
 
+//////////////////////////
+
+static int uart_write_multi(sg_request_t *reqs, unsigned items, unsigned unitno)
+{
+	int retval;
+
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if ((flags & DRV_STATUS_RUN) == 0) {
+		return (EPERM);
+	} else if (flags & DRV_WRITING) {
+		return (EAGAIN);
+	}
+
+	if (!reqs || !items) {
+		return (EINVAL);
+	}
+
+	flags |= DRV_WRITING;
+
+	while (items--) {
+		retval = uart_write(reqs->buffer, &reqs->bytes, unitno);
+		reqs->retcode = retval;
+		if (retval < EOK) {
+			break;
+		}
+		++reqs;
+	}
+
+	flags &= ~DRV_WRITING;
+
+	return (retval);
+}
+
+static int uart_read_multi(sg_request_t *reqs, unsigned items, unsigned unitno)
+{
+	int retval;
+
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if ((flags & DRV_STATUS_RUN) == 0) {
+		return (EPERM);
+	} else if (flags & DRV_READING) {
+		return (EAGAIN);
+	}
+
+	if (!reqs || !items) {
+		return (EINVAL);
+	}
+
+	flags |= DRV_READING;
+
+	while (items--) {
+		retval = uart_read(reqs->buffer, &reqs->bytes, unitno);
+		reqs->retcode = retval;
+		if (retval < EOK) {
+			break;
+		}
+		++reqs;
+	}
+
+	flags &= ~DRV_READING;
+
+	return (retval);
+}
+
+////////////////
+
 static int uart_ioctrl(void *data, unsigned opcode, unsigned unitno)
 {
 	uint8_t temp;
@@ -664,6 +736,6 @@ char_driver_t uart16550d_drv = {
 	,
 	.write_fn = uart_write,
 	.read_fn = uart_read,
-	.write_multi_fn = NULL,
-	.read_multi_fn = NULL
+	.write_multi_fn = uart_write_multi,
+	.read_multi_fn = uart_read_multi
 };

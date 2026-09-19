@@ -275,6 +275,7 @@ unsigned device_get_count(unsigned type);
  * write operations and the driver is busy, the thread will suspend and
  * wait for completion.
  * If the device is busy EAGAIN error code is returned.
+ * This function fails if invoked for a block device.
  *
  * PARAMETERS IN
  * device_t *dev - the device performing I/O
@@ -297,6 +298,7 @@ int device_io_tx(device_t * dev, const char *buf, size_t *bytes);
  * read operations and the driver is busy or has no data to read, the thread
  * will suspend and wait for completion.
  * If the device is busy EAGAIN error code is returned.
+ * This function fails if invoked for a block device.
  *
  * PARAMETERS IN
  * device_t *dev - the device performing I/O
@@ -313,6 +315,130 @@ int device_io_tx(device_t * dev, const char *buf, size_t *bytes);
  * the value passed in with the parameter bytes).
  */
 int device_io_rx(device_t * dev, char *buf, size_t *bytes);
+
+/*
+ * Perform locking of the device's request queue.
+ * If the device is not a block device or the request
+ * queue mutex is already locked, an error code is returned.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * EBUSY if the device is already locked by the calling thread
+ * ENOTBLK if the device is not a block device
+ * EOK if the device's request queue mutex is successfully locked
+ */
+int device_io_rq_lock(device_t * dev);
+
+/*
+ * Perform unlocking of the device's request queue.
+ * If the device is not a block device or the request
+ * queue mutex is not locked, an error code is returned.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * EPERM if the device is not locked by the calling thread
+ * ENOTBLK if the device is not a block device
+ * EOK if the device's request queue mutex is successfully unlocked
+ */
+int device_io_rq_unlock(device_t * dev);
+
+/*
+ * Perform I/O on the device's request queue for reading.
+ * If the device is not a block device or the request queue is not locked,
+ * an error code is returned.
+ * Parameters are copied into the request queue and stacked for later commit.
+ * Data pointed to by buf must remain valid until the request queue is committed.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ * char *buf     - the data buffer to store data read from the device
+ * size_t bytes  - the size of the data buffer
+ * uint64_t sblock - the block number to start the operation at
+ * unsigned dsk - the disk number
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is full
+ * EBUSY if the device's request queue is not empty and the last request is not a read operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_rx(device_t * dev, char *buf, size_t bytes, uint64_t sblock, unsigned dsk);
+
+/*
+ * Perform I/O on the device's request queue for writing.
+ * If the device is not a block device or the request queue is not locked,
+ * an error code is returned.
+ * Parameters are copied into the request queue and stacked for later commit.
+ * Data pointed to by buf must remain valid until the request queue is committed.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ * const char *buf - the data buffer to be transmitted by the device
+ * size_t bytes  - the size of the data buffer
+ * uint64_t sblock - the block number to start the operation at
+ * unsigned dsk - the disk number
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is full
+ * EBUSY if the device's request queue is not empty and the last request is not a write operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_tx(device_t * dev, const char *buf, size_t bytes, uint64_t sblock, unsigned dsk);
+
+/*
+ * Commit the device's request queue for execution.
+ * The operation is performed atomically keeping the lock on the device.
+ * Reads and writes are performed in homogeneous sets, i.e. consecutive reads
+ * are performed as a whole, then consecutive writes are performed as a whole.
+ * The process is repeated until all reads and writes are completed.
+ * Status of each operation is reported in retcodes.
+ * In case of failure the function will also report an error code for every
+ * operation in the queue.
+ * An error value of EAGAIN in retcodes means the operation should be repeated
+ * as it was not performed.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ *
+ * PARAMETERS OUT
+ * int *retcodes - pointer to an array of return codes
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is empty
+ * EIO if the driver failed to complete the write operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_commit(device_t * dev, int *retcodes);
+
+/*
+ * Abort all operations in the device's request queue.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is empty
+ * EIO if the driver failed to complete the write operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_abort(device_t * dev);
 
 /*
  * Perform polling. If the driver support polling the corresponding
