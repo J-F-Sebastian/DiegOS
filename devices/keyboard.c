@@ -23,23 +23,25 @@
 
 #include "scancodes.h"
 
-int keyboard_read_fn(void *buf, size_t bytes, void *drv, unsigned unitno)
+int keyboard_read_fn(void *buf, size_t *bytes, void *drv, unsigned unitno)
 {
 	char_driver_t *cdrv;
 	int retcode;
 	size_t inputcnt = 0;
 	char decbuffer;
+	unsigned bufsize = sizeof(decbuffer);
 	char *output = (char *)buf;
 
-	if (!buf || !drv) {
+	if (!buf || !drv || !bytes) {
 		return (EINVAL);
 	}
 
 	cdrv = (char_driver_t *) drv;
 
-	while (inputcnt != bytes) {
-		retcode = cdrv->read_fn(&decbuffer, sizeof(decbuffer), unitno);
+	while (inputcnt != *bytes) {
+		retcode = cdrv->read_fn(&decbuffer, &bufsize, unitno);
 		if (retcode < 0) {
+			*bytes = inputcnt;
 			return (retcode);
 		}
 		decbuffer = scancode_to_char(decbuffer);
@@ -49,5 +51,6 @@ int keyboard_read_fn(void *buf, size_t bytes, void *drv, unsigned unitno)
 		}
 	}
 
-	return (int)(inputcnt);
+	*bytes = inputcnt;
+	return (EOK);
 }

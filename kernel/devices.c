@@ -383,12 +383,11 @@ unsigned device_get_count(unsigned type)
 	return ((type < DEV_TYPE_MAX) ? devices_count[type] : list_count(&device_list));
 }
 
-int device_io_tx(device_t *dev, const char *buf, size_t bytes)
+int device_io_tx(device_t *dev, const char *buf, size_t *bytes)
 {
-	int retcode = bytes;
-	size_t cbytes = 0;
+	int retcode;
 
-	if (!dev || !dev->drv || !buf) {
+	if (!dev || !dev->drv || !buf || !bytes) {
 		return (EINVAL);
 	}
 

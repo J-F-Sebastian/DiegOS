@@ -220,7 +220,7 @@ static int kbd_done(unsigned unitno)
 	return (del_int_cb(KEYBOARD_IVT));
 }
 
-static int kbd_read(void *buf, unsigned bytes, unsigned unitno)
+static int kbd_read(void *buf, unsigned *bytes, unsigned unitno)
 {
 	char *dest = buf;
 	unsigned count;
@@ -229,11 +229,11 @@ static int kbd_read(void *buf, unsigned bytes, unsigned unitno)
 		return (ENXIO);
 	}
 
-	if (!buf) {
+	if (!buf || !bytes) {
 		return (EINVAL);
 	}
 
-	if (!bytes) {
+	if (!*bytes) {
 		return (EOK);
 	}
 
@@ -241,14 +241,15 @@ static int kbd_read(void *buf, unsigned bytes, unsigned unitno)
 		thread_io_wait(&wq_kbd);
 	}
 
-	count = bytes;
+	count = *bytes;
 	while (!cbuffer_is_empty(&kbd_rx_cbuf) && count) {
 		*dest++ = kbd_rx_buf[kbd_rx_cbuf.read];
 		cbuffer_remove(&kbd_rx_cbuf);
 		--count;
 	}
 
-	return (bytes - count);
+	*bytes -= count;
+	return (EOK);
 }
 
 static unsigned kbd_status(unsigned unitno)
@@ -408,7 +409,7 @@ static int mse_done(unsigned unitno)
 	return (del_int_cb(PS2MOUSE_IVT));
 }
 
-static int mse_read(void *buf, unsigned bytes, unsigned unitno)
+static int mse_read(void *buf, unsigned *bytes, unsigned unitno)
 {
 	return (ENXIO);
 }

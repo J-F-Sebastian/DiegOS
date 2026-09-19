@@ -290,16 +290,20 @@ static int tty_done(unsigned unitno)
 	return (EOK);
 }
 
-static int tty_write(const void *buf, unsigned bytes, unsigned unitno)
+static int tty_write(const void *buf, unsigned *bytes, unsigned unitno)
 {
 	char *localbuf = (char *)buf;
-	int retval = bytes;
+	int retval = *bytes;
 
 	if (unitno) {
 		return ENXIO;
 	}
 
-	while (bytes) {
+	if (!buf || !bytes) {
+		return EINVAL;
+	}
+
+	while (retval) {
 		/*
 		 * All unmanaged ctrl chars are skipped, no output no evidence of
 		 * their existance...
@@ -336,7 +340,7 @@ static int tty_write(const void *buf, unsigned bytes, unsigned unitno)
 				newline();
 		}
 		++localbuf;
-		--bytes;
+		--retval;
 	}
 
 	update_frame();
@@ -344,7 +348,8 @@ static int tty_write(const void *buf, unsigned bytes, unsigned unitno)
 	update_vram_start();
 	update_cursor_position();
 
-	return (retval);
+	*bytes -= retval;
+	return (EOK);
 }
 
 static unsigned tty_status(unsigned unitno)
@@ -352,6 +357,7 @@ static unsigned tty_status(unsigned unitno)
 	if (unitno) {
 		return (0);
 	}
+
 	return (status);
 }
 

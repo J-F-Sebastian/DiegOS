@@ -26,6 +26,6 @@
  * Please read include/diegos/devices.h for a description of the function,
  * its behavior, returned values, and parameters.
  */
-int keyboard_read_fn(void *buf, size_t bytes, void *drv, unsigned unitno);
+int keyboard_read_fn(void *buf, size_t *bytes, void *drv, unsigned unitno);
 
 #endif
