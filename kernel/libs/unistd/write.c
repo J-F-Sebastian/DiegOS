@@ -38,7 +38,7 @@ ssize_t write(int fd, const void *buf, size_t n)
 
 	if (fdarray[fd].flags & FD_DATA_IS_RAW) {
 		do {
-			retcode = device_io_tx(fdarray[fd].rawdev, (char *)buf, n);
+			retcode = device_io_tx(fdarray[fd].rawdev, (char *)buf, &n);
 		} while (retries-- && (retcode == EAGAIN));
 		if (retcode < EOK) {
 			errno = EIO;
@@ -49,5 +49,5 @@ ssize_t write(int fd, const void *buf, size_t n)
 		return (-1);
 	}
 
-	return ((ssize_t) retcode);
+	return ((ssize_t) n);
 }

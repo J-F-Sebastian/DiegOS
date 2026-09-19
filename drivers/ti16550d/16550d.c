@@ -439,9 +439,9 @@ static int uart_done(unsigned unitno)
 	return (del_int_cb(UART_IVT));
 }
 
-static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
+static int uart_write(const void *buf, unsigned *bytes, unsigned unitno)
 {
-	unsigned copy_bytes;
+	unsigned copy_bytes, tot_bytes;
 	int retval = 0;
 
 	if (unitno) {
@@ -454,13 +454,15 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 		return (EAGAIN);
 	}
 
-	if (!buf) {
+	if (!buf || !bytes) {
 		return (EINVAL);
 	}
 
-	if (!bytes) {
+	if (!*bytes) {
 		return (EOK);
 	}
+
+	tot_bytes = *bytes;
 
 	flags |= DRV_WRITING;
 
@@ -479,44 +481,45 @@ static int uart_write(const void *buf, unsigned bytes, unsigned unitno)
 	 * loop will continue to the end.
 	 */
 	copy_bytes = cbuffer_free_space_trim(&tx_cbuf);
-	if (bytes < copy_bytes) {
-		copy_bytes = bytes;
+	if (tot_bytes < copy_bytes) {
+		copy_bytes = tot_bytes;
 	}
 	memcpy(tx_buf + tx_cbuf.write, buf, copy_bytes);
 	cbuffer_add_n(&tx_cbuf, copy_bytes);
 	retval += copy_bytes;
 	buf += copy_bytes;
-	bytes -= copy_bytes;
+	tot_bytes -= copy_bytes;
 
 	enable_uart_tx();
 
-	while (bytes) {
+	while (tot_bytes) {
 
 		while (cbuffer_free_space(&tx_cbuf) < TX_SEQ_MAX) {
 			(void)thread_io_wait(&wq_w);
 		}
 
 		copy_bytes = cbuffer_free_space_trim(&tx_cbuf);
-		if (bytes < copy_bytes) {
-			copy_bytes = bytes;
+		if (tot_bytes < copy_bytes) {
+			copy_bytes = tot_bytes;
 		}
 		memcpy(tx_buf + tx_cbuf.write, buf, copy_bytes);
 		cbuffer_add_n(&tx_cbuf, copy_bytes);
 		retval += copy_bytes;
 		buf += copy_bytes;
-		bytes -= copy_bytes;
+		tot_bytes -= copy_bytes;
 
 		enable_uart_tx();
 	}
 
 	flags &= ~DRV_WRITING;
 
-	return (retval);
+	*bytes = retval;
+	return (EOK);
 }
 
-static int uart_read(void *buf, unsigned bytes, unsigned unitno)
+static int uart_read(void *buf, unsigned *bytes, unsigned unitno)
 {
-	unsigned copy_bytes;
+	unsigned copy_bytes, tot_bytes;
 
 	if (unitno) {
 		return (ENXIO);
@@ -528,13 +531,15 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 		return (EAGAIN);
 	}
 
-	if (!buf) {
+	if (!buf || !bytes) {
 		return (EINVAL);
 	}
 
-	if (!bytes) {
+	if (!*bytes) {
 		return (EOK);
 	}
+
+	tot_bytes = *bytes;
 
 	flags |= DRV_READING;
 
@@ -543,15 +548,16 @@ static int uart_read(void *buf, unsigned bytes, unsigned unitno)
 	}
 
 	copy_bytes = cbuffer_in_use_trim(&rx_cbuf);
-	if (bytes < copy_bytes) {
-		copy_bytes = bytes;
+	if (tot_bytes < copy_bytes) {
+		copy_bytes = tot_bytes;
 	}
 	memcpy(buf, rx_buf + rx_cbuf.read, copy_bytes);
 	cbuffer_remove_n(&rx_cbuf, copy_bytes);
 
 	flags &= ~DRV_READING;
 
-	return (copy_bytes);
+	*bytes = copy_bytes;
+	return (EOK);
 }
 
 static int uart_ioctrl(void *data, unsigned opcode, unsigned unitno)

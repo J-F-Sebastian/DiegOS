@@ -56,29 +56,33 @@ enum DEVICE_TYPE {
  *
  * PARAMETERS IN
  * const void *buf - the source buffer
- * size_t bytes - the amount of data in bytes to be transferred to the driver
+ * size_t *bytes - pointer to the amount of data in bytes to be transferred to the driver
  * void *drv - a driver instance
- * unsinged unitno - the unit number of the driver
+ * unsigned unitno - the unit number of the driver
+ *
+ * PARAMETERS OUT
+ * size_t *bytes - pointer to the amount of data in bytes actually transferred to the driver
  *
  * RETURNS
  * EINVAL if buf or drv are NULL
- * The number of transferred bytes in case of success; zero is a valid amount of transferred bytes.
- * Any error code returned from the driver function call
+ * Any return code from the driver function call
  */
-typedef int (*device_write_fn)(const void *buf, size_t bytes, void *drv, unsigned unitno);
+typedef int (*device_write_fn)(const void *buf, size_t *bytes, void *drv, unsigned unitno);
 /*
  * PARAMETERS IN
  * void *buf - the destination buffer
- * size_t bytes - the amount of data in bytes to be transferred from the driver
+ * size_t *bytes - the amount of data in bytes to be transferred from the driver
  * void *drv - a driver instance
  * unsinged unitno - the unit number of the driver
  *
+ * PARAMETERS OUT
+ * size_t *bytes - pointer to the amount of data in bytes actually transferred from the driver
+ *
  * RETURNS
  * EINVAL if buf or drv are NULL
- * The number of transferred bytes in case of success; zero is a valid amount of transferred bytes.
- * Any error code returned from the driver function call
+  * Any return code from the driver function call
  */
-typedef int (*device_read_fn)(void *buf, size_t bytes, void *drv, unsigned unitno);
+typedef int (*device_read_fn)(void *buf, size_t *bytes, void *drv, unsigned unitno);
 
 typedef struct device_header {
 	/*
@@ -220,7 +224,7 @@ device_t *device_lookup_name(const char *devname);
  * A valid pointer to an existing device object in case of success,
  * NULL in any other case.
  */
-device_t *device_get_first(uint64_t *search);
+device_t *device_get_first(uint64_t * search);
 
 /*
  * device_get_first_of_type() retrieves a pointer to the first device in list
@@ -239,7 +243,7 @@ device_t *device_get_first(uint64_t *search);
  * A valid pointer to an existing device object in case of success,
  * NULL in any other case.
  */
-device_t *device_get_first_of_type(uint64_t *search, unsigned type);
+device_t *device_get_first_of_type(uint64_t * search, unsigned type);
 
 /*
  * device_get_next() retrieves a pointer to the device next to the one passed in parameter search.
@@ -252,7 +256,7 @@ device_t *device_get_first_of_type(uint64_t *search, unsigned type);
  * A valid pointer to an existing device object in case of success,
  * NULL in any other case.
  */
-device_t *device_get_next(uint64_t *search);
+device_t *device_get_next(uint64_t * search);
 
 /*
  * device_get_count() returns the number of devices of the specified type.
@@ -286,7 +290,7 @@ unsigned device_get_count(unsigned type);
  * returned value is the amount of bytes transmitted (it might not match the
  * value passed in with the parameter bytes).
  */
-int device_io_tx(device_t * dev, const char *buf, size_t bytes);
+int device_io_tx(device_t * dev, const char *buf, size_t *bytes);
 
 /*
  * Perform reading from devices. If the driver support suspending (blocking)
@@ -308,7 +312,7 @@ int device_io_tx(device_t * dev, const char *buf, size_t bytes);
  * returned value is the amount of bytes read in the buffer (it might not match
  * the value passed in with the parameter bytes).
  */
-int device_io_rx(device_t * dev, char *buf, size_t bytes);
+int device_io_rx(device_t * dev, char *buf, size_t *bytes);
 
 /*
  * Perform polling. If the driver support polling the corresponding
