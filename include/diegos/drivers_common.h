@@ -32,22 +32,24 @@
  * and resume the calling thread on reading or writing or both.
  */
 enum {
-	DRV_STATUS_DONE = (1 << 0),
-	DRV_STATUS_FAIL = (1 << 1),
-	DRV_STATUS_RUN = (1 << 2),
-	DRV_STATUS_STOP = (1 << 3),
-	DRV_READING = (1 << 4),
-	DRV_WRITING = (1 << 5),
+	DRV_STATUS_INIT = (1 << 0),
+	DRV_STATUS_DONE = (1 << 1),
+	DRV_STATUS_FAIL = (1 << 2),
+	DRV_STATUS_RUN = (1 << 3),
+	DRV_STATUS_STOP = (1 << 4),
+	DRV_READING = (1 << 8),
+	DRV_WRITING = (1 << 9),
 	DRV_STATUS_BUSY = (DRV_READING | DRV_WRITING),
-	DRV_CTRL = (1 << 6),
-	DRV_READ_BLOCK = (1 << 8),
-	DRV_WRITE_BLOCK = (1 << 9),
+	DRV_CTRL = (1 << 10),
 	DRV_IS_CHAR = (1 << 16),
 	DRV_IS_BLOCK = (1 << 17),
 	DRV_IS_NET = (1 << 18),
 	DRV_IS_TXT_UI = (1 << 19),
 	DRV_IS_GFX_UI = (1 << 20),
-	DRV_ST_MASK = 0x0000FFFF,
+	DRV_READ_BLOCK = (1 << 21),
+	DRV_WRITE_BLOCK = (1 << 22),
+	DRV_ST_MASK = 0x000000FF,
+	DRV_OP_MASK = 0x0000FF00,
 	DRV_IS_MASK = 0xFFFF0000
 };
 

@@ -24,12 +24,21 @@
 #include <errno.h>
 #include <diegos/kernel.h>
 #include <diegos/devices.h>
+#include <diegos/mutexes.h>
 
 #include "kprintf.h"
 #include "devices_private.h"
 
+#define BLKRQMAXSIZE 16
+
 typedef struct device_int {
 	list_node header;
+	/*
+	 * Alloc for block devices only, used to call R/W and R/W multi
+	 */
+	struct block_request *rq;
+	unsigned rq_size;
+	mutex_t *rq_mutex;
 	device_t dv;
 } device_int_t;
 
@@ -206,7 +215,7 @@ device_t *device_create(const void *inst, unsigned unitno)
 		return (NULL);
 	}
 
-	tmp = calloc(sizeof(*tmp), 1);
+	tmp = calloc(1, sizeof(*tmp));
 
 	if (!tmp) {
 		kerrprintf("Out of memory for device %s\n", temp);
@@ -217,6 +226,23 @@ device_t *device_create(const void *inst, unsigned unitno)
 	tmp->dv.header.unitno = unitno;
 	tmp->dv.header.type = type;
 	tmp->dv.drv = (void *)inst;
+
+	if (type == DEV_TYPE_BLOCK) {
+		tmp->rq = calloc(BLKRQMAXSIZE, sizeof(struct block_request));
+		if (!tmp->rq) {
+			kerrprintf("Out of memory for device %s block request\n", temp);
+			free(tmp);
+			return (NULL);
+		}
+		tmp->rq_size = 0;
+		tmp->rq_mutex = thread_create_mutex(NULL);
+		if (!tmp->rq_mutex) {
+			kerrprintf("Failed to initialize mutex for device %s\n", temp);
+			free(tmp->rq);
+			free(tmp);
+			return (NULL);
+		}
+	}
 
 	if (EOK != insert_device(tmp)) {
 		kerrprintf("Device %s failed list insertion\n", temp);
@@ -385,59 +411,221 @@ unsigned device_get_count(unsigned type)
 
 int device_io_tx(device_t *dev, const char *buf, size_t *bytes)
 {
+	device_int_t *cntr;
 	int retcode;
 
 	if (!dev || !dev->drv || !buf || !bytes) {
 		return (EINVAL);
 	}
 
-	if (dev->header.type != DEV_TYPE_CHAR) {
+	if ((dev->header.type != DEV_TYPE_CHAR) && (dev->header.type != DEV_TYPE_BLOCK)) {
 		return (EPERM);
 	}
 
-	/*
-	 * The two loops are identical except for the function call
-	 * servicing the write operation.
-	 * They are split - though redundant - for performance reasons.
-	 */
-	if (dev->header.write_fn) {
-		retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
-		if (retcode > 0) {
-			return (retcode);
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (dev->header.type == DEV_TYPE_CHAR) {
+		if (dev->header.write_fn) {
+			retcode = dev->header.write_fn(buf, bytes, dev->cdrv, dev->header.unitno);
 		} else {
-			return (EIO);
+			retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
 		}
 	} else {
-		retcode = dev->cdrv->write_fn(buf, bytes, dev->header.unitno);
-		if (retcode > 0) {
-			return (retcode);
-		} else {
-			return (EIO);
-		}
+		cntr->rq[0].buffer = (void *)buf;
+		cntr->rq[0].bytes = *bytes;
+		cntr->rq[0].disk = dev->header.unitno;
+		cntr->rq[0].cmd = 1;	/* WRITE */
+		cntr->rq[0].errors = 0;
+		retcode = dev->bdrv->write_fn((block_request_t *) cntr->rq, dev->header.unitno);
+		*bytes = cntr->rq[0].bytes;
 	}
 
-	return (cbytes);
+	return (retcode);
 }
 
-int device_io_rx(device_t *dev, char *buf, size_t bytes)
+int device_io_rx(device_t *dev, char *buf, size_t *bytes)
 {
+	device_int_t *cntr;
 	int retcode;
+
+	if (!dev || !dev->drv || !buf || !bytes) {
+		return (EINVAL);
+	}
+
+	if ((dev->header.type != DEV_TYPE_CHAR) && (dev->header.type != DEV_TYPE_BLOCK)) {
+		return (EPERM);
+	}
+
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (dev->header.type == DEV_TYPE_CHAR) {
+		if (dev->header.read_fn) {
+			retcode = dev->header.read_fn(buf, bytes, dev->cdrv, dev->header.unitno);
+		} else {
+			retcode = dev->cdrv->read_fn(buf, bytes, dev->header.unitno);
+		}
+	} else {
+		cntr->rq[0].buffer = (void *)buf;
+		cntr->rq[0].bytes = *bytes;
+		cntr->rq[0].disk = dev->header.unitno;
+		cntr->rq[0].cmd = 0;	/* READ */
+		cntr->rq[0].errors = 0;
+		retcode = dev->bdrv->read_fn((struct block_request *)cntr->rq, dev->header.unitno);
+		*bytes = cntr->rq[0].bytes;
+	}
+
+	return (retcode);
+}
+
+int device_io_rq_lock(device_t *dev)
+{
+	device_int_t *cntr;
+
+	if (!dev || !dev->drv) {
+		return (EINVAL);
+	}
+
+	if (dev->header.type != DEV_TYPE_BLOCK) {
+		return (ENOTBLK);
+	}
+
+	cntr = container_of(dev, device_int_t, dv);
+
+	return (thread_lock_mutex(cntr->rq_mutex));
+}
+
+int device_io_rq_tx(device_t *dev, const char *buf, size_t bytes)
+{
+	device_int_t *cntr;
 
 	if (!dev || !dev->drv || !buf) {
 		return (EINVAL);
 	}
 
-	if (dev->header.type != DEV_TYPE_CHAR) {
+	if (dev->header.type != DEV_TYPE_BLOCK) {
+		return (ENOTBLK);
+	}
+
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (!thread_mutex_is_locked(cntr->rq_mutex)) {
 		return (EPERM);
 	}
 
-	if (dev->header.read_fn) {
-		retcode = dev->header.read_fn(buf, bytes, dev->cdrv, dev->header.unitno);
-	} else {
-		retcode = dev->cdrv->read_fn(buf, bytes, dev->header.unitno);
+	if (cntr->rq_size == BLKRQMAXSIZE) {
+		return (EAGAIN);
 	}
 
-	return ((retcode >= 0) ? (retcode) : (EIO));
+	cntr->rq[cntr->rq_size].buffer = (void *)buf;
+	cntr->rq[cntr->rq_size].bytes = bytes;
+	cntr->rq[cntr->rq_size].disk = dev->header.unitno;
+	cntr->rq[cntr->rq_size].cmd = 1;	/* WRITE */
+	cntr->rq[cntr->rq_size].errors = 0;
+	cntr->rq_size++;
+
+	return (EOK);
+}
+
+int device_io_rq_rx(device_t *dev, char *buf, size_t bytes)
+{
+	device_int_t *cntr;
+
+	if (!dev || !dev->drv || !buf) {
+		return (EINVAL);
+	}
+
+	if (dev->header.type != DEV_TYPE_BLOCK) {
+		return (ENOTBLK);
+	}
+
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (!thread_mutex_is_locked(cntr->rq_mutex)) {
+		return (EPERM);
+	}
+
+	if (cntr->rq_size == BLKRQMAXSIZE) {
+		return (EAGAIN);
+	}
+
+	cntr->rq[cntr->rq_size].buffer = (void *)buf;
+	cntr->rq[cntr->rq_size].bytes = bytes;
+	cntr->rq[cntr->rq_size].disk = dev->header.unitno;
+	cntr->rq[cntr->rq_size].cmd = 0;	/* READ */
+	cntr->rq[cntr->rq_size].errors = 0;
+	cntr->rq_size++;
+
+	return (EOK);
+
+}
+
+int device_io_rq_commit(device_t *dev, int *retcodes)
+{
+	device_int_t *cntr;
+	int retcode = EOK;
+	unsigned cmd;
+	unsigned i = 0, j = 0, k = 0;
+	struct block_request *ptr;
+	int *retptr = retcodes;
+
+	if (!dev || !dev->drv || !retcodes) {
+		return (EINVAL);
+	}
+
+	if (dev->header.type != DEV_TYPE_BLOCK) {
+		return (ENOTBLK);
+	}
+
+	cntr = container_of(dev, device_int_t, dv);
+
+	if (!thread_mutex_is_locked(cntr->rq_mutex)) {
+		return (EPERM);
+	}
+
+	/*
+	 * If rq_size is 0 cmd is nonsense,
+	 * nevertheless the loop will not be entered
+	 * and the function will return EOK
+	 * which is the correct behavior.
+	 */
+	cmd = cntr->rq[i].cmd;
+	ptr = cntr->rq;
+	while (cntr->rq_size && (retcode == EOK)) {
+		while ((cmd == ptr->cmd) && cntr->rq_size) {
+			++i;
+			++ptr;
+			--cntr->rq_size;
+		}
+
+		switch (cmd) {
+		case 0:
+			retcode = dev->bdrv->read_multi_fn(&ptr, i, dev->header.unitno);
+			break;
+		case 1:
+			retcode = dev->bdrv->write_multi_fn(&ptr, i, dev->header.unitno);
+			break;
+		}
+
+		k = j + i;
+		while (j < k) {
+			*retptr++ = (ptr[j].errors) ? (EIO) : (EOK);
+			++j;
+		}
+
+		cmd = ptr->cmd;
+		i = 0;
+	}
+
+	if (cntr->rq_size) {
+		kerrprintf("Device %8s request queue not empty after commit\n", dev->header.name);
+		retcode = EIO;
+	}
+
+	memset(cntr->rq, 0, sizeof(struct block_request) * BLKRQMAXSIZE);
+
+	thread_unlock_mutex(cntr->rq_mutex);
+
+	return (retcode);
 }
 
 int device_poll(device_t *dev, poll_table_t *table, short *events)
