@@ -23,6 +23,10 @@
 \usepackage{tocbasic}
 \usepackage[avantgarde]{quotchap}
 \usepackage{lipsum}
+\usepackage{geometry}
+\usepackage[most]{tcolorbox}
+
+\newcommand{\myOS}{{\color{Cerulean}\textbf{DiegOS}}}
 
 \frontmatter
 \begin{document}
@@ -39,11 +43,12 @@ by Diego Gallizioli
 Copyright \textcopyright \today \\{\KOMAScriptVersion}\\
 }
 \lowertitleback{This work was created with the {\LaTeX} typesetting system.\\
-The layout was set with {\KOMAScript}.
+The layout was set with {\KOMAScript}.\\
+The source text was written almost entirely with gvim.\\
 
-All applications and tools ran under Slackware Linux.\\
-The {\color{Cerulean}\textbf{DiegOS}} source code and tools were coded under Slackware Linux.\\
-The {\color{Cerulean}\textbf{DiegOS}} simulations ran under Slackware Linux.\\
+All applications and tools used to run under Slackware Linux, now they are running under Fedora.\\
+The {\myOS} source code and tools were coded under Slackware Linux.\\
+The {\myOS} simulations ran under Slackware Linux.\\
 
 While every precaution has been taken in the preparation of this book, the author
 assume no responsibility for errors or omissions, or for damages resulting from the use of the
@@ -56,6 +61,9 @@ information contained herein.}
 
 \mainmatter
 \chapter{Introduction}
+\dictum[Darth Vader]{
+I find your lack of faith disturbing.
+}
 \section*{Inheritance and other inspirations}
 I approached the world of computing when I was 8 years old.
 
@@ -116,7 +124,7 @@ distractions.\footnote{You might guess what could possibly distract a 25 years
 old man from spending nights in front of a computer.}
 But, as a professional software developer I approached embedded systems and I found 
 an interesting echosystem to work on.
-This is why I resumed my late OS project and wrote {\color{Cerulean}\textbf{DiegOS}}.
+This is why I resumed my late OS project and wrote {\myOS}.
 
 From my personal standpoint the main goal of an Operating System is to offer a 
 friendly and comfortable environment for both programmers, users, and administrators,
@@ -130,13 +138,13 @@ argue upon it.
 Up today I had the chance and the privilege to work on a number of Operating Systems,
 some of them with peculiar features, some of them with legacy constraints, most of
 them with a clear design.
-{\color{Cerulean}\textbf{DiegOS}} was born after years of careful and intensive meditation; it has no peculiarities,
+{\myOS} was born after years of careful and intensive meditation; it has no peculiarities,
 a KISS \footnote{The acronim stands for Keep It Simple, Stupid.} approach, no legacy constraints, and above all a humble
 target: do the right thing, the easy way, the fastest way, avoiding common errors and nuisances.
 
-Development of {\color{Cerulean}\textbf{DiegOS}} took a lot of my spare time, still I did not conceive all the contents of this book by myself;
+Development of {\myOS} took a lot of my spare time, still I did not conceive all the contents of this book by myself;
 the most inspiring source of wisdom at the heart of
-{\color{Cerulean}\textbf{DiegOS}} is \textbf{Minix}.
+{\myOS} is \textbf{Minix}.
 Minix is definitively a fitness room, furnished with all the whistles and bells and tools you could ever dream of.
 This \textbf{\emph{does not imply}} that Minix is the best Operating System out there, 
 it simply means I consider it a delightful piece of code.
@@ -181,11 +189,11 @@ Likewise, there is no suffering, origin, cessation, or path; there is no wisdom,
 There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies and the other way is to make it so complicated that there are no obvious deficiencies.
 }
 \section{Design}
-{\color{Cerulean}\textbf{DiegOS}} has been designed to be a simple application running on top of bare metal.
+{\myOS} has been designed to be a simple application running on top of bare metal.
 It is compiled and linked as a single binary image, a single process application able to run 
 concurrent threads of execution by means of a co-operative scheduler.
 The software is partitioned in layers with defined dependencies between modules;
-{\color{Cerulean}\textbf{DiegOS}} does not support multiple processors,  multiple cores, or multiple hardware 
+{\myOS} does not support multiple processors,  multiple cores, or multiple hardware 
 threads of execution; it does not offer memory protection or swappable memory,
 and does not offer pre-emption.
 This kind of design is not innovative, it resembles most embedded OS available
@@ -194,7 +202,7 @@ online, or what are commonly known as realtime OS.
 The hardware abstration is implemented with a well defined virtual interface
 architecture commonly known as \textbf{HAL} or Hardware Abstraction Layer.
 
-{\color{Cerulean}\textbf{DiegOS}} is designed to be configurable, and the
+{\myOS} is designed to be configurable, and the
 first configuration step is
 the definition of a tuple (processor, platform) which instructs the code and
 the compiler on what to do with very specific aspects of the hardware, like
@@ -203,16 +211,63 @@ context switching or interrupt handling.
 \subsection{Overview}
 Using a bottom-up perspective the system is split into 3 layers
 
-\begin{center}
-    \renewcommand{\arraystretch}{2}
-    \begin{tabular}{| c | c || l |}
-    \hline
-    1 & Kernel & Layer composed by the kernel and the drivers \\ \hline
-    2 & Libraries & Layer composed by libraries \\ \hline
-    3 & Application & Layer composed by user space code \\
-    \hline
-    \end{tabular}
-\end{center}
+\hfill
+\begin{tcolorbox}[enhanced,adjusted title=Hardware,drop fuzzy shadow]
+%    \renewcommand{\arraystretch}{2}
+%    \begin{tabular}{| c | c || l |}
+%    \hline
+%    1 & Kernel & Layer composed by the kernel and the drivers \\ \hline
+%    2 & Libraries & Layer composed by libraries \\ \hline
+%    3 & Application & Layer composed by user space code \\
+%    \hline
+%    \end{tabular}
+    \begin{tcbraster}[
+        raster columns=2,
+        raster column skip=3mm,
+        colframe=blue!70!black, % Stile comune per la cornice dei sotto-box
+        colback=blue!5,        % Stile comune per lo sfondo dei sotto-box
+	raster equal height,
+        halign=center          % Allinea il testo al centro nei sotto-box
+        ]
+        
+        \begin{tcolorbox}[colframe=red,enhanced,adjusted title=HAL]
+            Layer composed by the kernel and the drivers
+        \end{tcolorbox}
+        \begin{tcolorbox}[colframe=purple,enhanced,adjusted title=Drivers]
+            Layer composed by the kernel and the drivers
+        \end{tcolorbox}
+        \begin{tcolorbox}[raster multicolumn=2,colframe=blue,enhanced,adjusted title=Kernel,drop fuzzy shadow]
+            Layer composed by the kernel and the drivers
+        \end{tcolorbox}
+        \begin{tcolorbox}[raster multicolumn=2,colframe=yellow,enhanced,adjusted title=Libraries]
+            Layer composed by the libraries
+        \end{tcolorbox}
+        \begin{tcolorbox}[raster multicolumn=2,colframe=green,enhanced,adjusted title=Application]
+            Layer composed by user space code
+        \end{tcolorbox}
+    \end{tcbraster}
+\end{tcolorbox}
+\hfill
+
+\begin{tcolorbox}[enhanced,adjusted title=Beta]
+\begin{tcbraster}[
+        raster columns=3,      % Definisce le 3 colonne orizzontali
+        raster column skip=3mm, % Spazio orizzontale tra i box
+        colframe=blue!70!black, % Stile comune per la cornice dei sotto-box
+        colback=blue!5,        % Stile comune per lo sfondo dei sotto-box
+	raster equal height,
+        halign=center          % Allinea il testo al centro nei sotto-box
+    ]
+        
+        \begin{tcolorbox}[title=Box 1]
+        \end{tcolorbox}
+        \begin{tcolorbox}[title=Box 2]
+        \end{tcolorbox}
+        \begin{tcolorbox}[title=Box 3]
+        \end{tcolorbox}
+        
+    \end{tcbraster}
+\end{tcolorbox}
 
 \begin{figure}
     \centering
@@ -238,10 +293,10 @@ which can be used by both the kernel and the applications.
 They are logically above the first layer as they implement an abstraction for algorithms
  and data structures to use raw memory, files or network connections.
 
-In {\color{Cerulean}\textbf{DiegOS}} both the kernel and the applications can
+In {\myOS} both the kernel and the applications can
 use public functions exposed by the library layer.
 In a more restrictive design the kernel would never share code or data with
-applications, and this was the starting point also for {\color{Cerulean}\textbf{DiegOS}}, until it became
+applications, and this was the starting point also for {\myOS}, until it became
 clear that code segregation was bloating the kernel and memory footprint was growing due to duplication
 in kernel and library codebases.
 
@@ -251,9 +306,10 @@ applications.
 
 The top layer is occupied by \textbf{applications} which are the actual
 portion of the code written by developers to do something useful. Although
-\textit{applications} recalls user space processes there is no concept of user and 
-kernel space in {\color{Cerulean}\textbf{DiegOS}}, applications are just code linked to the OS but using the 
+\textbf{applications} recalls user space processes there is no concept of user and 
+kernel space in {\myOS}, applications are just code linked to the OS but using the 
 APIs offered by the kernel and the libraries.
+Threads, processes and applications are equivalent in {\myOS}.
 
 Still, applications are not allowed to call the kernel's internals directly.
 The kernel is an indipendent item and need to be isolated as much as possible.
@@ -269,64 +325,150 @@ The \textbf{scheduler} is in charge of selecting a thread among all
 available threads in the system to run it; the algorithm implemented to make the selection
 is a linear search in a priority list without pre-emption or substitution.
 Only the running thread can perform a context switch because pre-emption is not allowed, this means
-that the running thread is the only task that \textit{let} other threads run by suspending itself
-or waiting on events, generated by other software threads or by hardware.
+that the running thread is the only task that let other threads run by suspending itself
+or waiting on events generated by other processes or by hardware.
 
-A context switch is a voluntary action performed by the thread and enabled by specific calls to the kernel.
-Context switching {\color{Red}\textit{must not}} happen in interrupt context, and no interrupt
+A context switch is a voluntary action performed by the running thread and enabled by specific calls to the kernel.
+Context switching \textbf{must not} happen in interrupt context, and no interrupt
 routine is allowed to call any scheduler function; doing so will surely result in
 a memory corruption.
 
-As no other task than the running thread is able to stop or suspend the running thread itself there need to be \textit{at least} one running thread in the system at any time to allow new threads to be created and then put in operation
-with a context switch.
+As no other task than the running thread is able to stop or suspend itself there need to be at least one running thread
+in the system at any time to allow new threads to be created and then put in operation.
+This thread is usually known as the \tcboxverb[colframe=white]{idle thread} because it runs when the system is idle and the system is not busy with users' tasks.
 
-This thread is usually known as the {\color{Blue}\textit{idle thread}} because it runs when the system is idle and the system is not busy with users' tasks.
-
-The {\color{Blue}\textit{idle thread}} is fundamental for the Operating System as well as it is for the hardware management: when the system goes idle there are no pending tasks to be executed, this is the perfect time to lower power consumption cutting off the processor frequency, putting peripherals in power-save mode, or putting the processor in power-save mode.
+The \tcboxverb[colframe=white]{idle thread} is fundamental for the Operating System as well as it is for the hardware management:
+when the system goes idle there are no pending tasks to be executed, this is the perfect time to lower power consumption cutting off
+the processor frequency, putting peripherals in power-save mode, or putting the processor in power-save mode.
 
 The running thread is the highest priority thread in ready state, not blocked nor waiting for an I/O operation to complete.
-The \textbf{scheduler} algorithm follows a cooperative model: the
-running thread will not be substituted until the code in execution \textit{voluntary}
-suspends the thread, or put it in a wait state for I/O or waiting for a mutex, a
+The \textbf{scheduler} algorithm follows a cooperative model: the running thread will not be substituted until the code in execution
+\textbf{voluntary} suspends the thread, or put it in a wait state for I/O or waiting for a mutex, a
 semaphore, a barrier or an event; once the running thread has changed state, the
 \textbf{scheduler} will select another thread to become the running one or --- which is perfectly acceptable ---
 select the same thread again if it is the first ready thread found in the priority list.
 
 The scheduler follows a strict priority selection: the running thread will never
-switch to a \footnote{Not yelding for lower priority threads is a policy.} lower
-priority thread unless the following two conditions are true:
+switch to a lower priority thread \footnote{This is a specific scheduler policy: the selection of the
+running thread does not step priority down under normal conditions.}
+unless the following two conditions are true:
 
-\begin{enumerate}
-\item no threads with a higher priority than the running thread are ready
-\item no threads with the same priority of the running thread are ready
-\end{enumerate}
-
-The \texttt{kernel API} offers two suspension points with a slightly different logic but still
-honoring these rules:
-
+\hfill
+\begin{tcolorbox}[enhanced, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
 \begin{itemize}
-\item the running thread suspends unconditionally 
-\item the running thread suspends only if there are no higher priority threads ready to run.
+\item There are no ready threads with a higher priority than the running thread
+\item There are no ready threads with the same priority of the running thread
 \end{itemize}
+\end{tcolorbox}
+\hfill
 
-As already explained when no user threads are running the scheduler will fall back to the 
-{\color{Blue}\textbf{idle thread}}; this is a special thread used to occupy the processor when there is no
+The \texttt{kernel API} offers two suspension points --- with a slightly different logic but still
+honoring these rules --- in the form of function calls to let the running thread switch context:
+
+\hfill
+\begin{tcolorbox}[enhanced, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+\begin{itemize}
+\item \texttt{thread\_suspend()} suspends unconditionally the running thread.
+\item \texttt{thread\_may\_suspend()} supends the running thread only if there are no higher priority threads ready to run.
+\end{itemize}
+\end{tcolorbox}
+\hfill
+
+As already mentioned when no user threads are running the scheduler will fall back to the 
+\texttt{idle thread}; this is a special thread used to occupy the processor when there is no
 specific task to be completed.
-The {\color{Blue}\textbf{idle thread}} performs a generic accounting task and --- most important above
-all --- calls a power saving function, part of the \texttt{Hardware Abstraction Layer}
+The \texttt{idle thread} performs accounting and data gathering to build a statistics dataset
+of memory occupation, free stacks memory, running time and possibly many others.
+Still, there is one operation performed by this thread --- most important above all --- which is of high interest
+these days: power saving function, part of the \texttt{Hardware Abstraction Layer}
 and to be implemented for each processor; power saving is one of the most
 important functionality of the kernel, as the processor will spare power, save
 batteries, and require less cooling.
 
 The \textbf{system clock manager} is a sensitive piece of code dealing with
 the system clock and the system timings in general.
-It will initialize the clock device\footnote{Version 1.0 of {\color{Cerulean}\textbf{DiegOS}} supports
+Its responsibility is to track time --- wall clock --- and allow threads to wait for a specific amount
+of time.\\
+It will initialize the clock devices\footnote{Version 1.x of {\myOS} supports
 one clock source only \texttt{/dev/clk0}} and perform accounting of system
 ticks\footnote{System ticks are implemented as a monotonic fixed rate counter},
-system wall clock\footnote{The system clock accounts milliseconds since boot time}
-and the clock period.
-The clock period is dynamic and changes accordingly to the delay of the
-threads waiting or sleeping, hence {\color{Cerulean}\textbf{DiegOS}} use a tickless kernel.
+boot time\footnote{The system boot time is a configurable time point marking a date
+since 1\textsuperscript{st} January 2015 GMT}, and the clock \textit{period}.
+
+A clock device is simply a counter; some devices count upwards from zero to higher values,
+some count backwards to zero. In any case the value of the counter is called the \textit{period}.
+Once the \textit{period} is expired and the counter reaches its terminal value an interrupt is raised
+and then the counter may restart counting or may wait to be restarted;
+the two different approaches are usually referred as \textit{periodic} and \textit{single-shot}.
+
+The counter may or may not raise and interrupt, in the latter case we have a free-running counter which can
+be polled to feed a variable in memory accumulating the time passing by.
+{\myOS} compute \textit{system ticks} by accumulating \textit{periods} as configured into the clock device;
+the resolution of the system clock is dependent on the resolution of the hardware.
+The system clock can be accessed by the application layer with different resolutions
+
+\hfill
+\begin{tcolorbox}[enhanced, adjusted title=Time measurement, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+\begin{center}
+    \begin{tabular}{| c | l |}
+    \hline
+    System Clock & Elapsed time in milliseconds \\ \hline
+    Up time & Adjusted elapsed time since boot \\ \hline
+    System ticks & Elapsed time in HZ ticks per second \\
+    \hline
+    \end{tabular}
+\end{center}
+\end{tcolorbox}
+\hfill
+
+System ticks are computed dividing the elapsed time by a specific frequency, usually configured at compile time
+declaring a \texttt{HZ} definition\footnote{Most common HZ values are 100, 1000 and 1024, with 100 the default
+choice for {\myOS}}.
+{\myOS} use a millisecond resolution for its timers while hardware can be configured to have any resolution,
+the software will account for milliseconds by converting the accumulated elapsed time at run time.
+One note about having monotonic clocks and not real-time clocks: it might seem an oversimplification, but experience (and history!)
+teach a different lesson: real-time clocks can confuse the status of a system by moving timepoint up and down the timeline.
+This poses a major issue for threads waiting for a specific timepoint, in fact, an unbounded operation on a timepoint
+(i.e. mixing signed and unsigned additions) might set a timepoint in the past or very far in the future, in both cases
+the wait operation will fail its original goal as the timepoint drifted\footnote{Mixing monotonic and realtime counters
+is a real life issue: GLIBC implementation prior to 2019 strictly applied recommendations found in the STL definition
+and used monotonic timers to create \texttt{time checkpoints} and real-time timers to evaluate the exit condition
+of \texttt{wait\_for} and \texttt{wait\_until} methods; altering system time --- from the system console for example ---
+to be in the past or in the future made applications hang forever}.
+
+The resolution of the system clock is configurable according to the limits imposed
+by the clock device driver; this detail is platform dependent and for this reason the driver
+offers an I/O control to retrieve the minimum and the maximum values accepted by the hardware counter.
+The clock period is dynamic and changes accordingly to the delay of the running threads,
+in other words it is tuned to the next timepoint and the value of this timepoint
+depends on the workload of the system; if the only running thread is the \texttt{idle thread}
+the period will grow constantly until it hits a configured ceiling.
+{\myOS} is a \textbf{tickless} kernel.
+
+The \textbf{thread synchronization APIs} is a collection of system utilities abstracting
+internal kernel structures used to let application alternate each other while accessing
+shared resources;
+since the \textbf{scheduler} and the threads management are hidden layers, the applications 
+have no direct access to each other nor can communicate directly with each
+other\footnote{There is no memory protection in {\myOS} so threads can mutually
+access private data and variables, while this is strongly discouraged, it is also a
+bad practice}.
+Applications need to synchronize when they share data, objects, files, or when
+they need to observe a timeline --- so they need to synchronize with the
+system clock.
+{\myOS} implement \textit{mutexes}, \textit{barriers}, \textit{spin locks}, \textit{timers}
+and \textit{alarms}.
+
+Additionally, an API for event management is provided to let threads talk to
+each other without crossing function calls or sharing global data.
+This set of functions \textbf{must be protected} against interruptions;
+interrupt routines \textbf{must not interrupt} or alter the running thread state or
+stack while the thread is suspending or waking up, as this might change the
+readiness state of a thread.
+This could result in an erroneous condition for one or more threads leaving the scheduler
+in an inconsistent state, or even corrupting a thread's stack.
+This sets an important paradigm in the design of {\myOS}: context switch is a \textbf{voluntary}
+action taken inside a running thread and executed calling the \texttt{kernel API}.
 
 The \textbf{kernel interface} is the public interface used by application code
 to interact with the management of threads, with the system startup and
@@ -337,39 +479,24 @@ devices.
 The true nature of this interface is not hiding thread management, but rather
 hiding \textit{scheduling} operations, preventing applications from accessing
 any of the \textbf{scheduler} functions.
-As a matter of fact, in {\color{Cerulean}\textbf{DiegOS}} the scheduler is a hidden layer and is
+As a matter of fact, in {\myOS} the scheduler is a hidden layer and is
 accessible  only through the \textbf{kernel interface}.
 Also hardware and drivers are hidden by this layer, they are accessible by
 using the \textit{devices} interface which is an abstraction of the drivers
 interface.
 
-The final item is the collection of \textbf{thread synchronization APIs};
-since the scheduler and the threads management are hidden layers, the applications 
-have no direct access to each other nor can communicate directly with each
-other.
-Applications need to synchronize when they share data, objects, files, or when
-they need to observe a timeline --- so they need to synchronize with the
-system clock.
-{\color{Cerulean}\textbf{DiegOS}} implement mutexes, barriers, spin locks, timers and alarms.
-Additionally, an API for event management is provided to let threads talk to
-each other without crossing function calls or sharing global data.
-This last set of functions \textbf{must} be protected by interruptions;
-interrupt routines \textbf{must not} interrupt or alter the threads state or
-stack while the thread is suspending or waking up, as this might change the
-readiness state of a thread: this could result in an erroneous condition for
-one or more threads leaving the scheduler in an inconsistent state, or even
-corrupting a thread's stack.
-
 \subsection{Layer 1a: The drivers}
 \textbf{Drivers} are a very important part of the kernel, they are allowed to access
-internals of the kernel \textit{not} exposed to applications, and usually
+internals of the kernel \textbf{not} exposed to applications, and usually
 implement \textit{interrupt routines} which requires access to sensitive
 resources offered by the processor or the platform or the kernel itself.
-Being dedicated to manage hardware it is not possible to implement a single
-common interface for all \textbf{drivers}, at the same time, a lot of functions and
-data and logic are common among all \textbf{drivers}.
-{\color{Cerulean}\textbf{DiegOS}} interfaces have been conceived to share (inherit) a common
-set of properties, adding specializations when needed.
+It is not possible to implement a single common interface for all \textbf{drivers}
+because the hardware they are supposed to use show different behaviors and require
+different logics when operated; at the same time, a lot of code and algorithms
+can be shared amongst \textbf{drivers}.
+{\myOS} interfaces have been conceived to share ("inherit") a common
+set of properties, adding specializations when needed.\footnote{Just like objects inheritance
+it is possible to extend a function calls structure with another function calls structure.}
 
 \subsection{Layer 2: The libraries}
 \textbf{Libraries} are the core of any software infrastructure.
@@ -382,25 +509,27 @@ structures and algorithms are indipendent yet interlocked, as data structures
 are owned by the running application, but the strategy to use them at best
 is common.
 
-There are two places for \textbf{libraries} in {\color{Cerulean}\textbf{DiegOS}}, the user
+There are two places for \textbf{libraries} in {\myOS}, the user
 applications libraries and the kernel libraries. The difference between the
 two is the target they want to accomplish: applications need general
-purpose data to solve general purpose problems, so they need lists, queues,
-binary trees, and some strategies to use them at best, like sorting or
+purpose data to solve general purpose problems, so they are offered lists, queues,
+binary trees and some strategies to use them at best, like sorting or
 searching.
 On the other hand the kernel code need specific data to handle drivers, manage
 hardware, communications busses, interrupt controllers, but again with common
 strategies like enumeration or sorting.
 
-One noticeable detail in {\color{Cerulean}\textbf{DiegOS}} is the presence of a native \texttt{libc}
+One noticeable detail in {\myOS} is the presence of a native \texttt{libc}
 library available as original source code in place of one of the several
 well-known implementations available in the world.\footnote{At the time of this writing well-known \texttt{libc}
 implementations are \texttt{glibc}, \texttt{uClibc}, \texttt{musl} and the
 \texttt{C runtime Library (CRT)}.} This singularity needs some explanation.
-This Operating System is a recreational hobby not for production;
+This Operating System is a recreational toy not for production;
 porting a library to a new Operating System is a big effort,
 expecially considering the \texttt{libc} contents and its portability requirements.
-Writing a new dedicated library proved to be effective for performances and size and required a coding effort which is comparable to spending some nights awake.\footnote{I would not call this burning my midnight oil.}
+Writing a new dedicated library proved to be effective for performances and size and
+required a coding effort equivalent to spending some nights awake with a big mug of coffee.
+\footnote{I would not call this burning my midnight oil.}
 
 Kernel libraries offer support for handling the PCI bus, some timing facility,
 and interfaces to the file system.
@@ -409,23 +538,29 @@ lists, memory pools, chunk managers, dynamic vectors, circual buffers, stacks,
 and many others.
 
 \subsection{Layer 3: The applications}
-\textbf{Applications} are the top level layer in {\color{Cerulean}\textbf{DiegOS}} and they are
+\textbf{Applications} are the top level layer in {\myOS} and they are
 barely noticeable in the code base, users are expected to add whatever they 
 want to this layer, customizing the system experience.
 An \textit{application} is not self-contained as it is supposed to be, as the
 overall system is a single binary; applications are prevented from accessing
 the internals of the kernel and are allowed to use only public APIs as found
 in libraries.
+
 Applications code run inside threads, at least one must be spawned at the end
 of the kernel initialization by declaring the function \texttt{platform\_run()}
 which is responsible for initializing data and threads.
-While one binary can run several applications, only one
-\texttt{platform\_run()} function can be declared: this means that applications
+While one binary can run several applications, only one \texttt{platform\_run()}
+function can be declared: this means that applications
 can be spread over a number of files, but the entry point is common and is
 inside \texttt{platform\_run()}.
 
+A number of system functionalities are implemented as applications, leveraging on the fact
+that running in the user layer sometimes offers more possibilities than running in the kernel layer
+--- libraries, devices, structured I/O can be used to implement a network stack, or a file system,
+or a HID interface.
+
 \section{Portability}
-The source code of {\color{Cerulean}\textbf{DiegOS}} is written in plain C, with a little amount of
+The source code of {\myOS} is written in plain C, with a little amount of
 assembler to perform hardware init.
 The C language is a compulsory choice when portability is a priority, and
 along with it the speed of the resulting binary.
@@ -434,19 +569,22 @@ instructions not known to the compiler; it can be handful when it is desidered t
 add hard optimizations to some function or even a whole API, provided that readability
 of the code is kept to a level where any developer could read the code,
 read the comments, understand the algorithm, the pitfalls,
-and the possible C counterpart.\footnote{Assembler is never portable, but can be translated if understandable}
+and the possible C counterpart.\footnote{Assembler by definition is never portable, but can be ported
+to different platforms if it is understandable}
 
 Some drivers and some libraries' API have a double implementation, one in plain C and 
 one optimized written in assembler; the former is totally portable,
-the latter is welcome when performance gets on stage.\\
+the latter is welcome when performance gets on stage.
 The system is not designed to run on 64-bit architectures, writing 32- and 64-bit compliant 
-code requires considerable time (and time is a scarce resource!).\footnote{
+code requires a considerable amount of time expecially if we are considering an
+Operating System; software cannot accomodate every difference with a common implementation
+when it comes to hardware handling or system management.\footnote{
 Writing code able to compile and run on both 32- and 64-bit processors would break
-the rule of simplicity; still, you will find computations and arrangements to
-support 64-bit systems.}\\
+the rule of simplicity; still, you will find 64-bit data structures in the code.}
+
 The system supports compiling and linking source files written in C++ using
 classes and objects, this makes it possibile to write applications with
-\textit{Object Oriented Programming}. It was not foreseen to add objects to
+\textit{Object Oriented Programming}. Unfortunately it was not foreseen to add objects to
 the kernel, although possible, it would require a new architecture.
 
 The system can be easily ported to different platforms or can support several
@@ -465,7 +603,7 @@ the alarm is expired; a timer need to count seconds, or better milli- micro-
 or nanoseconds, and the reference source of this "ticking" is usually a
 crystal oscillator.
 Measuring the crystal signal can be performed only in hardware for obvious
-reasons.\\
+reasons.
 Still, the output of the hardware is a measure of time, and the software will
 use it to track time passing by: from a logical point of view, the
 functionality of time accounting \textbf{does not} depend on hardware, while
@@ -477,11 +615,12 @@ Software need to be informed when a peripheral (hardware) change state, or
 fails, or has data to be handled.
 This is achieved by interrupting the processor --- hence interrupting software
 --- and putting both hardware and software in the condition of handling the
-incoming data or the error if any.\\
-In order to understand which is the source
-of the interruption the hardware provides an \textit{interrupt} system,
+incoming data or the error if any.
+
+In order to understand which is the source of the interruption the hardware provides
+an \textit{interrupt} system,
 offering informations on the origin of the interruption, the type of
-interruption and its actual priority.\\
+interruption and its actual priority.
 Even for interrupts the hardware implementation and the interface toward
 software can be different on different platforms, but from a logical point of
 view the operation to be performed is the same: software need to know which
@@ -490,7 +629,7 @@ device asked for attention.
 The \textbf{HAL} layer can be used to have a common interface between
 \textit{software} and \textit{hardware functionality}; the abstraction created
 by this layer has to be generic enough to cover most hardware features, while
-the same should be invisible to the caller.\\
+the same should be invisible to the caller.
 In few words, the software invoking the Hardware Abstraction Layer expects an
 output from the API which is consistent and identical on different platforms;
 the same software calling the same \textbf{HAL} interface callback will output the same
@@ -499,24 +638,30 @@ results independently from the underlying hardware.
 A good example of what an \textbf{HAL} layer is capable of is interrupt handling;
 interrupts generated by external devices can be processed by
 dedicated peripherals\\footnote{Devices managing multiple interrupt sources
-are devised as PIC Programmable Interrupt Controllers} and sorted in priority
-before being forwarded to the processor. Many processors embed a PIC device so
-that they do not need additional devices and can offer a wider set of features
+are devised as PIC Programmable Interrupt Controllers.} and sorted in priority
+before being forwarded to the processor. Many processors embed a dedicated device --- known
+as \textit{PIC} --- so that they do not need additional devices and can offer a wider set of features
 as the interrupt controller is actually on-board and can interact with other
-parts of the processor.\\
+parts of the processor.
+
 From the \textbf{HAL} point of view there is no difference in having an
 embedded PIC or an external PIC: the software interface will accept the
 correct amount of interrupts, the correct amount of priorities, and will let
 the software map the hardware interrupt lines to their logical counterpart in
 software. When an interrupt is triggered, the \textbf{HAL} layer will call a
-specific routine in charge of servicing the interrupt.\\
+specific routine in charge of servicing the interrupt.
 The operating system or any driver will then just need to map interrupts,
 register callbacks, and run.
+There is a clear tradeoff between performance and abstraction when making use
+of a \textbf{HAL} layer: abstraction needs software, software needs execution time,
+and execution time raises delay.
+In reverse the ability to use multiple hardware with the same interfaces increase
+the test surface of the software which increase stability in the long period.
 
 \section{The Build System}
-The code base of {\color{Cerulean}\textbf{DiegOS}} builds using makefiles and the make tool, no ancillary
+The code base of {\myOS} builds using makefiles and the make tool, no ancillary
 tool is required apart for a C-language toolchain.\\
-Any toolchain can be deployed and used to compile and build {\color{Cerulean}\textbf{DiegOS}},
+Any toolchain can be deployed and used to compile and build {\myOS},
 at the time of this writing only GCC has been tested.
 
 Output object files are stored in dedicated directories named after the platform 
@@ -547,7 +692,7 @@ anyone.
 The kernel, the libraries, the applications, they are all parts of a whole
 system. A system with a well defined target: start applications and make them
 run in a steady environment.
-To this purpose some additional sections are required in {\color{Cerulean}\textbf{DiegOS}}, the
+To this purpose some additional sections are required in {\myOS}, the
 boot code to let the main binary run in a preconfigured hardware environment,
 the file system to store and retrieve data, the networking subsystem to
 connect to the outer world.
@@ -572,7 +717,7 @@ of breaking and resuming the boot process, perform diagnostics, support early st
     \caption{The booting process}
 \end{figure}
 
-In {\color{Cerulean}\textbf{DiegOS}} the system loader is usually integrated into the OS binary header, so that the \texttt{SoC}
+In {\myOS} the system loader is usually integrated into the OS binary header, so that the \texttt{SoC}
 will execute the binary --- either from memory or from ROM --- and the first instructions executed will be the loader, which will init
 the bare minimum hardware, read the content of the remaining binary into memory, and then continue with the execution of the kernel.
 This implies that the hardware platform should be able to execute from a storage device\footnote{An internal or external ROM,
@@ -586,7 +731,7 @@ a bare metal application.
 \section{The boot code}
 The boot code belongs to the booting stage and it's ultimate goal is to
 implement the most straighforward solution to setup the processor, the CPU
-peripherals, then load and run the {\color{Cerulean}\textbf{DiegOS}} binary.
+peripherals, then load and run the {\myOS} binary.
 Boot code should be adaptable to any platform and any medium,
 and it should perform using the least amount of interactions with the hardware.
 It is understood that boot code is essentially processor and platform dependent,
@@ -595,12 +740,12 @@ portion of operations which vary with the machine.
 
 There is an elegant and effective solution to the problem of mixing
 dependencies with abstract algorithms, that is the \textit{Hardware
-Abstraction Layer}; in {\color{Cerulean}\textbf{DiegOS}} most of the booting process is
+Abstraction Layer}; in {\myOS} most of the booting process is
 implemented into \textit{HAL} functions, so that a very thin layer of
 high-level functions can perform common steps indipendently from the
 underlying hardware.
 
-To satisfy these requirements {\color{Cerulean}\textbf{DiegOS}} is built as a raw binary, relocated
+To satisfy these requirements {\myOS} is built as a raw binary, relocated
 to start at a specific memory address --- the same that will be used to 
 load it and then run it.\footnote{At the time of this writing there is no support
 for COFF, ELF or PE formats.}
@@ -610,7 +755,7 @@ to satisfy the needs of having a symbol reference for debugging, along with
 all binutils capabilities.
 In case the target EABI does not support the ELF format, any other object file
 format can be used; just be aware you always need to emit a raw binary file to
-load and execute {\color{Cerulean}\textbf{DiegOS}}.
+load and execute {\myOS}.
 
 Coming to procedures, the boot code implements a detailed setup procedure to have consistent 
 booting steps across any platform.
@@ -625,7 +770,7 @@ this stage comes so early in the booting process that understanding the
 easiest issue might be really hard.
 Add comments to explain how this data can be used. Do not add debugging
 infrastructures, traces, endless strings for printouts.
-\item Access the medium where you stored the {\color{Cerulean}\textbf{DiegOS}} binary, and read it into
+\item Access the medium where you stored the {\myOS} binary, and read it into
 memory. Document where the binary is put in memory, why it is put there, and
 the memory layout during boot. The medium and the code required to
 access it are up to you. The rationale here is, split your boot code if it grows beyond
@@ -633,14 +778,14 @@ logic; chain booting is not an option in this case.
 \item Before jumping to the OS entry point go through this checklist:
 
     \begin{enumerate}
-    \item All registers must be setup to start {\color{Cerulean}\textbf{DiegOS}}: scratch registers should be
+    \item All registers must be setup to start {\myOS}: scratch registers should be
     set to null, memory registers should be set to access the whole addressing
     space; you could also restrict the range of available addresses, but you 
     must ensure the OS is still able to access all the memory and all the hardware.
     \item A small stack will be used by the system init stage, be sure to set
     it up before jumping or you'll crash the machine.
     \item All interrupts \textit{must be disabled} prior to jumping to the
-    {\color{Cerulean}\textbf{DiegOS}} entry point. 
+    {\myOS} entry point. 
     \end{enumerate}
 
 \item Jump to the system entry point, which is labelled as \texttt{DiegOS}.
@@ -675,7 +820,7 @@ at user's will.
 \end{itemize}
 
 \section{The Kernel}
-The core functionalities of {\color{Cerulean}\textbf{DiegOS}} are enclosed in this library.
+The core functionalities of {\myOS} are enclosed in this library.
 The kernel is a single instance, single processor component; it does not
 support any kind of memory protection, and it is expecting to be able to access the
 whole address space with no restrictions. As mentioned before, there could be restrictions
@@ -689,7 +834,7 @@ heaven for \\footnote{you can guess where the citation comes from ...}.
 All in all, a general purpose OS would not even mention memory protection as an option; 
 again, if you need the real thing, go get it. A small bare-metal system would require lots
 of resources to assure a decent level of security if implementing memory protection,
-and this is not a goal for {\color{Cerulean}\textbf{DiegOS}}.
+and this is not a goal for {\myOS}.
 
 \begin{figure}
     \centering
@@ -704,7 +849,7 @@ Alarms, Events and Mutexes are all managed services, meaning that an owning thre
 can create, destroy, or reconfigure them at any time.
 
 \begin{description}
-\item[The Scheduler] the {\color{Cerulean}\textbf{DiegOS}} scheduler is as simple as possible, and is implemented as a FIFO
+\item[The Scheduler] the {\myOS} scheduler is as simple as possible, and is implemented as a FIFO
 queue with several priority levels. Pre-emption is not supported, and threads must co-operate in
  order to give up CPU time when computing is not required.
 
@@ -720,7 +865,7 @@ thread will be killed.} but at least one thread must be ready to run at any time
 
 The scheduler is designed to manage the threads' finite state machine and select 
 the running thread by using a priority queue schema. There are four
-priorities in {\color{Cerulean}\textbf{DiegOS}}, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
+priorities in {\myOS}, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
 \texttt{High Priority} and \texttt{Realtime Priority}.
 
 When a thread is in the ready queue, it will not substitute the running
@@ -841,11 +986,11 @@ Optionally a barrier can automatically close after opening, creating a step-lock
 
 \section{Drivers}
 \label{sub:drivers}
-Drivers in {\color{Cerulean}\textbf{DiegOS}} are interfaces to hardware.
+Drivers in {\myOS} are interfaces to hardware.
 They enable software to start and stop hardware operations, configure it, and perform input and output.
 Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
 be carefully designed to avoid conflicts with the system-wide interrupt handling.
-{\color{Cerulean}\textbf{DiegOS}} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
+{\myOS} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
 designed to be reentrant.
 The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
 and will enable the interrupt back again once the servicing routine returns.
@@ -951,7 +1096,7 @@ level threads, the availability of such APIs enable developers to code
 highly orthogonal systems, leveraging on the same libraries for drivers,
 front ends, interfaces, databases, applications.
 
-{\color{Cerulean}\textbf{DiegOS}} offers a pletora of data structures
+{\myOS} offers a pletora of data structures
 \section{Networking}
 
 \section{Drivers interface}
