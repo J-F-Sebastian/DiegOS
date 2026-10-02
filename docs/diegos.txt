@@ -729,6 +729,7 @@ Some platforms follow a more structured approach where the \textit{boot loader} 
 a bare metal application.
 
 \section{The boot code}
+
 The boot code belongs to the booting stage and it's ultimate goal is to
 implement the most straighforward solution to setup the processor, the CPU
 peripherals, then load and run the {\myOS} binary.
@@ -1102,15 +1103,28 @@ front ends, interfaces, databases, applications.
 \section{Drivers interface}
 
 \chapter{The File System architecture}
+\dictum[John McKittrick]{
+There's no way that a high school punk can put a dime into a telephone and break into our system!
+He's got to be working with somebody else. He's got to be!
+}
 \lipsum
 
 \chapter{The Networking infrastructure}
+\dictum[Maverick and Goose]{
+I feel the need... the need for speed!
+}
 \lipsum
 
 \chapter{The System Console}
+\dictum[Andrew S. Tanenbaum]{
+I can type faster than I can point. And my mother told me that pointing is impolite.
+}
 \lipsum
 
 \chapter{The Debug Infrastructure}
+\dictum[Travis Penn]{
+Assumption is the mother of all fuck-ups!
+}
 \lipsum
 
 \chapter{The Kernel Implementation}
