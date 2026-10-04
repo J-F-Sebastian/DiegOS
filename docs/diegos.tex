@@ -15,21 +15,24 @@
 \addtokomafont{chapterthumb}{\bfseries}
 \usepackage{setspace}
 \onehalfspacing
-\usepackage{listings}
 \usepackage{tikz}
 \usepackage{graphicx}
-\usepackage[dvipsnames]{xcolor}
 \usetikzlibrary{shapes,arrows}
 \usepackage{tocbasic}
 \usepackage[avantgarde]{quotchap}
 \usepackage{lipsum}
 \usepackage{geometry}
 \usepackage[most]{tcolorbox}
+\usepackage{minted}
+\usemintedstyle{borland}
 
 \newcommand{\myOS}{{\color{Cerulean}\textbf{DiegOS}}}
 
-\frontmatter
+%\lofoot{DiegOS Operating System}
+%\refoot{DiegOS Operating System}
+
 \begin{document}
+\frontmatter
 \subject{Documentation}
 \title{{\color{Cerulean}DiegOS}}
 \subtitle{Design and Implementation of a minimalistic Operating System}
@@ -44,21 +47,18 @@ Copyright \textcopyright \today \\{\KOMAScriptVersion}\\
 }
 \lowertitleback{This work was created with the {\LaTeX} typesetting system.\\
 The layout was set with {\KOMAScript}.\\
-The source text was written almost entirely with gvim.\\
+The source text was written almost entirely using {\textit{gvim}}.\\
 
-All applications and tools used to run under Slackware Linux, now they are running under Fedora.\\
-The {\myOS} source code and tools were coded under Slackware Linux.\\
-The {\myOS} simulations ran under Slackware Linux.\\
+All applications and tools were developed on an Intel workstation running Slackware Linux, ultimately the workstation is running Fedora Linux.
 
 While every precaution has been taken in the preparation of this book, the author
 assume no responsibility for errors or omissions, or for damages resulting from the use of the
 information contained herein.}
 
 \dedication{This work is dedicated to my family Monica, Davide, Matteo and Anna, for letting me sit in front of my computer late at night.}
+
 \maketitle
-
 \tableofcontents
-
 \mainmatter
 \chapter{Introduction}
 \dictum[Darth Vader]{
@@ -78,7 +78,8 @@ what they could be used for, they were giving answers: finding clues, finding
 people, finding informations.
 Remeber \textit{tron} or \textit{war games} ? Here it goes.
 
-My father bought a Commodore C64 after an intensive and extensive search throughout most of the electronics shops
+My father bought a Commodore C64 after an intensive and extensive search throughout
+most of the electronics shops
 available, probably inspired by the passion I demonstrated for computers.
 
 He had a target --- having me and my brother understand what a computer could
@@ -186,12 +187,15 @@ Likewise, there is no suffering, origin, cessation, or path; there is no wisdom,
 
 \chapter{The Architecture}
 \dictum[C.A.R. Hoare, The 1980 ACM Turing Award Lecture]{
-There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies and the other way is to make it so complicated that there are no obvious deficiencies.
+There are two ways of constructing a software design:
+One way is to make it so simple that there are obviously
+no deficiencies and the other way is to make it so complicated
+that there are no obvious deficiencies.
 }
 \section{Design}
 {\myOS} has been designed to be a simple application running on top of bare metal.
 It is compiled and linked as a single binary image, a single process application able to run 
-concurrent threads of execution by means of a co-operative scheduler.
+concurrent threads of execution by means of a cooperative scheduler.
 The software is partitioned in layers with defined dependencies between modules;
 {\myOS} does not support multiple processors,  multiple cores, or multiple hardware 
 threads of execution; it does not offer memory protection or swappable memory,
@@ -204,91 +208,106 @@ architecture commonly known as \textbf{HAL} or Hardware Abstraction Layer.
 
 {\myOS} is designed to be configurable, and the
 first configuration step is
-the definition of a tuple (processor, platform) which instructs the code and
-the compiler on what to do with very specific aspects of the hardware, like
-context switching or interrupt handling.
+the definition of a set of options to be used at compile time to instruct the code and
+the compiler on what to do with very specific aspects of the system, like
+context switching, interrupt handling, size of memory, size of buffers,
+maximum number of threads, instruction set to be used.
 
 \subsection{Overview}
-Using a bottom-up perspective the system is split into 3 layers
-
+Using a bottom-up perspective the system is split into 3 layers with foundations consisting of
+the \textbf{HAL} for the kernel and the hardware for \textbf{Drivers}.
+Drivers are logically next to the kernel and the HAL because they access hardware directly
+(this is shared with the HAL) and they are a part of the kernel (same privilege but no abstraction).
 \hfill
+
 \begin{tcolorbox}[enhanced,adjusted title=Hardware,drop fuzzy shadow]
-%    \renewcommand{\arraystretch}{2}
-%    \begin{tabular}{| c | c || l |}
-%    \hline
-%    1 & Kernel & Layer composed by the kernel and the drivers \\ \hline
-%    2 & Libraries & Layer composed by libraries \\ \hline
-%    3 & Application & Layer composed by user space code \\
-%    \hline
-%    \end{tabular}
-    \begin{tcbraster}[
-        raster columns=2,
-        raster column skip=3mm,
-        colframe=blue!70!black, % Stile comune per la cornice dei sotto-box
-        colback=blue!5,        % Stile comune per lo sfondo dei sotto-box
-	raster equal height,
-        halign=center          % Allinea il testo al centro nei sotto-box
-        ]
+    \begin{tcbitemize}[
+        raster columns=3,
+	raster rows=4,
+        raster column skip=5mm,
+        raster row skip=5mm,
+	raster equal height=rows,
+        halign=center]
         
-        \begin{tcolorbox}[colframe=red,enhanced,adjusted title=HAL]
-            Layer composed by the kernel and the drivers
-        \end{tcolorbox}
-        \begin{tcolorbox}[colframe=purple,enhanced,adjusted title=Drivers]
-            Layer composed by the kernel and the drivers
-        \end{tcolorbox}
-        \begin{tcolorbox}[raster multicolumn=2,colframe=blue,enhanced,adjusted title=Kernel,drop fuzzy shadow]
-            Layer composed by the kernel and the drivers
-        \end{tcolorbox}
-        \begin{tcolorbox}[raster multicolumn=2,colframe=yellow,enhanced,adjusted title=Libraries]
-            Layer composed by the libraries
-        \end{tcolorbox}
-        \begin{tcolorbox}[raster multicolumn=2,colframe=green,enhanced,adjusted title=Application]
-            Layer composed by user space code
-        \end{tcolorbox}
-    \end{tcbraster}
+        \tcbitem[
+		raster multicolumn=3,
+		colback=lightgray!90!green,
+		colframe=green!50!black,
+		enhanced,
+		adjusted title=Layer 3,
+		halign title=center,
+		drop fuzzy shadow]
+            Applications
+        \tcbitem[
+		raster multicolumn=3,
+		colback=lightgray!90!yellow,
+		colframe=yellow!80!darkgray,
+		enhanced,
+		adjusted title=Layer 2,
+		halign title=center,
+		drop fuzzy shadow]
+            Libraries
+	\tcbitem[raster multirow=2,raster multicolumn=2,blankest]
+		\begin{tcbitemize}[raster columns=2,raster rows=2]
+	        \tcbitem[
+			raster multicolumn=2,
+			colback=lightgray!90!cyan,
+			colframe=cyan!40!darkgray,
+			enhanced,
+			adjusted title=Layer 1,
+			halign title=center,
+			drop fuzzy shadow]
+	            Kernel
+		 \tcbitem[
+			raster multicolumn=2,
+			colback=lightgray!90!red,
+			colframe=red!60!gray,
+			enhanced,
+			adjusted title=HAL,
+			halign title=center,
+			drop fuzzy shadow]
+	            Hardware Abstraction Layer
+		\end{tcbitemize}
+
+        	\tcbitem[
+			colback=lightgray!90!violet,
+			colframe=violet!50!black,
+			enhanced,
+			adjusted title=Layer 1a,
+			halign title=center,
+			drop fuzzy shadow]
+	            Drivers
+   \end{tcbitemize}
 \end{tcolorbox}
 \hfill
 
-\begin{tcolorbox}[enhanced,adjusted title=Beta]
-\begin{tcbraster}[
-        raster columns=3,      % Definisce le 3 colonne orizzontali
-        raster column skip=3mm, % Spazio orizzontale tra i box
-        colframe=blue!70!black, % Stile comune per la cornice dei sotto-box
-        colback=blue!5,        % Stile comune per lo sfondo dei sotto-box
-	raster equal height,
-        halign=center          % Allinea il testo al centro nei sotto-box
-    ]
-        
-        \begin{tcolorbox}[title=Box 1]
-        \end{tcolorbox}
-        \begin{tcolorbox}[title=Box 2]
-        \end{tcolorbox}
-        \begin{tcolorbox}[title=Box 3]
-        \end{tcolorbox}
-        
-    \end{tcbraster}
-\end{tcolorbox}
+At the foundations of {\myOS} there is the \textbf{HAL} which is a virtualization of
+\marginline{\footnotesize{the system foundations}}
+common functions or operations to be performed by hardware or by platform-specific instructions.
+This part of the software is responsible for the correct execution of a context switch,
+access to memory-mapped registers, access to the Memory Management Unit or the Memory Protection Unit,
+BIOS management and parameters access, possibly BIOS routines execution
+\footnote{This specific capability may or may not be available, it depends on the processor and
+its execution mode when entering BIOS code.},
+handling of boot parameters, and a lot more.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\columnwidth]{diegos_layers}
-    \caption{The DiegOS layers structure}
-\end{figure}
+Side-by-side with the HAL there are \textbf{Drivers} with a well-defined interface used to access hardware
+devices. Drivers are sensitive and prone to fatal errors and need to mess with
+interrupts. They are logically side-by-side with the kernel as highest privileges are required to
+handle hardware resources and no other part of the system is allowed to run drivers --- only the kernel
+can create an instance of a driver and start it.
 
-the \textbf{kernel} is composed of several items like a mutex manager to coordinate
+The starting layer is the \textbf{kernel},
+\marginline{\footnotesize{1\textsuperscript{st} layer: the Kernel}}
+composed of several items like a mutex manager to coordinate
 concurrency between threads, an alarm manager to implement timers, an event manager
 to exchange messages between threads, barriers, spin locks, \textbf{I/O} support for drivers.
 The inner part of the core is all about thread management and is not directly exposed
 to other modules, a specific kernel API can be used to access those components
 from applications.
 
-Along with the \textbf{kernel} come the \textbf{drivers} which --- as the name
-implies --- are modules with a well-defined interface used to drive hardware
-devices. They are sensitive and prone to fatal errors and need to mess with
-interrupts. They are logically next to the kernel as they both belong to the
-first abstraction stage, from hardware to software.
-
 The middle layer is occupied by \textbf{libraries}, any kind of API or utility
+\marginline{\footnotesize{2\textsuperscript{nd} layer: the Libraries}}
 which can be used by both the kernel and the applications.
 They are logically above the first layer as they implement an abstraction for algorithms
  and data structures to use raw memory, files or network connections.
@@ -305,23 +324,104 @@ place, which is, to share code --- and not data --- between kernel and
 applications.
 
 The top layer is occupied by \textbf{applications} which are the actual
+\marginline{\footnotesize{3\textsuperscript{rd} layer: the Applications}}
 portion of the code written by developers to do something useful. Although
 \textbf{applications} recalls user space processes there is no concept of user and 
 kernel space in {\myOS}, applications are just code linked to the OS but using the 
 APIs offered by the kernel and the libraries.
 Threads, processes and applications are equivalent in {\myOS}.
-
 Still, applications are not allowed to call the kernel's internals directly.
 The kernel is an indipendent item and need to be isolated as much as possible.
 
 The following sections provide further details for each layer.
 
+\subsection{The Hardware Abstraction Layer}
+\label{subsec:hal}
+Software need hardware to run; a lot of software components need to interact 
+with some piece of hardware which is able to offer features not achievable in
+other ways.
+For instance, a software alarm need a timer to measure time and understand when
+the alarm is expired; a timer need to count seconds with the best resolution possible,
+and the reference source of this "ticking" is usually a crystal oscillator.
+Measuring the crystal signal is performed in hardware as it is an analog signal which
+is sampled, quantized, and accumulated in a counting register.
+The output of hardware is a measure of time, and the software will
+use it to track time passing by; but from a logical point of view the
+function of time accounting \textbf{does not} depend on hardware as it is purely abstract,
+seconds and days are the same quantities indipendently from the hardware they are computed on.
+.\footnote{Hardware timers may have different resolutions and different
+clock sources, nevertheless they perform the same task with the same logic.}
+Software need to be informed when a peripheral (hardware) changes state, or
+fails, or has data ready to be handled.
+This notification is achieved by interrupting the processor --- so interrupting software
+--- and putting both hardware and software in the condition of handling the
+event.
+In order to understand which is the source of the interruption the hardware provides
+an \textit{interrupt} system,
+offering informations on the origin of the interruption, the type of
+interruption and its actual priority.
+Hardware implementation and its interface toward software can vary on different platforms,
+but from a logical point of
+view the operation to be performed is the same: software need to know which
+device asked for attention.
+
+The \textbf{HAL} layer can be used to have a common interface between
+\textit{software} and \textit{hardware functionality}; the abstraction created
+by this layer has to be generic enough to cover most hardware features, while
+the same should be invisible to the caller.
+In few words, the software invoking the Hardware Abstraction Layer expects an
+output from the API which is consistent and identical on different platforms;
+the same software calling the same \textbf{HAL} interface callback will output the same
+results independently from the underlying hardware.
+
+A good example of what an \textbf{HAL} layer is capable of is interrupt handling;
+interrupts generated by external devices can be processed by
+dedicated peripherals\footnote{Devices managing multiple interrupt sources
+are devised as PIC Programmable Interrupt Controllers.} and sorted in priority
+before being forwarded to the processor. Many processors embed a dedicated device --- known
+as \textit{PIC} --- so that they do not need additional devices and can offer a wider set of features
+as the interrupt controller is actually on-board and can interact with other
+parts of the processor.
+
+From the \textbf{HAL} point of view there is no difference in having an
+embedded PIC or an external PIC: the software interface will accept the
+correct amount of interrupts, the correct amount of priorities, and will let
+the software map the hardware interrupt lines to their logical counterpart in
+software. When an interrupt is triggered, the \textbf{HAL} layer will call a
+specific routine in charge of servicing the interrupt.
+The operating system or any driver will then just need to map interrupts,
+register callbacks, and run.
+There is a clear tradeoff between performance and abstraction when making use
+of a \textbf{HAL} layer: abstraction needs software, software needs execution time,
+and execution time raises delay.
+In reverse the ability to use multiple hardware with the same interfaces increase
+the test surface of the software which increase stability in the long period.
+
+\subsection{Layer 1a: The drivers}
+\textbf{Drivers} are a very important part of the kernel, they are allowed to access
+internals of the kernel \textbf{not} exposed to applications, and usually
+implement \textit{interrupt routines} which requires access to sensitive
+resources offered by the processor or the platform or the kernel itself.
+It is not possible to implement a single common interface for all \textbf{drivers}
+because the hardware they are supposed to use show different behaviors and require
+different logics when operated; likewise the same hardware might be driven by
+different drivers with different behaviors.\\
+As an example a driver implementing a \texttt{TTY} might use a graphic card to print
+text in lines on video; a driver implementing graphics might use the same graphic card to plot
+lines and circles.\\
+{\myOS} interfaces have been conceived to share ("inherit") a common
+set of properties, adding specializations when needed.\footnote{Just like objects inheritance
+it is possible to extend a function calls structure with another function calls structure.}
+
 \subsection{Layer 1: The kernel}
-Going a bit deeper into details, the \textbf{kernel} is composed by 4 specific
+Going a bit deeper into details, the \textbf{kernel} is composed of 4 specific
 items: the \textbf{scheduler}, the \textbf{system clock manager}, the
 \textbf{threads synchronization APIs} and the \textbf{kernel interface}.
 
-The \textbf{scheduler} is in charge of selecting a thread among all
+%\subsubsection{Scheduler}
+The \textbf{scheduler}
+\marginline{\footnotesize{scheduling operations}}
+is in charge of selecting a thread among all
 available threads in the system to run it; the algorithm implemented to make the selection
 is a linear search in a priority list without pre-emption or substitution.
 Only the running thread can perform a context switch because pre-emption is not allowed, this means
@@ -333,7 +433,9 @@ Context switching \textbf{must not} happen in interrupt context, and no interrup
 routine is allowed to call any scheduler function; doing so will surely result in
 a memory corruption.
 
-As no other task than the running thread is able to stop or suspend itself there need to be at least one running thread
+As no other task 
+\marginline{\footnotesize{the idle thread}}
+than the running thread is able to stop or suspend itself there need to be at least one running thread
 in the system at any time to allow new threads to be created and then put in operation.
 This thread is usually known as the \tcboxverb[colframe=white]{idle thread} because it runs when the system is idle and the system is not busy with users' tasks.
 
@@ -341,7 +443,9 @@ The \tcboxverb[colframe=white]{idle thread} is fundamental for the Operating Sys
 when the system goes idle there are no pending tasks to be executed, this is the perfect time to lower power consumption cutting off
 the processor frequency, putting peripherals in power-save mode, or putting the processor in power-save mode.
 
-The running thread is the highest priority thread in ready state, not blocked nor waiting for an I/O operation to complete.
+The running thread 
+\marginline{\footnotesize{thread execution}}
+is the highest priority thread in ready state, not blocked nor waiting for an I/O operation to complete.
 The \textbf{scheduler} algorithm follows a cooperative model: the running thread will not be substituted until the code in execution
 \textbf{voluntary} suspends the thread, or put it in a wait state for I/O or waiting for a mutex, a
 semaphore, a barrier or an event; once the running thread has changed state, the
@@ -385,7 +489,9 @@ and to be implemented for each processor; power saving is one of the most
 important functionality of the kernel, as the processor will spare power, save
 batteries, and require less cooling.
 
+%\subsubsection{Clock management}
 The \textbf{system clock manager} is a sensitive piece of code dealing with
+\marginline{\footnotesize{clock management}}
 the system clock and the system timings in general.
 Its responsibility is to track time --- wall clock --- and allow threads to wait for a specific amount
 of time.\\
@@ -401,7 +507,9 @@ Once the \textit{period} is expired and the counter reaches its terminal value a
 and then the counter may restart counting or may wait to be restarted;
 the two different approaches are usually referred as \textit{periodic} and \textit{single-shot}.
 
-The counter may or may not raise and interrupt, in the latter case we have a free-running counter which can
+The counter may or may not raise and interrupt,
+\marginline{\footnotesize{system ticks}}
+in the latter case we have a free-running counter which can
 be polled to feed a variable in memory accumulating the time passing by.
 {\myOS} compute \textit{system ticks} by accumulating \textit{periods} as configured into the clock device;
 the resolution of the system clock is dependent on the resolution of the hardware.
@@ -445,7 +553,10 @@ depends on the workload of the system; if the only running thread is the \texttt
 the period will grow constantly until it hits a configured ceiling.
 {\myOS} is a \textbf{tickless} kernel.
 
-The \textbf{thread synchronization APIs} is a collection of system utilities abstracting
+%\subsubsection{Threads synchronization}
+The \textbf{threads synchronization APIs}
+\marginline{\footnotesize{synchronizing threads}}
+is a collection of system utilities abstracting
 internal kernel structures used to let application alternate each other while accessing
 shared resources;
 since the \textbf{scheduler} and the threads management are hidden layers, the applications 
@@ -470,7 +581,10 @@ in an inconsistent state, or even corrupting a thread's stack.
 This sets an important paradigm in the design of {\myOS}: context switch is a \textbf{voluntary}
 action taken inside a running thread and executed calling the \texttt{kernel API}.
 
-The \textbf{kernel interface} is the public interface used by application code
+%\subsubsection{Calling the kernel}
+The \textbf{kernel interface}
+\marginline{\footnotesize{calling the kernel functions}}
+is the public interface used by application code
 to interact with the management of threads, with the system startup and
 shutdown, and with system devices.
 This interface allow applications to create and destroy a thread, suspend it
@@ -484,19 +598,6 @@ accessible  only through the \textbf{kernel interface}.
 Also hardware and drivers are hidden by this layer, they are accessible by
 using the \textit{devices} interface which is an abstraction of the drivers
 interface.
-
-\subsection{Layer 1a: The drivers}
-\textbf{Drivers} are a very important part of the kernel, they are allowed to access
-internals of the kernel \textbf{not} exposed to applications, and usually
-implement \textit{interrupt routines} which requires access to sensitive
-resources offered by the processor or the platform or the kernel itself.
-It is not possible to implement a single common interface for all \textbf{drivers}
-because the hardware they are supposed to use show different behaviors and require
-different logics when operated; at the same time, a lot of code and algorithms
-can be shared amongst \textbf{drivers}.
-{\myOS} interfaces have been conceived to share ("inherit") a common
-set of properties, adding specializations when needed.\footnote{Just like objects inheritance
-it is possible to extend a function calls structure with another function calls structure.}
 
 \subsection{Layer 2: The libraries}
 \textbf{Libraries} are the core of any software infrastructure.
@@ -592,71 +693,6 @@ new devices making use of its driver infrastructure and the minimal
 \textit{HAL} required to support a board.\\
 The \textit{HAL} layer is described in subsection~\ref{subsec:hal} at
 page~\pageref{subsec:hal}.
-
-\subsection{The Hardware Abstraction Layer (HAL)}
-\label{subsec:hal}
-Software need hardware to run; a lot of software components need to interact 
-with some piece of hardware which is able to offer features not achievable in
-other ways.
-For instance, a software alarm need a timer to measure time and understand when
-the alarm is expired; a timer need to count seconds, or better milli- micro-
-or nanoseconds, and the reference source of this "ticking" is usually a
-crystal oscillator.
-Measuring the crystal signal can be performed only in hardware for obvious
-reasons.
-Still, the output of the hardware is a measure of time, and the software will
-use it to track time passing by: from a logical point of view, the
-functionality of time accounting \textbf{does not} depend on hardware, while
-the source of the information used to account time \textbf{is} hardware
-dependent.\footnote{Hardware timers may have different resolutions and different
-clock sources, nevertheless they perform the same task with the same logic and
-the same unit of time.}\\
-Software need to be informed when a peripheral (hardware) change state, or
-fails, or has data to be handled.
-This is achieved by interrupting the processor --- hence interrupting software
---- and putting both hardware and software in the condition of handling the
-incoming data or the error if any.
-
-In order to understand which is the source of the interruption the hardware provides
-an \textit{interrupt} system,
-offering informations on the origin of the interruption, the type of
-interruption and its actual priority.
-Even for interrupts the hardware implementation and the interface toward
-software can be different on different platforms, but from a logical point of
-view the operation to be performed is the same: software need to know which
-device asked for attention.
-
-The \textbf{HAL} layer can be used to have a common interface between
-\textit{software} and \textit{hardware functionality}; the abstraction created
-by this layer has to be generic enough to cover most hardware features, while
-the same should be invisible to the caller.
-In few words, the software invoking the Hardware Abstraction Layer expects an
-output from the API which is consistent and identical on different platforms;
-the same software calling the same \textbf{HAL} interface callback will output the same
-results independently from the underlying hardware.
-
-A good example of what an \textbf{HAL} layer is capable of is interrupt handling;
-interrupts generated by external devices can be processed by
-dedicated peripherals\\footnote{Devices managing multiple interrupt sources
-are devised as PIC Programmable Interrupt Controllers.} and sorted in priority
-before being forwarded to the processor. Many processors embed a dedicated device --- known
-as \textit{PIC} --- so that they do not need additional devices and can offer a wider set of features
-as the interrupt controller is actually on-board and can interact with other
-parts of the processor.
-
-From the \textbf{HAL} point of view there is no difference in having an
-embedded PIC or an external PIC: the software interface will accept the
-correct amount of interrupts, the correct amount of priorities, and will let
-the software map the hardware interrupt lines to their logical counterpart in
-software. When an interrupt is triggered, the \textbf{HAL} layer will call a
-specific routine in charge of servicing the interrupt.
-The operating system or any driver will then just need to map interrupts,
-register callbacks, and run.
-There is a clear tradeoff between performance and abstraction when making use
-of a \textbf{HAL} layer: abstraction needs software, software needs execution time,
-and execution time raises delay.
-In reverse the ability to use multiple hardware with the same interfaces increase
-the test surface of the software which increase stability in the long period.
 
 \section{The Build System}
 The code base of {\myOS} builds using makefiles and the make tool, no ancillary
@@ -1018,9 +1054,7 @@ to reset the device to defaults and reconfigure it.
 Function \texttt{status} can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization
 \footnote{Drivers have different extensions for different kind of hardware devices: block devices, character devices, graphics, networking}.
 
-\begin{lstlisting}[language=C,basicstyle=\small\ttfamily,backgroundcolor=\color{gray!10!white},keywordstyle=\bfseries\color{green!40!black},
-commentstyle=\color{orange!60!black},identifierstyle=\itshape\color{cyan!60!black}, stringstyle=\color{red!60!black}]
-
+\begin{minted}{C}
 typedef struct driver_header {
     /*
      * Name of the driver, to be filled at compile time.
@@ -1081,8 +1115,7 @@ typedef struct driver_header {
      */
     short (*poll_fn)(poll_table_t *table);
 } driver_header_t;
-
-\end{lstlisting}
+\end{minted}
 
 \section{The File System}
 

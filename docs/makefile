@@ -1,8 +1,7 @@
 .PHONY: all clean
 
 all:
-	pdflatex diegos.txt
-	pslatex diegos.txt
+	pdflatex -shell-escape diegos.tex
 
 clean:
 	rm -f *.pdf diegos.toc *.log diegos.aux
