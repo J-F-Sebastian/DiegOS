@@ -17,16 +17,22 @@
 \onehalfspacing
 \usepackage{tikz}
 \usepackage{graphicx}
-\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{graphs, positioning, calc, fit, arrows.meta}
 \usepackage{tocbasic}
 \usepackage[avantgarde]{quotchap}
 \usepackage{lipsum}
 \usepackage{geometry}
 \usepackage[most]{tcolorbox}
 \usepackage{minted}
-\usemintedstyle{borland}
+%\usemintedstyle{borland}
 
+% colored DiegOS logo
 \newcommand{\myOS}{{\color{Cerulean}\textbf{DiegOS}}}
+
+%use numbers for nested enums
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
+\renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
 
 %\lofoot{DiegOS Operating System}
 %\refoot{DiegOS Operating System}
@@ -281,7 +287,7 @@ Drivers are logically next to the kernel and the HAL because they access hardwar
 \end{tcolorbox}
 \hfill
 
-At the foundations of {\myOS} there is the \textbf{HAL} which is a virtualization of
+At the foundations of {\myOS} there is the {\color{Red}\textbf{HAL}} which is a virtualization of
 \marginline{\footnotesize{the system foundations}}
 common functions or operations to be performed by hardware or by platform-specific instructions.
 This part of the software is responsible for the correct execution of a context switch,
@@ -291,13 +297,13 @@ BIOS management and parameters access, possibly BIOS routines execution
 its execution mode when entering BIOS code.},
 handling of boot parameters, and a lot more.
 
-Side-by-side with the HAL there are \textbf{Drivers} with a well-defined interface used to access hardware
+Side-by-side with the HAL there are {\color{Violet}\textbf{Drivers}} with a well-defined interface used to access hardware
 devices. Drivers are sensitive and prone to fatal errors and need to mess with
 interrupts. They are logically side-by-side with the kernel as highest privileges are required to
 handle hardware resources and no other part of the system is allowed to run drivers --- only the kernel
 can create an instance of a driver and start it.
 
-The starting layer is the \textbf{kernel},
+The starting layer is the {\color{Cyan}\textbf{Kernel}},
 \marginline{\footnotesize{1\textsuperscript{st} layer: the Kernel}}
 composed of several items like a mutex manager to coordinate
 concurrency between threads, an alarm manager to implement timers, an event manager
@@ -306,7 +312,7 @@ The inner part of the core is all about thread management and is not directly ex
 to other modules, a specific kernel API can be used to access those components
 from applications.
 
-The middle layer is occupied by \textbf{libraries}, any kind of API or utility
+The middle layer is occupied by {\color{Yellow}\textbf{Libraries}}, any kind of API or utility
 \marginline{\footnotesize{2\textsuperscript{nd} layer: the Libraries}}
 which can be used by both the kernel and the applications.
 They are logically above the first layer as they implement an abstraction for algorithms
@@ -323,7 +329,7 @@ In order to keep the binary size as small as possible a compromise is put in
 place, which is, to share code --- and not data --- between kernel and
 applications.
 
-The top layer is occupied by \textbf{applications} which are the actual
+The top layer is occupied by {\color{Green}\textbf{Applications}} which are the actual
 \marginline{\footnotesize{3\textsuperscript{rd} layer: the Applications}}
 portion of the code written by developers to do something useful. Although
 \textbf{applications} recalls user space processes there is no concept of user and 
@@ -418,7 +424,6 @@ Going a bit deeper into details, the \textbf{kernel} is composed of 4 specific
 items: the \textbf{scheduler}, the \textbf{system clock manager}, the
 \textbf{threads synchronization APIs} and the \textbf{kernel interface}.
 
-%\subsubsection{Scheduler}
 The \textbf{scheduler}
 \marginline{\footnotesize{scheduling operations}}
 is in charge of selecting a thread among all
@@ -489,7 +494,6 @@ and to be implemented for each processor; power saving is one of the most
 important functionality of the kernel, as the processor will spare power, save
 batteries, and require less cooling.
 
-%\subsubsection{Clock management}
 The \textbf{system clock manager} is a sensitive piece of code dealing with
 \marginline{\footnotesize{clock management}}
 the system clock and the system timings in general.
@@ -553,7 +557,6 @@ depends on the workload of the system; if the only running thread is the \texttt
 the period will grow constantly until it hits a configured ceiling.
 {\myOS} is a \textbf{tickless} kernel.
 
-%\subsubsection{Threads synchronization}
 The \textbf{threads synchronization APIs}
 \marginline{\footnotesize{synchronizing threads}}
 is a collection of system utilities abstracting
@@ -581,7 +584,6 @@ in an inconsistent state, or even corrupting a thread's stack.
 This sets an important paradigm in the design of {\myOS}: context switch is a \textbf{voluntary}
 action taken inside a running thread and executed calling the \texttt{kernel API}.
 
-%\subsubsection{Calling the kernel}
 The \textbf{kernel interface}
 \marginline{\footnotesize{calling the kernel functions}}
 is the public interface used by application code
@@ -607,8 +609,8 @@ the drivers.
 Back in 1976 Niklaus Wirth published a book titled \emph{"Algorithms + Data
 Structures = Programs"} creating a milestone for software engineering: data
 structures and algorithms are indipendent yet interlocked, as data structures
-are owned by the running application, but the strategy to use them at best
-is common.
+are owned by the running application, the algorithms are implemented in code;
+it is not enough to thoroughly design only one of them.
 
 There are two places for \textbf{libraries} in {\myOS}, the user
 applications libraries and the kernel libraries. The difference between the
@@ -624,7 +626,7 @@ One noticeable detail in {\myOS} is the presence of a native \texttt{libc}
 library available as original source code in place of one of the several
 well-known implementations available in the world.\footnote{At the time of this writing well-known \texttt{libc}
 implementations are \texttt{glibc}, \texttt{uClibc}, \texttt{musl} and the
-\texttt{C runtime Library (CRT)}.} This singularity needs some explanation.
+\texttt{C runtime Library (CRT)}} This singularity needs some explanation.
 This Operating System is a recreational toy not for production;
 porting a library to a new Operating System is a big effort,
 expecially considering the \texttt{libc} contents and its portability requirements.
@@ -681,7 +683,12 @@ code requires a considerable amount of time expecially if we are considering an
 Operating System; software cannot accomodate every difference with a common implementation
 when it comes to hardware handling or system management.\footnote{
 Writing code able to compile and run on both 32- and 64-bit processors would break
-the rule of simplicity; still, you will find 64-bit data structures in the code.}
+the rule of simplicity; still, you will find 64-bit data structures in the code}
+
+Inlines are extensively adopted in place of macros to gain type checks and 
+to prevent funny warnings generated by macro expansion --- it is very easy to loose control
+over macros as they are expanded by the preprocessor and then compiled, letting variables
+to be declared and added, possibly duplicated, creating redundancies.
 
 The system supports compiling and linking source files written in C++ using
 classes and objects, this makes it possibile to write applications with
@@ -696,7 +703,7 @@ page~\pageref{subsec:hal}.
 
 \section{The Build System}
 The code base of {\myOS} builds using makefiles and the make tool, no ancillary
-tool is required apart for a C-language toolchain.\\
+tool is required apart for a C-language toolchain.
 Any toolchain can be deployed and used to compile and build {\myOS},
 at the time of this writing only GCC has been tested.
 
@@ -710,14 +717,15 @@ The makefiles \textit{will not} automatically perform a selection of source
 code using platform and CPU as a key, this excercise is left to the
 developers.
 
-Configuration of the build system is implemented with makefiles again, so
-there is no need to use other tools rather than \textit{make}.
-This choice implies passing the configuration to the compiling toolchain as
-command line strings, and this poses a limit to the size of the configuration as
-the length of the command line is also the length of all declarations and
-strings passed to the compiler.
+Configuration of the build system is implemented with makefiles, so
+there is no need to use other tools rather than \textit{make}
+to configure, compile and build {\myOS}.
+This choice implies passing the configuration to the toolchain programs as
+command line strings, the size of the configuration is then limited by
+the length of the command line.
 Again, while there are smarter solutions, this is a simple one and will not let the
-system become too complex.
+system become too complex\footnote{A very good alternative to standard Unix makefiles
+is the CMake build system, it might be the next build system for {\myOS}}.
 
 \chapter{The System}
 \dictum[Dave Cutler]{
@@ -734,62 +742,76 @@ the file system to store and retrieve data, the networking subsystem to
 connect to the outer world.
 
 \section{The system loader}
-All operating systems need to perform a common, early stage operation: load a binary --- the operating system ! --- from storage
+All operating systems need to perform a common, early stage operation: load a binary from storage
 into memory and then execute it.
 
 This early stage application is commonly known as \textit{loader} or \textit{boot loader}.
 
 A \textit{boot loader} is a very minimal application with limited access to hardware and limited performances,
-but its solely purpose is to let the hardware run the operating system, which is in charge of perform a full initialization
+its solely purpose is to let the hardware run the operating system, which is in charge of performing a full initialization
 of the hardware.
 
 Seldom the \textit{boot loader} will not load the operating system, but rather a \textit{second-stage loader} which will load
 and execute the operating system; this latter kind of executable is also known as \textit{monitor} and is capable
-of breaking and resuming the boot process, perform diagnostics, support early stage debugging.
+of breaking and resuming the boot process, perform diagnostics and support early stage debugging.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\columnwidth]{boot_loader}
-    \caption{The booting process}
-\end{figure}
+\medskip
+\begin{tikzpicture}[scale=1.25,transform shape,font=\fontsize{9.6pt}{11.52pt}\selectfont]
+	\draw[gray,dotted,line width=1.2pt] (4.55,-0.95) rectangle (9.35,0.95);
+	\node[circle,draw=Gray,fill=Gray!30!White,text=Black,line width=1.2pt,
+		minimum size=2.2cm,align=center] (POWERON) at (0,0) {POWER ON};
+	\node[rectangle,draw=NavyBlue,fill=NavyBlue,text=white,line width=1.2pt,
+		text width=1.6cm,minimum width=1.6cm,minimum height=1cm,
+		inner sep=2pt,align=center] (FBL) at (2.8,0) {First Boot Loader};
+	\node[rectangle,draw=TealBlue,fill=TealBlue,text=white,line width=1.2pt,
+		text width=1.6cm,minimum width=1.6cm,minimum height=1cm,
+		inner sep=2pt,align=center] (SBL) at (5.8,0) {Second Boot Loader};
+	\node[rectangle,draw=Orange,fill=Bittersweet,text=white,line width=1.2pt,
+		text width=1.6cm,minimum width=1.6cm,minimum height=1cm,
+		inner sep=2pt,align=center] (RUN) at (8.1,0) {Start Operating System};
+	\draw[->,thick, dotted] (POWERON.east) -- (FBL.west);
+	\draw[->,thick] (FBL.east) -- (SBL.west);
+	\draw[->,thick] (SBL.east) -- (RUN.west);
+\end{tikzpicture}
+\medskip
 
-In {\myOS} the system loader is usually integrated into the OS binary header, so that the \texttt{SoC}
-will execute the binary --- either from memory or from ROM --- and the first instructions executed will be the loader, which will init
-the bare minimum hardware, read the content of the remaining binary into memory, and then continue with the execution of the kernel.
+In {\myOS} the system loader is usually merged on top of the OS header in order to compose
+a single binary file, so that the \texttt{SoC} will execute the binary --- either from memory or from ROM --- 
+and the execution will start the loader, which will init
+the bare minimum hardware, read the content of the remaining binary into memory if the loader did not
+provide to do so, and then jump to the entry point of the kernel.
 This implies that the hardware platform should be able to execute from a storage device\footnote{An internal or external ROM,
-a flash memory device, a hard disk.} and then jump to RAM.
+a flash memory device, a hard disk} and then jump to RAM.
 This also implies that the processor should be able to bootstrap from storage, or in other words, it should be able to access
 storage in hardware with no software intervention.
-
 Some platforms follow a more structured approach where the \textit{boot loader} is an indipendent executable running alone as
 a bare metal application.
 
 \section{The boot code}
 
-The boot code belongs to the booting stage and it's ultimate goal is to
+The boot code belongs to the booting stage and its ultimate goal is to
 implement the most straighforward solution to setup the processor, the CPU
 peripherals, then load and run the {\myOS} binary.
-Boot code should be adaptable to any platform and any medium,
+Boot code should be adaptable\footnote{Adaptable does not imply portable} to any platform and any medium,
 and it should perform using the least amount of interactions with the hardware.
 It is understood that boot code is essentially processor and platform dependent,
 even reducing the assembler parts to the bare minimum there would be a huge
 portion of operations which vary with the machine.
 
 There is an elegant and effective solution to the problem of mixing
-dependencies with abstract algorithms, that is the \textit{Hardware
+dependencies with abstract algorithms, the \textbf{Hardware
 Abstraction Layer}; in {\myOS} most of the booting process is
-implemented into \textit{HAL} functions, so that a very thin layer of
+implemented into \textbf{HAL} functions, so that a very thin layer of
 high-level functions can perform common steps indipendently from the
 underlying hardware.
 
 To satisfy these requirements {\myOS} is built as a raw binary, relocated
 to start at a specific memory address --- the same that will be used to 
-load it and then run it.\footnote{At the time of this writing there is no support
-for COFF, ELF or PE formats.}
-
-It is suggested to always build an ELF file along with the raw binary, 
-to satisfy the needs of having a symbol reference for debugging, along with
-all binutils capabilities.
+load it and run it\footnote{At the time of this writing there is no support
+for COFF, ELF or PE formats}.
+An ELF file is built along with the raw binary to satisfy the needs of having
+a symbol reference for debugging with \textit{GDB} and to be able to use
+all \textit{binutils} tools.
 In case the target EABI does not support the ELF format, any other object file
 format can be used; just be aware you always need to emit a raw binary file to
 load and execute {\myOS}.
@@ -802,11 +824,11 @@ Please note the recommendations on how to write and document the code: any detai
 \begin{enumerate}
 \item Setup the host processor in order to be able to execute the boot code.
 Reserve a register or a memory location to store debugging data like return 
-values or failures, it can be very handy even if a debugger is available as
-this stage comes so early in the booting process that understanding the
+values or failures, it can be very handy even if a debugger is available.
+This stage comes so early in the booting process that understanding the
 easiest issue might be really hard.
-Add comments to explain how this data can be used. Do not add debugging
-infrastructures, traces, endless strings for printouts.
+Add comments to explain how this data can be used.
+Do not add debugging infrastructures, traces, endless strings for printouts.
 \item Access the medium where you stored the {\myOS} binary, and read it into
 memory. Document where the binary is put in memory, why it is put there, and
 the memory layout during boot. The medium and the code required to
@@ -816,7 +838,7 @@ logic; chain booting is not an option in this case.
 
     \begin{enumerate}
     \item All registers must be setup to start {\myOS}: scratch registers should be
-    set to null, memory registers should be set to access the whole addressing
+    set to zero, memory registers should be set to access the whole addressing
     space; you could also restrict the range of available addresses, but you 
     must ensure the OS is still able to access all the memory and all the hardware.
     \item A small stack will be used by the system init stage, be sure to set
@@ -828,24 +850,27 @@ logic; chain booting is not an option in this case.
 \item Jump to the system entry point, which is labelled as \texttt{DiegOS}.
 Be careful not to perform a function call, but simply jump to the label;
 calling implies using the stack, and setting a return address somewhere, which
-is not expected to happen.\footnote{No Operating System returns to the boot
-code after shutting down.}
+is not expected to happen\footnote{No Operating System jumps to the boot
+code after shutting down or after a reset}.
 \end{enumerate}
 
 \section{System Initialization}
 Initialization is split into a set of function calls, acting on both hardware and
-software. 
+software.
+
+\hfill
+\begin{tcolorbox}[enhanced, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
 \begin{itemize}
 \item Initialize the uninitialized data memory space, the .BSS section in
 ELF format terminology.
 \item Initialize the processor, including power save features, interrupts,
 cache memory.
 \item Initialize the platform hardware and software; usually you would init
-heap and SoC devices here, as well as platform-dependent libraries (i.e.
-malloc).
-\textbf{Do not initialize} any kind of driver at this stage.
-\item Initialize the TTY; depending on your platform, this can be a frame buffer,
-a video card, a serial line; keep in mind that this is the system's TTY, and will be used
+heap and \texttt{SoC} devices here, as well as platform dependent parts 
+ like malloc or I/O memory maps.
+\textbf{Do not initialize} any driver at this stage.
+\item Initialize the debug \texttt{TTY}; depending on your platform, this can be a frame buffer,
+a video card, a serial line; keep in mind that this is the system's \texttt{TTY}, and will be used
 for debugging purposes only.
 \item Initialize the drivers; details about the drivers infrastructure are
 explained in section \ref{sub:drivers} at page \pageref{sub:drivers}
@@ -855,28 +880,85 @@ explained in section \ref{sub:drivers} at page \pageref{sub:drivers}
 at user's will.
 \item Run the kernel, this actually roll the ball and kicks the scheduler.
 \end{itemize}
+\end{tcolorbox}
 
 \section{The Kernel}
-The core functionalities of {\myOS} are enclosed in this library.
+The core functionalities of {\myOS} are enclosed in this part of the software.
 The kernel is a single instance, single processor component; it does not
 support any kind of memory protection, and it is expecting to be able to access the
 whole address space with no restrictions. As mentioned before, there could be restrictions
 on the address space, but the OS must still be able to drive all the hardware and must
-be able to access all the memory.
+be able to access all the memory address space.
 The kernel does not support threads contention or access privilege, so any portion of
 the code (and consequently any thread) is able to peek or poke any memory location or 
 access any hardware device.
-This is questionable choice, although it is nothing the God of Information wouldn't let you in 
-heaven for \\footnote{you can guess where the citation comes from ...}.
-All in all, a general purpose OS would not even mention memory protection as an option; 
+This is a questionable choice, although it is \textit{"nothing the God of Information wouldn't let you in 
+heaven for"}\footnote{I let the reader guess the quote and the movie}.
+All in all, a general purpose Operating System would not even mention memory protection as an option; 
 again, if you need the real thing, go get it. A small bare-metal system would require lots
-of resources to assure a decent level of security if implementing memory protection,
+of resources to assure a decent level of security when implementing memory protection,
 and this is not a goal for {\myOS}.
 
+There are a number of services offered by the kernel to support applications with basic operations,
+in a away that it is possible to keep a separation between processes in term of resources and code.
+These services offer synchronization with time, between processes, resource contention facilities and
+input/output management.
+A schema of the structure of these services is sketched in figure \ref{fig:tikz-thekernel} at page \pageref{fig:tikz-thekernel}. 
+
 \begin{figure}
-    \centering
-    \includegraphics[width=0.8\columnwidth]{kernel_handsketched}
-    \caption{The kernel}
+	\centering
+	\begin{tikzpicture}[
+	    x=1cm,
+	    y=1cm,
+	    >=Latex,
+	    line width=0.7pt,
+	    font=\small,
+	    block/.style={draw, fill=gray!20, align=center, minimum width=2.2cm, minimum height=1.2cm},
+	    redblock/.style={draw=red!70!black, fill=red!15, align=center, minimum width=2.4cm, minimum height=1.4cm},
+	    bluecircle/.style={draw=blue!70!black, fill=blue!20, circle, minimum size=2.1cm, align=center},
+	    schedulercircle/.style={draw=orange!80!black, fill=orange!20, circle, minimum size=2.1cm, align=center},
+	    aquamarinecircle/.style={draw=Aquamarine!70!black, fill=Aquamarine!45, circle, minimum size=2.1cm, align=center},
+	    kernelcircle/.style={draw=black, fill=white, circle, minimum size=5.6cm},
+	    groupbox/.style={draw=black, fill=none, inner sep=8pt},
+	    filebox/.style={draw, dashed, minimum width=4.4cm, minimum height=3.0cm, align=center},
+	    netbox/.style={draw, minimum width=4.8cm, minimum height=3.2cm, align=center},
+	    tiny/.style={draw, fill=gray!20, minimum width=1.8cm, minimum height=1cm, align=center}
+	]
+
+	% Kernel shell
+	\node[kernelcircle] (kernel) at (0,0) {};
+	\node[bluecircle] (core) at (-0.9,-0.6) {Kernel};
+	\node[schedulercircle] (sched) at (0.9,-0.6) {Scheduler};
+	\node[aquamarinecircle] (clock) at (-0.1,0.95) {System\\Clock\\Manager};
+
+	% Top-level components connected to the kernel
+	\node[redblock] (boot) at (-4.4,4.0) {Boot\\Code};
+	\node[redblock] (pdc) at (4.2,4.0) {Hardware\\Abstraction\\Layer};
+
+	% Lower-left service blocks
+	\node[block] (alarms) at (-6.0,-4.7) {Alarms\\Manager};
+	\node[block] (events) at (-3.5,-4.7) {Events\\Manager};
+	\node[block] (io) at (-4.65,-6.2) {I/O\\Manager};
+	\node[groupbox, fit=(alarms)(events)(io)] (servicebox) {};
+	\node[below=2pt of servicebox.south] {Events};
+
+	% Right-hand concurrency blocks
+	\node[block] (mutex) at (3.65,-4.7) {Mutexes};
+	\node[block] (spin) at (3.65,-6.2) {Spin Locks};
+	\node[block] (timers) at (6.15,-4.7) {Timers};
+	\node[block] (barriers) at (6.15,-6.2) {Barriers};
+	\node[groupbox, fit=(mutex)(spin)(timers)(barriers)] (concurrencybox) {};
+	\node[below=2pt of concurrencybox.south] {Concurrency};
+
+	% Arrows from external components
+	\draw[-{Latex[length=2.5mm]}] (boot) -- (kernel);
+	\draw[-{Latex[length=2.5mm]}] (pdc) -- (kernel);
+	\draw[-{Latex[length=2.5mm]}] (servicebox) -- (kernel.south west);
+	\draw[-{Latex[length=2.5mm]}] (concurrencybox) -- (kernel.south east);
+
+	\end{tikzpicture}
+	\caption{The kernel}
+	\label{fig:tikz-thekernel}
 \end{figure}
 
 \section{Kernel Services}
@@ -894,13 +976,112 @@ Threads can be suspended, halted, delayed, and removed\footnote{Removal means th
 thread will be killed.} but at least one thread must be ready to run at any time
 \footnote{This is the Idle thread, which cannot be killed.}.
 
+\definecolor{runningpurple}{HTML}{DA77F2}
+\definecolor{runningpurpleedge}{HTML}{9C36B5}
+\definecolor{idlefill}{HTML}{B2F2BB}
+\definecolor{idleedge}{HTML}{2F9E44}
+\definecolor{normalfill}{HTML}{A5D8FF}
+\definecolor{normaledge}{HTML}{1971C2}
+\definecolor{highfill}{HTML}{FFF9DB}
+\definecolor{highedge}{HTML}{FFD700}
+\definecolor{realtimefill}{HTML}{FFC9C9}
+\definecolor{realtimeedge}{HTML}{E03131}
+\definecolor{ink}{HTML}{1E1E1E}
+
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\columnwidth]{the_scheduler}
-    \caption{The cooperative scheduler}
+%%    \includegraphics[width=0.8\columnwidth]{the_scheduler}
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    x=0.02cm,
+    y=-0.02cm,
+    line width=0.04cm,
+    font=\small,
+    >=Latex
+]
+\begin{scope}[shift={(-641,-178)}]
+\path[use as bounding box] (641,178) rectangle (1258,1122);
+
+% Running thread and its priority-state transitions
+\draw[draw=runningpurpleedge, fill=runningpurple]
+    (961,251) ellipse [x radius=1.5cm, y radius=1.46cm];
+\node[align=center, text=runningpurpleedge] at (961,251) {Running\\Thread};
+
+\draw[->, draw=ink] (711.4,376) -- (889.6,285.7);
+\draw[->, draw=ink] (873.2,377) -- (911.7,313.7);
+\draw[->, draw=ink] (1036,382) -- (999,320);
+\draw[->, draw=ink] (1198.9,379) -- (1024.3,291.9);
+
+\draw[->, draw=ink] (976,436) -- (932,436);
+\draw[->, draw=ink] (811,434) -- (768,434);
+\draw[->, draw=ink] (1140,439) -- (1096,439);
+
+\draw[draw=idleedge, fill=idlefill, rounded corners=3pt] (645,380) rectangle (763,495);
+\node[text=idleedge] at (704,437.5) {IDLE};
+\draw[draw=normaledge, fill=normalfill, rounded corners=3pt] (808.5,379.5) rectangle (925.5,494.5);
+\node[text=normaledge] at (867,437) {NORMAL};
+\draw[draw=highedge, fill=highfill, rounded corners=3pt] (975.5,382.5) rectangle (1093.5,497.5);
+\node[text=highedge] at (1034.5,440) {HIGH};
+\draw[draw=realtimeedge, fill=realtimefill, rounded corners=3pt] (1139.5,383.5) rectangle (1256.5,498.5);
+\node[text=realtimeedge] at (1198,441) {REALTIME};
+
+% Idle-priority thread queue
+\draw[->, draw=ink, line width=0.02cm] (704,498) -- (704,525);
+\draw[->, draw=ink, line width=0.02cm] (702,646) -- (702,675);
+\draw[->, draw=ink, line width=0.02cm] (702,798) -- (701,826);
+\draw[draw=idleedge, rounded corners=3pt] (643,527.5) rectangle (761,642.5);
+\node[text=idleedge] at (702,585) {Thread 1};
+\draw[draw=idleedge, rounded corners=3pt] (642,679.5) rectangle (760,794.5);
+\node[text=idleedge] at (701,737) {Thread 2};
+\draw[draw=idleedge, rounded corners=3pt] (642,829.5) rectangle (760,944.5);
+\node[text=idleedge] at (701,887) {Thread 3};
+
+% Normal-priority thread queue
+\draw[->, draw=ink, line width=0.02cm] (865,499) -- (866,525);
+\draw[->, draw=ink, line width=0.02cm] (865,645) -- (865,676);
+\draw[->, draw=ink, line width=0.02cm] (866,795) -- (865,826);
+\draw[draw=normaledge, rounded corners=3pt] (807.5,525.5) rectangle (924.5,640.5);
+\node[text=normaledge] at (866,583) {Thread 1};
+\draw[draw=normaledge, rounded corners=3pt] (805.5,678.5) rectangle (922.5,793.5);
+\node[text=normaledge] at (864,736) {Thread 2};
+\draw[draw=normaledge, rounded corners=3pt] (802.5,828.5) rectangle (919.5,943.5);
+\node[text=normaledge] at (861,886) {Thread 3};
+
+% High-priority thread queue
+\draw[->, draw=ink, line width=0.02cm] (1037,501) -- (1038,527);
+\draw[->, draw=ink, line width=0.02cm] (1040,644) -- (1040,675);
+\draw[draw=ink, line width=0.08cm] (1006.5,822.5) -- (1067.5,821.5);
+\draw[draw=highedge, rounded corners=3pt] (978,525.5) rectangle (1096,640.5);
+\node[text=highedge] at (1036.5,583) {Thread 1};
+\draw[draw=highedge, rounded corners=3pt] (977,677.5) rectangle (1095,792.5);
+\node[text=highedge] at (1036,735) {Thread 2};
+\draw[draw=highedge, rounded corners=3pt] (980,849.5) rectangle (1098,964.5);
+\node[text=highedge] at (1039,907) {Thread P};
+
+% Real-time thread queue
+\draw[->, draw=ink, line width=0.02cm] (1202,503) -- (1203,529);
+\draw[draw=ink, line width=0.08cm] (1169.5,676.5) -- (1230.5,675.5);
+\draw[draw=realtimeedge, rounded corners=3pt] (1139.5,526.5) rectangle (1256.5,641.5);
+\node[text=realtimeedge] at (1198,584) {Thread 1};
+\draw[draw=realtimeedge, rounded corners=3pt] (1141.5,707.5) rectangle (1258.5,822.5);
+\node[text=realtimeedge] at (1200,765) {Thread Q};
+
+% Additional thread slots
+\draw[draw=ink, line width=0.08cm] (670,971) -- (731,970);
+\draw[draw=ink, line width=0.08cm] (834.5,969.5) -- (895.5,968.5);
+\draw[draw=idleedge, rounded corners=3pt] (641,1004.5) rectangle (759,1119.5);
+\node[text=idleedge] at (700,1062) {Thread M};
+\draw[draw=normaledge, rounded corners=3pt] (803.5,1006.5) rectangle (920.5,1121.5);
+\node[text=normaledge] at (862,1064) {Thread N};
+\end{scope}
+\end{tikzpicture}
+}
+
+\caption{The cooperative scheduler}
+\label{fig:tikz-thescheduler}
 \end{figure}
 
-The scheduler is designed to manage the threads' finite state machine and select 
+The scheduler is designed to manage the threads' state machine and select 
 the running thread by using a priority queue schema. There are four
 priorities in {\myOS}, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
 \texttt{High Priority} and \texttt{Realtime Priority}.
@@ -915,11 +1096,11 @@ The scheduler will loop the highest priority queue with at least a ready thread 
 list is void; the list will be empty when all the threads with that priority have suspended or have
 been killed.
 This implies that all threads in a specific ready queue will run at least once before being evicted
-from the list itself.
-Lists are browsed in decreasing priority order down to \texttt{Idle priority} where at least one ever-running
-thread is expected to exists.
+from the list itself\footnote{Eviction from a ready queue is voluntary and can be performed by waiting or sleeping or dieing}.
+Lists are browsed in decreasing priority order from \texttt{Realtime Priority} to \texttt{Idle Priority} where at least one ever-running
+thread is expected to exists\footnote{The ever-running thread is the idle thread}.
 
-Whatever the thread's priority might be, a thread owns the system until suspending or waiting: care must be taken
+Whatever the thread's priority might be, a thread owns the whole system until suspending or waiting: care must be taken
 in writing application code processing data to avoid hogging the CPU or - definitively worser - starving other
 threads.
 
@@ -931,6 +1112,8 @@ operations and run them in chunks, suspending the thread between runs;
 failing to do so will starve all threads exept the running one.
 Even if this might be a desired behavior, it is really dangerous and might generate unwanted effects
 on accounting or performance monitoring.
+Generally speaking it is a best practice to split a task load into slices and run slices individually,
+yelding to other threads at every slice.
 
 \item[Threads] a thread is a new independent code path starting from a
 function (used as entry point) that can be alternated with other code paths.
@@ -946,11 +1129,11 @@ code paths would break leading to memory corruptions or crashes.
 
 \begin{tikzpicture}[->,  outer sep=auto, inner sep=1em, thick, node distance=4cm]
 \node [circle,fill=gray!30,draw] (IDLE) {IDLE};
-\node [circle,fill=green!60,draw] (READY) [below of=IDLE] {READY};
-\node [circle,fill=orange!60,draw] (RUN) [below of=READY] {RUN};
-\node [circle,fill=gray!30,draw] (KILL) [below  of=RUN] {KILL};
-\node [circle,fill=blue!60,draw] (SLEEP) [left of=KILL] {SLEEP};
-\node [circle,fill=blue!60,draw] (WAIT) [right of=KILL] {WAIT};
+\node [circle,fill=LimeGreen,draw] (READY) [below of=IDLE] {READY};
+\node [circle,fill=YellowOrange,draw] (RUN) [below of=READY] {RUN};
+\node [circle,fill=gray!60,draw] (KILL) [below  of=RUN] {KILL};
+\node [circle,fill=NavyBlue,draw] (SLEEP) [left of=KILL] {SLEEP};
+\node [circle,fill=NavyBlue,draw] (WAIT) [right of=KILL] {WAIT};
 \path
 (IDLE)     edge [dashed, loop above] node [right] {On creation} (IDLE)
 (IDLE)     edge [dashed] node [right] {After creation} (READY)
@@ -1054,68 +1237,9 @@ to reset the device to defaults and reconfigure it.
 Function \texttt{status} can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization
 \footnote{Drivers have different extensions for different kind of hardware devices: block devices, character devices, graphics, networking}.
 
-\begin{minted}{C}
-typedef struct driver_header {
-    /*
-     * Name of the driver, to be filled at compile time.
-     */
-    char name[DRV_NAME_LEN + 1];
-    /*
-     * Init function, it is to be invoked at startup 
-     * to discover the supported devices,
-     * assign resources for all units, 
-     * and init the device.
-     * Note: init does not mean start, run,
-     *           enable interrupts, enable DMA.
-     *           The kernel will not be able to handle 
-     *           events to or from devices until
-     *           the start_fn function is invoked.
-     *           The device should be configured to 
-     *           be ready to start working but kept
-     *           reset or idle.
-     * Return values:
-     * EOK in case of success (device unit inited)
-     * ENXIO in case the unitno is not supported 
-     *            or inited
-     * other errnos for failures
-     */
-    int (*init_fn)(unsigned unitno);
-    /*
-     * Start the device's operations.
-     *  This include interrupt handlers, DMA, 
-     * I/O activities.
-     */
-    int (*start_fn)(unsigned unitno);
-    /*
-     * Stop the device's operations. 
-     * This include I/O activities as well as events,
-     * but the device should not fail or be reset.
-     * Calling start_fn again the device should recover
-     * gracefully and start working.
-     */
-    int (*stop_fn)(unsigned unitno);
-    /*
-     * This function should shut down the device.
-     * It will be invoked on shutdown/reboot
-     * of the kernel.
-     */
-    int (*done_fn)(unsigned unitno);
-    /*
-     * Retrieve the driver status
-     */
-    unsigned (*status_fn)(unsigned unitno);
-   /*
-     * I/O control, driver specific
-     */
-    int (*ioctrl_fn)(void *data,
-			unsigned opcode, 
-			unsigned unitno);
-    /*
-     * Implement poll
-     */
-    short (*poll_fn)(poll_table_t *table);
-} driver_header_t;
-\end{minted}
+\scriptsize
+\inputminted{C}{../include/diegos/drivers_common.h}
+\normalsize
 
 \section{The File System}
 
@@ -1181,4 +1305,3 @@ section, as all other contending thread will be waiting and won't be scheduled a
 CPU and letting the locking thread complete its tasks as fast as possible.
 
 \end{document}
-
