@@ -906,6 +906,7 @@ A schema of the structure of these services is sketched in figure \ref{fig:tikz-
 
 \begin{figure}
 	\centering
+	\resizebox{\textwidth}{!}{%
 	\begin{tikzpicture}[
 	    x=1cm,
 	    y=1cm,
@@ -935,17 +936,17 @@ A schema of the structure of these services is sketched in figure \ref{fig:tikz-
 	\node[redblock] (pdc) at (4.2,4.0) {Hardware\\Abstraction\\Layer};
 
 	% Lower-left service blocks
-	\node[block] (alarms) at (-6.0,-4.7) {Alarms\\Manager};
-	\node[block] (events) at (-3.5,-4.7) {Events\\Manager};
-	\node[block] (io) at (-4.65,-6.2) {I/O\\Manager};
+	\node[block] (alarms) at (-5.0,-4.7) {Alarms\\Manager};
+	\node[block] (events) at (-2.5,-4.7) {Events\\Manager};
+	\node[block] (io) at (-3.65,-6.2) {I/O\\Manager};
 	\node[groupbox, fit=(alarms)(events)(io)] (servicebox) {};
 	\node[below=2pt of servicebox.south] {Events};
 
 	% Right-hand concurrency blocks
-	\node[block] (mutex) at (3.65,-4.7) {Mutexes};
-	\node[block] (spin) at (3.65,-6.2) {Spin Locks};
-	\node[block] (timers) at (6.15,-4.7) {Timers};
-	\node[block] (barriers) at (6.15,-6.2) {Barriers};
+	\node[block] (mutex) at (2.65,-4.7) {Mutexes};
+	\node[block] (spin) at (2.65,-6.2) {Spin Locks};
+	\node[block] (timers) at (5.15,-4.7) {Timers};
+	\node[block] (barriers) at (5.15,-6.2) {Barriers};
 	\node[groupbox, fit=(mutex)(spin)(timers)(barriers)] (concurrencybox) {};
 	\node[below=2pt of concurrencybox.south] {Concurrency};
 
@@ -956,6 +957,7 @@ A schema of the structure of these services is sketched in figure \ref{fig:tikz-
 	\draw[-{Latex[length=2.5mm]}] (concurrencybox) -- (kernel.south east);
 
 	\end{tikzpicture}
+	}
 	\caption{The kernel}
 	\label{fig:tikz-thekernel}
 \end{figure}
@@ -989,7 +991,6 @@ thread will be killed.} but at least one thread must be ready to run at any time
 
 \begin{figure}
     \centering
-%%    \includegraphics[width=0.8\columnwidth]{the_scheduler}
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
     x=0.02cm,
@@ -1004,7 +1005,7 @@ thread will be killed.} but at least one thread must be ready to run at any time
 % Running thread and its priority-state transitions
 \draw[draw=runningpurpleedge, fill=runningpurple]
     (961,251) ellipse [x radius=1.5cm, y radius=1.46cm];
-\node[align=center, text=runningpurpleedge] at (961,251) {Running\\Thread};
+\node[align=center, text=Black] at (961,251) {Running\\Thread};
 
 \draw[->, draw=ink] (711.4,376) -- (889.6,285.7);
 \draw[->, draw=ink] (873.2,377) -- (911.7,313.7);
@@ -1126,7 +1127,7 @@ The stack pointer (which is usually part of the processor context) must be saved
 and stack memory areas \textbf{must not} be corrupted at any time, or the distinctive backtrace of 
 code paths would break leading to memory corruptions or crashes.
 
-\begin{tikzpicture}[->,  outer sep=auto, inner sep=1em, thick, node distance=4cm]
+\hspace*{-1cm}\begin{tikzpicture}[->,  outer sep=auto, inner sep=1em, thick, node distance=4cm]
 \node [circle,fill=gray!30,draw] (IDLE) {IDLE};
 \node [circle,fill=LimeGreen,draw] (READY) [below of=IDLE] {READY};
 \node [circle,fill=YellowOrange,draw] (RUN) [below of=READY] {RUN};
