@@ -32,6 +32,47 @@
 \renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
 \renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
 
+% Custom command to draw a stop sign
+\newcommand{\stopsign}[1][1.0]{%
+  \begin{tikzpicture}[baseline=-0.5ex, scale=#1]
+    % Outer red octagon
+    \fill[red] (22.5:1) -- (67.5:1) -- (112.5:1) -- (157.5:1)
+            -- (202.5:1) -- (247.5:1) -- (292.5:1) -- (337.5:1) -- cycle;
+    % Inner white border line
+    \draw[white, line width=1.5pt, double=red, double distance=0.5pt]
+         (22.5:0.92) -- (67.5:0.92) -- (112.5:0.92) -- (157.5:0.92)
+      -- (202.5:0.92) -- (247.5:0.92) -- (292.5:0.92) -- (337.5:0.92) -- cycle;
+    % Text in the center
+    \node[white, font=\sffamily\bfseries] at (0,0) {STOP};
+  \end{tikzpicture}%
+}
+
+\newtcolorbox{warning}[1][]{
+enhanced,before skip balanced=2mm,after skip balanced=3mm,
+boxrule=0.4pt,left=8mm,right=2mm,top=1mm,bottom=1mm,
+colback=yellow!50,
+colframe=yellow!20!black,
+sharp corners,rounded corners=southeast,arc is angular,arc=3mm,
+underlay={%
+	\path[fill=tcbcolback!80!black] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+	\path[draw=tcbcolframe,shorten <=-0.05mm,shorten >=-0.05mm] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+	\path[fill=yellow!50!black,draw=none] (interior.south west) rectangle node[white]{\Huge\bfseries !} ([xshift=6mm]interior.north west);
+	},drop fuzzy shadow,#1
+}
+
+\newtcolorbox{danger}[1][]{
+enhanced,before skip balanced=2mm,after skip balanced=3mm,
+boxrule=0.4pt,left=17mm,right=2mm,top=1mm,bottom=1mm,
+colback=red!50,
+colframe=red!20!black,
+sharp corners,rounded corners=southeast,arc is angular,arc=3mm,
+underlay={%
+	\path[fill=tcbcolback!80!black] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+	\path[draw=tcbcolframe,shorten <=-0.05mm,shorten >=-0.05mm] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+	\path[fill=red!50!black,draw=none] (interior.south west) rectangle node[white]{\stopsign[0.75]} ([xshift=15mm]interior.north west);
+	},drop fuzzy shadow,#1
+}
+
 %\lofoot{DiegOS Operating System}
 %\refoot{DiegOS Operating System}
 
@@ -1012,10 +1053,10 @@ thread will be killed.} but at least one thread must be ready to run at any time
     (961,251) ellipse [x radius=1.5cm, y radius=1.46cm];
 \node[align=center, text=Black] at (961,251) {Running\\Thread};
 
-\draw[->, draw=ink] (711.4,376) -- (889.6,285.7);
-\draw[->, draw=ink] (873.2,377) -- (911.7,313.7);
-\draw[->, draw=ink] (1036,382) -- (999,320);
-\draw[->, draw=ink] (1198.9,379) -- (1024.3,291.9);
+\draw[<->, draw=ink] (711.4,376) -- (889.6,285.7);
+\draw[<->, draw=ink] (873.2,377) -- (911.7,313.7);
+\draw[<->, draw=ink] (1036,382) -- (999,320);
+\draw[<->, draw=ink] (1198.9,379) -- (1024.3,291.9);
 
 \draw[->, draw=ink] (976,436) -- (932,436);
 \draw[->, draw=ink] (811,434) -- (768,434);
@@ -1184,10 +1225,13 @@ with no memory-free handler, in this case the consumer will not release the even
 if a memory-free handler is set, the consumer will invoke it passing a pointer to the event
 as a parameter to the handler.
 
+\begin{warning}
 \textbf{Important:} the memory release handler (memory-free handler) is executed in
 the \textit{consumer} thread's context, possibly out of control of the producer's thread;
 if events are created on the heap a synchronization mechanism must be put in place to
 avoid corrupting data structures.
+\end{warning}
+
 \item[Mutexes] are the simplest form of semaphore. A mutex is initially
 unlocked; the first thread trying to acquire a lock on the mutex will actually get the lock
 and proceed with execution, entering a critical code section and running as long as it needs to.
@@ -1222,40 +1266,51 @@ Optionally a barrier can automatically close after opening, creating a step-lock
 Whenever a thread is put in \texttt{WAIT} state it is inserted in a shared \textit{wait queue} where
 priority does not matter.
 Threads in this queue does not run and cannot be elected to execute; the scheduler will periodically
-scan the queue looking for threads waiting on a resource in a timed fashion
+scan the queue and wake up all eligible threads to be moved into their respective \textit{ready queues}.
+Threads waiting on I/O or waiting for an infinite amount of time are woken up by other primitives of the
+kernel, their state is changed to \textit{READY} but they are not removed from the \textit{wait queue},
+this task is left to the scheduler.
+
 \section{Drivers}
 \label{sub:drivers}
 Drivers in {\myOS} are interfaces to hardware.
 They enable software to start and stop hardware operations, configure it, and perform input and output.
 Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
 be carefully designed to avoid conflicts with the system-wide interrupt handling.
-{\myOS} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are not}
+{\myOS} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are}
 designed to be reentrant.
 The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
 and will enable the interrupt back again once the servicing routine returns.
 
-There is a common interface for all drivers, and common rules to specify functions.\\
-All functions returning a status will return an \texttt{int} value.\\
-All functions returning a size will return an \texttt{unsigned int} value.\\
+There is a common interface for all drivers, and common rules to specify functions.
+All functions returning a status will return an \texttt{int} value.
+All functions returning a size will return an \texttt{unsigned int} value.
 Drivers are multi-instance, as a consequence all function prototypes must specify an \texttt{unsigned int} unit number
 as last parameter.
 
-The \texttt{init} function can be used to initialize the driver for a specific instance
+\begin{warning}
+The design of the drivers' interface is going to change in the future replacing parametrics tuple (driver, unit)
+with a more consistent context-based approach.
+\end{warning}
+
+The \texttt{name} character string stores the driver's name, this is a quite short string and should
+resume the name or purpose of the driver, usually the name of the device to be driven.
+The \texttt{init()} function can be used to initialize the driver for a specific instance
 \footnote{An instance matches a hardware device, a single driver can handle multiple devices.}
-but \texttt{not} actually make the device run.
-
-Functions \texttt{start} and \texttt{stop} can run the hardware activities or stop them, this includes enabling or disabling
+but it \textbf{will not} make the device run: the function contract is to setup the hardware, the driver
+and the software to be ready to run the device.
+Functions \texttt{start()} and \texttt{stop()} can run the hardware activities or stop them, this includes enabling or disabling
 interrupts, DMA transfers, I/O operations, sensors polling, and so on.
-It is assumed that alternating calls to \texttt{start} and \texttt{stop} will make the hardware device either work or not work,
+It is assumed that alternating calls to \texttt{start()} and \texttt{stop()} will make the hardware device either run or not run,
 but will not change its configuration or power state.
-
-Function \texttt{done} can be used to terminate the driver and shut down the hardware device. This operation is \textbf{not reversible}
-in contrast with the \texttt{start} and \texttt{stop} functions. Once \texttt{done} has been invoked it is required to call \texttt{init} again
+Function \texttt{done()} can be used to terminate the driver and shut down the hardware device.
+It is coupled with \texttt{init()} just like \texttt{start()} and \texttt{stop()} functions.
+Once \texttt{done()} has been invoked it is required to call \texttt{init()}
 to reset the device to defaults and reconfigure it.
-
-Function \texttt{status} can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization
+Function \texttt{status()} can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization.
 \footnote{Drivers have different extensions for different kind of hardware devices: block devices, character devices, graphics, networking}.
-
+The common drivers interface is reported in the following pages.
+\newpage
 \scriptsize
 \inputminted{C}{../include/diegos/drivers_common.h}
 \normalsize
