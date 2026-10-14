@@ -4,7 +4,7 @@
 \KOMAoption{chapterprefix}{true}
 \KOMAoption{parskip}{half}
 
-\usepackage[dvipsnames]{xcolor}
+\usepackage[svgnames]{xcolor}
 \usepackage[english]{babel}
 \usepackage{textcomp}
 \usepackage{chapterthumb}
@@ -25,7 +25,7 @@
 %\usemintedstyle{borland}
 
 % colored DiegOS logo
-\newcommand{\myOS}{{\color{Cerulean}\textbf{DiegOS}}}
+\newcommand{\myOS}{{\color{SteelBlue}\textbf{DiegOS}}}
 
 %use numbers for nested enums
 \renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
@@ -38,7 +38,7 @@
 \begin{document}
 \frontmatter
 \subject{Documentation}
-\title{{\color{Cerulean}DiegOS}}
+\title{{\color{SteelBlue}DiegOS}}
 \subtitle{Design and Implementation of a minimalistic Operating System}
 \author{Diego Gallizioli}
 \date{\today}
@@ -461,7 +461,7 @@ running thread does not step priority down under normal conditions.}
 unless the following two conditions are true:
 
 \hfill
-\begin{tcolorbox}[enhanced, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+\begin{tcolorbox}[enhanced, colframe=CadetBlue!80!White, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
 \begin{itemize}
 \item There are no ready threads with a higher priority than the running thread
 \item There are no ready threads with the same priority of the running thread
@@ -473,7 +473,7 @@ The \texttt{kernel API} offers two suspension points --- with a slightly differe
 honoring these rules --- in the form of function calls to let the running thread switch context:
 
 \hfill
-\begin{tcolorbox}[enhanced, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+\begin{tcolorbox}[enhanced, colframe=YellowGreen!80!White, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
 \begin{itemize}
 \item \texttt{thread\_suspend()} suspends unconditionally the running thread.
 \item \texttt{thread\_may\_suspend()} supends the running thread only if there are no higher priority threads ready to run.
@@ -518,7 +518,7 @@ the resolution of the system clock is dependent on the resolution of the hardwar
 The system clock can be accessed by the application layer with different resolutions
 
 \hfill
-\begin{tcolorbox}[enhanced, adjusted title=Time measurement, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+\begin{tcolorbox}[enhanced, colframe=LightSalmon!60!White, coltitle=Black, adjusted title=Time measurement, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
 \begin{center}
     \begin{tabular}{| c | l |}
     \hline
@@ -610,7 +610,9 @@ structures and algorithms are indipendent yet interlocked, as data structures
 are owned by the running application, the algorithms are implemented in code;
 it is not enough to thoroughly design only one of them.
 
-There are two places for \textbf{libraries} in {\myOS}, the user
+There are two places for
+\marginline{\footnotesize{where libraries are}}
+\textbf{libraries} in {\myOS}, the user
 applications libraries and the kernel libraries. The difference between the
 two is the target they want to accomplish: applications need general
 purpose data to solve general purpose problems, so they are offered lists, queues,
@@ -620,7 +622,9 @@ On the other hand the kernel code need specific data to handle drivers, manage
 hardware, communications busses, interrupt controllers, but again with common
 strategies like enumeration or sorting.
 
-One noticeable detail in {\myOS} is the presence of a native \texttt{libc}
+One noticeable detail
+\marginline{\footnotesize{the native libc}}
+in {\myOS} is the presence of a native \texttt{libc}
 library available as original source code in place of one of the several
 well-known implementations available in the world.\footnote{At the time of this writing well-known \texttt{libc}
 implementations are \texttt{glibc}, \texttt{uClibc}, \texttt{musl} and the
@@ -762,10 +766,10 @@ of breaking and resuming the boot process, perform diagnostics and support early
 	\node[rectangle,draw=NavyBlue,fill=NavyBlue,text=white,line width=1.2pt,
 		text width=1.6cm,minimum width=1.6cm,minimum height=1cm,
 		inner sep=2pt,align=center] (FBL) at (2.8,0) {First Boot Loader};
-	\node[rectangle,draw=TealBlue,fill=TealBlue,text=white,line width=1.2pt,
+	\node[rectangle,draw=Teal,fill=Teal,text=white,line width=1.2pt,
 		text width=1.6cm,minimum width=1.6cm,minimum height=1cm,
 		inner sep=2pt,align=center] (SBL) at (5.8,0) {Second Boot Loader};
-	\node[rectangle,draw=Orange,fill=Bittersweet,text=white,line width=1.2pt,
+	\node[rectangle,draw=Orange,fill=Chocolate,text=white,line width=1.2pt,
 		text width=1.6cm,minimum width=1.6cm,minimum height=1cm,
 		inner sep=2pt,align=center] (RUN) at (8.1,0) {Start Operating System};
 	\draw[->,thick, dotted] (POWERON.east) -- (FBL.west);
@@ -834,8 +838,9 @@ the memory layout during boot. The medium and the code required to
 access it are up to you. The rationale here is, split your boot code if it grows beyond
 logic; chain booting is not an option in this case.
 \item Before jumping to the OS entry point go through this checklist:
-
-    \begin{enumerate}
+\hfill
+\begin{tcolorbox}[enhanced, colframe=CadetBlue!80!White, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+    \begin{itemize}
     \item All registers must be setup to start {\myOS}: scratch registers should be
     set to zero, memory registers should be set to access the whole addressing
     space; you could also restrict the range of available addresses, but you 
@@ -844,8 +849,8 @@ logic; chain booting is not an option in this case.
     it up before jumping or you'll crash the machine.
     \item All interrupts \textit{must be disabled} prior to jumping to the
     {\myOS} entry point. 
-    \end{enumerate}
-
+    \end{itemize}
+\end{tcolorbox}
 \item Jump to the system entry point, which is labelled as \texttt{DiegOS}.
 Be careful not to perform a function call, but simply jump to the label;
 calling implies using the stack, and setting a return address somewhere, which
@@ -858,7 +863,7 @@ Initialization is split into a set of function calls, acting on both hardware an
 software.
 
 \hfill
-\begin{tcolorbox}[enhanced, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
+\begin{tcolorbox}[enhanced, colframe=YellowGreen!80!White, leftrule=3mm, top=5mm, bottom=5mm, halign=center, drop fuzzy shadow]
 \begin{itemize}
 \item Initialize the uninitialized data memory space, the .BSS section in
 ELF format terminology.
@@ -1083,8 +1088,8 @@ thread will be killed.} but at least one thread must be ready to run at any time
 
 The scheduler is designed to manage the threads' state machine and select 
 the running thread by using a priority queue schema. There are four
-priorities in {\myOS}, namely \texttt{Idle Priority}, \texttt{Normal Priority}, 
-\texttt{High Priority} and \texttt{Realtime Priority}.
+priorities in {\myOS}, namely \textit{Idle Priority}, \textit{Normal Priority}, 
+\textit{High Priority} and \textit{Realtime Priority}.
 
 When a thread is in the ready queue, it will not substitute the running
 one, not even if the ready thread's priority is higher; pre-emption is \textbf{not
@@ -1103,6 +1108,9 @@ thread is expected to exists\footnote{The ever-running thread is the idle thread
 Whatever the thread's priority might be, a thread owns the whole system until suspending or waiting: care must be taken
 in writing application code processing data to avoid hogging the CPU or - definitively worser - starving other
 threads.
+This is a design principle in {\myOS}: threads have a \textit{Priority} to be selected for execution
+but they all have the same execution \textit{privilege}\footnote{Same execution privilege includes
+equal access to privileged instructions, I/O ports, memory, registers, counters}.
 
 Bear in mind that a higher priority thread will never give up for a lower priority
 thread; to avoid CPU hogging you must be sure that all threads will either sleep or 
@@ -1127,13 +1135,15 @@ The stack pointer (which is usually part of the processor context) must be saved
 and stack memory areas \textbf{must not} be corrupted at any time, or the distinctive backtrace of 
 code paths would break leading to memory corruptions or crashes.
 
-\hspace*{-1cm}\begin{tikzpicture}[->,  outer sep=auto, inner sep=1em, thick, node distance=4cm]
+\begin{figure}
+\centering
+\begin{tikzpicture}[->,  outer sep=auto, inner sep=1em, thick, node distance=4cm]
 \node [circle,fill=gray!30,draw] (IDLE) {IDLE};
 \node [circle,fill=LimeGreen,draw] (READY) [below of=IDLE] {READY};
-\node [circle,fill=YellowOrange,draw] (RUN) [below of=READY] {RUN};
+\node [circle,fill=Orange,draw] (RUN) [below of=READY] {RUN};
 \node [circle,fill=gray!60,draw] (KILL) [below  of=RUN] {KILL};
-\node [circle,fill=NavyBlue,draw] (SLEEP) [left of=KILL] {SLEEP};
-\node [circle,fill=NavyBlue,draw] (WAIT) [right of=KILL] {WAIT};
+\node [circle,fill=RoyalBlue,draw] (SLEEP) [left of=KILL] {SLEEP};
+\node [circle,fill=RoyalBlue,draw] (WAIT) [right of=KILL] {WAIT};
 \path
 (IDLE)     edge [dashed, loop above] node [right] {On creation} (IDLE)
 (IDLE)     edge [dashed] node [right] {After creation} (READY)
@@ -1146,14 +1156,18 @@ code paths would break leading to memory corruptions or crashes.
 (WAIT)   edge [bend right=60] node [right] {wake up} (READY);
 \end{tikzpicture}
 
+\caption{Thread State Machine }
+\label{fig:tikz-threadstatemachine}
+\end{figure}
+
 Threads can be in four stable states, namely \texttt{RUN, WAIT, SLEEP,  READY}, and two transient states
  \texttt{IDLE} and \texttt{KILL}.
 The latter are transient by definition as they designate a thread which has been created but never run (\texttt{IDLE})
 and a thread scheduled to be killed (\texttt{KILL})
-\footnote{A thread is not killed upon call to a specific kernel interface, it is inserted in a temporary queue for later disposal.}.\\
+\footnote{A thread is not killed upon call to a specific kernel interface, it is inserted in a temporary queue for later disposal}.\\
 Threads can be promoted from the \texttt{READY} state to the \texttt{RUN} state  by the scheduler internals only;  the reverse action is performed by \textit{suspension} function calls.\\
-Kernel APIs can change the \texttt{RUN} thread state to \texttt{WAIT} state by means of \textit{sleeping} functions or \textit{suspension points}.
-\footnote{Kernel suspension points are mutexes, barriers, I/O waits.}
+Kernel APIs can change the \texttt{RUN} thread state to \texttt{WAIT} state by means of \textit{sleeping} functions or \textit{suspension points}
+\footnote{Kernel suspension points are mutexes, barriers, I/O waits}.
 
 \item[Alarms] are a fundamental feature to let threads sleep and wake up at a
 defined time. 
@@ -1162,13 +1176,14 @@ like handling events. Alarms can be one-shot or recursive, and can be started or
 halted anytime.
 \item[Events] are extensible system messages, used to signal some interesting news to a thread. 
 Events are organized as queues (FIFO), and processed one by one in
-chronological order.\\
+chronological order.
 Memory management for events is optional,  both the producer and the
 consumer must take care of allocating memory when creating an event message,
 and freeing it once the event has been processed. The producer can create events
 with no memory-free handler, in this case the consumer will not release the event storage;
 if a memory-free handler is set, the consumer will invoke it passing a pointer to the event
-as a parameter to the handler.\\
+as a parameter to the handler.
+
 \textbf{Important:} the memory release handler (memory-free handler) is executed in
 the \textit{consumer} thread's context, possibly out of control of the producer's thread;
 if events are created on the heap a synchronization mechanism must be put in place to
@@ -1182,28 +1197,32 @@ waiting queue.
 Once the first thread has released (unlocked) the mutex, the threads waiting for 
 a lock will be run one at a time, until no waiting threads are left; every thread entering the
 critical section is guaranteed to have acquired a lock on the mutex, which means, 
-code after the lock acquisition function is guaranteed to run helding a lock on the mutex.\\
+code after the lock acquisition function is guaranteed to run helding a lock on the mutex.
 Once no thread is waiting for a lock on the mutex, the mutex is left unlocked.
 \item[Spin locks] are a running  atomic delay to acquire a lock on a integer used as a
-barrie. Spin locks can be locked or unlocked.\\
+barrie. Spin locks can be locked or unlocked.
 A thread trying to acquire a spin lock will enter an infinite loop until the lock is 
 gained, so if the spin lock is originally locked, the thread will suspend and enter
-the ready queue continuosly.\\
+the ready queue continuosly.
 Good use of spin locks is to protect very short critical sections or hardware accesses,
 where the longer code path required to manage mutexes might be not as efficient.
 \item[I/O waits] are wait queues, useful to suspend the calling thread execution till 
-data is available, this usually happens while waiting for input from a hardware device.\\
+data is available, this usually happens while waiting for input from a hardware device.
 The suspended thread is removed from the ready queue and parked into a wait queue, multiple
-threads can sleep on the same wait queue, and can be awakened in groups.\\
+threads can sleep on the same wait queue, and can be awakened in groups.
 Threads are moved from wait queues to ready queues in a FIFO fashion, and it is not possible
 to priorize or sort this sequence.
 \item[Barriers] are a form of cumulative mutual exclusion, useful to suspend execution of several
-threads waiting for a single shared resource to be available.\\
+threads waiting for a single shared resource to be available.
 Barriers are \textit{closed} upon creation, and can be opened or closed by any thread; an open barrier will
-resume \textbf{all} the waiting threads at once moving them into their respective \textit{ready queues}.\\
+resume \textbf{all} the waiting threads at once moving them into their respective \textit{ready queues}.
 Optionally a barrier can automatically close after opening, creating a step-lock software gate.
 \end{description}
 
+Whenever a thread is put in \texttt{WAIT} state it is inserted in a shared \textit{wait queue} where
+priority does not matter.
+Threads in this queue does not run and cannot be elected to execute; the scheduler will periodically
+scan the queue looking for threads waiting on a resource in a timed fashion
 \section{Drivers}
 \label{sub:drivers}
 Drivers in {\myOS} are interfaces to hardware.
