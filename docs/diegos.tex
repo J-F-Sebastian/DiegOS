@@ -21,7 +21,8 @@
 \usepackage{lipsum}
 \usepackage{geometry}
 \usepackage[most]{tcolorbox}
-\usepackage{minted}
+\usepackage[chapter]{minted}
+\usepackage{caption}
 %\usemintedstyle{borland}
 
 % colored DiegOS logo
@@ -104,6 +105,7 @@ information contained herein.}
 
 \maketitle
 \tableofcontents
+\listoflistings
 \mainmatter
 \chapter{Introduction}
 \dictum[Darth Vader]{
@@ -1273,47 +1275,165 @@ this task is left to the scheduler.
 
 \section{Drivers}
 \label{sub:drivers}
-Drivers in {\myOS} are interfaces to hardware.
+Drivers are a software interface conceived to establish a communication with hardware.
 They enable software to start and stop hardware operations, configure it, and perform input and output.
 Common operations performed by drivers include enabling and handling interrupts: the pertinent code must
 be carefully designed to avoid conflicts with the system-wide interrupt handling.
-{\myOS} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are}
-designed to be reentrant.
-The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
-and will enable the interrupt back again once the servicing routine returns.
+%{\myOS} protects critical sections by enabling and disabling interrupts, and these operations \textbf{are}
+%designed to be reentrant.
+%The system-wide interrupt handler will invoke the registered callback with the corresponding interrupt \textbf{off},
+%and will enable the interrupt back again once the servicing routine returns.
 
-There is a common interface for all drivers, and common rules to specify functions.
-All functions returning a status will return an \texttt{int} value.
+\subsection{A common interface}
+Hardware comes under different forms, but certain operations apply to all of them.
+A device need to be initialized --- configured --- in order to work as expected and to perform
+specific routine with specific options.
+As an example, a disk drive controller can use DMA transfers when reading or writing,
+and it will need a configured memory address to tranfer data from the disk drive to memory and reverse.
+The same controller might accept to work disabling DMA transfers, in this case a different configuration
+is required to handle data transfers and the driver will need a different timing strategy to make the hardware
+perform decently
+\footnote{DMA memory transfers are completely managed by hardware, programmed transfers require software to move data
+from the device to the central memory}.
+
+In {\myOS} there is a common interface valid for all drivers, and a set of rules used to define it.
+All functions returning a status will return an \texttt{int} value which specifies if the operation
+was successful or it encountered a problem, in the latter case the type of error is reported
+using the values found in Unix or Linux and set into the \texttt{errno} variable;
+this error reporting schema is far less than optimal but simple enough for a simple Operating System.
 All functions returning a size will return an \texttt{unsigned int} value.
-Drivers are multi-instance, as a consequence all function prototypes must specify an \texttt{unsigned int} unit number
-as last parameter.
-
+Drivers are multi-instance, as a consequence all function prototypes must have an \texttt{unsigned int} parameter
+to identify the instance number.
+\vfill
 \begin{warning}
 The design of the drivers' interface is going to change in the future replacing parametrics tuple (driver, unit)
 with a more consistent context-based approach.
 \end{warning}
+\vfill
+Let's now break down the drivers' common header and its structures, you can have a look at the
+file in listing \ref{list:drivers_common}.
 
-The \texttt{name} character string stores the driver's name, this is a quite short string and should
+\begin{description}
+\item[name] is character string storing the driver's name, this is a quite short string and should
 resume the name or purpose of the driver, usually the name of the device to be driven.
-The \texttt{init()} function can be used to initialize the driver for a specific instance
+\item[init()] function can be used to initialize the driver for a specific instance
 \footnote{An instance matches a hardware device, a single driver can handle multiple devices.}
-but it \textbf{will not} make the device run: the function contract is to setup the hardware, the driver
-and the software to be ready to run the device.
-Functions \texttt{start()} and \texttt{stop()} can run the hardware activities or stop them, this includes enabling or disabling
+but it \textbf{will not} make the device run: the function contract is to setup the hardware, not make it run.
+\item[start(),stop()] can run the hardware activities or stop them, this includes enabling or disabling
 interrupts, DMA transfers, I/O operations, sensors polling, and so on.
 It is assumed that alternating calls to \texttt{start()} and \texttt{stop()} will make the hardware device either run or not run,
 but will not change its configuration or power state.
-Function \texttt{done()} can be used to terminate the driver and shut down the hardware device.
+These two functions --- along with the interrupt routines --- are the most dangerous part of a driver, they deal with interrupts and
+buffers, they may leak memory if not properly coded, 
+\item[done()] can be used to terminate the driver and shut down the hardware device.
 It is coupled with \texttt{init()} just like \texttt{start()} and \texttt{stop()} functions.
 Once \texttt{done()} has been invoked it is required to call \texttt{init()}
 to reset the device to defaults and reconfigure it.
-Function \texttt{status()} can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization.
+\item[status()] can be called at any time to report the driver's internal state, the ongoing operation, and the driver's specialization.
 \footnote{Drivers have different extensions for different kind of hardware devices: block devices, character devices, graphics, networking}.
-The common drivers interface is reported in the following pages.
-\newpage
+\end{description}
+
+The common header and its common functions enable the kernel to initialize, start, stop, terminate and get a report 
+of the status of any driver indipendently from its specialization;
+all drivers can be managed by the kernel in the same way,
+the devices linked to the drivers will inherit their names from the drivers names and
+will be able to operate any driver using one semantic only.
+
+This simplifies the structure of the kernel and let the developers add support to their favourite hardware
+without the burden of adding initialization sections or functions dedicated to the new driver.
+The plug-and-play design of the driver interface is a nice example of the \textit{KISS} principle
+and it is one of the most common pattern found in an Operating system
+\footnote{This would be obvious in an Operating System coded with an object-oriented language}.
+
 \scriptsize
 \inputminted{C}{../include/diegos/drivers_common.h}
+\captionof{listing}{drivers\_common.h}
+\label{list:drivers_common}
 \normalsize
+\hfill
+
+\subsection{Character drivers}
+A character driver can manage any hardware or virtual device which is handling data in the form
+of a stream of bytes --- characters if you'd like.
+
+A character driver expects to input a stream of bytes from the device, and to output a stream of bytes
+to the device; the length of the stream is not predefined and can vary from 1 to anything, the stream
+might not even have an end and lasts fot the entire running time of the device.
+The basic principle of this type of driver is the stream: input and output comes in the form of a sequence
+of bytes.
+Examples of this type of driver are the serial lines drivers (RS232 or IEEE 485) or the keyboard.
+
+The character driver is the most simple driver and its extended interface is composed by 4 function calls,
+namely read and write with a single buffer, and read and write with multiple buffers.
+
+You can have a look at the interface in listing \ref{list:char_drivers}
+
+\scriptsize
+\inputminted{C}{../include/diegos/char_drivers.h}
+\captionof{listing}{char\_drivers.h}
+\label{list:char_drivers}
+\normalsize
+
+\subsection{Network drivers}
+A network driver can handle devices with networking capabilities, sending or receiving data to remote peers
+in chunks of data and with a well-defined set of rules for addressing, encoding and decoding.
+A network driver looks similar to a character driver, they both send and receive data streams and --- apart for
+the structured data required by a network card --- they are agnostic about the contents of the data.
+
+A character driver sorts data in bytes, a network driver sorts data in packets or frames: the input stream
+is organized as a queue of chunks instead of a queue of bytes.
+
+A network driver need additional informations to properly run its device, like the addresses of the sender
+and the receiver, the line status (which is \textbf{not} the device's status!), the encoding to be applied to the stream,
+the possible multiplexing of senders and receivers.
+
+The extended interface comprises numerical informations like the MTU
+\footnote{Maximum Transmission Unit} of the network card, addresses to be used for multicast or unicast transmissions,
+timers for a State Machine in case the line protocol requires it, and the usual single - and multiple read and write functions.
+
+You can have a look at the interface in listing \ref{list:net_drivers}
+
+\scriptsize
+\inputminted{C}{../include/diegos/net_drivers.h}
+\captionof{listing}{net\_drivers.h}
+\label{list:net_drivers}
+\normalsize
+
+\subsection{Block drivers}
+A block driver is quite different when compared with other drivers, not because of its extended interface --- which is very
+similar to that of a character driver --- but for the peculiarities of the devices it manages.
+
+Block drivers are structured to support storage in the form of Hard Disks, Solid State Disks, NOR, NAND, eMMC, SD, floppy disks,
+and anything else might exist.
+All these devices share a common property: they offer pre-sized storage unit called blocks, sectors or pages which are accessed
+as a whole.
+As an example, a Hard Disk internal memory is usually fractioned in 512-bytes sectors; it is not possible to read or write a part
+of a sector, but only the whole 512 bytes. If the driver is submitted with an amount of data which is not multiple of 512 bytes
+the data must be padded
+\footnote{Additional spare data is appended to the buffer until its size is a multiple of the sector size}
+to fill an integral number of sectors; equally if the driver is requested to read an amount of data which is not multiple of 512 bytes
+the driver needs to read additional, unwanted data in an internal buffer, then partially copy the last sector to the requester.
+
+Block drivers also need to know \textit{where} data are to be read or written; as a matter of fact, a storage device has a finite capacity
+and cannot save an infinite amount of data. A serial line (character driver) can stream the english alphabet for eons until the end of the world
+and won't ever need to know when the stream started or when it started.
+A block device must be addressed before a write operation by specifing the first sector to be used; the data stream will be saved starting with
+the selected sector, proceeding with the next in order until the last sector is reached, at which point the operation will roll to the very first
+sector on disk and proceed until the previously selected starting sector is reached; when this second condition is met the disk has been completely
+written and no more free storage is available.
+The driver is allowed to overwrite previously written sectors, and can proceed in this action for eons until the end of the world, but always
+being aware of which sector is being written and which was the first one selected to start operations.
+
+Rolling over the last sector, padding on write and partial copying on read are not present in other type of drivers.
+
+You can have a look at the interface in listing \ref{list:block_drivers}
+
+\scriptsize
+\inputminted{C}{../include/diegos/block_drivers.h}
+\captionof{listing}{block\_drivers.h}
+\label{list:block_drivers}
+\normalsize
+
 
 \section{The File System}
 
