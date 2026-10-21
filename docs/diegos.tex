@@ -1380,12 +1380,18 @@ in chunks of data and with a well-defined set of rules for addressing, encoding 
 A network driver looks similar to a character driver, they both send and receive data streams and --- apart for
 the structured data required by a network card --- they are agnostic about the contents of the data.
 
-A character driver sorts data in bytes, a network driver sorts data in packets or frames: the input stream
-is organized as a queue of chunks instead of a queue of bytes.
+A character driver has the \textit{byte} as its minimum non-fractionable data unit,
+a network driver has a \textit{packet} or a \textit{frame} as its minimum non-fractionable data unit: the input stream
+of a network driver is organized as a queue of packets instead of a queue of bytes.
+Just like character drivers there might be no beginning or end of a stream, and no addressing is required to configure
+a network device
+\footnote{Packets do not require numbering, data flows in and out seamlessly just like a stream of bytes}.
 
 A network driver need additional informations to properly run its device, like the addresses of the sender
 and the receiver, the line status (which is \textbf{not} the device's status!), the encoding to be applied to the stream,
 the possible multiplexing of senders and receivers.
+The network driver is more similar to a middleware component, it mixes higher layer components (the protocols) with
+lower layer components (the hardware).
 
 The extended interface comprises numerical informations like the MTU
 \footnote{Maximum Transmission Unit} of the network card, addresses to be used for multicast or unicast transmissions,
@@ -1403,24 +1409,27 @@ You can have a look at the interface in listing \ref{list:net_drivers}
 A block driver is quite different when compared with other drivers, not because of its extended interface --- which is very
 similar to that of a character driver --- but for the peculiarities of the devices it manages.
 
-Block drivers are structured to support storage in the form of Hard Disks, Solid State Disks, NOR, NAND, eMMC, SD, floppy disks,
-and anything else might exist.
-All these devices share a common property: they offer pre-sized storage unit called blocks, sectors or pages which are accessed
-as a whole.
+Block drivers are structured to support a wide range of storage devices: Hard Disks, Solid State Disks, NOR, NAND, eMMC, SD, floppy disks.
+
+All these devices share a common property: they store data in the form of fixed-size units called blocks, sectors or pages.
+These units are non-fractionable and must be read or written as a whole.
+
 As an example, a Hard Disk internal memory is usually fractioned in 512-bytes sectors; it is not possible to read or write a part
 of a sector, but only the whole 512 bytes. If the driver is submitted with an amount of data which is not multiple of 512 bytes
 the data must be padded
 \footnote{Additional spare data is appended to the buffer until its size is a multiple of the sector size}
 to fill an integral number of sectors; equally if the driver is requested to read an amount of data which is not multiple of 512 bytes
-the driver needs to read additional, unwanted data in an internal buffer, then partially copy the last sector to the requester.
+the driver needs to read additional, unwanted data in an internal buffer, then perform a partial copy of the last sector to the requester.
 
-Block drivers also need to know \textit{where} data are to be read or written; as a matter of fact, a storage device has a finite capacity
-and cannot save an infinite amount of data. A serial line (character driver) can stream the english alphabet for eons until the end of the world
-and won't ever need to know when the stream started or when it started.
-A block device must be addressed before a write operation by specifing the first sector to be used; the data stream will be saved starting with
-the selected sector, proceeding with the next in order until the last sector is reached, at which point the operation will roll to the very first
-sector on disk and proceed until the previously selected starting sector is reached; when this second condition is met the disk has been completely
-written and no more free storage is available.
+A storage device is a finite array of numbered sectors with a geometric layout which can be a linear array or a \textbf{CHS}
+\footnote{CHS stands for Cylinder, Head, Sector} tuple, the latter is a remnant of mechanical disk drives with spinning disks.
+The device must be addressed before an I/O operation by specifing the first sector to be used; the data stream will start at
+the selected sector, proceed accessing the next sector in order until the last sector is reached, at which point the operation will roll to the very first
+sector on disk and proceed until the starting sector is reached again
+\footnote{This is true for linear addressing and for CHS addressing, in the latter case the progress of addresses is cascaded --- sector number
+increases until it rolls over and increases head number until it rolls over and increases cylinder number}.
+This process puts in evidence that a storage device has a finite capacity and cannot stream seamelessy with no starting and no ending like
+a network device or a character device.
 The driver is allowed to overwrite previously written sectors, and can proceed in this action for eons until the end of the world, but always
 being aware of which sector is being written and which was the first one selected to start operations.
 
@@ -1434,6 +1443,24 @@ You can have a look at the interface in listing \ref{list:block_drivers}
 \label{list:block_drivers}
 \normalsize
 
+\subsection{User Interface drivers}
+User interface drivers come in 2 flavors: they can drive a text-based device or a graphics device.
+They share very similar interfaces but with different targets, in fact, a text display and a pixel
+display address items with different sizes using coordinates; text and pixels have color properties,
+they can be moved around, copied, and with proper algorithms it is possible to draw geometric
+figures on both.
+\vfill
+\begin{warning}
+The design of the UI drivers' interface is going to change in future versions.
+\end{warning}
+\vfill
+You can have a look at the interfaces in listing \ref{list:ui_drivers}
+
+\scriptsize
+\inputminted{C}{../include/diegos/ui_drivers.h}
+\captionof{listing}{ui\_drivers.h}
+\label{list:ui_drivers}
+\normalsize
 
 \section{The File System}
 
@@ -1451,9 +1478,7 @@ front ends, interfaces, databases, applications.
 {\myOS} offers a pletora of data structures
 \section{Networking}
 
-\section{Drivers interface}
-
-\chapter{The File System architecture}
+\chapter{The File System}
 \dictum[John McKittrick]{
 There's no way that a high school punk can put a dime into a telephone and break into our system!
 He's got to be working with somebody else. He's got to be!
