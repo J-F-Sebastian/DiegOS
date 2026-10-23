@@ -17,10 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _INTERRUPTS_H_
-#define _INTERRUPTS_H_
+#ifndef _HAL_INTERRUPTS_H_
+#define _HAL_INTERRUPTS_H_
 
 /*
+ * This is the interrupts interface and is part of
+ * the HAL (Hardware Abstraction Layer).
  * The following externs *must* be defined for
  * every processor in use. the platform makefile
  * *must* link these symbols. 

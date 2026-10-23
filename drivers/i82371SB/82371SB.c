@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/drivers.h>
 #include <errno.h>
 #include <libs/pci.h>

@@ -37,7 +37,7 @@
 #include <libs/pci.h>
 #include <libs/pci_lib.h>
 #include <processor/ports.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/delays.h>
 #include <diegos/drivers.h>
 #include <diegos/net_buffers.h>

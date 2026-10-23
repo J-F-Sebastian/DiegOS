@@ -18,7 +18,7 @@
  */
 
 #include <diegos/net_buffers.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/barriers.h>
 #include <libs/cbuffers.h>
 #include <libs/pakman.h>

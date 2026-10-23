@@ -17,7 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
+#include <diegos/hal_kernel.h>
 #include <diegos/poll.h>
 #include <diegos/devices.h>
 #include <diegos/net_interfaces.h>
@@ -33,7 +34,6 @@
 #include "poll_private.h"
 #include "./libs/unistd/fdescr_private.h"
 #include "kprintf.h"
-#include "platform_include.h"
 
 struct poll_item {
 	queue_node header;

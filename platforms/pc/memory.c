@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../kernel/platform_include.h"
+#include <diegos/hal_kernel.h>
 #include <platform/int86.h>
 #include <types_common.h>
 

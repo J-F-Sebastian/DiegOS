@@ -17,13 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PLATFORM_INCLUDE_H_
-#define _PLATFORM_INCLUDE_H_
+#ifndef _HAL_KERNEL_H_
+#define _HAL_KERNEL_H_
 
 /*
- * The following externs *must* be defined for
- * every processor in use. the platform makefile
- * *must* link these symbols.
+ * This is the Hardware Abstraction Layer (HAL) for DiegOS, and it is the
+ * only place where the kernel is allowed to use processor or platform
+ * specific code. The rest of the kernel must be platform and processor
+ * agnostic.
+ * This interface MUST be implemented for every build target.
  */
 
 /*
@@ -65,40 +67,6 @@ extern void load_context(const void *to);
  * exiting the function.
  */
 extern void cleanup_context(void *ctx, unsigned tid);
-
-/*
- * Init the processor, setup all required data to run
- * DiegOS.
- * Returns a pointer to a null-terminated string describing
- * the processor.
- * This function MUST NOT make use of libc code.
- */
-extern const char *processor_init(void);
-
-/*
- * Init the platform, i.e. setup all required hw and
- * set the platform in ready-state for drivers and kernel
- * init.
- * Init all libraries requiring a platform dependent value
- * to run - malloc, ISA, EISA, PCI, PCIe, etc.
- */
-extern void platform_init(void);
-
-/*
- * Init the TTY, this is a stand-alone pre-driver init as
- * it might be very useful to have debug traces ASAP :-)
- */
-extern void tty_init(void);
-
-/*
- * Start drivers init and tables setup
- */
-extern void drivers_init(void);
-
-/*
- * Start the applications!
- */
-extern void platform_run(void);
 
 /*
  * Enable the interrupts for this platform; please note,

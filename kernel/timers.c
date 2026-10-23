@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <diegos/kernel.h>
 #include <diegos/kernel_ticks.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/barriers.h>
 #include <diegos/timers.h>
 #include <libs/list.h>

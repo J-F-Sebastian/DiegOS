@@ -19,10 +19,10 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
+#include <diegos/hal_kernel_init.h>
 #include <processor/ia32.h>
 #include <processor/apic.h>
-#include "../../kernel/platform_include.h"
 #include "ia32_private.h"
 
 #define MASK1   (FPU | MMX | FXSR | SSE | SSE2)

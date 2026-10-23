@@ -18,7 +18,7 @@
  */
 
 #include <types_common.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/devices.h>
 #include <diegos/delays.h>
 #include <errno.h>

@@ -23,7 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <types_common.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <platform/i8259.h>
 
 #include "ia32_private.h"

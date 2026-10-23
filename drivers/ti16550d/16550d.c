@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <diegos/kernel.h>
 #include <diegos/poll.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

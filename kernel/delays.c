@@ -20,9 +20,9 @@
 #include <limits.h>
 #include <stdint.h>
 #include <diegos/delays.h>
+#include <diegos/hal_kernel.h>
 
 #include "kprintf.h"
-#include "platform_include.h"
 
 #define BASE_VALUE (1UL << 6)
 

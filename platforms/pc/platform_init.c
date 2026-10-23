@@ -23,13 +23,12 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal.h>
 #include <diegos/delays.h>
 #include <diegos/devices.h>
 #include <diegos/drivers.h>
 #include <diegos/net_interfaces.h>
 
-#include "../../kernel/platform_include.h"
 #include <platform/i8259.h>
 #include "../devices/keyboard.h"
 #include <libs/pci_lib.h>

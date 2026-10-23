@@ -19,13 +19,12 @@
 
 #include <string.h>
 #include <errno.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal.h>
 #include <diegos/kernel.h>
 #include <diegos/delays.h>
 
 #include "kernel_private.h"
 #include "kprintf.h"
-#include "platform_include.h"
 
 extern STATUS malloc_init(const void *heapstart, const void *heapend);
 extern STATUS iomalloc_init(const void *start, const void *end);

@@ -24,7 +24,7 @@
 #include <diegos/kernel.h>
 #include <diegos/poll.h>
 #include <diegos/delays.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <string.h>
 #include <stdio.h>
 #include <libs/cbuffers.h>

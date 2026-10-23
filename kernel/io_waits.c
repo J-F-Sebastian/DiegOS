@@ -23,14 +23,14 @@
 #include <libs/chunks.h>
 #include <libs/bitmaps.h>
 #include <diegos/io_waits.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
+#include <diegos/hal_kernel.h>
 
 #include "poll_private.h"
 #include "io_waits_private.h"
 #include "threads.h"
 #include "kprintf.h"
 #include "scheduler.h"
-#include "platform_include.h"
 
 struct wait_queue_int {
 	list_node header;

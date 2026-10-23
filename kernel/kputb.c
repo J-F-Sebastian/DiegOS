@@ -18,7 +18,7 @@
  */
 
 #include <diegos/devices.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 
 static device_t *outdev = NULL;
 

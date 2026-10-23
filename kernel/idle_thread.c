@@ -18,8 +18,8 @@
  */
 
 #include <diegos/kernel.h>
+#include <diegos/hal_kernel.h>
 
-#include "platform_include.h"
 #include "idle_thread.h"
 
 void idle_thread_entry()

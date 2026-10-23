@@ -25,6 +25,7 @@
 #include <diegos/kernel_ticks.h>
 #include <diegos/mutexes.h>
 #include <diegos/devices.h>
+#include <diegos/hal_kernel.h>
 
 #include "kernel_private.h"
 #include "threads.h"
@@ -43,7 +44,6 @@
 #include "drivers_private.h"
 #include "network_private.h"
 #include "poll_private.h"
-#include "platform_include.h"
 
 static const char *messages[] = { "cannot init clock",
 	"cannot init scheduler"

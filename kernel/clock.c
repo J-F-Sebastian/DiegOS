@@ -18,7 +18,7 @@
  */
 
 #include <diegos/devices.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/kernel_ticks.h>
 #include <libs/kernel_time.h>
 #include <errno.h>

@@ -19,8 +19,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <diegos/hal_kernel.h>
 
-#include "platform_include.h"
 #include "threads.h"
 #include "scheduler.h"
 #include "fail_safe.h"

@@ -25,12 +25,12 @@
 #include <libs/queue.h>
 #include <libs/bitmaps.h>
 #include <diegos/events.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
+#include <diegos/hal_kernel.h>
 
 #include "threads.h"
 #include "scheduler.h"
 #include "events_private.h"
-#include "platform_include.h"
 #include "kprintf.h"
 
 typedef struct ev_queue {

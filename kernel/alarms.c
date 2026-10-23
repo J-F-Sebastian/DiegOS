@@ -25,7 +25,7 @@
 #include <diegos/events.h>
 #include <diegos/kernel_events.h>
 #include <diegos/kernel_ticks.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <libs/list.h>
 
 #include "scheduler.h"

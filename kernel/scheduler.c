@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
 #include <diegos/kernel_ticks.h>
 
 #include "threads.h"

@@ -21,11 +21,11 @@
 #include <diegos/kernel_dump.h>
 #include <diegos/barriers.h>
 #include <diegos/net_interfaces.h>
+#include <diegos/hal_kernel.h>
 
 #include "threads.h"
 #include "scheduler.h"
 #include "mutex_private.h"
-#include "platform_include.h"
 
 extern long _text_start, _text_end, _data_start, _data_end, _bss_start, _bss_end;
 

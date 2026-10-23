@@ -22,14 +22,14 @@
 #include <errno.h>
 #include <libs/list.h>
 #include <diegos/barriers.h>
-#include <diegos/interrupts.h>
+#include <diegos/hal_interrupts.h>
+#include <diegos/hal_kernel.h>
 #include <libs/bitmaps.h>
 #include <string.h>
 
 #include "barriers_private.h"
 #include "threads.h"
 #include "scheduler.h"
-#include "platform_include.h"
 #include "kprintf.h"
 
 enum {
