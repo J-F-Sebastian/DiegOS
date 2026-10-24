@@ -109,15 +109,23 @@
 #define ST3_WP		0x40		/* Write Protect */
 
 /* Values for FD_COMMAND */
+#define FD_SPECIFY              0x03	/* specify Step Rate Timer, Head Load/Unload Timer */
+#define FD_SENSED		0x04	/* Sense Drive Status */
 #define FD_RECALIBRATE		0x07	/* move to track 0 */
-#define FD_SEEK			0x0F	/* seek track */
-#define FD_READ			0xE6	/* read with MT, MFM, SKip deleted */
-#define FD_WRITE		0xC5	/* write with MT, MFM */
 #define FD_SENSEI		0x08	/* Sense Interrupt Status */
-#define FD_SPECIFY		0x03	/* specify HUT etc */
-#define FD_FORMAT		0x4D	/* format one track */
+#define FD_SEEK			0x0F	/* seek track */
 #define FD_VERSION		0x10	/* get version code */
-#define FD_CONFIGURE		0x13	/* configure FIFO operation */
 #define FD_PERPENDICULAR	0x12	/* perpendicular r/w mode */
+#define FD_CONFIGURE		0x13	/* configure FIFO operation */
+#define FD_READID		0x4A	/* read ID */
+#define FD_FORMAT		0x4D	/* format one track */
+#define FD_WRITE		0xC5	/* write normal data with MT, MFM */
+#define FD_READND		0xC6	/* read normal and deleted data with MT, MFM */
+#define FD_WRITED		0xC9	/* write deleted data with MT, MFM */
+#define FD_READD		0xCC	/* read deleted data with MT, MFM */
+#define FD_READ			0xE6	/* read with MT, MFM, SKip deleted */
+
+/* Interrupt vector */
+#define FLOPPY_IVT    (32 + FLOPPY_IRQ)
 
 #endif
