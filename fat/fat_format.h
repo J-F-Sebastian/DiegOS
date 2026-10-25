@@ -32,7 +32,10 @@ struct FATPartition {
 	/* zero based LBA addresses */
 	uint32_t startsector;
 	uint32_t endsector;
+	/* set to 0 if you want it to be computed */
 	uint8_t secpercluster;
+	/* set to the amount of additional reserved sectors */
+	uint16_t reservedsectors;
 	/* Volume Label */
 	char label[16];
 };
