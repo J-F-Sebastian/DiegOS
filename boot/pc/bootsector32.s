@@ -127,12 +127,16 @@
 ;     ~~~~~~~~~~~~~~~~~~~~~
 ;
 
+; The Master Boot Record is loaded at 0x7C00 and is 512 bytes long.
+; At boot time the cpu is running in real mode, i.e. 16 bit.
 [ORG 0x7C00]
 [BITS 16]
 
+; Back in real world this is not to be hard-coded, a sector can be bigger
+; than 512 bytes.
 BYTESPERSEC     EQU 512
 RAM_START       EQU 0x0600
-STACK16_START	EQU 0x7000
+STACK16_START   EQU 0x7000
 STACK32_START   EQU 0x00110000
 DIEGOS_START    EQU 0x00110000
 DIEGOS_LOAD     EQU 0x00010000
@@ -198,16 +202,17 @@ JC      Error
 ;DL = drive number (bit 7 set for hard disk)
 ;ES:BX -> data buffer
 
-; set destination buffer
+; set destination buffer in AX as segment, offset is 0
 ; NOTE: the buffer is 64KBytes limited !!!
-MOV     SI, WORD [BPB + 0xE]
-DEC     SI
-MOV     AX, WORD DIEGOS_LOAD>>4
+; SI is set to 1 to read the Parameter Block
+MOV     SI, 1
+MOV     AX, WORD STACK16_START>>4
 MOV     ES, AX
-MOV     BP, AX
 
 ;1.44 MB Disk Format support 18 sectors per track,
 ; or 0x12. the first sector is used by boot code.
+; the second sector is used by the Parameter Block if
+; the FS is FAT16.1 (this is assumed !!!)
 ; Function 0x02 of INT 0x13, read data from disk
 ;AH = function 0x02
 ;AL = sectors to be read, first round not in loop
@@ -219,6 +224,20 @@ MOV     CX, 0x0002
 ;DL = 1st disk unit
 MOV     DH, 0x00
 XOR     BX, BX
+
+INT     0x13
+JC      Error
+
+; Now we have an in-memory copy of the Parameter Block
+; We need the reserved sectors counter only
+; SI is the counter of reserved sectors (DiegOS.bin)
+MOV     SI, WORD [ES:BX + 12]
+DEC     SI
+INC     CL
+MOV     AX, WORD DIEGOS_LOAD>>4
+MOV     ES, AX
+MOV     BP, AX
+MOV     AX, 0x0201
 
 readOneSector:
 
@@ -271,8 +290,8 @@ A20Enabled:
 ;MOV     AX, 0xE801
 ;INT     0x15		; request upper memory size
 ;JC      Error
-;CMP	AX, 0x0
-;JNE    	useAX		; was the EAX result invalid?
+;CMP     AX, 0x0
+;JNE     useAX		; was the EAX result invalid?
 ;MOV     AX, CX
 ;MOV     BX, DX
 ;useAX:
@@ -306,7 +325,6 @@ MOV     DWORD [GDT_DESC + 20], DWORD LINEAR_PROTO_DATA_HI
 MOV     WORD  [IDTR_START], (256 * 8) - 1
 MOV     DWORD [IDTR_START + 2], DWORD IDT_DESC
 
-
 ; Setup GDTR
 MOV     WORD  [GDTR_START], (8 * 8) - 1
 MOV     DWORD [GDTR_START + 2], DWORD GDT_DESC
@@ -317,8 +335,7 @@ o32     LGDT [GDTR_START]
 ; enter protected mode
 MOV     EBX, CR0
 OR      EBX, PE_BIT
-AND     EBX, ~CD_BIT
-AND     EBX, ~NW_BIT
+AND     EBX, ~(CD_BIT | NW_BIT)
 MOV     CR0, EBX
 
 ; clear prefetch queue, sets CS
@@ -345,7 +362,7 @@ LIDT    [IDTR_START]
 MOV     ESI, DWORD DIEGOS_LOAD
 MOV     EDI, DWORD DIEGOS_START
 XOR     ECX, ECX
-MOV     CX, WORD [BPB + 0xE]
+MOV     CX, WORD [STACK16_START + 12]
 DEC     CX
 SHL     ECX, 7
 REP     MOVSD
@@ -405,7 +422,7 @@ RET
 A20Enable:
 MOV     AL, 0xD1
 OUT     0x64, AL
-call    empty_8042
+CALL    empty_8042
 MOV     AL, 0xDF
 OUT     0x64, AL
 CALL    empty_8042
@@ -419,7 +436,7 @@ TEST    AL, 0x02
 JNZ     empty_8042
 RET
 
-HelloString     db 0xDB,0xDB,0xDD,'DiegOS Boot Loader 3.0', 0x0D, 0x0A, 0x00
+HelloString     db 0xDB,0xDB,0xDD,'DiegOS Boot Loader 3.1', 0x0D, 0x0A, 0x00
 ErrorString     db 'Error', 0x00
 StartString     db 0x0D, 0x0A, 'Starting ...', 0x0D, 0x0A, 0x00
 TIMES 510 - ($ - $$) db 0xdf
