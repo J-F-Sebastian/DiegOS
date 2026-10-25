@@ -69,7 +69,7 @@ struct BPB {
 	 */
 	char BPB_Media;
 	/*
-	 * Size of each FAT (16-bit) is sectors
+	 * Size of each FAT (16-bit) in sectors
 	 */
 	char BPB_FATSz16[2];
 	/*

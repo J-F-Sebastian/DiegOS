@@ -86,7 +86,7 @@ int FAT_format(void *ctx, struct FATPartition *part)
 		return -1;
 
 	if (!part->secpercluster) {
-		part->secpercluster = compute_secperclus(geom.bytes_per_sector, sectors);
+		part->secpercluster = compute_secperclus(geom.bytes_per_sector, sectors - part->reservedsectors);
 		if (!part->secpercluster)
 			return -1;
 	} else {
@@ -101,10 +101,10 @@ int FAT_format(void *ctx, struct FATPartition *part)
 			return -1;
 	}
 
-	strncpy(newvolume.PB.OEMName, "DiegOS  ", sizeof(newvolume.PB.OEMName));
+	memcpy(newvolume.PB.OEMName, "DiegOS  ", sizeof(newvolume.PB.OEMName));
 	newvolume.PB.BytsPerSec = geom.bytes_per_sector;
 	newvolume.PB.SecPerClus = part->secpercluster;
-	newvolume.PB.ResvdSecCnt = RES_SECTORS;
+	newvolume.PB.ResvdSecCnt = RES_SECTORS + part->reservedsectors;
 	newvolume.PB.NumFATs = NUM_FATS;
 	newvolume.PB.TotSec = sectors;
 
@@ -118,7 +118,7 @@ int FAT_format(void *ctx, struct FATPartition *part)
 	memset(newvolume.PB.VolLab, ' ', sizeof(newvolume.PB.VolLab));
 	strncpy(newvolume.PB.VolLab, part->label, sizeof(newvolume.PB.VolLab));
 	memset(newvolume.PB.FilSysType, 0, sizeof(newvolume.PB.FilSysType));
-	strncpy(newvolume.PB.FilSysType, "FAT16.1 ", sizeof(newvolume.PB.FilSysType));
+	memcpy(newvolume.PB.FilSysType, "FAT16.1 ", sizeof(newvolume.PB.FilSysType));
 	newvolume.PB.RootClus = 2;
 
 	buffer = malloc(geom.bytes_per_sector);
