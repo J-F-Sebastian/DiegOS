@@ -22,12 +22,11 @@
 #include <string.h>
 
 #include "mkimg.h"
-#include "mkimgfd.h"
+#include "mkimage_disk.h"
 
 static void print_help(void)
 {
-	printf("Usage:\n\n\t<-f> -b <boot sector>\n\t-s <DiegOS>\n\t-d <image>\n\n");
-	printf("Optional -f build a boot image for floppies.\n");
+	printf("Usage:\n\n\t-b <boot sector>\n\t-s <DiegOS>\n\t-d <image>\n\n");
 }
 
 int main(int argc, char *argv[])
@@ -37,26 +36,16 @@ int main(int argc, char *argv[])
 	uint32_t first, last;
 	char *bs, *os, *img;
 	FILE *temp;
-	int floppy = 0;
 
-	printf("DiegOS mkimage v2.0\n");
+	printf("DiegOS mkimage v2.1\n");
 	if (argc < 7) {
 		print_help();
 		return 0;
 	}
 
-	if ((argc != 7) && (argc != 8)) {
+	if (argc != 7) {
 		print_help();
 		return 0;
-	}
-
-	if (argc == 8) {
-		if ((argv[1][0] != '-') && (argv[1][1] != 'f')) {
-			print_help();
-			return 0;
-		}
-		floppy = 1;
-		i++;
 	}
 
 	if ((argv[i][0] != '-') || (argv[i + 2][0] != '-') || (argv[i + 4][0] != '-')) {
@@ -93,22 +82,9 @@ int main(int argc, char *argv[])
 
 	printf("BOOT SECTOR ... %s\n" "OS IMAGE ...... %s\n" "DISK IMAGE .... %s\n", bs, os, img);
 
-	if (floppy) {
-		printf("FLOPPY IMAGE\n\n");
-		if (mkimgfd(img, bs, os)) {
-			printf("mkimage ERROR\n");
-		}
-
-		free(bs);
-		free(os);
-		free(img);
-
-		return 0;
-	}
-
 	temp = fopen(os, "rb");
 	if (!temp) {
-		printf("Ï/O ERROR: %s not found\n", os);
+		printf("I/O ERROR: %s not found\n", os);
 		free(bs);
 		free(os);
 		free(img);
@@ -125,37 +101,41 @@ int main(int argc, char *argv[])
 
 	first = table[0].LBA_first_Sector;
 	last = first + table[0].num_of_sectors - 1;
+	i = first % (HD_HEADS * HD_SECTORS);
 	/* Head */
-	table[0].CHS_first_sector[0] = (first / 18) % 2;
+	table[0].CHS_first_sector[0] = i / HD_SECTORS;
 	/* Sector */
-	table[0].CHS_first_sector[1] = (first % 18) + 1;
+	table[0].CHS_first_sector[1] = (first % HD_SECTORS) + 1;
 	/* Cylinder */
-	table[0].CHS_first_sector[2] = first / (2 * 18);
+	table[0].CHS_first_sector[2] = first / (HD_HEADS * HD_SECTORS);
+	i = last % (HD_HEADS * HD_SECTORS);
 	/* Head */
-	table[0].CHS_last_sector[0] = (last / 18) % 2;
+	table[0].CHS_last_sector[0] = i / HD_SECTORS;
 	/* Sector */
-	table[0].CHS_last_sector[1] = (last % 18) + 1;
+	table[0].CHS_last_sector[1] = (last % HD_SECTORS) + 1;
 	/* Cylinder */
-	table[0].CHS_last_sector[2] = last / (2 * 18);
+	table[0].CHS_last_sector[2] = last / (HD_HEADS * HD_SECTORS);
 
 	table[1].type = PART_FAT16_1;
 	table[1].status = 0x00;
 	table[1].LBA_first_Sector = last + 1;
-	table[1].num_of_sectors = 2880 - table[1].LBA_first_Sector;
-	first = last + 1;
-	last = 2879;
+	table[1].num_of_sectors = HD_TOTAL_SECTORS - table[1].LBA_first_Sector;
+	first = table[1].LBA_first_Sector;
+	last = HD_TOTAL_SECTORS - 1;
+	i = first % (HD_HEADS * HD_SECTORS);
 	/* Head */
-	table[1].CHS_first_sector[0] = (first / 18) % 2;
+	table[1].CHS_first_sector[0] = i / HD_SECTORS;
 	/* Sector */
-	table[1].CHS_first_sector[1] = (first % 18) + 1;
+	table[1].CHS_first_sector[1] = (first % HD_SECTORS) + 1;
 	/* Cylinder */
-	table[1].CHS_first_sector[2] = first / (2 * 18);
+	table[1].CHS_first_sector[2] = first / (HD_HEADS * HD_SECTORS);
+	i = last % (HD_HEADS * HD_SECTORS);
 	/* Head */
-	table[1].CHS_last_sector[0] = (last / 18) % 2;
+	table[1].CHS_last_sector[0] = i / HD_SECTORS;
 	/* Sector */
-	table[1].CHS_last_sector[1] = (last % 18) + 1;
+	table[1].CHS_last_sector[1] = (last % HD_SECTORS) + 1;
 	/* Cylinder */
-	table[1].CHS_last_sector[2] = last / (2 * 18);
+	table[1].CHS_last_sector[2] = last / (HD_HEADS * HD_SECTORS);
 
 	printf("\nPartition table entries:\n\n");
 
@@ -171,11 +151,11 @@ int main(int argc, char *argv[])
 		       i,
 		       table[i].type,
 		       (table[i].status & 0x80) ? 'Y' : 'N',
-		       ((int)(table[i].CHS_first_sector[1] & 0xc0) << 2) +
+		       ((table[i].CHS_first_sector[1] & 0xC0U) << 2) +
 		       table[i].CHS_first_sector[2],
 		       table[i].CHS_first_sector[0],
 		       table[i].CHS_first_sector[1] & 0x3f,
-		       ((int)(table[i].CHS_last_sector[1] & 0xc0) << 2) +
+		       ((table[i].CHS_last_sector[1] & 0xC0U) << 2) +
 		       table[i].CHS_last_sector[2],
 		       table[i].CHS_last_sector[0],
 		       table[i].CHS_last_sector[1] & 0x3f,
