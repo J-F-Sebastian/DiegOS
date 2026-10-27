@@ -41,9 +41,9 @@ struct MBR_partition_entry {
 	 * Sectors 1 - 64
 	 * Cylinders 0 -1023
 	 */
-	char CHS_first_sector[3];
+	unsigned char CHS_first_sector[3];
 	char type;
-	char CHS_last_sector[3];
+	unsigned char CHS_last_sector[3];
 	uint32_t LBA_first_Sector;
 	uint32_t num_of_sectors;
 };
