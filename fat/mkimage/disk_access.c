@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "../disk_access.h"
+#include "mkimage_disk.h"
 
 /* MEGAHACK we assume the image is the image of a disk with 512 bytes/sector !!!
  * AND WE CREATE IT !!!
@@ -47,7 +48,6 @@ int disk_init(const char *dev, void **ctx)
 
 	*ctx = NULL;
 	disk = fopen(dev, "wb");
-//    if (fopen_s(&disk, dev,"wb"))
 	if (!disk) {
 		/* ENODEV */
 		return -1;
@@ -57,7 +57,7 @@ int disk_init(const char *dev, void **ctx)
 	if (!disk)
 		return -1;
 
-	for (i = 0; i < 2880 * 512 / sizeof(i); i++)
+	for (i = 0; i < HD_TOTAL_SECTORS * 512 / sizeof(i); i++)
 		fwrite(&i, sizeof(i), 1, disk);
 
 	if (fseek(disk, 0, SEEK_END)) {
@@ -121,7 +121,24 @@ int disk_get_geometry(void *ctx, struct disk_geometry *geom)
 
 int disk_read(void *ctx, unsigned sec, unsigned numsec, char *buf)
 {
-	return -1;
+	struct my_context *mctx = (struct my_context *)ctx;
+	unsigned retval;
+
+	/* EINVAL */
+	if (!mctx ||
+	    !numsec ||
+	    !buf ||
+	    (sec > mctx->geom.num_of_sectors) ||
+	    (numsec > mctx->geom.num_of_sectors) || ((sec + numsec) > mctx->geom.num_of_sectors)) {
+		return -1;
+	}
+
+	if (fseek(mctx->disk, (long)sec * mctx->geom.bytes_per_sector, SEEK_SET))
+		return -1;
+
+	retval = fread(buf, mctx->geom.bytes_per_sector, numsec, mctx->disk);
+
+	return (numsec != retval);
 }
 
 int disk_write(void *ctx, unsigned sec, unsigned numsec, const char *buf)
