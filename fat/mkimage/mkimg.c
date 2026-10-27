@@ -103,6 +103,7 @@ int mkimg(const char *image,
 			fat.startsector = buffer.partitions[iretcode].LBA_first_Sector;
 			fat.endsector =
 			    fat.startsector + buffer.partitions[iretcode].num_of_sectors - 1;
+			fat.reservedsectors = 0;
 			memset(fat.label, ' ', sizeof(fat.label));
 			if (FAT_format(ctx, &fat)) {
 				free(osbuffer);
