@@ -76,10 +76,33 @@ inline void *real_to_prot(const void *real)
 
 extern void int86(unsigned char intnum, regs16_t * regs);
 
+/*
+ * Returns a pointer to the first ISA DMA buffer
+ * shared with int86 interrupts
+ * NOTE: The pointer is a 32bit protected mode pointer,
+ * so it must be converted to a real mode pointer before use
+ * within 16-bit code.
+ *
+ * RETURNS: A pointer to the first ISA DMA buffer
+ */
 extern void *int86_real_buffer(void);
 
 extern unsigned int86_real_buffer_size(void);
 
+/*
+ * Returns a pointer to the specified ISA DMA buffer
+ * shared with int86 interrupts
+ * NOTE: The pointer is a 32bit protected mode pointer,
+ * so it must be converted to a real mode pointer before use
+ * within 16-bit code.
+ * Index is zero based.
+ *
+ * PARAMETERS IN:
+ * unsigned idx - The index of the ISA DMA buffer to retrieve
+ *
+ * RETURNS: A pointer to the specified ISA DMA buffer or
+ * NULL if the index is out of range
+ */
 extern void *ISA_DMA_real_buffer(unsigned idx);
 
 extern unsigned ISA_DMA_real_buffer_size(unsigned idx);
