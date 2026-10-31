@@ -364,6 +364,7 @@ _ISA_DMA_real_buffer:
 mov ecx, [esp + 4]
 cmp ecx, $4
 jae out_of_range
+inc ecx
 mov eax, 0x10000
 mul ecx
 ret
