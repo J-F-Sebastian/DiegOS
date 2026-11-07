@@ -64,49 +64,49 @@
 #define DOR_DRIVE1	0x01	/* drive 1 select */
 #define DOR_DRIVE2	0x02	/* drive 2 select */
 #define DOR_DRIVE3	0x03	/* drive 3 select */
+#define DOR_DRIVE_MASK	0x03	/* drive select mask */
 #define DOR_RESET	0x04	/* clear reset controller / set normal operation */
 #define DOR_DMA		0x08	/* enable DMA and interrupts */
 #define DOR_MOTOR0	0x10	/* drive 0 motor on */
 #define DOR_MOTOR1	0x20	/* drive 1 motor on */
 #define DOR_MOTOR2	0x40	/* drive 2 motor on */
 #define DOR_MOTOR3	0x80	/* drive 3 motor on */
+#define DOR_MOTOR_MASK	0xF0	/* mask for motor bits */
 
 /* Bits of main status register */
-#define STATUS_BUSYMASK	0x0F		/* drive busy mask */
-#define STATUS_BUSY	0x10		/* FDC busy */
-#define STATUS_DMA	0x20		/* 0- DMA mode */
-#define STATUS_DIR	0x40		/* 0- cpu->fdc */
-#define STATUS_READY	0x80		/* Data reg ready */
+#define STATUS_DISKB(x)	(0x01 << x)	/* Disk X busy in recalibrate or seek */
+#define STATUS_BUSYMASK	0x0F	/* drive busy mask */
+#define STATUS_BUSY	0x10	/* FDC busy in reading or writing */
+#define STATUS_DMA	0x20	/* 0- DMA mode */
+#define STATUS_DIR	0x40	/* 0- cpu->fdc */
+#define STATUS_READY	0x80	/* Data reg ready */
 
 /* Bits of FD_ST0 */
-#define ST0_DS		0x03		/* drive select mask */
-#define ST0_HA		0x04		/* Head (Address) */
-#define ST0_NR		0x08		/* Not Ready */
-#define ST0_ECE		0x10		/* Equipment chech error */
-#define ST0_SE		0x20		/* Seek end */
-#define ST0_INTR	0xC0		/* Interrupt code mask */
+#define ST0_DS		0x03	/* drive select mask 0,1,2,3 */
+#define ST0_HEAD	0x04	/* Head 0 side 0 1 side 1 */
+#define ST0_NR		0x08	/* Not Ready */
+#define ST0_ECE		0x10	/* Equipment check error - seek or recalibrate failed */
+#define ST0_SE		0x20	/* Seek end - seek or recalibrate completed */
+#define ST0_ABNORM      0x40	/* Abnormal termination */
+#define ST0_INVCMD	0x80	/* Invalid command  */
+#define ST0_INTR	0xC0	/* Interrupt code mask */
 
 /* Bits of FD_ST1 */
-#define ST1_MAM		0x01		/* Missing Address Mark */
-#define ST1_WP		0x02		/* Write Protect */
-#define ST1_ND		0x04		/* No Data - unreadable */
-#define ST1_OR		0x10		/* OverRun */
-#define ST1_CRC		0x20		/* CRC error in data or addr */
-#define ST1_EOC		0x80		/* End Of Cylinder */
+#define ST1_MAM		0x01	/* Missing Address Mark (2 index pulses without address mark of read below) */
+#define ST1_WP		0x02	/* Write Protect error */
+#define ST1_ND		0x04	/* No Data error - unreadable */
+#define ST1_OR		0x10	/* Overrun or underrun */
+#define ST1_CRC		0x20	/* CRC error in data or addr */
+#define ST1_EOC		0x80	/* Sector past end of track error */
 
 /* Bits of FD_ST2 */
-#define ST2_MAM		0x01		/* Missing Addess Mark (again) */
-#define ST2_BC		0x02		/* Bad Cylinder */
-#define ST2_SNS		0x04		/* Scan Not Satisfied */
-#define ST2_SEH		0x08		/* Scan Equal Hit */
-#define ST2_WC		0x10		/* Wrong Cylinder */
-#define ST2_CRC		0x20		/* CRC error in data field */
-#define ST2_CM		0x40		/* Control Mark = deleted */
-
-/* Bits of FD_ST3 */
-#define ST3_HA		0x04		/* Head (Address) */
-#define ST3_TZ		0x10		/* Track Zero signal (1=track 0) */
-#define ST3_WP		0x40		/* Write Protect */
+#define ST2_MAM		0x01	/* Missing Addess Mark (different than 0xF8 or 0xFE) */
+#define ST2_BC		0x02	/* Bad Cylinder (sector ID is 0xFF) */
+#define ST2_SNS		0x04	/* Scan Not Satisfied */
+#define ST2_SEH		0x08	/* Scan Equal Hit */
+#define ST2_WC		0x10	/* Wrong Cylinder */
+#define ST2_CRC		0x20	/* CRC error in data field */
+#define ST2_CM		0x40	/* Control Mark error (data instead of deleted data and reverse) */
 
 /* Values for FD_COMMAND */
 #define FD_SPECIFY              0x03	/* specify Step Rate Timer, Head Load/Unload Timer */
@@ -124,6 +124,9 @@
 #define FD_WRITED		0xC9	/* write deleted data with MT, MFM */
 #define FD_READD		0xCC	/* read deleted data with MT, MFM */
 #define FD_READ			0xE6	/* read with MT, MFM, SKip deleted */
+
+/* Bits of DIR */
+#define DIR_CHG                 0x80	/* Disk Change - 1 if diskette has been changed since last reset */
 
 /* Interrupt vector */
 #define FLOPPY_IVT    (32 + FLOPPY_IRQ)
