@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
 	strncpy(os, &argv[i + 2][0], strlen(&argv[i + 2][0]));
 	strncpy(img, &argv[i + 4][0], strlen(&argv[i + 4][0]));
 
-	printf("BOOT SECTOR ... %s\n" "OS IMAGE ...... %s\n" "DISK IMAGE .... %s\n", bs, os, img);
+	printf("BOOT SECTOR .......... %s\n" "OS IMAGE ............. %s\n"
+	       "FLOPPY DISK IMAGE .... %s\n", bs, os, img);
 
-	printf("FLOPPY IMAGE\n\n");
 	retval = mkimgfd(img, bs, os);
 	if (retval) {
 		printf("mkimage ERROR %d\n", retval);
