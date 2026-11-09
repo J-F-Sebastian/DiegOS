@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <diegos/drivers.h>
 
-#define DEV_NAME_LEN (7)
+#define DEV_NAME_LEN (15)
 
 enum DEVICE_TYPE {
 	/*
