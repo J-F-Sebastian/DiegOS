@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <diegos/drivers.h>
 
-#define DEV_NAME_LEN (7)
+#define DEV_NAME_LEN (15)
 
 enum DEVICE_TYPE {
 	/*
@@ -313,6 +313,81 @@ int device_io_tx(device_t * dev, const char *buf, size_t *bytes);
  * the value passed in with the parameter bytes).
  */
 int device_io_rx(device_t * dev, char *buf, size_t *bytes);
+
+/*
+ * Perform locking of the device's request queue.
+ * If the device is not a block device or the request
+ * queue mutex is already locked, an error code is returned.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * EBUSY if the device is already locked by the calling thread
+ * ENOTBLK if the device is not a block device
+ * EOK if the device's request queue mutex is successfully locked
+ */
+int device_io_rq_lock(device_t *dev);
+
+/*
+ * Perform I/O on the device's request queue for reading.
+ * If the device is not a block device or the request queue is not locked,
+ * an error code is returned.
+ * Parameters are copied into the request queue and stacked for later commit.
+ * Data pointed to by buf must remain valid until the request queue is committed.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ * char *buf     - the data buffer to store data read from the device
+ * size_t bytes  - the size of the data buffer
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is full
+ * EBUSY if the device's request queue is not empty and the last request is not a read operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_rx(device_t *dev, char *buf, size_t bytes);
+
+/*
+ * Perform I/O on the device's request queue for writing.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ * const char *buf - the data buffer to be transmitted by the device
+ * size_t bytes  - the size of the data buffer
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is full
+ * EBUSY if the device's request queue is not empty and the last request is not a write operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_tx(device_t *dev, const char *buf, size_t bytes);
+
+/*
+ * Commit the device's request queue for execution.
+ *
+ * PARAMETERS IN
+ * device_t *dev - the device performing I/O
+ *
+ * PARAMETERS OUT
+ * int *retcodes - pointer to an array of return codes
+ *
+ * RETURNS
+ * EINVAL if parameters are not valid
+ * ENOTBLK if the device is not a block device
+ * EPERM if the device's request queue mutex is not locked
+ * EAGAIN if the device's request queue is empty
+ * EIO if the driver failed to complete the write operation
+ * EOK if the operation is successful
+ */
+int device_io_rq_commit(device_t *dev, int *retcodes);
 
 /*
  * Perform polling. If the driver support polling the corresponding
