@@ -173,6 +173,43 @@ int thread_io_resume(wait_queue_t *wq)
 	return (EOK);
 }
 
+int thread_io_wait_done(wait_queue_t *wq)
+{
+	list_node *ptr;
+	struct wait_queue_int *wq_int;
+	int retval;
+
+	if (!wq) {
+		return EINVAL;
+	}
+
+	/*
+	 * Release all waiting threads
+	 */
+	retval = thread_io_resume(wq);
+
+	if (retval != EOK) {
+		return retval;
+	}
+
+	lock();
+	retval = EFAULT;
+	ptr = list_head(&wait_queues);
+	while (ptr) {
+		wq_int = (struct wait_queue_int *)ptr;
+		if (wq == wq_int->wq) {
+			list_remove(&wait_queues, &wq_int->header);
+			chunks_pool_free(wait_queue_int_items, wq_int);
+			retval = EOK;
+			break;
+		}
+		ptr = ptr->next;
+	}
+	unlock();
+
+	return retval;
+}
+
 /*
  * Private section
  */
