@@ -106,10 +106,10 @@ static int drivers_list_init(void)
 	if (!dev)
 		return (ENODEV);
 
-	dev = device_create(&i82371sb_drv, 0);
-	dev1 = device_create(&i82371sb_drv, 1);
-	dev2 = device_create(&i82371sb_drv, 2);
-	dev3 = device_create(&i82371sb_drv, 3);
+	dev = device_create(&i82371sb_mfn_drv, 0);
+	dev1 = device_create(&i82371sb_mfn_drv, 1);
+	dev2 = device_create(&i82371sb_ide_drv, 0);
+	dev3 = device_create(&i82371sb_usb_drv, 0);
 
 	if ((dev || dev1 || dev2 || dev3) == 0) {
 		return (ENODEV);
