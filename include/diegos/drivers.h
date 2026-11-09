@@ -25,7 +25,7 @@
 
 /* Definitions MUST STAY HERE */
 
-#define DRV_NAME_LEN        (5)
+#define DRV_NAME_LEN        (11)
 #define DRV_UNIT_MAX        (4)
 #define DRV_MAX_ADDR_LEN    (16)
 
