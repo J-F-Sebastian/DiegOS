@@ -30,23 +30,22 @@ static pci_bus_device_t *instance[] = { NULL, NULL, NULL, NULL };
 
 static const uint16_t devid[] = {
 	i82371SB_BRIDGE_DID,
+	i82371AB_PWR_DID,
 	i82371SB_IDE_DID,
-	i82371SB_USB_DID,
-	i82371AB_PWR_DID
+	i82371SB_USB_DID
 };
 
 static const char *names[] = {
 	"82371SB PIIX3 PCI-to-ISA Bridge (Triton II)",
-	"82371SB PIIX3 IDE Interface (Triton II)",
-	"82371SB PIIX3 USB Host Controller (Triton II)",
-	"82371AB PIIX3 Power Management"
+	"82371AB PIIX3 Power Management" "82371SB PIIX3 IDE Interface (Triton II)",
+	"82371SB PIIX3 USB Host Controller (Triton II)"
 };
 
 static unsigned status[] = {
 	DRV_STATUS_RUN | DRV_IS_CHAR,
+	DRV_STATUS_RUN | DRV_IS_CHAR,
 	DRV_STATUS_RUN | DRV_IS_BLOCK,
-	DRV_STATUS_RUN | DRV_IS_NET,
-	DRV_STATUS_RUN | DRV_IS_CHAR
+	DRV_STATUS_RUN | DRV_IS_NET
 };
 
 /*
@@ -56,13 +55,19 @@ static unsigned status[] = {
  * ISA Bridge
  * IDE Interface
  * USB Host
- * PM
+ * Power Management
  */
-static int i82371sb_init(unsigned unitno)
+
+/******************************************/
+/*    ISA Bridge and Power Management     */
+/******************************************/
+
+static int i82371sb_mfn_init(unsigned unitno)
 {
 	uint16_t value = 0;
+	pci_bus_device_t *p;
 
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -70,46 +75,16 @@ static int i82371sb_init(unsigned unitno)
 		return (EPERM);
 	}
 
-	instance[unitno] = pci_bus_find_device(i82371SB_VID, devid[unitno], NULL);
+	p = instance[unitno] = pci_bus_find_device(i82371SB_VID, devid[unitno], NULL);
 
-	if (instance[unitno]) {
+	if (p) {
 		/*
 		 * Read the PCICMD register
 		 */
-		pci_read_config_reg16(pci_create_bdf
-				      (instance[unitno]->bus, instance[unitno]->device,
-				       instance[unitno]->function), 4, &value);
+		pci_read_config_reg16(pci_create_bdf(p->bus, p->device, p->function), 4, &value);
 
-		switch (unitno) {
-		case 0:
-			/* ISA Bridge */
-			/* FALLTHRU */
-		case 3:
-			/* Power Management */
-			kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n",
-				   instance[unitno]->bus,
-				   instance[unitno]->device,
-				   instance[unitno]->function,
-				   instance[unitno]->vendorid,
-				   instance[unitno]->deviceid, names[unitno]);
-			break;
-
-		case 1:
-			/* IDE Interface */
-			/* FALLTHRU */
-		case 2:
-			/* USB Host */
-			kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n\t\tports %s - Bus Master %s\n",
-				   instance[unitno]->bus,
-				   instance[unitno]->device,
-				   instance[unitno]->function,
-				   instance[unitno]->vendorid,
-				   instance[unitno]->deviceid,
-				   names[unitno],
-				   (value & 1) ? "enabled" : "disabled",
-				   (value & 4) ? "enabled" : "disabled");
-			break;
-		}
+		kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n",
+			   p->bus, p->device, p->function, p->vendorid, p->deviceid, names[unitno]);
 
 		return (EOK);
 	}
@@ -117,9 +92,9 @@ static int i82371sb_init(unsigned unitno)
 	return (ENXIO);
 }
 
-static int i82371sb_start(unsigned unitno)
+static int i82371sb_mfn_start(unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -130,9 +105,9 @@ static int i82371sb_start(unsigned unitno)
 	return (EOK);
 }
 
-static int i82371sb_stop(unsigned unitno)
+static int i82371sb_mfn_stop(unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -143,9 +118,9 @@ static int i82371sb_stop(unsigned unitno)
 	return (EOK);
 }
 
-static int i82371sb_done(unsigned unitno)
+static int i82371sb_mfn_done(unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -156,17 +131,17 @@ static int i82371sb_done(unsigned unitno)
 	return (EOK);
 }
 
-static unsigned i82371sb_status(unsigned unitno)
+static unsigned i82371sb_mfn_status(unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return 0;
 	}
 	return (status[unitno]);
 }
 
-static short i82371sb_poll(unsigned unitno, poll_table_t * table)
+static short i82371sb_mfn_poll(unsigned unitno, poll_table_t *table)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -177,9 +152,9 @@ static short i82371sb_poll(unsigned unitno, poll_table_t * table)
 	return (EOK);
 }
 
-static int i82371sb_ioctrl(void *arg, unsigned cmd, unsigned unitno)
+static int i82371sb_mfn_ioctrl(void *arg, unsigned cmd, unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -190,9 +165,9 @@ static int i82371sb_ioctrl(void *arg, unsigned cmd, unsigned unitno)
 	return (EOK);
 }
 
-static int i82371sb_write(const void *buf, unsigned *bytes, unsigned unitno)
+static int i82371sb_mfn_write(const void *buf, unsigned *bytes, unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -203,9 +178,9 @@ static int i82371sb_write(const void *buf, unsigned *bytes, unsigned unitno)
 	return (EIO);
 }
 
-static int i82371sb_read(void *buf, unsigned *bytes, unsigned unitno)
+static int i82371sb_mfn_read(void *buf, unsigned *bytes, unsigned unitno)
 {
-	if (unitno >= NELEMENTS(devid)) {
+	if (unitno > 1) {
 		return (ENXIO);
 	}
 
@@ -216,20 +191,336 @@ static int i82371sb_read(void *buf, unsigned *bytes, unsigned unitno)
 	return (EIO);
 }
 
-char_driver_t i82371sb_drv = {
+/******************************************/
+/*      IDE bus master controller         */
+/******************************************/
+
+static int i82371sb_ide_init(unsigned unitno)
+{
+	uint16_t value = 0;
+	pci_bus_device_t *p;
+
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (instance[2]) {
+		return (EPERM);
+	}
+
+	p = instance[2] = pci_bus_find_device(i82371SB_VID, devid[2], NULL);
+
+	if (p) {
+		/*
+		 * Read the PCICMD register
+		 */
+		pci_read_config_reg16(pci_create_bdf(p->bus, p->device, p->function), 4, &value);
+
+		/* IDE Interface */
+		/* USB Host */
+		kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n\t\tports %s - Bus Master %s\n",
+			   p->bus,
+			   p->device,
+			   p->function,
+			   p->vendorid,
+			   p->deviceid,
+			   names[2],
+			   (value & 1) ? "enabled" : "disabled",
+			   (value & 4) ? "enabled" : "disabled");
+
+		return (EOK);
+	}
+
+	return (ENXIO);
+}
+
+static int i82371sb_ide_start(unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_ide_stop(unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_ide_done(unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static unsigned i82371sb_ide_status(unsigned unitno)
+{
+	if (unitno) {
+		return 0;
+	}
+	return (status[2]);
+}
+
+static short i82371sb_ide_poll(unsigned unitno, poll_table_t *table)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_ide_ioctrl(void *arg, unsigned cmd, unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_ide_write(const void *buf, unsigned *bytes, unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EIO);
+}
+
+static int i82371sb_ide_read(void *buf, unsigned *bytes, unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[2]) {
+		return (EACCES);
+	}
+
+	return (EIO);
+}
+
+/******************************************/
+/*      USB bus master controller         */
+/******************************************/
+
+static int i82371sb_usb_init(unsigned unitno)
+{
+	uint16_t value = 0;
+	pci_bus_device_t *p;
+
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (instance[3]) {
+		return (EPERM);
+	}
+
+	p = instance[3] = pci_bus_find_device(i82371SB_VID, devid[3], NULL);
+
+	if (p) {
+		/*
+		 * Read the PCICMD register
+		 */
+		pci_read_config_reg16(pci_create_bdf(p->bus, p->device, p->function), 4, &value);
+
+		/* USB Host */
+		kdrvprintf("%u:%u.%u %#x:%#x ==> %s\n\t\tports %s - Bus Master %s\n",
+			   p->bus,
+			   p->device,
+			   p->function,
+			   p->vendorid,
+			   p->deviceid,
+			   names[3],
+			   (value & 1) ? "enabled" : "disabled",
+			   (value & 4) ? "enabled" : "disabled");
+
+		return (EOK);
+	}
+
+	return (ENXIO);
+}
+
+static int i82371sb_usb_start(unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_usb_stop(unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_usb_done(unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static unsigned i82371sb_usb_status(unsigned unitno)
+{
+	if (unitno) {
+		return 0;
+	}
+	return (status[3]);
+}
+
+static short i82371sb_usb_poll(unsigned unitno, poll_table_t *table)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_usb_ioctrl(void *arg, unsigned cmd, unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EOK);
+}
+
+static int i82371sb_usb_write(const void *buf, unsigned *bytes, unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EIO);
+}
+
+static int i82371sb_usb_read(void *buf, unsigned *bytes, unsigned unitno)
+{
+	if (unitno) {
+		return (ENXIO);
+	}
+
+	if (!instance[3]) {
+		return (EACCES);
+	}
+
+	return (EIO);
+}
+
+char_driver_t i82371sb_mfn_drv = {
 	.cmn = {
-		.name = "PIIX3",
-		.init_fn = i82371sb_init,
-		.start_fn = i82371sb_start,
-		.stop_fn = i82371sb_stop,
-		.done_fn = i82371sb_done,
-		.ioctrl_fn = i82371sb_ioctrl,
-		.status_fn = i82371sb_status,
-		.poll_fn = i82371sb_poll
-	}
+		.name = "PIIX3-MFN",
+		.init_fn = i82371sb_mfn_init,
+		.start_fn = i82371sb_mfn_start,
+		.stop_fn = i82371sb_mfn_stop,
+		.done_fn = i82371sb_mfn_done,
+		.ioctrl_fn = i82371sb_mfn_ioctrl,
+		.status_fn = i82371sb_mfn_status,
+		.poll_fn = i82371sb_mfn_poll}
 	,
-	.write_fn = i82371sb_write,
-	.read_fn = i82371sb_read,
+	.write_fn = i82371sb_mfn_write,
+	.read_fn = i82371sb_mfn_read,
+	.write_multi_fn = NULL,
+	.read_multi_fn = NULL
+};
+
+char_driver_t i82371sb_ide_drv = {
+	.cmn = {
+		.name = "PIIX3-IDE",
+		.init_fn = i82371sb_ide_init,
+		.start_fn = i82371sb_ide_start,
+		.stop_fn = i82371sb_ide_stop,
+		.done_fn = i82371sb_ide_done,
+		.ioctrl_fn = i82371sb_ide_ioctrl,
+		.status_fn = i82371sb_ide_status,
+		.poll_fn = i82371sb_ide_poll}
+	,
+	.write_fn = i82371sb_ide_write,
+	.read_fn = i82371sb_ide_read,
+	.write_multi_fn = NULL,
+	.read_multi_fn = NULL
+};
+
+char_driver_t i82371sb_usb_drv = {
+	.cmn = {
+		.name = "PIIX3-USB",
+		.init_fn = i82371sb_usb_init,
+		.start_fn = i82371sb_usb_start,
+		.stop_fn = i82371sb_usb_stop,
+		.done_fn = i82371sb_usb_done,
+		.ioctrl_fn = i82371sb_usb_ioctrl,
+		.status_fn = i82371sb_usb_status,
+		.poll_fn = i82371sb_usb_poll}
+	,
+	.write_fn = i82371sb_usb_write,
+	.read_fn = i82371sb_usb_read,
 	.write_multi_fn = NULL,
 	.read_multi_fn = NULL
 };
