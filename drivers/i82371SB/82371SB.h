@@ -32,6 +32,8 @@
 #define i82371AB_PWR_DID    (0x7113)
 #define i82371SB_USB_DID    (0x7020)
 
-extern char_driver_t i82371sb_drv;
+extern char_driver_t i82371sb_mfn_drv;
+extern char_driver_t i82371sb_ide_drv;
+extern char_driver_t i82371sb_usb_drv;
 
 #endif				// 82371SB_H_INCLUDED
