@@ -118,7 +118,7 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags, unsigned ms
 	switch_context(&prev->context, next->context);
 
 	retcode = EOK;
-	// This should defitively be improved
+	// This should definitively be improved
 	if (msecs) {
 		lock();
 		if (list_count(wq)) {
@@ -126,6 +126,9 @@ static int thread_io_wait_internal(wait_queue_t *wq, unsigned flags, unsigned ms
 			while (temp) {
 				if (temp->tid == scheduler_running_tid()) {
 					retcode = ETIMEDOUT;
+					if (EOK == list_remove(wq, &temp->header)) {
+						chunks_pool_free(wait_queue_items, temp);
+					}
 					break;
 				}
 				temp = (struct wait_queue_item *)temp->header.next;
