@@ -171,7 +171,7 @@ const char *flags2str(uint32_t flags)
 {
 	static char flagstr[36];
 
-	flagstr[0] = 0;
+	memset(flagstr, 0, sizeof(flagstr));
 
 	if (flags & THREAD_FLAG_TERMINATE) {
 		strcat(flagstr, "TERM ");
