@@ -22,6 +22,8 @@
 
 extern int errno;		/* place where the error numbers go */
 
+const char *errno2str(int errno);
+
 #define EOK           (0)	/* no error */
 
 #define EPERM         (-1)	/* operation not permitted */
