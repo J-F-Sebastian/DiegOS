@@ -165,11 +165,12 @@ inline void set_dma_page(unsigned int dmanr, char pagenr)
  */
 inline void set_dma_addr(unsigned int dmanr, unsigned int a)
 {
-	set_dma_page(dmanr, a >> 16);
 	if (dmanr <= 3) {
+		set_dma_page(dmanr, a >> 16);
 		out_byte(a & 0xff, ((dmanr & 3) << 1) + IO_DMA1_BASE);
 		out_byte((a >> 8) & 0xff, ((dmanr & 3) << 1) + IO_DMA1_BASE);
 	} else {
+		set_dma_page(dmanr, a >> 17);
 		out_byte((a >> 1) & 0xff, ((dmanr & 3) << 2) + IO_DMA2_BASE);
 		out_byte((a >> 9) & 0xff, ((dmanr & 3) << 2) + IO_DMA2_BASE);
 	}
