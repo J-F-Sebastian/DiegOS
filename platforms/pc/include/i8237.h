@@ -91,9 +91,9 @@
 inline void enable_dma(unsigned int dmanr)
 {
 	if (dmanr <= 3)
-		out_byte(dmanr, DMA1_MASK_REG);
+		out_byte(DMA1_MASK_REG, dmanr);
 	else
-		out_byte(dmanr & 3, DMA2_MASK_REG);
+		out_byte(DMA2_MASK_REG, dmanr & 3);
 }
 
 /*
@@ -102,9 +102,9 @@ inline void enable_dma(unsigned int dmanr)
 inline void disable_dma(unsigned int dmanr)
 {
 	if (dmanr <= 3)
-		out_byte(dmanr | 4, DMA1_MASK_REG);
+		out_byte(DMA1_MASK_REG, dmanr | 4);
 	else
-		out_byte((dmanr & 3) | 4, DMA2_MASK_REG);
+		out_byte(DMA2_MASK_REG, (dmanr & 3) | 4);
 }
 
 /*
@@ -113,9 +113,9 @@ inline void disable_dma(unsigned int dmanr)
 inline void clear_dma_ff(unsigned int dmanr)
 {
 	if (dmanr <= 3)
-		out_byte(0, DMA1_CLEAR_FF_REG);
+		out_byte(DMA1_CLEAR_FF_REG, 0);
 	else
-		out_byte(0, DMA2_CLEAR_FF_REG);
+		out_byte(DMA2_CLEAR_FF_REG, 0);
 }
 
 /*
@@ -124,9 +124,9 @@ inline void clear_dma_ff(unsigned int dmanr)
 inline void set_dma_mode(unsigned int dmanr, char mode)
 {
 	if (dmanr <= 3)
-		out_byte(mode | dmanr, DMA1_MODE_REG);
+		out_byte(DMA1_MODE_REG, mode | dmanr);
 	else
-		out_byte(mode | (dmanr & 3), DMA2_MODE_REG);
+		out_byte(DMA2_MODE_REG, mode | (dmanr & 3));
 }
 
 /*
@@ -136,25 +136,25 @@ inline void set_dma_page(unsigned int dmanr, char pagenr)
 {
 	switch (dmanr & 7) {
 	case 0:
-		out_byte(pagenr, DMA_PAGE_0);
+		out_byte(DMA_PAGE_0, pagenr);
 		break;
 	case 1:
-		out_byte(pagenr, DMA_PAGE_1);
+		out_byte(DMA_PAGE_1, pagenr);
 		break;
 	case 2:
-		out_byte(pagenr, DMA_PAGE_2);
+		out_byte(DMA_PAGE_2, pagenr);
 		break;
 	case 3:
-		out_byte(pagenr, DMA_PAGE_3);
+		out_byte(DMA_PAGE_3, pagenr);
 		break;
 	case 5:
-		out_byte(pagenr & 0xfe, DMA_PAGE_5);
+		out_byte(DMA_PAGE_5, pagenr & 0xfe);
 		break;
 	case 6:
-		out_byte(pagenr & 0xfe, DMA_PAGE_6);
+		out_byte(DMA_PAGE_6, pagenr & 0xfe);
 		break;
 	case 7:
-		out_byte(pagenr & 0xfe, DMA_PAGE_7);
+		out_byte(DMA_PAGE_7, pagenr & 0xfe);
 		break;
 	}
 }
@@ -167,12 +167,12 @@ inline void set_dma_addr(unsigned int dmanr, unsigned int a)
 {
 	if (dmanr <= 3) {
 		set_dma_page(dmanr, a >> 16);
-		out_byte(a & 0xff, ((dmanr & 3) << 1) + IO_DMA1_BASE);
-		out_byte((a >> 8) & 0xff, ((dmanr & 3) << 1) + IO_DMA1_BASE);
+		out_byte(((dmanr & 3) << 1) + IO_DMA1_BASE, a & 0xff);
+		out_byte(((dmanr & 3) << 1) + IO_DMA1_BASE, (a >> 8) & 0xff);
 	} else {
 		set_dma_page(dmanr, a >> 17);
-		out_byte((a >> 1) & 0xff, ((dmanr & 3) << 2) + IO_DMA2_BASE);
-		out_byte((a >> 9) & 0xff, ((dmanr & 3) << 2) + IO_DMA2_BASE);
+		out_byte(((dmanr & 3) << 2) + IO_DMA2_BASE, (a >> 1) & 0xff);
+		out_byte(((dmanr & 3) << 2) + IO_DMA2_BASE, (a >> 9) & 0xff);
 	}
 }
 
@@ -189,11 +189,11 @@ inline void set_dma_count(unsigned int dmanr, unsigned int count)
 {
 	count--;
 	if (dmanr <= 3) {
-		out_byte(count & 0xff, ((dmanr & 3) << 1) + 1 + IO_DMA1_BASE);
-		out_byte((count >> 8) & 0xff, ((dmanr & 3) << 1) + 1 + IO_DMA1_BASE);
+		out_byte(((dmanr & 3) << 1) + 1 + IO_DMA1_BASE, count & 0xff);
+		out_byte(((dmanr & 3) << 1) + 1 + IO_DMA1_BASE, (count >> 8) & 0xff);
 	} else {
-		out_byte((count >> 1) & 0xff, ((dmanr & 3) << 2) + 2 + IO_DMA2_BASE);
-		out_byte((count >> 9) & 0xff, ((dmanr & 3) << 2) + 2 + IO_DMA2_BASE);
+		out_byte(((dmanr & 3) << 2) + 2 + IO_DMA2_BASE, (count >> 1) & 0xff);
+		out_byte(((dmanr & 3) << 2) + 2 + IO_DMA2_BASE, (count >> 9) & 0xff);
 	}
 }
 
