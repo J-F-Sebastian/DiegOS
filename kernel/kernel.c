@@ -60,7 +60,7 @@ static const char *messages2[] = { "cannot init threads",
 	"cannot init network buffers",
 	"cannot init drivers",
 	"cannot init devices",
-	"cannot init interfaces"
+	"cannot init network interfaces"
 };
 
 typedef BOOL(*initlibfn) (void);
@@ -87,6 +87,23 @@ typedef void (*startlibfn)(void);
 
 static const startlibfn start_array[] = { start_devices_lib,
 	start_net_interfaces_lib
+};
+
+static const struct kernel_threads_params {
+	const char *name;
+	uint8_t prio, tid;
+	void (*entry_ptr)(void);
+	uint32_t stack_size;
+} kernel_threads_array[] = {
+	{"IDLE", THREAD_PRIO_IDLE, THREAD_TID_IDLE, idle_thread_entry, 1 * KBYTE},
+	{"TIMERS", THREAD_PRIO_REALTIME, THREAD_TID_TMRS, timers_thread_entry, 4 * KBYTE}
+};
+
+static const char *kernel_threads_errors[] = {
+	"cannot create the IDLE thread.",
+	"cannot add IDLE to the scheduler.",
+	"cannot create the TIMERS thread.",
+	"cannot add TIMERS to the scheduler."
 };
 
 void kernel_init()
@@ -122,27 +139,22 @@ void kernel_libs_init()
 void kernel_threads_init()
 {
 	uint8_t tid;
+	unsigned i;
+	static const struct kernel_threads_params *p;
 
-	tid = init_thread("Idle", THREAD_PRIO_IDLE, idle_thread_entry, NULL, 1 * KBYTE);
+	for (i = 0; i < NELEMENTS(kernel_threads_array); i++) {
 
-	if ((THREAD_TID_INVALID == tid) || (THREAD_TID_IDLE != tid)) {
-		kernel_panic("cannot create the IDLE thread.");
-		return;
-	}
+		p = kernel_threads_array + i;
 
-	if (!scheduler_add_thread(tid)) {
-		kernel_panic("cannot add IDLE to the scheduler.");
-	}
+		tid = init_thread(p->name, p->prio, p->entry_ptr, NULL, p->stack_size);
 
-	tid = init_thread("Timers", THREAD_PRIO_REALTIME, timers_thread_entry, NULL, 4 * KBYTE);
+		if ((THREAD_TID_INVALID == tid) || (p->tid != tid)) {
+			kernel_panic(kernel_threads_errors[i * 2]);
+		}
 
-	if ((THREAD_TID_INVALID == tid) || (THREAD_TID_TMRS != tid)) {
-		kernel_panic("cannot create the TIMERS thread.");
-		return;
-	}
-
-	if (!scheduler_add_thread(tid)) {
-		kernel_panic("cannot add TIMERS to the scheduler.");
+		if (!scheduler_add_thread(tid)) {
+			kernel_panic(kernel_threads_errors[i * 2 + 1]);
+		}
 	}
 
 	kprintf("kernel threads setup complete.\n");
