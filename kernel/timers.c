@@ -54,7 +54,7 @@ struct timer {
 
 static list_inst timers_list;
 
-static uint32_t period = -1U;
+static uint32_t period = ~0UL;
 
 static barrier_t *bar = NULL;
 
@@ -62,7 +62,7 @@ static void timer_cb(uint64_t msecs)
 {
 	struct timer *cursor;
 	unsigned expired = 0;
-	period = -1U;
+	period = ~0UL;
 
 	cursor = list_head(&timers_list);
 
@@ -83,7 +83,7 @@ static void timer_cb(uint64_t msecs)
 		cursor = (timer_t *) cursor->header.next;
 	}
 
-	clock_set_period(period, CLK_INST_ALARMS);
+	clock_set_period(period, CLK_INST_TIMERS);
 	if (expired)
 		barrier_open(bar);
 }
