@@ -34,4 +34,6 @@ void sched_dump(void);
 
 void netif_dump(void);
 
+void tmrs_dump(void);
+
 #endif

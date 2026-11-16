@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <diegos/kernel_dump.h>
 #include <diegos/barriers.h>
+#include <diegos/timers.h>
 #include <diegos/net_interfaces.h>
 #include <diegos/hal_kernel.h>
 
@@ -110,4 +111,9 @@ void netif_dump()
 		itf = net_interface_next(itf);
 	}
 	printf("\n-----------------------------------------------------------------\n");
+}
+
+void tmrs_dump()
+{
+	timers_dump(NULL);
 }
