@@ -44,12 +44,12 @@ static unsigned mode = 0;
 /*
  * callbacks invoked after ticks accounting
  */
-static kernel_clock_cb callbacks[CLK_INST_MAX];
+static kernel_clock_cb callbacks[CLK_INST_MAX] = { NULL, NULL, NULL };
 
 /*
  * periods associated to callback instances
  */
-static uint32_t inst_period[CLK_INST_MAX];
+static uint32_t inst_period[CLK_INST_MAX] = { ~0U, ~0U, ~0U };
 
 /*
  * clock instance made global, so runtime calls to change frequency
@@ -88,12 +88,6 @@ BOOL clock_init(void)
 {
 	uint32_t params[3] = { 0, 0, 0 };
 	uint32_t comp;
-	unsigned i;
-
-	for (i = 0; i < NELEMENTS(callbacks); i++) {
-		callbacks[i] = NULL;
-		inst_period[i] = -1U;
-	}
 
 	clock = device_lookup(DEV_CLK, 0);
 
