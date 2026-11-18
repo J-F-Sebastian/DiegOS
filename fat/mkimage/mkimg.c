@@ -94,13 +94,13 @@ int mkimg(const char *image,
 		if (buffer.partitions[iretcode].type == PART_AOPDS) {
 			for (i = 0; i < buffer.partitions[iretcode].num_of_sectors; i++) {
 				fread(osbuffer, geom.bytes_per_sector, 1, os);
-				disk_write(ctx, buffer.partitions[iretcode].LBA_first_Sector + i, 1,
+				disk_write(ctx, buffer.partitions[iretcode].LBA_first_sector + i, 1,
 					   osbuffer);
 			}
 			fseek(os, 0, SEEK_SET);
 		} else if (buffer.partitions[iretcode].type == PART_FAT16_1) {
 			fat.secpercluster = 0;
-			fat.startsector = buffer.partitions[iretcode].LBA_first_Sector;
+			fat.startsector = buffer.partitions[iretcode].LBA_first_sector;
 			fat.endsector =
 			    fat.startsector + buffer.partitions[iretcode].num_of_sectors - 1;
 			fat.reservedsectors = 0;

@@ -56,8 +56,7 @@ int MBR_write(void *ctx, const struct MBR *mbr)
 	buf = malloc(geom.bytes_per_sector);
 	memcpy(buf, mbr, sizeof(*mbr));
 
-	if (disk_write(ctx, 0, 1, buf))
-	{
+	if (disk_write(ctx, 0, 1, buf)) {
 		free(buf);
 		return -1;
 	}
@@ -93,7 +92,7 @@ void MBR_list(struct MBR *mbr)
 		       cursor->CHS_last_sector[2],
 		       cursor->CHS_last_sector[0],
 		       cursor->CHS_last_sector[1] & 0x3f,
-		       cursor->LBA_first_Sector, cursor->num_of_sectors);
+		       cursor->LBA_first_sector, cursor->num_of_sectors);
 	}
 	printf("|                                         "
 	       "                       " "                                         |\n");

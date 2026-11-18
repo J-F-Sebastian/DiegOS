@@ -21,107 +21,11 @@
 #define BPB_H
 
 #include <stdint.h>
-
-/*
- * BIOS Parameter Block is in the boot record found on FAT12/FAT16 volumes
- * or floppy disks sector 0 (boot sector).
- * This is used for booting ONLY.
- * The structure is packed as it must be exactly 512 bytes long, and the
- * structure must be consistent across different platforms.
- */
-#pragma pack(1)
-struct BPB {
-	/*
-	 * Usually JMP SHORT 0x3C or 0xEB 0x?? 0x90
-	 */
-	char BS_jmpBoot[3];
-	/*
-	 * OEM Name is merely an ASCII string, padded with spaces,
-	 * not NULL terminated
-	 */
-	char BS_OEMName[8];
-	/*
-	 * Bytes per sector
-	 */
-	char BPB_BytsPerSec[2];
-	/*
-	 * Sectors per cluster
-	 */
-	char BPB_SecPerClus;
-	/*
-	 * Reserved sectors
-	 */
-	char BPB_RsvdSecCnt[2];
-	/*
-	 * Number of FATs in this volume
-	 */
-	char BPB_NumFATs;
-	/*
-	 * Root directory entries
-	 */
-	char BPB_RootEntCnt[2];
-	/*
-	 * Total sectors (16-bit)
-	 */
-	char BPB_TotSec16[2];
-	/*
-	 * Media type
-	 */
-	char BPB_Media;
-	/*
-	 * Size of each FAT (16-bit) in sectors
-	 */
-	char BPB_FATSz16[2];
-	/*
-	 * Sectors per track
-	 */
-	char BPB_SecPerTrk[2];
-	/*
-	 * Number of heads
-	 */
-	char BPB_NumHeads[2];
-	/*
-	 * Hidden sectors
-	 */
-	char BPB_HiddSec[4];
-	/*
-	 * Total sectors (32-bit)
-	 */
-	char BPB_TotSec32[4];
-	/*
-	 * Drive number
-	 */
-	char BS_DrvNum;
-	/*
-	 * Reserved
-	 */
-	char Reserved1;
-	/*
-	 * Extended boot signature (0x29 if the next three fields are valid)
-	 */
-	char BS_BootSig;
-	/*
-	 * Volume ID (serial number)
-	 */
-	char BS_VolID[4];
-	/*
-	 * Volume label, padded with spaces, not NULL terminated
-	 */
-	char BS_VolLab[11];
-	/*
-	 * File system type, padded with spaces, not NULL terminated
-	 */
-	char BS_FilSysType[8];
-	/*
-	 * Boot code, not used by the FAT file system, but can be used by a boot loader
-	 */
-	char bootcode[448];
-	/*
-	 * 0x55 - 0xAA
-	 */
-	char boot_signature[2];
-};
-#pragma pack(0)
+#ifdef _MKIMAGE_
+#include "bpb_data.h"
+#else
+#include <fs/bpb_data.h>
+#endif
 
 /**
  * @brief BPB_read access the Boot Sector found on disk pointed by ctx.
