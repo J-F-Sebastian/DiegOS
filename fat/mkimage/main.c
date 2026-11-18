@@ -95,11 +95,11 @@ int main(int argc, char *argv[])
 	fseek(temp, 0, SEEK_END);
 	table[0].type = PART_AOPDS;
 	table[0].status = 0x80;
-	table[0].LBA_first_Sector = 1;
+	table[0].LBA_first_sector = 1;
 	table[0].num_of_sectors = (ftell(temp) + 511) / 512;
 	fclose(temp);
 
-	first = table[0].LBA_first_Sector;
+	first = table[0].LBA_first_sector;
 	last = first + table[0].num_of_sectors - 1;
 	i = first % (HD_HEADS * HD_SECTORS);
 	/* Head */
@@ -118,9 +118,9 @@ int main(int argc, char *argv[])
 
 	table[1].type = PART_FAT16_1;
 	table[1].status = 0x00;
-	table[1].LBA_first_Sector = last + 1;
-	table[1].num_of_sectors = HD_TOTAL_SECTORS - table[1].LBA_first_Sector;
-	first = table[1].LBA_first_Sector;
+	table[1].LBA_first_sector = last + 1;
+	table[1].num_of_sectors = HD_TOTAL_SECTORS - table[1].LBA_first_sector;
+	first = table[1].LBA_first_sector;
 	last = HD_TOTAL_SECTORS - 1;
 	i = first % (HD_HEADS * HD_SECTORS);
 	/* Head */
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 		       table[i].CHS_last_sector[2],
 		       table[i].CHS_last_sector[0],
 		       table[i].CHS_last_sector[1] & 0x3f,
-		       table[i].LBA_first_Sector, table[i].num_of_sectors);
+		       table[i].LBA_first_sector, table[i].num_of_sectors);
 	}
 
 	if (mkimg(img, bs, os, table)) {

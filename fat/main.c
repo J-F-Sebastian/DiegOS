@@ -7,6 +7,7 @@
 #include "disk_access.h"
 #include "fat.h"
 #include "mbr.h"
+#include "mbr_data.h"
 #include "fat_print.h"
 #include "fat_format.h"
 
@@ -44,7 +45,7 @@ static void do_format(void)
         return;
     }
 
-    part.startsector = entry.LBA_first_Sector;
+    part.startsector = entry.LBA_first_sector;
     part.endsector = part.startsector + entry.num_of_sectors - 1;
     part.secpercluster = 0;
     memset(part.label, ' ', sizeof(part.label));
@@ -110,7 +111,7 @@ static void do_mount(void)
         return;
     }
 
-    if (FAT_mount(ctx, entry.LBA_first_Sector, &vol))
+    if (FAT_mount(ctx, entry.LBA_first_sector, &vol))
     {
         printf("* ERROR: CANNOT MOUNT SELECTED PARTITION\n");
         return;
@@ -856,7 +857,7 @@ static void do_write_mbr()
     putchar('\n');
 
     /* Update the partition entry */
-    mbr.partitions[index].LBA_first_Sector = start_sector;
+    mbr.partitions[index].LBA_first_sector = start_sector;
     mbr.partitions[index].num_of_sectors = num_sectors;
     mbr.partitions[index].status = (toupper(answer) == 'Y') ? '\x80' : '\x00';
 

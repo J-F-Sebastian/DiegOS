@@ -1,11 +1,13 @@
 # This is a host tool, won't use the makefile infra of DiegOS
 .PHONY: all clean
 
-OBJSC = ../fat_format.o ../fat_internals.o ../fat_names.o
+OBJSC = fat_format.o fat_internals.o fat_names.o
 OBJSB = floppy_access.o main_floppy.o mkimgfd.o
-OBJSA = disk_access.o main.o mkimg.o ../mbr.o
+OBJSA = disk_access.o main.o mkimg.o mbr.o
 OBJSR = mkimgfdraw.o
 CFLAGS += -O1 -Wall -Wextra -Winline -Wcast-align -g3
+CFLAGS += -I. -I../
+CFLAGS += -D_MKIMAGE_
 
 all: $(OBJSC) $(OBJSB) $(OBJSA) $(OBJSR)
 	$(CC) -o mkimage $(OBJSA) $(OBJSC)

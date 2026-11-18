@@ -22,41 +22,16 @@
 
 #include <stdint.h>
 
+#ifdef _MKIMAGE_
+#include "mbr_data.h"
+#else
+#include <fs/mbr_data.h>
+#endif
+
 /* FAT16.1 File System */
 #define PART_FAT16_1 0x0D
 /* Alternative OS Development Partition Standard */
 #define PART_AOPDS   0x7F
-
-#pragma pack(push, 1)
-struct MBR_partition_entry {
-	char status;
-	/*
-	 * Bits
-	 * 0-7 Heads
-	 * 0-5 Sectors, 6-7 Cylinders (High 2 bits)
-	 * 0-7 Cylinders
-	 *
-	 * Ranges
-	 * Heads 0 - 255
-	 * Sectors 1 - 64
-	 * Cylinders 0 -1023
-	 */
-	unsigned char CHS_first_sector[3];
-	char type;
-	unsigned char CHS_last_sector[3];
-	uint32_t LBA_first_Sector;
-	uint32_t num_of_sectors;
-};
-
-struct MBR {
-	char bootcode[446];
-	struct MBR_partition_entry partitions[4];
-	/*
-	 * 0x55 - 0xAA
-	 */
-	char boot_signature[2];
-};
-#pragma pack(pop)
 
 /**
  * @brief MBR_read access the Master Boot Record found on disk pointed by ctx.
