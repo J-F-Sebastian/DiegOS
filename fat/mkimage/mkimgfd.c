@@ -65,7 +65,7 @@ int mkimgfd(const char *image, const char *bootsec, const char *diegos)
 		0x29,
 		{0xDE, 0xAD, 0xBE, 0xEF},
 		{'N', 'O', ' ', 'N', 'A', 'M', 'E', ' ', ' ', ' ', ' '},
-		{'F', 'A', 'T', ' ', ' ', ' ', ' ', ' '},
+		{'F', 'A', 'T', '1', '6', '.', '1', ' '},
 		{0},
 		{0x55, 0xAA}
 	};
