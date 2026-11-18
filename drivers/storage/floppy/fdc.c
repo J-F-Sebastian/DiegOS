@@ -311,6 +311,9 @@ static void floppy_select(unsigned int nr)
 	if (controller_ctx.drive == nr)
 		return;
 
+	if (controller_ctx.drive != 255)
+		floppy_motor_off();
+
 	controller_ctx.version = 0;
 	controller_ctx.drive = nr;
 	controller_ctx.fsm = UNDEFINED;
