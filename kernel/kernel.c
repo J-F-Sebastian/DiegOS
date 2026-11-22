@@ -364,11 +364,18 @@ int thread_lock_mutex_timed(mutex_t *mtx, unsigned msecs)
 		return (EINVAL);
 	}
 
+	if (mutex_is_locked_by_me(mtx))
+		return (EBUSY);
+
 	prev = scheduler_running_thread();
 
 	is_locked = mutex_is_locked(mtx);
 
-	if (lock_mutex(prev->tid, mtx) && is_locked) {
+	if (lock_mutex(prev->tid, mtx) == FALSE) {
+		return (EPERM);
+	}
+
+	if (is_locked) {
 		scheduler_wait_thread(THREAD_FLAG_WAIT_MUTEX, msecs);
 		schedule_thread();
 		next = scheduler_running_thread();
@@ -376,10 +383,9 @@ int thread_lock_mutex_timed(mutex_t *mtx, unsigned msecs)
 		if (msecs) {
 			return (mutex_is_locked_by_me(mtx)) ? (EOK) : (ETIMEDOUT);
 		}
-		return (EOK);
 	}
 
-	return (EBUSY);
+	return (EOK);
 }
 
 int thread_unlock_mutex(mutex_t *mtx)
