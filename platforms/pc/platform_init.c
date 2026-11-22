@@ -26,7 +26,6 @@
 #include <diegos/hal.h>
 #include <diegos/delays.h>
 #include <diegos/devices.h>
-#include <diegos/drivers.h>
 #include <diegos/net_interfaces.h>
 
 #include <platform/i8259.h>
@@ -45,6 +44,7 @@
 #include "../../drivers/LAPIC/lapic.h"
 #include "../../drivers/VESA/vesa.h"
 #include "../../drivers/network/rtl8139/rtl8139.h"
+#include "../../drivers/storage/floppy/fdc.h"
 
 /*
  * Hardcoded values for calibration
@@ -129,6 +129,10 @@ static int drivers_list_init(void)
 	dev = device_create(&vesa_drv, 0);
 	if (!dev)
 		return (ENODEV);
+
+	if (!device_create(&fdc_drv, 0)) {
+		return (ENODEV);
+	}
 
 	if (!net_interface_create(&lo_drv, 0)) {
 		return (ENODEV);
